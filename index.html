@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: DIAGNOSTIC</title>
+    <title>DOMUS MAGI: REVELATIONS</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; font-family: monospace; background: #000; }
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; }
 
         #ui-wrapper {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -17,32 +17,46 @@
 
         #visor-superior {
             width: 100%; height: 35%; background: #000;
-            border-bottom: 3px solid #0f0; pointer-events: auto;
+            border-bottom: 3px solid #fff; pointer-events: auto;
             display: flex; justify-content: center; align-items: center; overflow: hidden;
         }
         #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
-        #placeholder-text { color: #0f0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+        #placeholder-text { color: #0f0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; font-size: 14px; }
 
-        #zona-ar { flex-grow: 1; position: relative; }
+        #zona-ar { 
+            flex-grow: 1; 
+            position: relative;
+        }
+
+        /* IMPORTANTE: Video de cámara debe ser visible */
+        #ar-camera-feed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
 
         #zona-inferior {
-            width: 100%; height: auto; background: rgba(0, 0, 0, 0.95);
-            border-top: 2px solid #0f0; pointer-events: auto; padding: 10px;
+            width: 100%; height: auto; background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid #fff; pointer-events: auto; padding-bottom: env(safe-area-inset-bottom);
         }
 
         #panel-datos {
             display: flex; justify-content: space-around; padding: 12px 5px;
-            border-bottom: 1px solid #0f0; background: #0a0a0a;
+            border-bottom: 1px solid #333; background: #0a0a0a;
         }
         .dato-box { text-align: center; flex: 1; }
-        .dato-titulo { font-size: 9px; color: #0f0; display: block; margin-bottom: 2px; }
+        .dato-titulo { font-size: 9px; color: #888; display: block; margin-bottom: 2px; }
         .dato-valor { font-size: 16px; font-weight: bold; color: #0f0; font-family: monospace; }
 
         #botonera {
             display: flex; justify-content: center; gap: 12px; padding: 15px;
         }
         .btn-poder {
-            width: 65px; height: 65px; border-radius: 12px; border: 2px solid #0f0;
+            width: 65px; height: 65px; border-radius: 12px; border: 2px solid #fff;
             font-size: 24px; font-weight: bold; color: white; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             transition: transform 0.1s;
@@ -60,78 +74,49 @@
             flex-direction: column; justify-content: center; align-items: center;
         }
         #btn-comenzar {
-            padding: 20px 40px; font-size: 20px; background: #0f0; 
-            color: #000; border: none; border-radius: 50px; cursor: pointer;
+            padding: 20px 40px; font-size: 20px; background: #28a745; 
+            color: white; border: none; border-radius: 50px; cursor: pointer;
             font-weight: bold;
         }
 
-        /* MODO DIAGNÓSTICO EXPANDIDO */
-        #debug-panel {
-            position: absolute; top: 0; left: 0; width: 100%; 
-            background: rgba(0,0,0,0.9); color: #0f0; 
-            padding: 15px; font-size: 11px; z-index: 9999;
-            border-bottom: 2px solid #0f0;
-            max-height: 200px; overflow-y: auto;
-        }
-        .debug-line { margin: 3px 0; }
-        .debug-error { color: #f00; }
-        .debug-success { color: #0f0; }
-        .debug-warning { color: #ff0; }
-
-        #camera-status {
-            position: absolute; bottom: 10px; right: 10px;
-            background: rgba(0,0,0,0.8); color: #0f0;
-            padding: 10px; border: 1px solid #0f0; border-radius: 5px;
-            font-size: 10px; z-index: 9998;
+        #debug-info {
+            position: absolute; top: 10px; left: 10px; 
+            background: rgba(0,0,0,0.8); color: #0f0; 
+            padding: 10px; font-size: 11px; z-index: 9999;
+            font-family: monospace; max-width: 90%;
+            border: 1px solid #0f0;
         }
 
-        #test-controls {
-            position: absolute; top: 220px; left: 10px;
-            background: rgba(0,0,0,0.8); padding: 10px;
-            border: 1px solid #0f0; border-radius: 5px; z-index: 9997;
-        }
-        .test-btn {
-            background: #0f0; color: #000; border: none;
-            padding: 8px 15px; margin: 5px; cursor: pointer;
-            font-weight: bold; border-radius: 3px;
+        /* Canvas de A-Frame debe ser visible */
+        .a-canvas {
+            z-index: 0 !important;
         }
     </style>
 </head>
 <body>
 
     <div id="overlay-inicio">
-        <h1 style="color: #0f0; margin-bottom: 20px; font-size: 32px;">DOMUS MAGI</h1>
-        <p style="color: #0f0; margin-bottom: 20px;">MODO DIAGNÓSTICO</p>
-        <button id="btn-comenzar">INICIAR DIAGNÓSTICO</button>
+        <h1 style="color: white; margin-bottom: 30px;">DOMUS MAGI</h1>
+        <p style="color: #ccc; margin-bottom: 20px; text-align: center; padding: 0 20px;">
+            Esta app necesita acceso a tu cámara.<br>
+            Por favor autoriza cuando se solicite.
+        </p>
+        <button id="btn-comenzar">ACTIVAR CÁMARA Y COMENZAR</button>
     </div>
 
-    <div id="debug-panel">
-        <div class="debug-line debug-warning">🔍 SISTEMA DE DIAGNÓSTICO ACTIVO</div>
-        <div class="debug-line">Esperando inicio del sistema...</div>
-    </div>
-
-    <div id="camera-status">
-        <div>📷 Cámara: <span id="cam-status">Inactiva</span></div>
-        <div>🎯 Tracking: <span id="track-status">Inactivo</span></div>
-        <div>🎴 Targets cargados: <span id="target-count">0</span></div>
-    </div>
-
-    <div id="test-controls" style="display: none;">
-        <div style="color: #0f0; margin-bottom: 10px; font-weight: bold;">CONTROLES DE PRUEBA</div>
-        <button class="test-btn" onclick="testTarget(0)">Test DRACO</button>
-        <button class="test-btn" onclick="testTarget(1)">Test LEO</button>
-        <button class="test-btn" onclick="testTarget(2)">Test APER</button>
-        <button class="test-btn" onclick="testTarget(3)">Test AQUILA</button>
-        <button class="test-btn" onclick="clearDebug()">Limpiar Log</button>
+    <div id="debug-info">
+        <div id="debug-log">Sistema: Esperando inicio...</div>
     </div>
 
     <div id="ui-wrapper">
         <div id="visor-superior">
-            <span id="placeholder-text">SISTEMA DE COMBATE - MODO DIAGNÓSTICO</span>
+            <span id="placeholder-text">Visor de Combate Inactivo</span>
             <video id="video-player" playsinline></video>
         </div>
 
-        <div id="zona-ar"></div>
+        <div id="zona-ar">
+            <!-- Aquí aparecerá la cámara de AR -->
+        </div>
 
         <div id="zona-inferior">
             <div id="panel-datos">
@@ -158,24 +143,35 @@
         </div>
     </div>
 
+    <!-- ESCENA AR CON CONFIGURACIÓN MEJORADA -->
     <a-scene 
         mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
         vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false"
-        embedded>
-        <a-camera position="0 0 0" look-controls="enabled: false" cursor="rayOrigin: mouse"></a-camera>
+        embedded
+        renderer="logarithmicDepthBuffer: true; precision: medium;">
+        
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
+        <!-- Targets con objetos 3D visibles -->
         <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA">
-            <a-box position="0 0 0" scale="0.5 0.5 0.5" color="#ff0000"></a-box>
+            <a-plane position="0 0 0" width="1" height="1" rotation="0 0 0" color="#ff0000" opacity="0.8"></a-plane>
+            <a-text value="DRACO" position="0 0.6 0" align="center" color="#fff" scale="2 2 2"></a-text>
         </a-entity>
+        
         <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA">
-            <a-box position="0 0 0" scale="0.5 0.5 0.5" color="#00ff00"></a-box>
+            <a-plane position="0 0 0" width="1" height="1" rotation="0 0 0" color="#00ff00" opacity="0.8"></a-plane>
+            <a-text value="LEO" position="0 0.6 0" align="center" color="#fff" scale="2 2 2"></a-text>
         </a-entity>
+        
         <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA">
-            <a-box position="0 0 0" scale="0.5 0.5 0.5" color="#0000ff"></a-box>
+            <a-plane position="0 0 0" width="1" height="1" rotation="0 0 0" color="#0000ff" opacity="0.8"></a-plane>
+            <a-text value="APER" position="0 0.6 0" align="center" color="#fff" scale="2 2 2"></a-text>
         </a-entity>
+        
         <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA">
-            <a-box position="0 0 0" scale="0.5 0.5 0.5" color="#ffff00"></a-box>
+            <a-plane position="0 0 0" width="1" height="1" rotation="0 0 0" color="#ffff00" opacity="0.8"></a-plane>
+            <a-text value="AQUILA" position="0 0.6 0" align="center" color="#fff" scale="2 2 2"></a-text>
         </a-entity>
     </a-scene>
 
@@ -189,140 +185,126 @@
 
         let cartaFijada = null;
         let sistemaIniciado = false;
-        let debugLines = [];
 
         const lblCarta = document.getElementById('val-carta');
         const lblAccion = document.getElementById('val-accion');
         const lblPuntos = document.getElementById('val-puntos');
         const videoPlayer = document.getElementById('video-player');
         const placeholder = document.getElementById('placeholder-text');
-        const debugPanel = document.getElementById('debug-panel');
+        const debugLog = document.getElementById('debug-log');
 
-        function log(msg, type = 'normal') {
+        function log(msg) {
+            console.log(msg);
             const timestamp = new Date().toLocaleTimeString();
-            const line = `[${timestamp}] ${msg}`;
-            console.log(line);
-            
-            debugLines.unshift(`<div class="debug-line debug-${type}">${line}</div>`);
-            if (debugLines.length > 20) debugLines.pop();
-            
-            debugPanel.innerHTML = debugLines.join('');
+            debugLog.innerHTML = `[${timestamp}] ${msg}<br>` + debugLog.innerHTML.split('<br>').slice(0, 8).join('<br>');
         }
 
-        function clearDebug() {
-            debugLines = [];
-            debugPanel.innerHTML = '<div class="debug-line">Log limpiado</div>';
-        }
-
-        function testTarget(index) {
-            const targets = ['DRACO SICA', 'LEO SICA', 'APER SICA', 'AQUILA SICA'];
-            const nombre = targets[index];
-            log(`🧪 TEST MANUAL: Simulando detección de ${nombre}`, 'warning');
-            
-            cartaFijada = DB_PODER[nombre];
-            lblCarta.innerText = nombre;
-            lblCarta.style.color = "#0f0";
-            log(`✅ Carta fijada manualmente: ${nombre}`, 'success');
-        }
-
+        // BOTÓN DE INICIO
         document.getElementById('btn-comenzar').addEventListener('click', async () => {
-            document.getElementById('overlay-inicio').style.display = 'none';
-            document.getElementById('test-controls').style.display = 'block';
-            log('🚀 Iniciando sistema de diagnóstico...', 'warning');
-            
-            const sceneEl = document.querySelector('a-scene');
-            
-            const iniciarMindAR = async () => {
-                try {
-                    log('📡 Verificando archivo targets.mind...', 'normal');
-                    
-                    // Intentar cargar el archivo para verificar
-                    const response = await fetch('./targets.mind');
-                    if (!response.ok) {
-                        log('❌ ERROR: No se encontró el archivo targets.mind', 'error');
-                        log('   Verifica que el archivo esté en la misma carpeta que el HTML', 'error');
-                        return;
+            try {
+                log('🚀 Solicitando acceso a cámara...');
+                
+                // PASO 1: Solicitar permiso de cámara EXPLÍCITAMENTE
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                log('✅ Permiso de cámara concedido');
+                log('📷 Stream de video obtenido');
+                
+                // Detener el stream temporal (MindAR usará su propio stream)
+                stream.getTracks().forEach(track => track.stop());
+                
+                // Ocultar overlay
+                document.getElementById('overlay-inicio').style.display = 'none';
+                
+                // PASO 2: Iniciar MindAR
+                const sceneEl = document.querySelector('a-scene');
+                
+                const iniciarAR = async () => {
+                    try {
+                        log('⏳ Iniciando sistema MindAR...');
+                        
+                        const mindarSystem = sceneEl.systems["mindar-image-system"];
+                        
+                        if (!mindarSystem) {
+                            log('❌ ERROR: Sistema MindAR no encontrado');
+                            return;
+                        }
+                        
+                        await mindarSystem.start();
+                        sistemaIniciado = true;
+                        
+                        log('✅ MindAR INICIADO');
+                        log('✅ Cámara ACTIVA');
+                        log('🎯 Apunta a una carta ahora');
+                        
+                        placeholder.innerText = 'Sistema Activo - Escanea una Carta';
+                        
+                    } catch (error) {
+                        log('❌ ERROR en MindAR: ' + error.message);
+                        alert('Error al iniciar AR: ' + error.message + '\n\nVerifica que el archivo targets.mind esté en la carpeta correcta.');
                     }
-                    log('✅ Archivo targets.mind encontrado', 'success');
-                    
-                    log('⏳ Iniciando sistema MindAR...', 'normal');
-                    const mindarSystem = sceneEl.systems["mindar-image-system"];
-                    
-                    if (!mindarSystem) {
-                        log('❌ ERROR: Sistema MindAR no disponible', 'error');
-                        return;
-                    }
-                    
-                    await mindarSystem.start();
-                    sistemaIniciado = true;
-                    
-                    document.getElementById('cam-status').innerText = 'Activa';
-                    document.getElementById('track-status').innerText = 'Activo';
-                    
-                    log('✅ MindAR iniciado correctamente', 'success');
-                    log('📷 Cámara activada', 'success');
-                    log('🎯 Sistema de tracking activo', 'success');
-                    log('👉 Apunta la cámara a una carta ahora', 'warning');
-                    
-                } catch (error) {
-                    log('❌ ERROR CRÍTICO: ' + error.message, 'error');
-                    log('   Stack: ' + error.stack, 'error');
+                };
+                
+                if (sceneEl.hasLoaded) {
+                    await iniciarAR();
+                } else {
+                    sceneEl.addEventListener('loaded', iniciarAR);
                 }
-            };
-
-            if (sceneEl.hasLoaded) {
-                await iniciarMindAR();
-            } else {
-                sceneEl.addEventListener('loaded', iniciarMindAR);
+                
+            } catch (error) {
+                log('❌ ERROR de cámara: ' + error.message);
+                alert('No se pudo acceder a la cámara.\n\nAsegúrate de:\n1. Dar permiso cuando el navegador lo solicite\n2. Usar HTTPS o localhost\n3. Tener una cámara disponible\n\nError: ' + error.message);
             }
         });
 
+        // CONFIGURAR DETECCIÓN DE CARTAS
         const sceneEl = document.querySelector('a-scene');
         sceneEl.addEventListener('loaded', () => {
-            log('🎬 Escena A-Frame cargada', 'success');
+            log('🎬 Escena A-Frame lista');
             
             const targets = document.querySelectorAll('[mindar-image-target]');
-            log(`🎯 Encontrados ${targets.length} targets configurados`, 'success');
-            document.getElementById('target-count').innerText = targets.length;
+            log(`🎯 ${targets.length} targets configurados`);
             
             targets.forEach((el, index) => {
                 const nombre = el.getAttribute('data-nombre');
-                log(`   Target ${index}: ${nombre}`, 'normal');
                 
-                el.addEventListener('targetFound', (event) => {
-                    log(`🎉 ¡TARGET DETECTADO! Index: ${index}, Nombre: ${nombre}`, 'success');
-                    
-                    if (!DB_PODER[nombre]) {
-                        log(`⚠️ Carta no está en la base de datos: ${nombre}`, 'warning');
-                        return;
-                    }
+                el.addEventListener('targetFound', () => {
+                    log(`🎉 ¡CARTA DETECTADA! ${nombre}`);
                     
                     cartaFijada = DB_PODER[nombre];
                     lblCarta.innerText = nombre;
                     lblCarta.style.color = "#0f0";
                     
-                    log(`✅ Carta activada: ${nombre}`, 'success');
-                    log(`   Stats: ATK=${cartaFijada.ataque} DEF=${cartaFijada.defensa} MAG=${cartaFijada.magia} HEAL=${cartaFijada.cura}`, 'normal');
+                    // Efecto visual
+                    lblCarta.parentElement.style.background = 'rgba(0,255,0,0.2)';
+                    setTimeout(() => {
+                        lblCarta.parentElement.style.background = '';
+                    }, 500);
                 });
                 
                 el.addEventListener('targetLost', () => {
-                    log(`⚠️ Target perdido: ${nombre}`, 'warning');
+                    log(`⚠️ Carta perdida: ${nombre}`);
                 });
             });
-            
-            log('✅ Todos los event listeners configurados', 'success');
         });
 
+        // BOTONES DE PODER
         document.querySelectorAll('.btn-poder').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (!sistemaIniciado) {
-                    alert("⚠️ Sistema no iniciado. Presiona 'INICIAR DIAGNÓSTICO' primero.");
+                    alert("⚠️ Sistema no iniciado.\nPresiona 'ACTIVAR CÁMARA Y COMENZAR' primero.");
                     return;
                 }
 
                 if (!cartaFijada) {
-                    alert("⚠️ No hay carta escaneada. Usa los botones de TEST o escanea una carta.");
-                    log("❌ Intento de acción sin carta", 'error');
+                    alert("⚠️ No hay carta escaneada.\nApunta la cámara a una carta primero.");
+                    log("❌ Intento de acción sin carta");
                     return;
                 }
 
@@ -335,32 +317,47 @@
                         puntos = cartaFijada.ataque; 
                         archivoVideo = "ataque.mp4";
                         lblAccion.innerText = "IMPETUS";
-                        log(`⚔️ IMPETUS: ${puntos} puntos`, 'success');
+                        log(`⚔️ IMPETUS: ${puntos} pts`);
                         break;
                     case 'defensa': 
                         puntos = cartaFijada.defensa; 
                         archivoVideo = "defensa.mp4";
                         lblAccion.innerText = "TUTELA";
-                        log(`🛡️ TUTELA: ${puntos} puntos`, 'success');
+                        log(`🛡️ TUTELA: ${puntos} pts`);
                         break;
                     case 'cura': 
                         puntos = cartaFijada.cura; 
                         archivoVideo = "cura.mp4";
                         lblAccion.innerText = "AUXILIUM";
-                        log(`💚 AUXILIUM: ${puntos} puntos`, 'success');
+                        log(`💚 AUXILIUM: ${puntos} pts`);
                         break;
                     case 'magia': 
                         puntos = cartaFijada.magia; 
                         archivoVideo = "magia.mp4";
                         lblAccion.innerText = "MYSTERIUM";
-                        log(`✨ MYSTERIUM: ${puntos} puntos`, 'success');
+                        log(`✨ MYSTERIUM: ${puntos} pts`);
                         break;
                 }
 
                 lblPuntos.innerText = puntos;
                 lblPuntos.style.color = puntos > 3 ? "#0f0" : "#ff0";
 
-                placeholder.innerText = `Ejecutando ${lblAccion.innerText}...`;
+                // Intentar reproducir video si existe
+                placeholder.style.display = 'none';
+                videoPlayer.style.display = 'block';
+                videoPlayer.src = archivoVideo;
+                videoPlayer.play().catch(() => {
+                    // Si no hay video, volver al placeholder
+                    videoPlayer.style.display = 'none';
+                    placeholder.style.display = 'block';
+                    placeholder.innerText = `${lblAccion.innerText} - ${puntos} puntos`;
+                });
+
+                videoPlayer.onended = () => {
+                    videoPlayer.style.display = 'none';
+                    placeholder.style.display = 'block';
+                    placeholder.innerText = 'Sistema Activo - Escanea una Carta';
+                };
             });
         });
     </script>
