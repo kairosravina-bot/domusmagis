@@ -16,6 +16,16 @@
             background: #000; 
         }
 
+        /* HACER QUE EL CANVAS DE A-FRAME SEA VISIBLE */
+        .a-canvas {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 1 !important;
+        }
+
         /* OVERLAY DE INICIO */
         #overlay-inicio {
             position: fixed;
@@ -70,7 +80,7 @@
             transform: scale(0.95);
         }
 
-        /* INTERFAZ PRINCIPAL */
+        /* INTERFAZ PRINCIPAL - DEBE ESTAR SOBRE LA CÁMARA */
         #ui-wrapper {
             position: fixed;
             top: 0;
@@ -79,7 +89,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            z-index: 10;
+            z-index: 100;
             pointer-events: none;
         }
 
@@ -87,13 +97,14 @@
         #visor-superior {
             width: 100%;
             height: 35%;
-            background: #000;
+            background: rgba(0, 0, 0, 0.8);
             border-bottom: 3px solid #00ff00;
             pointer-events: auto;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            backdrop-filter: blur(5px);
         }
 
         #video-player {
@@ -108,26 +119,28 @@
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 2px;
-            font-size: 16px;
+            font-size: 14px;
             text-align: center;
             padding: 20px;
         }
 
-        /* ZONA AR */
+        /* ZONA AR - TRANSPARENTE PARA VER LA CÁMARA */
         #zona-ar {
             flex-grow: 1;
             position: relative;
-            background: #000;
+            pointer-events: none;
+            /* ESTA ZONA DEBE SER TRANSPARENTE */
         }
 
         /* PANEL INFERIOR */
         #zona-inferior {
             width: 100%;
             height: auto;
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0, 0, 0, 0.9);
             border-top: 2px solid #00ff00;
             pointer-events: auto;
             padding-bottom: env(safe-area-inset-bottom);
+            backdrop-filter: blur(10px);
         }
 
         #panel-datos {
@@ -135,7 +148,7 @@
             justify-content: space-around;
             padding: 15px 10px;
             border-bottom: 1px solid #00ff00;
-            background: #0a0a0a;
+            background: rgba(10, 10, 10, 0.9);
         }
 
         .dato-box {
@@ -195,7 +208,7 @@
             position: fixed;
             top: 10px;
             left: 10px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             color: #00ff00;
             padding: 10px;
             font-size: 11px;
@@ -205,6 +218,22 @@
             border: 1px solid #00ff00;
             max-height: 150px;
             overflow-y: auto;
+            backdrop-filter: blur(5px);
+        }
+
+        /* INDICADOR DE CÁMARA */
+        #camera-indicator {
+            position: fixed;
+            bottom: 120px;
+            right: 10px;
+            background: rgba(0, 255, 0, 0.8);
+            color: #000;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 9998;
+            display: none;
         }
     </style>
 </head>
@@ -221,10 +250,44 @@
         <button id="btn-comenzar">ACTIVAR CÁMARA Y COMENZAR</button>
     </div>
 
+    <!-- ESCENA AR - DEBE ESTAR PRIMERO PARA QUE RENDERICE ATRÁS -->
+    <a-scene 
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false"
+        embedded
+        renderer="colorManagement: true; sortObjects: true; alpha: true;">
+        
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA">
+            <a-plane position="0 0 0" width="1" height="1.4" color="#ff0000" opacity="0.7"></a-plane>
+            <a-text value="DRACO SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
+        </a-entity>
+        
+        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA">
+            <a-plane position="0 0 0" width="1" height="1.4" color="#00ff00" opacity="0.7"></a-plane>
+            <a-text value="LEO SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
+        </a-entity>
+        
+        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA">
+            <a-plane position="0 0 0" width="1" height="1.4" color="#0000ff" opacity="0.7"></a-plane>
+            <a-text value="APER SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
+        </a-entity>
+        
+        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA">
+            <a-plane position="0 0 0" width="1" height="1.4" color="#ffff00" opacity="0.7"></a-plane>
+            <a-text value="AQUILA SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
+        </a-entity>
+    </a-scene>
+
     <!-- DEBUG INFO -->
     <div id="debug-info">
         <div id="debug-log">🔄 Sistema listo. Presiona el botón para comenzar...</div>
     </div>
+
+    <!-- INDICADOR DE CÁMARA -->
+    <div id="camera-indicator">📷 CÁMARA ACTIVA</div>
 
     <!-- INTERFAZ PRINCIPAL -->
     <div id="ui-wrapper" style="display: none;">
@@ -233,7 +296,9 @@
             <video id="video-player" playsinline></video>
         </div>
 
-        <div id="zona-ar"></div>
+        <div id="zona-ar">
+            <!-- AQUÍ SE VERÁ LA CÁMARA DE FONDO -->
+        </div>
 
         <div id="zona-inferior">
             <div id="panel-datos">
@@ -260,37 +325,6 @@
         </div>
     </div>
 
-    <!-- ESCENA AR -->
-    <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false"
-        embedded
-        renderer="colorManagement: true; sortObjects: true;">
-        
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA">
-            <a-plane position="0 0 0" width="1" height="1.4" color="#ff0000" opacity="0.7"></a-plane>
-            <a-text value="DRACO SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
-        </a-entity>
-        
-        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA">
-            <a-plane position="0 0 0" width="1" height="1.4" color="#00ff00" opacity="0.7"></a-plane>
-            <a-text value="LEO SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
-        </a-entity>
-        
-        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA">
-            <a-plane position="0 0 0" width="1" height="1.4" color="#0000ff" opacity="0.7"></a-plane>
-            <a-text value="APER SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
-        </a-entity>
-        
-        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA">
-            <a-plane position="0 0 0" width="1" height="1.4" color="#ffff00" opacity="0.7"></a-plane>
-            <a-text value="AQUILA SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
-        </a-entity>
-    </a-scene>
-
     <script>
         const DB_PODER = {
             "DRACO SICA": { ataque: 6, defensa: 2, magia: 1, cura: 1 },
@@ -308,6 +342,7 @@
         const videoPlayer = document.getElementById('video-player');
         const placeholder = document.getElementById('placeholder-text');
         const debugLog = document.getElementById('debug-log');
+        const cameraIndicator = document.getElementById('camera-indicator');
 
         function log(msg) {
             console.log(msg);
@@ -331,11 +366,13 @@
                 });
                 
                 log('✅ Permiso de cámara concedido');
+                log('📹 Stream de video activo');
                 stream.getTracks().forEach(track => track.stop());
                 
-                // Ocultar overlay e mostrar interfaz
+                // Ocultar overlay y mostrar interfaz
                 document.getElementById('overlay-inicio').style.display = 'none';
                 document.getElementById('ui-wrapper').style.display = 'flex';
+                cameraIndicator.style.display = 'block';
                 
                 log('⏳ Iniciando MindAR...');
                 
@@ -353,10 +390,21 @@
                         sistemaIniciado = true;
                         
                         log('✅ ¡SISTEMA ACTIVO!');
-                        log('📸 Cámara funcionando');
-                        log('🎯 Apunta a una carta');
+                        log('📸 Cámara renderizando');
+                        log('🎯 Apunta a una carta ahora');
+                        log('👁️ Deberías ver la imagen de tu cámara en el centro');
                         
                         placeholder.innerText = 'SISTEMA ACTIVO - ESCANEA UNA CARTA';
+                        
+                        // Verificar que el canvas sea visible
+                        setTimeout(() => {
+                            const canvas = document.querySelector('.a-canvas');
+                            if (canvas) {
+                                log('✅ Canvas de A-Frame encontrado y visible');
+                            } else {
+                                log('⚠️ Canvas no encontrado - puede haber un problema');
+                            }
+                        }, 1000);
                         
                     } catch (error) {
                         log('❌ Error MindAR: ' + error.message);
@@ -379,7 +427,7 @@
         // DETECCIÓN DE CARTAS
         const sceneEl = document.querySelector('a-scene');
         sceneEl.addEventListener('loaded', () => {
-            log('🎬 Escena cargada');
+            log('🎬 Escena A-Frame cargada');
             
             const targets = document.querySelectorAll('[mindar-image-target]');
             log(`🎯 ${targets.length} targets configurados`);
