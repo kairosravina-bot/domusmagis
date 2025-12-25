@@ -69,6 +69,14 @@
             padding: 20px 40px; font-size: 20px; background: #28a745; 
             color: white; border: none; border-radius: 50px; cursor: pointer;
         }
+
+        /* DEBUG INFO */
+        #debug-info {
+            position: absolute; top: 10px; left: 10px; 
+            background: rgba(0,0,0,0.7); color: #0f0; 
+            padding: 10px; font-size: 12px; z-index: 9999;
+            font-family: monospace; max-width: 300px;
+        }
     </style>
 </head>
 <body>
@@ -78,6 +86,9 @@
         <h1 style="color: white; margin-bottom: 30px;">DOMUS MAGI</h1>
         <button id="btn-comenzar">INICIAR SISTEMA</button>
     </div>
+
+    <!-- DEBUG INFO -->
+    <div id="debug-info">Sistema: Inicializando...</div>
 
     <div id="ui-wrapper">
         <div id="visor-superior">
@@ -134,6 +145,7 @@
 
         // VARIABLES DE CONTROL
         let cartaFijada = null;
+        let sistemaIniciado = false;
 
         // ELEMENTOS DOM
         const lblCarta = document.getElementById('val-carta');
@@ -141,31 +153,84 @@
         const lblPuntos = document.getElementById('val-puntos');
         const videoPlayer = document.getElementById('video-player');
         const placeholder = document.getElementById('placeholder-text');
+        const debugInfo = document.getElementById('debug-info');
+
+        // FUNCIÓN DEBUG
+        function log(msg) {
+            console.log(msg);
+            debugInfo.innerHTML = msg + '<br>' + debugInfo.innerHTML.split('<br>').slice(0, 5).join('<br>');
+        }
 
         // INICIAR SISTEMA
-        document.getElementById('btn-comenzar').addEventListener('click', () => {
+        document.getElementById('btn-comenzar').addEventListener('click', async () => {
             document.getElementById('overlay-inicio').style.display = 'none';
-            document.querySelector('a-scene').systems["mindar-image-system"].start();
+            log('🚀 Iniciando sistema...');
+            
+            const sceneEl = document.querySelector('a-scene');
+            
+            // Esperar a que la escena esté completamente cargada
+            const iniciarMindAR = async () => {
+                try {
+                    log('⏳ Iniciando MindAR...');
+                    await sceneEl.systems["mindar-image-system"].start();
+                    sistemaIniciado = true;
+                    log('✅ MindAR iniciado correctamente');
+                    log('📷 Apunta la cámara a una carta');
+                } catch (error) {
+                    log('❌ Error al iniciar: ' + error.message);
+                }
+            };
+
+            if (sceneEl.hasLoaded) {
+                await iniciarMindAR();
+            } else {
+                sceneEl.addEventListener('loaded', iniciarMindAR);
+            }
         });
 
-        // DETECCIÓN DE CARTAS
-        const targets = document.querySelectorAll('[mindar-image-target]');
-        targets.forEach(el => {
-            el.addEventListener('targetFound', () => {
+        // DETECCIÓN DE CARTAS - Configurar después de que la escena esté lista
+        const sceneEl = document.querySelector('a-scene');
+        sceneEl.addEventListener('loaded', () => {
+            log('🎬 Escena A-Frame cargada');
+            
+            const targets = document.querySelectorAll('[mindar-image-target]');
+            log(`🎯 Configurando ${targets.length} targets`);
+            
+            targets.forEach((el, index) => {
                 const nombre = el.getAttribute('data-nombre');
-                cartaFijada = DB_PODER[nombre]; // Extraemos los datos de la DB
                 
-                lblCarta.innerText = nombre;
-                lblCarta.style.color = "#0f0";
+                el.addEventListener('targetFound', () => {
+                    if (!DB_PODER[nombre]) {
+                        log(`⚠️ Carta desconocida: ${nombre}`);
+                        return;
+                    }
+                    
+                    cartaFijada = DB_PODER[nombre];
+                    lblCarta.innerText = nombre;
+                    lblCarta.style.color = "#0f0";
+                    
+                    log(`✅ CARTA DETECTADA: ${nombre}`);
+                    log(`   ATK:${cartaFijada.ataque} DEF:${cartaFijada.defensa} MAG:${cartaFijada.magia} HEAL:${cartaFijada.cura}`);
+                });
+                
+                el.addEventListener('targetLost', () => {
+                    log(`⚠️ Carta perdida: ${nombre}`);
+                    // No reseteamos cartaFijada para que los botones sigan funcionando
+                });
             });
-            // No usamos targetLost para que los botones sigan funcionando al "fijar" la carta
         });
 
         // LÓGICA DE LOS 4 BOTONES (I, T, A, M)
         document.querySelectorAll('.btn-poder').forEach(btn => {
             btn.addEventListener('click', () => {
+                if (!sistemaIniciado) {
+                    alert("⚠️ Sistema no iniciado. Presiona 'INICIAR SISTEMA' primero.");
+                    return;
+                }
+
                 if (!cartaFijada) {
-                    alert("ESCANEANDO... Por favor, enfoca una carta primero.");
+                    alert("⚠️ ESCANEANDO... Por favor, enfoca una carta primero.");
+                    log("❌ Intento de acción sin carta escaneada");
                     return;
                 }
 
@@ -178,21 +243,25 @@
                         puntos = cartaFijada.ataque; 
                         archivoVideo = "ataque.mp4";
                         lblAccion.innerText = "IMPETUS";
+                        log(`⚔️ IMPETUS activado: ${puntos} puntos`);
                         break;
                     case 'defensa': 
                         puntos = cartaFijada.defensa; 
                         archivoVideo = "defensa.mp4";
                         lblAccion.innerText = "TUTELA";
+                        log(`🛡️ TUTELA activado: ${puntos} puntos`);
                         break;
                     case 'cura': 
                         puntos = cartaFijada.cura; 
                         archivoVideo = "cura.mp4";
                         lblAccion.innerText = "AUXILIUM";
+                        log(`💚 AUXILIUM activado: ${puntos} puntos`);
                         break;
                     case 'magia': 
                         puntos = cartaFijada.magia; 
                         archivoVideo = "magia.mp4";
                         lblAccion.innerText = "MYSTERIUM";
+                        log(`✨ MYSTERIUM activado: ${puntos} puntos`);
                         break;
                 }
 
@@ -204,8 +273,21 @@
 
                 // ACTUALIZAR INTERFAZ
                 lblPuntos.innerText = puntos;
+                lblPuntos.style.color = puntos > 3 ? "#0f0" : "#ff0";
+
+                // Volver al placeholder cuando termine el video
+                videoPlayer.onended = () => {
+                    videoPlayer.style.display = 'none';
+                    placeholder.style.display = 'block';
+                    placeholder.innerText = 'Esperando siguiente acción...';
+                };
             });
         });
+
+        // OCULTAR DEBUG DESPUÉS DE 30 SEGUNDOS
+        setTimeout(() => {
+            debugInfo.style.display = 'none';
+        }, 30000);
     </script>
 </body>
 </html>
