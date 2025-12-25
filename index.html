@@ -3,96 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: REVELATIONS</title>
-    <!-- LIBRERÍAS ESTABLES -->
+    <title>DOMUS MAGI: DIAGNOSTIC</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; }
+        body { margin: 0; overflow: hidden; font-family: monospace; background: #000; }
 
-        /* --- INTERFAZ --- */
         #ui-wrapper {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; z-index: 10; pointer-events: none;
         }
 
-        /* 1. VISOR SUPERIOR (35%) */
         #visor-superior {
             width: 100%; height: 35%; background: #000;
-            border-bottom: 3px solid #fff; pointer-events: auto;
+            border-bottom: 3px solid #0f0; pointer-events: auto;
             display: flex; justify-content: center; align-items: center; overflow: hidden;
         }
         #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
-        #placeholder-text { color: #444; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+        #placeholder-text { color: #0f0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
 
-        /* 2. ZONA CENTRAL (ESPACIO PARA AR) */
-        #zona-ar { flex-grow: 1; }
+        #zona-ar { flex-grow: 1; position: relative; }
 
-        /* 3. PANEL INFERIOR (DATOS + BOTONES) */
         #zona-inferior {
-            width: 100%; height: auto; background: rgba(0, 0, 0, 0.9);
-            border-top: 2px solid #fff; pointer-events: auto; padding-bottom: env(safe-area-inset-bottom);
+            width: 100%; height: auto; background: rgba(0, 0, 0, 0.95);
+            border-top: 2px solid #0f0; pointer-events: auto; padding: 10px;
         }
 
         #panel-datos {
             display: flex; justify-content: space-around; padding: 12px 5px;
-            border-bottom: 1px solid #333; background: #0a0a0a;
+            border-bottom: 1px solid #0f0; background: #0a0a0a;
         }
         .dato-box { text-align: center; flex: 1; }
-        .dato-titulo { font-size: 9px; color: #888; display: block; margin-bottom: 2px; }
+        .dato-titulo { font-size: 9px; color: #0f0; display: block; margin-bottom: 2px; }
         .dato-valor { font-size: 16px; font-weight: bold; color: #0f0; font-family: monospace; }
 
         #botonera {
             display: flex; justify-content: center; gap: 12px; padding: 15px;
         }
         .btn-poder {
-            width: 65px; height: 65px; border-radius: 12px; border: 2px solid #fff;
+            width: 65px; height: 65px; border-radius: 12px; border: 2px solid #0f0;
             font-size: 24px; font-weight: bold; color: white; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             transition: transform 0.1s;
         }
         .btn-poder:active { transform: scale(0.9); }
 
-        #btn-i { background: #c0392b; } /* IMPETUS */
-        #btn-t { background: #555555; } /* TUTELA */
-        #btn-m { background: #8e44ad; } /* MYSTERIUM */
-        #btn-a { background: #27ae60; } /* AUXILIUM */
+        #btn-i { background: #c0392b; }
+        #btn-t { background: #555555; }
+        #btn-m { background: #8e44ad; }
+        #btn-a { background: #27ae60; }
 
-        /* PANTALLA DE INICIO */
         #overlay-inicio {
             position: absolute; top:0; left:0; width:100%; height:100%;
             background: #000; z-index: 10000; display: flex; 
             flex-direction: column; justify-content: center; align-items: center;
         }
         #btn-comenzar {
-            padding: 20px 40px; font-size: 20px; background: #28a745; 
-            color: white; border: none; border-radius: 50px; cursor: pointer;
+            padding: 20px 40px; font-size: 20px; background: #0f0; 
+            color: #000; border: none; border-radius: 50px; cursor: pointer;
+            font-weight: bold;
         }
 
-        /* DEBUG INFO */
-        #debug-info {
-            position: absolute; top: 10px; left: 10px; 
-            background: rgba(0,0,0,0.7); color: #0f0; 
-            padding: 10px; font-size: 12px; z-index: 9999;
-            font-family: monospace; max-width: 300px;
+        /* MODO DIAGNÓSTICO EXPANDIDO */
+        #debug-panel {
+            position: absolute; top: 0; left: 0; width: 100%; 
+            background: rgba(0,0,0,0.9); color: #0f0; 
+            padding: 15px; font-size: 11px; z-index: 9999;
+            border-bottom: 2px solid #0f0;
+            max-height: 200px; overflow-y: auto;
+        }
+        .debug-line { margin: 3px 0; }
+        .debug-error { color: #f00; }
+        .debug-success { color: #0f0; }
+        .debug-warning { color: #ff0; }
+
+        #camera-status {
+            position: absolute; bottom: 10px; right: 10px;
+            background: rgba(0,0,0,0.8); color: #0f0;
+            padding: 10px; border: 1px solid #0f0; border-radius: 5px;
+            font-size: 10px; z-index: 9998;
+        }
+
+        #test-controls {
+            position: absolute; top: 220px; left: 10px;
+            background: rgba(0,0,0,0.8); padding: 10px;
+            border: 1px solid #0f0; border-radius: 5px; z-index: 9997;
+        }
+        .test-btn {
+            background: #0f0; color: #000; border: none;
+            padding: 8px 15px; margin: 5px; cursor: pointer;
+            font-weight: bold; border-radius: 3px;
         }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA DE INICIO PARA ACTIVAR AUDIO/CÁMARA -->
     <div id="overlay-inicio">
-        <h1 style="color: white; margin-bottom: 30px;">DOMUS MAGI</h1>
-        <button id="btn-comenzar">INICIAR SISTEMA</button>
+        <h1 style="color: #0f0; margin-bottom: 20px; font-size: 32px;">DOMUS MAGI</h1>
+        <p style="color: #0f0; margin-bottom: 20px;">MODO DIAGNÓSTICO</p>
+        <button id="btn-comenzar">INICIAR DIAGNÓSTICO</button>
     </div>
 
-    <!-- DEBUG INFO -->
-    <div id="debug-info">Sistema: Inicializando...</div>
+    <div id="debug-panel">
+        <div class="debug-line debug-warning">🔍 SISTEMA DE DIAGNÓSTICO ACTIVO</div>
+        <div class="debug-line">Esperando inicio del sistema...</div>
+    </div>
+
+    <div id="camera-status">
+        <div>📷 Cámara: <span id="cam-status">Inactiva</span></div>
+        <div>🎯 Tracking: <span id="track-status">Inactivo</span></div>
+        <div>🎴 Targets cargados: <span id="target-count">0</span></div>
+    </div>
+
+    <div id="test-controls" style="display: none;">
+        <div style="color: #0f0; margin-bottom: 10px; font-weight: bold;">CONTROLES DE PRUEBA</div>
+        <button class="test-btn" onclick="testTarget(0)">Test DRACO</button>
+        <button class="test-btn" onclick="testTarget(1)">Test LEO</button>
+        <button class="test-btn" onclick="testTarget(2)">Test APER</button>
+        <button class="test-btn" onclick="testTarget(3)">Test AQUILA</button>
+        <button class="test-btn" onclick="clearDebug()">Limpiar Log</button>
+    </div>
 
     <div id="ui-wrapper">
         <div id="visor-superior">
-            <span id="placeholder-text">Visor de Combate Inactivo</span>
+            <span id="placeholder-text">SISTEMA DE COMBATE - MODO DIAGNÓSTICO</span>
             <video id="video-player" playsinline></video>
         </div>
 
@@ -123,19 +158,28 @@
         </div>
     </div>
 
-    <!-- ESCENA DE REALIDAD AUMENTADA -->
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <a-scene 
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false"
+        embedded>
+        <a-camera position="0 0 0" look-controls="enabled: false" cursor="rayOrigin: mouse"></a-camera>
 
-        <!-- MAPEO DE TARGETS (Asegúrate que el orden en el .mind coincida) -->
-        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA"></a-entity>
-        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA"></a-entity>
-        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA"></a-entity>
-        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA"></a-entity>
+        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA">
+            <a-box position="0 0 0" scale="0.5 0.5 0.5" color="#ff0000"></a-box>
+        </a-entity>
+        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA">
+            <a-box position="0 0 0" scale="0.5 0.5 0.5" color="#00ff00"></a-box>
+        </a-entity>
+        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA">
+            <a-box position="0 0 0" scale="0.5 0.5 0.5" color="#0000ff"></a-box>
+        </a-entity>
+        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA">
+            <a-box position="0 0 0" scale="0.5 0.5 0.5" color="#ffff00"></a-box>
+        </a-entity>
     </a-scene>
 
     <script>
-        // 1. BASE DE DATOS DE VALORES (Ajustar según tus tablas)
         const DB_PODER = {
             "DRACO SICA": { ataque: 6, defensa: 2, magia: 1, cura: 1 },
             "LEO SICA":   { ataque: 4, defensa: 4, magia: 1, cura: 1 },
@@ -143,41 +187,86 @@
             "AQUILA SICA":{ ataque: 4, defensa: 2, magia: 3, cura: 1 }
         };
 
-        // VARIABLES DE CONTROL
         let cartaFijada = null;
         let sistemaIniciado = false;
+        let debugLines = [];
 
-        // ELEMENTOS DOM
         const lblCarta = document.getElementById('val-carta');
         const lblAccion = document.getElementById('val-accion');
         const lblPuntos = document.getElementById('val-puntos');
         const videoPlayer = document.getElementById('video-player');
         const placeholder = document.getElementById('placeholder-text');
-        const debugInfo = document.getElementById('debug-info');
+        const debugPanel = document.getElementById('debug-panel');
 
-        // FUNCIÓN DEBUG
-        function log(msg) {
-            console.log(msg);
-            debugInfo.innerHTML = msg + '<br>' + debugInfo.innerHTML.split('<br>').slice(0, 5).join('<br>');
+        function log(msg, type = 'normal') {
+            const timestamp = new Date().toLocaleTimeString();
+            const line = `[${timestamp}] ${msg}`;
+            console.log(line);
+            
+            debugLines.unshift(`<div class="debug-line debug-${type}">${line}</div>`);
+            if (debugLines.length > 20) debugLines.pop();
+            
+            debugPanel.innerHTML = debugLines.join('');
         }
 
-        // INICIAR SISTEMA
+        function clearDebug() {
+            debugLines = [];
+            debugPanel.innerHTML = '<div class="debug-line">Log limpiado</div>';
+        }
+
+        function testTarget(index) {
+            const targets = ['DRACO SICA', 'LEO SICA', 'APER SICA', 'AQUILA SICA'];
+            const nombre = targets[index];
+            log(`🧪 TEST MANUAL: Simulando detección de ${nombre}`, 'warning');
+            
+            cartaFijada = DB_PODER[nombre];
+            lblCarta.innerText = nombre;
+            lblCarta.style.color = "#0f0";
+            log(`✅ Carta fijada manualmente: ${nombre}`, 'success');
+        }
+
         document.getElementById('btn-comenzar').addEventListener('click', async () => {
             document.getElementById('overlay-inicio').style.display = 'none';
-            log('🚀 Iniciando sistema...');
+            document.getElementById('test-controls').style.display = 'block';
+            log('🚀 Iniciando sistema de diagnóstico...', 'warning');
             
             const sceneEl = document.querySelector('a-scene');
             
-            // Esperar a que la escena esté completamente cargada
             const iniciarMindAR = async () => {
                 try {
-                    log('⏳ Iniciando MindAR...');
-                    await sceneEl.systems["mindar-image-system"].start();
+                    log('📡 Verificando archivo targets.mind...', 'normal');
+                    
+                    // Intentar cargar el archivo para verificar
+                    const response = await fetch('./targets.mind');
+                    if (!response.ok) {
+                        log('❌ ERROR: No se encontró el archivo targets.mind', 'error');
+                        log('   Verifica que el archivo esté en la misma carpeta que el HTML', 'error');
+                        return;
+                    }
+                    log('✅ Archivo targets.mind encontrado', 'success');
+                    
+                    log('⏳ Iniciando sistema MindAR...', 'normal');
+                    const mindarSystem = sceneEl.systems["mindar-image-system"];
+                    
+                    if (!mindarSystem) {
+                        log('❌ ERROR: Sistema MindAR no disponible', 'error');
+                        return;
+                    }
+                    
+                    await mindarSystem.start();
                     sistemaIniciado = true;
-                    log('✅ MindAR iniciado correctamente');
-                    log('📷 Apunta la cámara a una carta');
+                    
+                    document.getElementById('cam-status').innerText = 'Activa';
+                    document.getElementById('track-status').innerText = 'Activo';
+                    
+                    log('✅ MindAR iniciado correctamente', 'success');
+                    log('📷 Cámara activada', 'success');
+                    log('🎯 Sistema de tracking activo', 'success');
+                    log('👉 Apunta la cámara a una carta ahora', 'warning');
+                    
                 } catch (error) {
-                    log('❌ Error al iniciar: ' + error.message);
+                    log('❌ ERROR CRÍTICO: ' + error.message, 'error');
+                    log('   Stack: ' + error.stack, 'error');
                 }
             };
 
@@ -188,20 +277,23 @@
             }
         });
 
-        // DETECCIÓN DE CARTAS - Configurar después de que la escena esté lista
         const sceneEl = document.querySelector('a-scene');
         sceneEl.addEventListener('loaded', () => {
-            log('🎬 Escena A-Frame cargada');
+            log('🎬 Escena A-Frame cargada', 'success');
             
             const targets = document.querySelectorAll('[mindar-image-target]');
-            log(`🎯 Configurando ${targets.length} targets`);
+            log(`🎯 Encontrados ${targets.length} targets configurados`, 'success');
+            document.getElementById('target-count').innerText = targets.length;
             
             targets.forEach((el, index) => {
                 const nombre = el.getAttribute('data-nombre');
+                log(`   Target ${index}: ${nombre}`, 'normal');
                 
-                el.addEventListener('targetFound', () => {
+                el.addEventListener('targetFound', (event) => {
+                    log(`🎉 ¡TARGET DETECTADO! Index: ${index}, Nombre: ${nombre}`, 'success');
+                    
                     if (!DB_PODER[nombre]) {
-                        log(`⚠️ Carta desconocida: ${nombre}`);
+                        log(`⚠️ Carta no está en la base de datos: ${nombre}`, 'warning');
                         return;
                     }
                     
@@ -209,28 +301,28 @@
                     lblCarta.innerText = nombre;
                     lblCarta.style.color = "#0f0";
                     
-                    log(`✅ CARTA DETECTADA: ${nombre}`);
-                    log(`   ATK:${cartaFijada.ataque} DEF:${cartaFijada.defensa} MAG:${cartaFijada.magia} HEAL:${cartaFijada.cura}`);
+                    log(`✅ Carta activada: ${nombre}`, 'success');
+                    log(`   Stats: ATK=${cartaFijada.ataque} DEF=${cartaFijada.defensa} MAG=${cartaFijada.magia} HEAL=${cartaFijada.cura}`, 'normal');
                 });
                 
                 el.addEventListener('targetLost', () => {
-                    log(`⚠️ Carta perdida: ${nombre}`);
-                    // No reseteamos cartaFijada para que los botones sigan funcionando
+                    log(`⚠️ Target perdido: ${nombre}`, 'warning');
                 });
             });
+            
+            log('✅ Todos los event listeners configurados', 'success');
         });
 
-        // LÓGICA DE LOS 4 BOTONES (I, T, A, M)
         document.querySelectorAll('.btn-poder').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (!sistemaIniciado) {
-                    alert("⚠️ Sistema no iniciado. Presiona 'INICIAR SISTEMA' primero.");
+                    alert("⚠️ Sistema no iniciado. Presiona 'INICIAR DIAGNÓSTICO' primero.");
                     return;
                 }
 
                 if (!cartaFijada) {
-                    alert("⚠️ ESCANEANDO... Por favor, enfoca una carta primero.");
-                    log("❌ Intento de acción sin carta escaneada");
+                    alert("⚠️ No hay carta escaneada. Usa los botones de TEST o escanea una carta.");
+                    log("❌ Intento de acción sin carta", 'error');
                     return;
                 }
 
@@ -243,51 +335,34 @@
                         puntos = cartaFijada.ataque; 
                         archivoVideo = "ataque.mp4";
                         lblAccion.innerText = "IMPETUS";
-                        log(`⚔️ IMPETUS activado: ${puntos} puntos`);
+                        log(`⚔️ IMPETUS: ${puntos} puntos`, 'success');
                         break;
                     case 'defensa': 
                         puntos = cartaFijada.defensa; 
                         archivoVideo = "defensa.mp4";
                         lblAccion.innerText = "TUTELA";
-                        log(`🛡️ TUTELA activado: ${puntos} puntos`);
+                        log(`🛡️ TUTELA: ${puntos} puntos`, 'success');
                         break;
                     case 'cura': 
                         puntos = cartaFijada.cura; 
                         archivoVideo = "cura.mp4";
                         lblAccion.innerText = "AUXILIUM";
-                        log(`💚 AUXILIUM activado: ${puntos} puntos`);
+                        log(`💚 AUXILIUM: ${puntos} puntos`, 'success');
                         break;
                     case 'magia': 
                         puntos = cartaFijada.magia; 
                         archivoVideo = "magia.mp4";
                         lblAccion.innerText = "MYSTERIUM";
-                        log(`✨ MYSTERIUM activado: ${puntos} puntos`);
+                        log(`✨ MYSTERIUM: ${puntos} puntos`, 'success');
                         break;
                 }
 
-                // EJECUTAR VIDEO
-                placeholder.style.display = 'none';
-                videoPlayer.style.display = 'block';
-                videoPlayer.src = archivoVideo;
-                videoPlayer.play();
-
-                // ACTUALIZAR INTERFAZ
                 lblPuntos.innerText = puntos;
                 lblPuntos.style.color = puntos > 3 ? "#0f0" : "#ff0";
 
-                // Volver al placeholder cuando termine el video
-                videoPlayer.onended = () => {
-                    videoPlayer.style.display = 'none';
-                    placeholder.style.display = 'block';
-                    placeholder.innerText = 'Esperando siguiente acción...';
-                };
+                placeholder.innerText = `Ejecutando ${lblAccion.innerText}...`;
             });
         });
-
-        // OCULTAR DEBUG DESPUÉS DE 30 SEGUNDOS
-        setTimeout(() => {
-            debugInfo.style.display = 'none';
-        }, 30000);
     </script>
 </body>
 </html>
