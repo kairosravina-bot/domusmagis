@@ -16,7 +16,18 @@
             background: #000; 
         }
 
-        /* HACER QUE EL CANVAS DE A-FRAME SEA VISIBLE */
+        /* FORZAR VISIBILIDAD DEL VIDEO DE MINDAR */
+        #arjs-video {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            z-index: 0 !important;
+            display: block !important;
+        }
+
         .a-canvas {
             position: fixed !important;
             top: 0 !important;
@@ -73,14 +84,13 @@
 
         #btn-comenzar:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 50px rgba(0,255,0,0.8);
         }
 
         #btn-comenzar:active {
             transform: scale(0.95);
         }
 
-        /* INTERFAZ PRINCIPAL - DEBE ESTAR SOBRE LA CÁMARA */
+        /* INTERFAZ PRINCIPAL */
         #ui-wrapper {
             position: fixed;
             top: 0;
@@ -97,14 +107,14 @@
         #visor-superior {
             width: 100%;
             height: 35%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             border-bottom: 3px solid #00ff00;
             pointer-events: auto;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
         }
 
         #video-player {
@@ -124,12 +134,42 @@
             padding: 20px;
         }
 
-        /* ZONA AR - TRANSPARENTE PARA VER LA CÁMARA */
+        /* ZONA AR - TRANSPARENTE */
         #zona-ar {
             flex-grow: 1;
             position: relative;
             pointer-events: none;
-            /* ESTA ZONA DEBE SER TRANSPARENTE */
+        }
+
+        /* INDICADOR CENTRAL */
+        #centro-indicador {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 3px dashed rgba(0, 255, 0, 0.5);
+            border-radius: 10px;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        #centro-indicador span {
+            color: #00ff00;
+            font-size: 12px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
         }
 
         /* PANEL INFERIOR */
@@ -218,22 +258,28 @@
             border: 1px solid #00ff00;
             max-height: 150px;
             overflow-y: auto;
-            backdrop-filter: blur(5px);
         }
 
-        /* INDICADOR DE CÁMARA */
-        #camera-indicator {
+        /* INDICADOR DE TRACKING */
+        #tracking-status {
             position: fixed;
-            bottom: 120px;
-            right: 10px;
-            background: rgba(0, 255, 0, 0.8);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 255, 0, 0.9);
             color: #000;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 24px;
             font-weight: bold;
             z-index: 9998;
             display: none;
+            animation: fadeInOut 2s;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
         }
     </style>
 </head>
@@ -243,14 +289,14 @@
     <div id="overlay-inicio">
         <h1>DOMUS MAGI</h1>
         <p>
-            Esta aplicación usa tu cámara para detectar cartas mediante Realidad Aumentada.
+            Sistema de detección de cartas por Realidad Aumentada.
             <br><br>
-            <strong>Por favor autoriza el acceso cuando se solicite.</strong>
+            <strong>Autoriza el acceso a la cámara cuando se solicite.</strong>
         </p>
         <button id="btn-comenzar">ACTIVAR CÁMARA Y COMENZAR</button>
     </div>
 
-    <!-- ESCENA AR - DEBE ESTAR PRIMERO PARA QUE RENDERICE ATRÁS -->
+    <!-- ESCENA AR -->
     <a-scene 
         mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
         vr-mode-ui="enabled: false" 
@@ -261,33 +307,33 @@
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA">
-            <a-plane position="0 0 0" width="1" height="1.4" color="#ff0000" opacity="0.7"></a-plane>
-            <a-text value="DRACO SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
+            <a-plane position="0 0 0" width="1" height="1.4" color="#ff0000" opacity="0.8"></a-plane>
+            <a-text value="DRACO SICA" position="0 0.8 0" align="center" color="#ffffff" scale="2 2 2"></a-text>
         </a-entity>
         
         <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA">
-            <a-plane position="0 0 0" width="1" height="1.4" color="#00ff00" opacity="0.7"></a-plane>
-            <a-text value="LEO SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
+            <a-plane position="0 0 0" width="1" height="1.4" color="#00ff00" opacity="0.8"></a-plane>
+            <a-text value="LEO SICA" position="0 0.8 0" align="center" color="#ffffff" scale="2 2 2"></a-text>
         </a-entity>
         
         <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA">
-            <a-plane position="0 0 0" width="1" height="1.4" color="#0000ff" opacity="0.7"></a-plane>
-            <a-text value="APER SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
+            <a-plane position="0 0 0" width="1" height="1.4" color="#0000ff" opacity="0.8"></a-plane>
+            <a-text value="APER SICA" position="0 0.8 0" align="center" color="#ffffff" scale="2 2 2"></a-text>
         </a-entity>
         
         <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA">
-            <a-plane position="0 0 0" width="1" height="1.4" color="#ffff00" opacity="0.7"></a-plane>
-            <a-text value="AQUILA SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
+            <a-plane position="0 0 0" width="1" height="1.4" color="#ffff00" opacity="0.8"></a-plane>
+            <a-text value="AQUILA SICA" position="0 0.8 0" align="center" color="#ffffff" scale="2 2 2"></a-text>
         </a-entity>
     </a-scene>
 
     <!-- DEBUG INFO -->
     <div id="debug-info">
-        <div id="debug-log">🔄 Sistema listo. Presiona el botón para comenzar...</div>
+        <div id="debug-log">🔄 Sistema listo...</div>
     </div>
 
-    <!-- INDICADOR DE CÁMARA -->
-    <div id="camera-indicator">📷 CÁMARA ACTIVA</div>
+    <!-- INDICADOR DE TRACKING -->
+    <div id="tracking-status">CARTA DETECTADA!</div>
 
     <!-- INTERFAZ PRINCIPAL -->
     <div id="ui-wrapper" style="display: none;">
@@ -297,7 +343,9 @@
         </div>
 
         <div id="zona-ar">
-            <!-- AQUÍ SE VERÁ LA CÁMARA DE FONDO -->
+            <div id="centro-indicador">
+                <span>APUNTA AQUÍ<br>LA CARTA</span>
+            </div>
         </div>
 
         <div id="zona-inferior">
@@ -342,7 +390,7 @@
         const videoPlayer = document.getElementById('video-player');
         const placeholder = document.getElementById('placeholder-text');
         const debugLog = document.getElementById('debug-log');
-        const cameraIndicator = document.getElementById('camera-indicator');
+        const trackingStatus = document.getElementById('tracking-status');
 
         function log(msg) {
             console.log(msg);
@@ -350,12 +398,40 @@
             debugLog.innerHTML = `[${time}] ${msg}<br>` + debugLog.innerHTML.split('<br>').slice(0, 10).join('<br>');
         }
 
+        function mostrarTracking(texto) {
+            trackingStatus.innerText = texto;
+            trackingStatus.style.display = 'block';
+            setTimeout(() => {
+                trackingStatus.style.display = 'none';
+            }, 2000);
+        }
+
+        // FUNCIÓN PARA FORZAR VISIBILIDAD DEL VIDEO
+        function forzarVideoVisible() {
+            setTimeout(() => {
+                const video = document.querySelector('#arjs-video, video');
+                if (video) {
+                    video.style.position = 'fixed';
+                    video.style.top = '0';
+                    video.style.left = '0';
+                    video.style.width = '100%';
+                    video.style.height = '100%';
+                    video.style.objectFit = 'cover';
+                    video.style.zIndex = '0';
+                    video.style.display = 'block';
+                    log('✅ Video feed forzado a ser visible');
+                } else {
+                    log('⚠️ Video feed no encontrado aún');
+                    forzarVideoVisible(); // Reintentar
+                }
+            }, 500);
+        }
+
         // INICIAR SISTEMA
         document.getElementById('btn-comenzar').addEventListener('click', async () => {
             log('🚀 Iniciando sistema...');
             
             try {
-                // Solicitar cámara explícitamente
                 log('📷 Solicitando permiso de cámara...');
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
@@ -365,14 +441,11 @@
                     } 
                 });
                 
-                log('✅ Permiso de cámara concedido');
-                log('📹 Stream de video activo');
+                log('✅ Permiso concedido');
                 stream.getTracks().forEach(track => track.stop());
                 
-                // Ocultar overlay y mostrar interfaz
                 document.getElementById('overlay-inicio').style.display = 'none';
                 document.getElementById('ui-wrapper').style.display = 'flex';
-                cameraIndicator.style.display = 'block';
                 
                 log('⏳ Iniciando MindAR...');
                 
@@ -390,25 +463,17 @@
                         sistemaIniciado = true;
                         
                         log('✅ ¡SISTEMA ACTIVO!');
-                        log('📸 Cámara renderizando');
-                        log('🎯 Apunta a una carta ahora');
-                        log('👁️ Deberías ver la imagen de tu cámara en el centro');
+                        log('🎯 Tracking funcionando');
+                        log('📹 Intentando mostrar video...');
                         
                         placeholder.innerText = 'SISTEMA ACTIVO - ESCANEA UNA CARTA';
                         
-                        // Verificar que el canvas sea visible
-                        setTimeout(() => {
-                            const canvas = document.querySelector('.a-canvas');
-                            if (canvas) {
-                                log('✅ Canvas de A-Frame encontrado y visible');
-                            } else {
-                                log('⚠️ Canvas no encontrado - puede haber un problema');
-                            }
-                        }, 1000);
+                        // Forzar visibilidad del video
+                        forzarVideoVisible();
                         
                     } catch (error) {
-                        log('❌ Error MindAR: ' + error.message);
-                        alert('Error al iniciar:\n' + error.message + '\n\nVerifica que targets.mind esté en la carpeta correcta.');
+                        log('❌ Error: ' + error.message);
+                        alert('Error:\n' + error.message);
                     }
                 };
                 
@@ -420,29 +485,29 @@
                 
             } catch (error) {
                 log('❌ Error de cámara: ' + error.message);
-                alert('No se pudo acceder a la cámara:\n\n' + error.message + '\n\nVerifica:\n- Estar en HTTPS o localhost\n- Dar permiso de cámara\n- Tener una cámara disponible');
+                alert('Error de cámara:\n' + error.message);
             }
         });
 
         // DETECCIÓN DE CARTAS
         const sceneEl = document.querySelector('a-scene');
         sceneEl.addEventListener('loaded', () => {
-            log('🎬 Escena A-Frame cargada');
+            log('🎬 Escena cargada');
             
             const targets = document.querySelectorAll('[mindar-image-target]');
-            log(`🎯 ${targets.length} targets configurados`);
+            log(`🎯 ${targets.length} targets listos`);
             
             targets.forEach((el, idx) => {
                 const nombre = el.getAttribute('data-nombre');
                 
                 el.addEventListener('targetFound', () => {
-                    log(`🎉 ¡DETECTADO! ${nombre}`);
+                    log(`🎉 ¡${nombre} DETECTADA!`);
+                    mostrarTracking(`${nombre} DETECTADA!`);
                     
                     cartaFijada = DB_PODER[nombre];
                     lblCarta.innerText = nombre;
                     lblCarta.style.color = "#00ff00";
                     
-                    // Flash visual
                     lblCarta.parentElement.style.background = 'rgba(0,255,0,0.3)';
                     setTimeout(() => {
                         lblCarta.parentElement.style.background = '';
@@ -450,7 +515,7 @@
                 });
                 
                 el.addEventListener('targetLost', () => {
-                    log(`⚠️ Perdido: ${nombre}`);
+                    log(`⚠️ ${nombre} perdida`);
                 });
             });
         });
@@ -459,7 +524,7 @@
         document.querySelectorAll('.btn-poder').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (!sistemaIniciado) {
-                    alert('⚠️ Sistema no iniciado');
+                    alert('⚠️ Inicia el sistema primero');
                     return;
                 }
                 
@@ -499,7 +564,8 @@
                 lblPuntos.innerText = puntos;
                 lblPuntos.style.color = puntos > 3 ? '#00ff00' : '#ffff00';
                 
-                placeholder.innerText = `${accion} ACTIVADO - ${puntos} PUNTOS`;
+                placeholder.innerText = `${accion} - ${puntos} PUNTOS`;
+                mostrarTracking(`${accion} ACTIVADO!`);
             });
         });
     </script>
