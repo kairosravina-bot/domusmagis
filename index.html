@@ -8,121 +8,238 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; }
-
-        #ui-wrapper {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; z-index: 10; pointer-events: none;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #000; 
         }
 
-        #visor-superior {
-            width: 100%; height: 35%; background: #000;
-            border-bottom: 3px solid #fff; pointer-events: auto;
-            display: flex; justify-content: center; align-items: center; overflow: hidden;
-        }
-        #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
-        #placeholder-text { color: #0f0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; font-size: 14px; }
-
-        #zona-ar { 
-            flex-grow: 1; 
-            position: relative;
-        }
-
-        /* IMPORTANTE: Video de cámara debe ser visible */
-        #ar-camera-feed {
-            position: absolute;
+        /* OVERLAY DE INICIO */
+        #overlay-inicio {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            z-index: 1;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
+        #overlay-inicio h1 {
+            color: #00ff00;
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00ff00;
+            letter-spacing: 4px;
+        }
+
+        #overlay-inicio p {
+            color: #888;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            max-width: 400px;
+        }
+
+        #btn-comenzar {
+            padding: 20px 50px;
+            font-size: 20px;
+            font-weight: bold;
+            background: #00ff00;
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(0,255,0,0.5);
+            transition: all 0.3s;
+        }
+
+        #btn-comenzar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 50px rgba(0,255,0,0.8);
+        }
+
+        #btn-comenzar:active {
+            transform: scale(0.95);
+        }
+
+        /* INTERFAZ PRINCIPAL */
+        #ui-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* VISOR SUPERIOR */
+        #visor-superior {
+            width: 100%;
+            height: 35%;
+            background: #000;
+            border-bottom: 3px solid #00ff00;
+            pointer-events: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #video-player {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        #placeholder-text {
+            color: #00ff00;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 16px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* ZONA AR */
+        #zona-ar {
+            flex-grow: 1;
+            position: relative;
+            background: #000;
+        }
+
+        /* PANEL INFERIOR */
         #zona-inferior {
-            width: 100%; height: auto; background: rgba(0, 0, 0, 0.9);
-            border-top: 2px solid #fff; pointer-events: auto; padding-bottom: env(safe-area-inset-bottom);
+            width: 100%;
+            height: auto;
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 2px solid #00ff00;
+            pointer-events: auto;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         #panel-datos {
-            display: flex; justify-content: space-around; padding: 12px 5px;
-            border-bottom: 1px solid #333; background: #0a0a0a;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 10px;
+            border-bottom: 1px solid #00ff00;
+            background: #0a0a0a;
         }
-        .dato-box { text-align: center; flex: 1; }
-        .dato-titulo { font-size: 9px; color: #888; display: block; margin-bottom: 2px; }
-        .dato-valor { font-size: 16px; font-weight: bold; color: #0f0; font-family: monospace; }
+
+        .dato-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .dato-titulo {
+            font-size: 10px;
+            color: #888;
+            display: block;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .dato-valor {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ff00;
+            font-family: monospace;
+        }
 
         #botonera {
-            display: flex; justify-content: center; gap: 12px; padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
         }
+
         .btn-poder {
-            width: 65px; height: 65px; border-radius: 12px; border: 2px solid #fff;
-            font-size: 24px; font-weight: bold; color: white; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.1s;
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            border: 3px solid #fff;
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
-        .btn-poder:active { transform: scale(0.9); }
+
+        .btn-poder:active {
+            transform: scale(0.9);
+        }
 
         #btn-i { background: #c0392b; }
         #btn-t { background: #555555; }
         #btn-m { background: #8e44ad; }
         #btn-a { background: #27ae60; }
 
-        #overlay-inicio {
-            position: absolute; top:0; left:0; width:100%; height:100%;
-            background: #000; z-index: 10000; display: flex; 
-            flex-direction: column; justify-content: center; align-items: center;
-        }
-        #btn-comenzar {
-            padding: 20px 40px; font-size: 20px; background: #28a745; 
-            color: white; border: none; border-radius: 50px; cursor: pointer;
-            font-weight: bold;
-        }
-
+        /* DEBUG */
         #debug-info {
-            position: absolute; top: 10px; left: 10px; 
-            background: rgba(0,0,0,0.8); color: #0f0; 
-            padding: 10px; font-size: 11px; z-index: 9999;
-            font-family: monospace; max-width: 90%;
-            border: 1px solid #0f0;
-        }
-
-        /* Canvas de A-Frame debe ser visible */
-        .a-canvas {
-            z-index: 0 !important;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            padding: 10px;
+            font-size: 11px;
+            z-index: 9999;
+            font-family: monospace;
+            max-width: 90%;
+            border: 1px solid #00ff00;
+            max-height: 150px;
+            overflow-y: auto;
         }
     </style>
 </head>
 <body>
 
+    <!-- PANTALLA DE INICIO -->
     <div id="overlay-inicio">
-        <h1 style="color: white; margin-bottom: 30px;">DOMUS MAGI</h1>
-        <p style="color: #ccc; margin-bottom: 20px; text-align: center; padding: 0 20px;">
-            Esta app necesita acceso a tu cámara.<br>
-            Por favor autoriza cuando se solicite.
+        <h1>DOMUS MAGI</h1>
+        <p>
+            Esta aplicación usa tu cámara para detectar cartas mediante Realidad Aumentada.
+            <br><br>
+            <strong>Por favor autoriza el acceso cuando se solicite.</strong>
         </p>
         <button id="btn-comenzar">ACTIVAR CÁMARA Y COMENZAR</button>
     </div>
 
+    <!-- DEBUG INFO -->
     <div id="debug-info">
-        <div id="debug-log">Sistema: Esperando inicio...</div>
+        <div id="debug-log">🔄 Sistema listo. Presiona el botón para comenzar...</div>
     </div>
 
-    <div id="ui-wrapper">
+    <!-- INTERFAZ PRINCIPAL -->
+    <div id="ui-wrapper" style="display: none;">
         <div id="visor-superior">
-            <span id="placeholder-text">Visor de Combate Inactivo</span>
+            <span id="placeholder-text">VISOR DE COMBATE INACTIVO</span>
             <video id="video-player" playsinline></video>
         </div>
 
-        <div id="zona-ar">
-            <!-- Aquí aparecerá la cámara de AR -->
-        </div>
+        <div id="zona-ar"></div>
 
         <div id="zona-inferior">
             <div id="panel-datos">
                 <div class="dato-box">
                     <span class="dato-titulo">CARTA</span>
-                    <span id="val-carta" class="dato-valor" style="color:#ff0">---</span>
+                    <span id="val-carta" class="dato-valor" style="color:#ffff00">---</span>
                 </div>
                 <div class="dato-box">
                     <span class="dato-titulo">ACCIÓN</span>
@@ -143,35 +260,34 @@
         </div>
     </div>
 
-    <!-- ESCENA AR CON CONFIGURACIÓN MEJORADA -->
+    <!-- ESCENA AR -->
     <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
         vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false"
         embedded
-        renderer="logarithmicDepthBuffer: true; precision: medium;">
+        renderer="colorManagement: true; sortObjects: true;">
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- Targets con objetos 3D visibles -->
         <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA">
-            <a-plane position="0 0 0" width="1" height="1" rotation="0 0 0" color="#ff0000" opacity="0.8"></a-plane>
-            <a-text value="DRACO" position="0 0.6 0" align="center" color="#fff" scale="2 2 2"></a-text>
+            <a-plane position="0 0 0" width="1" height="1.4" color="#ff0000" opacity="0.7"></a-plane>
+            <a-text value="DRACO SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
         </a-entity>
         
         <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA">
-            <a-plane position="0 0 0" width="1" height="1" rotation="0 0 0" color="#00ff00" opacity="0.8"></a-plane>
-            <a-text value="LEO" position="0 0.6 0" align="center" color="#fff" scale="2 2 2"></a-text>
+            <a-plane position="0 0 0" width="1" height="1.4" color="#00ff00" opacity="0.7"></a-plane>
+            <a-text value="LEO SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
         </a-entity>
         
         <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA">
-            <a-plane position="0 0 0" width="1" height="1" rotation="0 0 0" color="#0000ff" opacity="0.8"></a-plane>
-            <a-text value="APER" position="0 0.6 0" align="center" color="#fff" scale="2 2 2"></a-text>
+            <a-plane position="0 0 0" width="1" height="1.4" color="#0000ff" opacity="0.7"></a-plane>
+            <a-text value="APER SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
         </a-entity>
         
         <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA">
-            <a-plane position="0 0 0" width="1" height="1" rotation="0 0 0" color="#ffff00" opacity="0.8"></a-plane>
-            <a-text value="AQUILA" position="0 0.6 0" align="center" color="#fff" scale="2 2 2"></a-text>
+            <a-plane position="0 0 0" width="1" height="1.4" color="#ffff00" opacity="0.7"></a-plane>
+            <a-text value="AQUILA SICA" position="0 0.8 0" align="center" color="#ffffff" scale="1.5 1.5 1.5"></a-text>
         </a-entity>
     </a-scene>
 
@@ -195,16 +311,17 @@
 
         function log(msg) {
             console.log(msg);
-            const timestamp = new Date().toLocaleTimeString();
-            debugLog.innerHTML = `[${timestamp}] ${msg}<br>` + debugLog.innerHTML.split('<br>').slice(0, 8).join('<br>');
+            const time = new Date().toLocaleTimeString();
+            debugLog.innerHTML = `[${time}] ${msg}<br>` + debugLog.innerHTML.split('<br>').slice(0, 10).join('<br>');
         }
 
-        // BOTÓN DE INICIO
+        // INICIAR SISTEMA
         document.getElementById('btn-comenzar').addEventListener('click', async () => {
+            log('🚀 Iniciando sistema...');
+            
             try {
-                log('🚀 Solicitando acceso a cámara...');
-                
-                // PASO 1: Solicitar permiso de cámara EXPLÍCITAMENTE
+                // Solicitar cámara explícitamente
+                log('📷 Solicitando permiso de cámara...');
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
                         facingMode: 'environment',
@@ -214,150 +331,127 @@
                 });
                 
                 log('✅ Permiso de cámara concedido');
-                log('📷 Stream de video obtenido');
-                
-                // Detener el stream temporal (MindAR usará su propio stream)
                 stream.getTracks().forEach(track => track.stop());
                 
-                // Ocultar overlay
+                // Ocultar overlay e mostrar interfaz
                 document.getElementById('overlay-inicio').style.display = 'none';
+                document.getElementById('ui-wrapper').style.display = 'flex';
                 
-                // PASO 2: Iniciar MindAR
+                log('⏳ Iniciando MindAR...');
+                
                 const sceneEl = document.querySelector('a-scene');
                 
-                const iniciarAR = async () => {
+                const iniciar = async () => {
                     try {
-                        log('⏳ Iniciando sistema MindAR...');
-                        
                         const mindarSystem = sceneEl.systems["mindar-image-system"];
                         
                         if (!mindarSystem) {
-                            log('❌ ERROR: Sistema MindAR no encontrado');
-                            return;
+                            throw new Error('Sistema MindAR no disponible');
                         }
                         
                         await mindarSystem.start();
                         sistemaIniciado = true;
                         
-                        log('✅ MindAR INICIADO');
-                        log('✅ Cámara ACTIVA');
-                        log('🎯 Apunta a una carta ahora');
+                        log('✅ ¡SISTEMA ACTIVO!');
+                        log('📸 Cámara funcionando');
+                        log('🎯 Apunta a una carta');
                         
-                        placeholder.innerText = 'Sistema Activo - Escanea una Carta';
+                        placeholder.innerText = 'SISTEMA ACTIVO - ESCANEA UNA CARTA';
                         
                     } catch (error) {
-                        log('❌ ERROR en MindAR: ' + error.message);
-                        alert('Error al iniciar AR: ' + error.message + '\n\nVerifica que el archivo targets.mind esté en la carpeta correcta.');
+                        log('❌ Error MindAR: ' + error.message);
+                        alert('Error al iniciar:\n' + error.message + '\n\nVerifica que targets.mind esté en la carpeta correcta.');
                     }
                 };
                 
                 if (sceneEl.hasLoaded) {
-                    await iniciarAR();
+                    await iniciar();
                 } else {
-                    sceneEl.addEventListener('loaded', iniciarAR);
+                    sceneEl.addEventListener('loaded', iniciar);
                 }
                 
             } catch (error) {
-                log('❌ ERROR de cámara: ' + error.message);
-                alert('No se pudo acceder a la cámara.\n\nAsegúrate de:\n1. Dar permiso cuando el navegador lo solicite\n2. Usar HTTPS o localhost\n3. Tener una cámara disponible\n\nError: ' + error.message);
+                log('❌ Error de cámara: ' + error.message);
+                alert('No se pudo acceder a la cámara:\n\n' + error.message + '\n\nVerifica:\n- Estar en HTTPS o localhost\n- Dar permiso de cámara\n- Tener una cámara disponible');
             }
         });
 
-        // CONFIGURAR DETECCIÓN DE CARTAS
+        // DETECCIÓN DE CARTAS
         const sceneEl = document.querySelector('a-scene');
         sceneEl.addEventListener('loaded', () => {
-            log('🎬 Escena A-Frame lista');
+            log('🎬 Escena cargada');
             
             const targets = document.querySelectorAll('[mindar-image-target]');
             log(`🎯 ${targets.length} targets configurados`);
             
-            targets.forEach((el, index) => {
+            targets.forEach((el, idx) => {
                 const nombre = el.getAttribute('data-nombre');
                 
                 el.addEventListener('targetFound', () => {
-                    log(`🎉 ¡CARTA DETECTADA! ${nombre}`);
+                    log(`🎉 ¡DETECTADO! ${nombre}`);
                     
                     cartaFijada = DB_PODER[nombre];
                     lblCarta.innerText = nombre;
-                    lblCarta.style.color = "#0f0";
+                    lblCarta.style.color = "#00ff00";
                     
-                    // Efecto visual
-                    lblCarta.parentElement.style.background = 'rgba(0,255,0,0.2)';
+                    // Flash visual
+                    lblCarta.parentElement.style.background = 'rgba(0,255,0,0.3)';
                     setTimeout(() => {
                         lblCarta.parentElement.style.background = '';
                     }, 500);
                 });
                 
                 el.addEventListener('targetLost', () => {
-                    log(`⚠️ Carta perdida: ${nombre}`);
+                    log(`⚠️ Perdido: ${nombre}`);
                 });
             });
         });
 
-        // BOTONES DE PODER
+        // BOTONES
         document.querySelectorAll('.btn-poder').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (!sistemaIniciado) {
-                    alert("⚠️ Sistema no iniciado.\nPresiona 'ACTIVAR CÁMARA Y COMENZAR' primero.");
+                    alert('⚠️ Sistema no iniciado');
                     return;
                 }
-
+                
                 if (!cartaFijada) {
-                    alert("⚠️ No hay carta escaneada.\nApunta la cámara a una carta primero.");
-                    log("❌ Intento de acción sin carta");
+                    alert('⚠️ Escanea una carta primero');
                     return;
                 }
-
+                
                 const tipo = btn.getAttribute('data-tipo');
                 let puntos = 0;
-                let archivoVideo = "";
-
+                let accion = '';
+                
                 switch(tipo) {
-                    case 'ataque': 
-                        puntos = cartaFijada.ataque; 
-                        archivoVideo = "ataque.mp4";
-                        lblAccion.innerText = "IMPETUS";
-                        log(`⚔️ IMPETUS: ${puntos} pts`);
+                    case 'ataque':
+                        puntos = cartaFijada.ataque;
+                        accion = 'IMPETUS';
+                        log(`⚔️ ${accion}: ${puntos}`);
                         break;
-                    case 'defensa': 
-                        puntos = cartaFijada.defensa; 
-                        archivoVideo = "defensa.mp4";
-                        lblAccion.innerText = "TUTELA";
-                        log(`🛡️ TUTELA: ${puntos} pts`);
+                    case 'defensa':
+                        puntos = cartaFijada.defensa;
+                        accion = 'TUTELA';
+                        log(`🛡️ ${accion}: ${puntos}`);
                         break;
-                    case 'cura': 
-                        puntos = cartaFijada.cura; 
-                        archivoVideo = "cura.mp4";
-                        lblAccion.innerText = "AUXILIUM";
-                        log(`💚 AUXILIUM: ${puntos} pts`);
+                    case 'cura':
+                        puntos = cartaFijada.cura;
+                        accion = 'AUXILIUM';
+                        log(`💚 ${accion}: ${puntos}`);
                         break;
-                    case 'magia': 
-                        puntos = cartaFijada.magia; 
-                        archivoVideo = "magia.mp4";
-                        lblAccion.innerText = "MYSTERIUM";
-                        log(`✨ MYSTERIUM: ${puntos} pts`);
+                    case 'magia':
+                        puntos = cartaFijada.magia;
+                        accion = 'MYSTERIUM';
+                        log(`✨ ${accion}: ${puntos}`);
                         break;
                 }
-
+                
+                lblAccion.innerText = accion;
                 lblPuntos.innerText = puntos;
-                lblPuntos.style.color = puntos > 3 ? "#0f0" : "#ff0";
-
-                // Intentar reproducir video si existe
-                placeholder.style.display = 'none';
-                videoPlayer.style.display = 'block';
-                videoPlayer.src = archivoVideo;
-                videoPlayer.play().catch(() => {
-                    // Si no hay video, volver al placeholder
-                    videoPlayer.style.display = 'none';
-                    placeholder.style.display = 'block';
-                    placeholder.innerText = `${lblAccion.innerText} - ${puntos} puntos`;
-                });
-
-                videoPlayer.onended = () => {
-                    videoPlayer.style.display = 'none';
-                    placeholder.style.display = 'block';
-                    placeholder.innerText = 'Sistema Activo - Escanea una Carta';
-                };
+                lblPuntos.style.color = puntos > 3 ? '#00ff00' : '#ffff00';
+                
+                placeholder.innerText = `${accion} ACTIVADO - ${puntos} PUNTOS`;
             });
         });
     </script>
