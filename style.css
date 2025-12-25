@@ -1,0 +1,38 @@
+/* style.css */
+body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
+
+/* 1. Visor Superior (33%) */
+#visor-superior {
+    position: absolute; top: 0; width: 100%; height: 33vh;
+    background: #000; border-bottom: 2px solid #ffd700; z-index: 2000;
+}
+#video-render { width: 100%; height: 100%; object-fit: contain; }
+
+/* 2. Zona de Cámara (Centro) */
+#escena-ar { width: 100%; height: 100%; }
+
+/* 3. Mando Inferior (Botones I, T, A, M) */
+#controles {
+    position: absolute; bottom: 0; width: 100%; height: 28vh;
+    background: rgba(15, 15, 15, 0.95); display: flex; 
+    justify-content: space-around; align-items: center; z-index: 2000;
+    border-top: 1px solid #444;
+}
+
+.btn {
+    width: 70px; height: 70px; border-radius: 12px; border: 2px solid #fff;
+    font-size: 32px; font-weight: bold; color: white; cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.impetus { background: #b00; }  /* I - Rojo */
+.tutela { background: #555; }   /* T - Gris */
+.auxilium { background: #080; } /* A - Verde */
+.mysterium { background: #60a; }/* M - Violeta */
+
+/* HUD de Datos */
+#hud {
+    position: absolute; top: 34vh; width: 100%; color: #0f0;
+    background: rgba(0,0,0,0.7); padding: 8px; z-index: 2000;
+    font-family: monospace; font-size: 14px; text-align: center;
+}

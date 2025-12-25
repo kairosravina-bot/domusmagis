@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SISTEMA DE COMBATE AR</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; }
+
+        /* --- CONTENEDOR PRINCIPAL DE INTERFAZ --- */
+        #interfaz {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 999; pointer-events: none; /* Permite ver la cámara */
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        /* --- 1. VISOR DE VIDEO (ARRIBA) --- */
+        #visor-superior {
+            width: 100%;
+            height: 35%; /* Ocupa el 35% superior */
+            background: black;
+            border-bottom: 4px solid #fff;
+            pointer-events: auto;
+            position: relative;
+            display: flex; justify-content: center; align-items: center;
+        }
+        
+        video { width: 100%; height: 100%; object-fit: contain; }
+        
+        #texto-espera {
+            color: #555; font-size: 1.2rem; position: absolute; text-align: center;
+        }
+
+        /* --- 2. ZONA CENTRAL (LIBRE) --- */
+        /* Aquí no ponemos nada para que se vea el escaneo */
+
+        /* --- 3. ZONA INFERIOR (DATOS + BOTONES) --- */
+        #zona-inferior {
+            width: 100%;
+            pointer-events: auto;
+            background: rgba(0, 0, 0, 0.8); /* Fondo oscuro para leer bien */
+            border-top: 2px solid white;
+            padding-bottom: 10px;
+        }
+
+        /* PANEL DE DATOS (Sobre los botones) */
+        #panel-datos {
+            display: flex; justify-content: space-around;
+            padding: 10px;
+            color: #00ff00; /* Letras verdes tipo hacker/militar */
+            font-family: monospace;
+            font-size: 14px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #333;
+        }
+        
+        .dato-box { text-align: center; }
+        .dato-titulo { font-size: 10px; color: #aaa; display: block; }
+        .dato-valor { font-size: 18px; font-weight: bold; }
+
+        /* BOTONERA */
+        #botonera {
+            display: flex; justify-content: center; gap: 10px;
+            padding: 10px;
+        }
+
+        .btn-poder {
+            width: 70px; height: 70px;
+            border-radius: 10px; border: 2px solid white;
+            font-size: 12px; font-weight: bold; color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 2px black;
+        }
+
+        #btn-ataque  { background: #c0392b; }
+        #btn-defensa { background: #2980b9; }
+        #btn-magia   { background: #8e44ad; }
+        #btn-cura    { background: #27ae60; }
+
+        /* ERROR VISUAL */
+        #error-mind {
+            display: none; position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); background: red; color: white; 
+            padding: 20px; z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="error-mind">ERROR: No encuentro 'targets.mind'</div>
+
+    <div id="interfaz">
+        
+        <!-- ARRIBA: VIDEO -->
+        <div id="visor-superior">
+            <div id="texto-espera">VISOR DE COMBATE</div>
+            <video id="video-player" playsinline webkit-playsinline></video>
+        </div>
+
+        <!-- ESPACIO VACÍO CENTRAL (Automático por flexbox) -->
+
+        <!-- ABAJO: DATOS Y BOTONES -->
+        <div id="zona-inferior">
+            
+            <!-- AQUI ESTAN LOS DATOS QUE PEDISTE -->
+            <div id="panel-datos">
+                <div class="dato-box">
+                    <span class="dato-titulo">OBJETIVO (CARTA)</span>
+                    <span id="val-carta" class="dato-valor" style="color:yellow">BUSCANDO...</span>
+                </div>
+                <div class="dato-box">
+                    <span class="dato-titulo">ACCIÓN</span>
+                    <span id="val-accion" class="dato-valor">---</span>
+                </div>
+                <div class="dato-box">
+                    <span class="dato-titulo">DAÑO/VALOR</span>
+                    <span id="val-puntos" class="dato-valor">0</span>
+                </div>
+            </div>
+
+            <!-- BOTONES -->
+            <div id="botonera">
+                <button id="btn-ataque"  class="btn-poder" data-vid="ataque.mp4"  data-acc="ATAQUE"  data-pts="1500">ATAQUE</button>
+                <button id="btn-defensa" class="btn-poder" data-vid="defensa.mp4" data-acc="DEFENSA" data-pts="800">DEFENSA</button>
+                <button id="btn-magia"   class="btn-poder" data-vid="magia.mp4"   data-acc="MAGIA"   data-pts="2500">MAGIA</button>
+                <button id="btn-cura"    class="btn-poder" data-vid="cura.mp4"    data-acc="CURA"    data-pts="+500">CURA</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ESCENA AR -->
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; uiLoading: no;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <!-- Detectores (Ajusta el data-name si el orden es diferente) -->
+        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-name="CASA"></a-entity>
+        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-name="ESCUDO"></a-entity>
+        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-name="ARMA"></a-entity>
+        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-name="NUMERO"></a-entity>
+    </a-scene>
+
+    <script>
+        // VARIABLES
+        let cartaActual = null; // Guarda qué carta estamos viendo
+
+        // REFERENCIAS HTML
+        const lblCarta  = document.getElementById('val-carta');
+        const lblAccion = document.getElementById('val-accion');
+        const lblPuntos = document.getElementById('val-puntos');
+        const videoPlayer = document.getElementById('video-player');
+        const textoEspera = document.getElementById('texto-espera');
+
+        // 1. LÓGICA DE DETECCIÓN (SCANNER)
+        const listaTargets = ['target0', 'target1', 'target2', 'target3'];
+
+        listaTargets.forEach(id => {
+            const el = document.getElementById(id);
+
+            // CARTA ENCONTRADA
+            el.addEventListener('targetFound', () => {
+                cartaActual = el.getAttribute('data-name');
+                
+                // Actualizar Panel de Datos
+                lblCarta.innerText = cartaActual;
+                lblCarta.style.color = "#00ff00"; // Verde
+                console.log("Detectado: " + cartaActual);
+            });
+
+            // CARTA PERDIDA
+            el.addEventListener('targetLost', () => {
+                cartaActual = null;
+                
+                // Actualizar Panel
+                lblCarta.innerText = "BUSCANDO...";
+                lblCarta.style.color = "yellow";
+            });
+        });
+
+        // 2. LÓGICA DE BOTONES
+        const botones = document.querySelectorAll('.btn-poder');
+
+        botones.forEach(btn => {
+            btn.addEventListener('click', () => {
+                
+                // Verificación de seguridad: ¿Hay carta?
+                if (!cartaActual) {
+                    alert("¡NO HAY OBJETIVO!\nEscanea una carta primero.");
+                    return;
+                }
+
+                // Obtener datos configurados en el HTML
+                const videoSrc = btn.getAttribute('data-vid');
+                const nombreAccion = btn.getAttribute('data-acc');
+                const puntosAccion = btn.getAttribute('data-pts');
+
+                // 1. Mostrar Video Arriba
+                textoEspera.style.display = 'none';
+                videoPlayer.src = videoSrc;
+                videoPlayer.play();
+
+                // 2. Mostrar Datos Abajo (Sobre los botones)
+                lblAccion.innerText = nombreAccion;
+                lblPuntos.innerText = puntosAccion;
+
+                console.log(`Disparo: ${nombreAccion} (${puntosAccion}) a ${cartaActual}`);
+            });
+        });
+
+        // Error si no encuentra el archivo .mind
+        document.querySelector('a-scene').addEventListener('arError', () => {
+            document.getElementById('error-mind').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
