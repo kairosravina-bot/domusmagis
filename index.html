@@ -4,359 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOMUS MAGI: REVELATIONS</title>
+    <!-- LIBRERÍAS ESTABLES -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            margin: 0; 
-            overflow: hidden; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #000; 
-        }
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; }
 
-        /* ASEGURAR QUE TODO EL VIDEO SEA VISIBLE */
-        video, #arjs-video {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-            z-index: 0 !important;
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-
-        .a-canvas {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            z-index: 1 !important;
-            pointer-events: none !important;
-        }
-
-        a-scene {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        /* OVERLAY DE INICIO */
-        #overlay-inicio {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        #overlay-inicio h1 {
-            color: #00ff00;
-            font-size: 48px;
-            margin-bottom: 20px;
-            text-shadow: 0 0 20px #00ff00;
-            letter-spacing: 4px;
-        }
-
-        #overlay-inicio p {
-            color: #888;
-            text-align: center;
-            margin-bottom: 30px;
-            line-height: 1.6;
-            max-width: 400px;
-        }
-
-        #btn-comenzar {
-            padding: 20px 50px;
-            font-size: 20px;
-            font-weight: bold;
-            background: #00ff00;
-            color: #000;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 0 30px rgba(0,255,0,0.5);
-            transition: all 0.3s;
-        }
-
-        #btn-comenzar:hover {
-            transform: scale(1.05);
-        }
-
-        /* INTERFAZ PRINCIPAL */
+        /* --- INTERFAZ --- */
         #ui-wrapper {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-            pointer-events: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; z-index: 10; pointer-events: none;
         }
 
-        /* VISOR SUPERIOR */
+        /* 1. VISOR SUPERIOR (35%) */
         #visor-superior {
-            width: 100%;
-            height: 35%;
-            background: rgba(0, 0, 0, 0.85);
-            border-bottom: 3px solid #00ff00;
-            pointer-events: auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
+            width: 100%; height: 35%; background: #000;
+            border-bottom: 3px solid #fff; pointer-events: auto;
+            display: flex; justify-content: center; align-items: center; overflow: hidden;
         }
+        #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
+        #placeholder-text { color: #444; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
 
-        #video-player {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: none;
-        }
+        /* 2. ZONA CENTRAL (ESPACIO PARA AR) */
+        #zona-ar { flex-grow: 1; }
 
-        #placeholder-text {
-            color: #00ff00;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 14px;
-            text-align: center;
-            padding: 20px;
-        }
-
-        /* ZONA AR - COMPLETAMENTE TRANSPARENTE */
-        #zona-ar {
-            flex-grow: 1;
-            position: relative;
-            pointer-events: none;
-        }
-
-        /* INDICADOR CENTRAL */
-        #centro-indicador {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 250px;
-            height: 250px;
-            border: 3px dashed rgba(0, 255, 0, 0.6);
-            border-radius: 15px;
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
-        }
-
-        #centro-indicador span {
-            color: #00ff00;
-            font-size: 14px;
-            font-weight: bold;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #00ff00;
-        }
-
-        /* PANEL INFERIOR */
+        /* 3. PANEL INFERIOR (DATOS + BOTONES) */
         #zona-inferior {
-            width: 100%;
-            height: auto;
-            background: rgba(0, 0, 0, 0.9);
-            border-top: 2px solid #00ff00;
-            pointer-events: auto;
-            padding-bottom: env(safe-area-inset-bottom);
-            backdrop-filter: blur(10px);
+            width: 100%; height: auto; background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid #fff; pointer-events: auto; padding-bottom: env(safe-area-inset-bottom);
         }
 
         #panel-datos {
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 10px;
-            border-bottom: 1px solid #00ff00;
-            background: rgba(10, 10, 10, 0.9);
+            display: flex; justify-content: space-around; padding: 12px 5px;
+            border-bottom: 1px solid #333; background: #0a0a0a;
         }
-
-        .dato-box {
-            text-align: center;
-            flex: 1;
-        }
-
-        .dato-titulo {
-            font-size: 10px;
-            color: #888;
-            display: block;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-        }
-
-        .dato-valor {
-            font-size: 18px;
-            font-weight: bold;
-            color: #00ff00;
-            font-family: monospace;
-        }
+        .dato-box { text-align: center; flex: 1; }
+        .dato-titulo { font-size: 9px; color: #888; display: block; margin-bottom: 2px; }
+        .dato-valor { font-size: 16px; font-weight: bold; color: #0f0; font-family: monospace; }
 
         #botonera {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            padding: 20px;
+            display: flex; justify-content: center; gap: 12px; padding: 15px;
         }
-
         .btn-poder {
-            width: 70px;
-            height: 70px;
-            border-radius: 12px;
-            border: 3px solid #fff;
-            font-size: 28px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            width: 65px; height: 65px; border-radius: 12px; border: 2px solid #fff;
+            font-size: 24px; font-weight: bold; color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.1s;
         }
+        .btn-poder:active { transform: scale(0.9); }
 
-        .btn-poder:active {
-            transform: scale(0.9);
+        #btn-i { background: #c0392b; } /* IMPETUS */
+        #btn-t { background: #555555; } /* TUTELA */
+        #btn-m { background: #8e44ad; } /* MYSTERIUM */
+        #btn-a { background: #27ae60; } /* AUXILIUM */
+
+        /* PANTALLA DE INICIO */
+        #overlay-inicio {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: #000; z-index: 10000; display: flex; 
+            flex-direction: column; justify-content: center; align-items: center;
         }
-
-        #btn-i { background: #c0392b; }
-        #btn-t { background: #555555; }
-        #btn-m { background: #8e44ad; }
-        #btn-a { background: #27ae60; }
-
-        /* INDICADOR DE TRACKING */
-        #tracking-status {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 255, 0, 0.95);
-            color: #000;
-            padding: 30px 50px;
-            border-radius: 15px;
-            font-size: 28px;
-            font-weight: bold;
-            z-index: 9998;
-            display: none;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(0,255,0,0.8);
-        }
-
-        /* DEBUG */
-        #debug-info {
-            position: fixed;
-            bottom: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #0f0;
-            padding: 8px;
-            font-size: 10px;
-            z-index: 9999;
-            font-family: monospace;
-            max-width: 300px;
-            border: 1px solid #0f0;
-            border-radius: 5px;
+        #btn-comenzar {
+            padding: 20px 40px; font-size: 20px; background: #28a745; 
+            color: white; border: none; border-radius: 50px; cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA DE INICIO -->
+    <!-- PANTALLA DE INICIO PARA ACTIVAR AUDIO/CÁMARA -->
     <div id="overlay-inicio">
-        <h1>DOMUS MAGI</h1>
-        <p>
-            Sistema de detección de cartas<br>mediante Realidad Aumentada.
-            <br><br>
-            <strong>Autoriza el acceso a la cámara</strong>
-        </p>
-        <button id="btn-comenzar">ACTIVAR SISTEMA</button>
+        <h1 style="color: white; margin-bottom: 30px;">DOMUS MAGI</h1>
+        <button id="btn-comenzar">INICIAR SISTEMA</button>
     </div>
 
-    <!-- ESCENA AR -->
-    <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false"
-        embedded
-        renderer="colorManagement: true; sortObjects: true; alpha: true; antialias: true;">
-        
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA">
-            <a-plane position="0 0 0" width="1" height="1.4" color="#ff0000" opacity="0.8"></a-plane>
-            <a-text value="DRACO SICA" position="0 0.8 0" align="center" color="#ffffff" scale="2 2 2"></a-text>
-        </a-entity>
-        
-        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA">
-            <a-plane position="0 0 0" width="1" height="1.4" color="#00ff00" opacity="0.8"></a-plane>
-            <a-text value="LEO SICA" position="0 0.8 0" align="center" color="#ffffff" scale="2 2 2"></a-text>
-        </a-entity>
-        
-        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA">
-            <a-plane position="0 0 0" width="1" height="1.4" color="#0000ff" opacity="0.8"></a-plane>
-            <a-text value="APER SICA" position="0 0.8 0" align="center" color="#ffffff" scale="2 2 2"></a-text>
-        </a-entity>
-        
-        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA">
-            <a-plane position="0 0 0" width="1" height="1.4" color="#ffff00" opacity="0.8"></a-plane>
-            <a-text value="AQUILA SICA" position="0 0.8 0" align="center" color="#ffffff" scale="2 2 2"></a-text>
-        </a-entity>
-    </a-scene>
-
-    <!-- INDICADOR DE TRACKING -->
-    <div id="tracking-status"></div>
-
-    <!-- DEBUG -->
-    <div id="debug-info">
-        <div id="debug-log">Sistema en espera...</div>
-    </div>
-
-    <!-- INTERFAZ PRINCIPAL -->
-    <div id="ui-wrapper" style="display: none;">
+    <div id="ui-wrapper">
         <div id="visor-superior">
-            <span id="placeholder-text">VISOR DE COMBATE</span>
+            <span id="placeholder-text">Visor de Combate Inactivo</span>
             <video id="video-player" playsinline></video>
         </div>
 
-        <div id="zona-ar">
-            <div id="centro-indicador">
-                <span>APUNTA AQUÍ<br>LA CARTA</span>
-            </div>
-        </div>
+        <div id="zona-ar"></div>
 
         <div id="zona-inferior">
             <div id="panel-datos">
                 <div class="dato-box">
                     <span class="dato-titulo">CARTA</span>
-                    <span id="val-carta" class="dato-valor" style="color:#ffff00">---</span>
+                    <span id="val-carta" class="dato-valor" style="color:#ff0">---</span>
                 </div>
                 <div class="dato-box">
                     <span class="dato-titulo">ACCIÓN</span>
@@ -377,7 +112,19 @@
         </div>
     </div>
 
+    <!-- ESCENA DE REALIDAD AUMENTADA -->
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <!-- MAPEO DE TARGETS (Asegúrate que el orden en el .mind coincida) -->
+        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA"></a-entity>
+        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA"></a-entity>
+        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA"></a-entity>
+        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA"></a-entity>
+    </a-scene>
+
     <script>
+        // 1. BASE DE DATOS DE VALORES (Ajustar según tus tablas)
         const DB_PODER = {
             "DRACO SICA": { ataque: 6, defensa: 2, magia: 1, cura: 1 },
             "LEO SICA":   { ataque: 4, defensa: 4, magia: 1, cura: 1 },
@@ -385,205 +132,123 @@
             "AQUILA SICA":{ ataque: 4, defensa: 2, magia: 3, cura: 1 }
         };
 
+        // VARIABLES DE CONTROL
         let cartaFijada = null;
-        let sistemaIniciado = false;
+        let cartaActual = null;
 
+        // ELEMENTOS DOM
         const lblCarta = document.getElementById('val-carta');
         const lblAccion = document.getElementById('val-accion');
         const lblPuntos = document.getElementById('val-puntos');
         const videoPlayer = document.getElementById('video-player');
         const placeholder = document.getElementById('placeholder-text');
-        const debugLog = document.getElementById('debug-log');
-        const trackingStatus = document.getElementById('tracking-status');
 
-        function log(msg) {
-            console.log(msg);
-            debugLog.innerHTML = msg;
-        }
-
-        function mostrarTracking(texto, tiempo = 2000) {
-            trackingStatus.innerText = texto;
-            trackingStatus.style.display = 'block';
-            setTimeout(() => {
-                trackingStatus.style.display = 'none';
-            }, tiempo);
-        }
-
+        // FUNCIÓN PARA REINICIAR DETECCIÓN
         function reiniciarDeteccion() {
             cartaFijada = null;
+            cartaActual = null;
             lblCarta.innerText = '---';
-            lblCarta.style.color = '#ffff00';
+            lblCarta.style.color = "#ff0";
             lblAccion.innerText = '---';
             lblPuntos.innerText = '0';
-            lblPuntos.style.color = '#00ff00';
-            placeholder.innerText = 'BUSCANDO NUEVA CARTA...';
-            log('🔄 Sistema listo para nueva carta');
-        }
-
-        // FORZAR VISIBILIDAD DEL VIDEO
-        function hacerVideoVisible() {
-            const intentarMostrar = () => {
-                const videos = document.querySelectorAll('video');
-                let videoEncontrado = false;
-                
-                videos.forEach(v => {
-                    if (v.id !== 'video-player') {
-                        v.style.cssText = `
-                            position: fixed !important;
-                            top: 0 !important;
-                            left: 0 !important;
-                            width: 100% !important;
-                            height: 100% !important;
-                            object-fit: cover !important;
-                            z-index: 0 !important;
-                            display: block !important;
-                            visibility: visible !important;
-                            opacity: 1 !important;
-                        `;
-                        videoEncontrado = true;
-                        log('✅ Video de cámara visible');
-                    }
-                });
-
-                if (!videoEncontrado) {
-                    setTimeout(intentarMostrar, 200);
-                }
-            };
-            
-            setTimeout(intentarMostrar, 500);
+            console.log('🔄 Sistema reiniciado - esperando nueva carta');
         }
 
         // INICIAR SISTEMA
-        document.getElementById('btn-comenzar').addEventListener('click', async () => {
-            log('🚀 Iniciando...');
+        document.getElementById('btn-comenzar').addEventListener('click', () => {
+            document.getElementById('overlay-inicio').style.display = 'none';
             
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: 'environment',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    } 
-                });
-                
-                log('✅ Cámara autorizada');
-                stream.getTracks().forEach(track => track.stop());
-                
-                document.getElementById('overlay-inicio').style.display = 'none';
-                document.getElementById('ui-wrapper').style.display = 'flex';
-                
-                const sceneEl = document.querySelector('a-scene');
-                
-                const iniciar = async () => {
-                    try {
-                        const mindarSystem = sceneEl.systems["mindar-image-system"];
-                        await mindarSystem.start();
-                        sistemaIniciado = true;
-                        
-                        log('✅ Sistema activo - Apunta a carta');
-                        placeholder.innerText = 'SISTEMA ACTIVO - ESCANEA CARTA';
-                        
-                        hacerVideoVisible();
-                        
-                    } catch (error) {
-                        log('❌ Error: ' + error.message);
-                        alert('Error: ' + error.message);
-                    }
-                };
-                
-                if (sceneEl.hasLoaded) {
-                    await iniciar();
-                } else {
-                    sceneEl.addEventListener('loaded', iniciar);
-                }
-                
-            } catch (error) {
-                log('❌ ' + error.message);
-                alert('Error de cámara: ' + error.message);
+            const sceneEl = document.querySelector('a-scene');
+            
+            // Función para iniciar MindAR
+            const startMindAR = () => {
+                sceneEl.systems["mindar-image-system"].start();
+            };
+            
+            // Si la escena ya está cargada, iniciar inmediatamente
+            if (sceneEl.hasLoaded) {
+                startMindAR();
+            } else {
+                // Si no, esperar a que cargue
+                sceneEl.addEventListener('loaded', startMindAR);
             }
         });
 
         // DETECCIÓN DE CARTAS
         const sceneEl = document.querySelector('a-scene');
         sceneEl.addEventListener('loaded', () => {
-            log('Escena lista');
-            
             const targets = document.querySelectorAll('[mindar-image-target]');
             
-            targets.forEach((el) => {
+            targets.forEach(el => {
                 const nombre = el.getAttribute('data-nombre');
                 
                 el.addEventListener('targetFound', () => {
-                    log(`✅ ${nombre} detectada`);
-                    mostrarTracking(`${nombre}\nDETECTADA!`, 1500);
+                    console.log('✅ CARTA DETECTADA:', nombre);
                     
+                    // Actualizar carta actual
+                    cartaActual = nombre;
                     cartaFijada = DB_PODER[nombre];
-                    lblCarta.innerText = nombre;
-                    lblCarta.style.color = "#00ff00";
-                    placeholder.innerText = 'CARTA FIJADA - ELIGE ACCIÓN';
                     
-                    lblCarta.parentElement.style.background = 'rgba(0,255,0,0.3)';
-                    setTimeout(() => {
-                        lblCarta.parentElement.style.background = '';
-                    }, 500);
+                    lblCarta.innerText = nombre;
+                    lblCarta.style.color = "#0f0";
                 });
                 
                 el.addEventListener('targetLost', () => {
-                    log(`⚠️ ${nombre} perdida`);
-                    mostrarTracking('CARTA PERDIDA\nBUSCANDO...', 1500);
+                    console.log('⚠️ Carta perdida:', nombre);
                     
-                    // REINICIAR CUANDO SE PIERDE LA CARTA
-                    setTimeout(() => {
-                        reiniciarDeteccion();
-                    }, 500);
+                    // Solo reiniciar si es la carta que estaba activa
+                    if (cartaActual === nombre) {
+                        setTimeout(() => {
+                            reiniciarDeteccion();
+                        }, 500);
+                    }
                 });
             });
         });
 
-        // BOTONES
+        // LÓGICA DE LOS 4 BOTONES (I, T, A, M)
         document.querySelectorAll('.btn-poder').forEach(btn => {
             btn.addEventListener('click', () => {
-                if (!sistemaIniciado) {
-                    alert('⚠️ Inicia el sistema primero');
-                    return;
-                }
-                
                 if (!cartaFijada) {
-                    alert('⚠️ Escanea una carta primero');
+                    alert("ESCANEANDO... Por favor, enfoca una carta primero.");
                     return;
                 }
-                
+
                 const tipo = btn.getAttribute('data-tipo');
                 let puntos = 0;
-                let accion = '';
-                
+                let archivoVideo = "";
+
                 switch(tipo) {
-                    case 'ataque':
-                        puntos = cartaFijada.ataque;
-                        accion = 'IMPETUS';
+                    case 'ataque': 
+                        puntos = cartaFijada.ataque; 
+                        archivoVideo = "ataque.mp4";
+                        lblAccion.innerText = "IMPETUS";
                         break;
-                    case 'defensa':
-                        puntos = cartaFijada.defensa;
-                        accion = 'TUTELA';
+                    case 'defensa': 
+                        puntos = cartaFijada.defensa; 
+                        archivoVideo = "defensa.mp4";
+                        lblAccion.innerText = "TUTELA";
                         break;
-                    case 'cura':
-                        puntos = cartaFijada.cura;
-                        accion = 'AUXILIUM';
+                    case 'cura': 
+                        puntos = cartaFijada.cura; 
+                        archivoVideo = "cura.mp4";
+                        lblAccion.innerText = "AUXILIUM";
                         break;
-                    case 'magia':
-                        puntos = cartaFijada.magia;
-                        accion = 'MYSTERIUM';
+                    case 'magia': 
+                        puntos = cartaFijada.magia; 
+                        archivoVideo = "magia.mp4";
+                        lblAccion.innerText = "MYSTERIUM";
                         break;
                 }
-                
-                lblAccion.innerText = accion;
+
+                // EJECUTAR VIDEO
+                placeholder.style.display = 'none';
+                videoPlayer.style.display = 'block';
+                videoPlayer.src = archivoVideo;
+                videoPlayer.play();
+
+                // ACTUALIZAR INTERFAZ
                 lblPuntos.innerText = puntos;
-                lblPuntos.style.color = puntos > 3 ? '#00ff00' : '#ffff00';
-                
-                placeholder.innerText = `${accion} - ${puntos} PUNTOS`;
-                mostrarTracking(`${accion}\nACTIVADO!\n${puntos} PUNTOS`, 2000);
-                
-                log(`⚔️ ${accion}: ${puntos} pts`);
             });
         });
     </script>
