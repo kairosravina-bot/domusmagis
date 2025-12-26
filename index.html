@@ -21,10 +21,31 @@
         #visor-superior {
             width: 100%; height: 35%; background: #000;
             border-bottom: 3px solid #fff; pointer-events: auto;
-            display: flex; justify-content: center; align-items: center; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden;
+            position: relative;
         }
         #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
-        #placeholder-text { color: #444; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+        #placeholder-text { 
+            color: #444; font-weight: bold; text-transform: uppercase; 
+            letter-spacing: 2px; text-align: center; padding: 10px;
+        }
+        
+        /* Indicador de lado escaneado */
+        #lado-escaneado {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #0f0;
+            padding: 8px 20px;
+            border-radius: 20px;
+            color: #0f0;
+            font-size: 14px;
+            font-weight: bold;
+            display: none;
+            z-index: 20;
+        }
 
         /* 2. ZONA CENTRAL (ESPACIO PARA AR) */
         #zona-ar { flex-grow: 1; }
@@ -52,6 +73,7 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: all 0.3s; position: relative; overflow: hidden;
             opacity: 0.4;
+            background-size: 200% 200%;
         }
         
         .btn-poder.activo {
@@ -59,21 +81,27 @@
             opacity: 1;
             border-color: #fff;
             color: white;
-            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+            animation: brilloPulso 1.5s ease-in-out infinite;
         }
         
         .btn-poder.activo:active { 
             transform: scale(0.9); 
         }
 
-        /* Animación de brillo */
-        @keyframes brillo {
-            0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.5); }
-            50% { box-shadow: 0 0 40px rgba(255,255,255,0.9), 0 0 60px rgba(255,255,255,0.6); }
-        }
-        
-        .btn-poder.activo {
-            animation: brillo 2s infinite;
+        /* Animación de brillo pulsante */
+        @keyframes brilloPulso {
+            0% { 
+                box-shadow: 0 0 10px rgba(255,255,255,0.3);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(255,255,255,0.8), 0 0 50px rgba(255,255,255,0.5);
+                transform: scale(1.05);
+            }
+            100% { 
+                box-shadow: 0 0 10px rgba(255,255,255,0.3);
+                transform: scale(1);
+            }
         }
 
         .btn-valor {
@@ -83,10 +111,10 @@
             color: #ff0;
         }
 
-        #btn-i { background: #c0392b; } /* IMPETUS */
-        #btn-t { background: #555555; } /* TUTELA */
-        #btn-m { background: #8e44ad; } /* MYSTERIUM */
-        #btn-a { background: #27ae60; } /* AUXILIUM */
+        #btn-i { background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%); }
+        #btn-t { background: linear-gradient(135deg, #555555 0%, #777777 100%); }
+        #btn-m { background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%); }
+        #btn-a { background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); }
 
         /* PANTALLA DE INICIO */
         #overlay-inicio {
@@ -128,6 +156,7 @@
 
     <div id="ui-wrapper">
         <div id="visor-superior">
+            <div id="lado-escaneado">LADO: ---</div>
             <span id="placeholder-text">Visor de Combate Inactivo</span>
             <video id="video-player" playsinline></video>
         </div>
@@ -181,7 +210,7 @@
         <a-camera position="0 0 0" look-controls="enabled: false" camera="active: true"></a-camera>
 
         <!-- MAPEO DE TARGETS CON ROTACIÓN AUTOMÁTICA -->
-        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA">
+        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA" data-lado="SICA-1">
             <a-plane 
                 position="0 0 0" 
                 rotation="0 0 0" 
@@ -192,7 +221,7 @@
             </a-plane>
         </a-entity>
 
-        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA">
+        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA" data-lado="SICA-2">
             <a-plane 
                 position="0 0 0" 
                 rotation="0 0 0" 
@@ -203,7 +232,7 @@
             </a-plane>
         </a-entity>
 
-        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA">
+        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA" data-lado="SICA-4">
             <a-plane 
                 position="0 0 0" 
                 rotation="0 0 0" 
@@ -214,7 +243,7 @@
             </a-plane>
         </a-entity>
 
-        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA">
+        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA" data-lado="SICA-5">
             <a-plane 
                 position="0 0 0" 
                 rotation="0 0 0" 
@@ -238,6 +267,7 @@
         // VARIABLES DE CONTROL
         let cartaFijada = null;
         let cartaActual = null;
+        let ladoActual = null;
         let timerPerdida = null;
         let botonesActivos = false;
 
@@ -245,6 +275,7 @@
         const lblCarta = document.getElementById('val-carta');
         const lblAccion = document.getElementById('val-accion');
         const lblPuntos = document.getElementById('val-puntos');
+        const lblLado = document.getElementById('lado-escaneado');
         const videoPlayer = document.getElementById('video-player');
         const placeholder = document.getElementById('placeholder-text');
         
@@ -268,7 +299,7 @@
             valA.innerText = datos.cura;
             valM.innerText = datos.magia;
             
-            // Activar clase CSS
+            // Activar clase CSS con animación
             btnI.classList.add('activo');
             btnT.classList.add('activo');
             btnA.classList.add('activo');
@@ -300,12 +331,25 @@
         function reiniciarDeteccion() {
             cartaFijada = null;
             cartaActual = null;
+            ladoActual = null;
             lblCarta.innerText = '---';
             lblCarta.style.color = "#ff0";
             lblAccion.innerText = '---';
             lblPuntos.innerText = '0';
+            lblLado.style.display = 'none';
             desactivarBotones();
             console.log('🔄 Sistema reiniciado - esperando nueva casa');
+        }
+
+        // FUNCIÓN PARA RESETEAR VISOR
+        function resetearVisor() {
+            videoPlayer.style.display = 'none';
+            videoPlayer.src = '';
+            placeholder.style.display = 'block';
+            lblAccion.innerText = '---';
+            lblAccion.style.color = '#0f0';
+            lblPuntos.innerText = '0';
+            console.log('📺 Visor reseteado');
         }
 
         // INICIAR SISTEMA
@@ -336,9 +380,10 @@
             
             targets.forEach(el => {
                 const nombre = el.getAttribute('data-nombre');
+                const lado = el.getAttribute('data-lado');
                 
                 el.addEventListener('targetFound', () => {
-                    console.log('✅ CASA DETECTADA:', nombre);
+                    console.log('✅ CASA DETECTADA:', nombre, '| LADO:', lado);
                     
                     // Cancelar timer de pérdida si existe
                     if (timerPerdida) {
@@ -348,10 +393,15 @@
                     
                     // Actualizar carta actual
                     cartaActual = nombre;
+                    ladoActual = lado;
                     cartaFijada = DB_PODER[nombre];
                     
                     lblCarta.innerText = nombre;
                     lblCarta.style.color = "#0f0";
+                    
+                    // Mostrar lado escaneado
+                    lblLado.innerText = `LADO: ${lado}`;
+                    lblLado.style.display = 'block';
                     
                     // ACTIVAR BOTONES CON LOS VALORES
                     activarBotones(cartaFijada);
@@ -420,15 +470,19 @@
                 // ACTUALIZAR INTERFAZ
                 lblPuntos.innerText = puntos;
                 
-                console.log(`🎯 Acción ejecutada: ${lblAccion.innerText} = ${puntos} FUERZA`);
+                console.log(`🎯 Acción ejecutada: ${lblAccion.innerText} = ${puntos} FUERZA | LADO: ${ladoActual}`);
             });
         });
 
-        // Resetear visor cuando termina el video
+        // RESETEAR VISOR CUANDO TERMINA EL VIDEO
         videoPlayer.addEventListener('ended', () => {
-            videoPlayer.style.display = 'none';
-            placeholder.style.display = 'block';
-            console.log('📺 Video finalizado');
+            resetearVisor();
+        });
+
+        // RESETEAR VISOR SI HAY ERROR EN EL VIDEO
+        videoPlayer.addEventListener('error', () => {
+            console.log('❌ Error cargando video');
+            resetearVisor();
         });
     </script>
 </body>
