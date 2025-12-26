@@ -4,159 +4,198 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOMUS MAGI: REVELATIONS</title>
+    <!-- LIBRERÍAS -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
+        body { margin: 0; overflow: hidden; font-family: sans-serif; background: #000; }
+        
+        /* HUD UI */
         #ui-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; z-index: 10; pointer-events: none; }
-        #visor-superior { width: 100%; height: 35%; background: #000; border-bottom: 3px solid #fff; pointer-events: auto; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; }
+        
+        /* VISOR (35%) */
+        #visor-superior { 
+            width: 100%; height: 35vh; background: #000; border-bottom: 2px solid #fff; 
+            pointer-events: auto; display: flex; justify-content: center; align-items: center; 
+            overflow: hidden; position: relative; 
+        }
         #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
-        #placeholder-text { color: #444; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
+        #placeholder-text { color: #555; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+
         #zona-ar { flex-grow: 1; }
-        #zona-inferior { width: 100%; height: auto; background: rgba(0, 0, 0, 0.9); border-top: 2px solid #fff; pointer-events: auto; padding-bottom: env(safe-area-inset-bottom); }
-        #panel-datos { display: flex; justify-content: space-around; padding: 12px 5px; border-bottom: 1px solid #333; background: #0a0a0a; }
+
+        /* PANEL INFERIOR */
+        #zona-inferior { width: 100%; background: rgba(0, 0, 0, 0.9); border-top: 2px solid #fff; pointer-events: auto; }
+        #panel-datos { display: flex; justify-content: space-around; padding: 10px 5px; background: #0a0a0a; border-bottom: 1px solid #333; }
         .dato-box { text-align: center; flex: 1; }
-        .dato-titulo { font-size: 9px; color: #888; display: block; margin-bottom: 2px; }
-        .dato-valor { font-size: 16px; font-weight: bold; color: #0f0; font-family: monospace; }
-        #botonera { display: flex; justify-content: center; gap: 12px; padding: 15px; }
-        .btn-poder { width: 65px; height: 65px; border-radius: 12px; border: 2px solid #555; font-size: 24px; font-weight: bold; color: #555; cursor: not-allowed; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s; opacity: 0.4; background-size: 200% 200%; }
-        .btn-poder.activo { cursor: pointer; opacity: 1; border-color: #fff; color: white; animation: brilloPulso 1.5s ease-in-out infinite; }
-        @keyframes brilloPulso { 0% { box-shadow: 0 0 10px rgba(255,255,255,0.3); } 50% { box-shadow: 0 0 25px rgba(255,255,255,0.6); } 100% { box-shadow: 0 0 10px rgba(255,255,255,0.3); } }
-        .btn-valor { font-size: 12px; font-weight: bold; margin-top: 2px; color: #ff0; }
-        #btn-i { background: linear-gradient(135deg, #c0392b, #e74c3c); }
-        #btn-t { background: linear-gradient(135deg, #555, #777); }
-        #btn-m { background: linear-gradient(135deg, #8e44ad, #9b59b6); }
-        #btn-a { background: linear-gradient(135deg, #27ae60, #2ecc71); }
-        #overlay-inicio { position: absolute; top:0; left:0; width:100%; height:100%; background: #000; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        #btn-comenzar { padding: 20px 40px; font-size: 20px; background: #28a745; color: white; border: none; border-radius: 50px; cursor: pointer; }
+        .dato-titulo { font-size: 9px; color: #888; display: block; }
+        .dato-valor { font-size: 15px; font-weight: bold; color: #0f0; font-family: monospace; }
+
+        /* BOTONERA */
+        #botonera { display: flex; justify-content: center; gap: 10px; padding: 15px; }
+        .btn-poder { 
+            width: 65px; height: 65px; border-radius: 10px; border: 2px solid #444; 
+            background: #111; color: #444; font-size: 22px; font-weight: bold;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0.3; transition: 0.3s; pointer-events: none;
+        }
+        .btn-poder.activo { opacity: 1; border-color: #fff; color: #fff; pointer-events: auto; cursor: pointer; }
+        .btn-valor { font-size: 11px; color: #ff0; margin-top: 2px; }
+
+        #btn-i.activo { background: linear-gradient(135deg, #900, #f00); }
+        #btn-a.activo { background: linear-gradient(135deg, #060, #0f0); }
+        #btn-t.activo { background: linear-gradient(135deg, #333, #777); }
+        #btn-m.activo { background: linear-gradient(135deg, #606, #a0f); }
+
+        /* PANTALLA CARGA */
+        #overlay-inicio { 
+            position: absolute; top:0; left:0; width:100%; height:100%; 
+            background: #000; z-index: 10000; display: flex; 
+            flex-direction: column; justify-content: center; align-items: center; 
+        }
+        #btn-comenzar { 
+            padding: 15px 40px; font-size: 20px; background: #28a745; color: white; 
+            border: none; border-radius: 50px; cursor: pointer; font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
     <div id="overlay-inicio">
-        <h1 style="color:white; letter-spacing:4px;">DOMUS MAGI</h1>
+        <h1 id="txt-logo" style="color:white; letter-spacing:8px;">DOMUS MAGI</h1>
         <button id="btn-comenzar">INICIAR SISTEMA</button>
-        <div id="estado-carga" style="color:#0f0; margin-top:10px;"></div>
+        <div id="status-carga" style="color:#0f0; margin-top:15px; font-family:monospace;"></div>
     </div>
 
     <div id="ui-wrapper">
         <div id="visor-superior">
-            <span id="placeholder-text">Visor Standby</span>
-            <video id="video-player" playsinline></video>
+            <span id="placeholder-text">SISTEMA EN ESPERA</span>
+            <video id="video-player" playsinline preload="auto"></video>
         </div>
+
         <div id="zona-ar"></div>
+
         <div id="zona-inferior">
             <div id="panel-datos">
-                <div class="dato-box"><span class="dato-titulo">CASA:</span><span id="val-carta" class="dato-valor">---</span></div>
-                <div class="dato-box"><span class="dato-titulo">ARMA:</span><span id="val-arma" class="dato-valor">---</span></div>
-                <div class="dato-box"><span class="dato-titulo">POSICION:</span><span id="val-pos" class="dato-valor" style="color:#0f0">---</span></div>
-                <div class="dato-box"><span class="dato-titulo">VALOR:</span><span id="val-puntos" class="dato-valor" style="color:#ff0">0</span></div>
+                <div class="dato-box"><span class="dato-titulo">CASA</span><span id="ui-casa" class="dato-valor">---</span></div>
+                <div class="dato-box"><span class="dato-titulo">ARMA</span><span id="ui-arma" class="dato-valor">---</span></div>
+                <div class="dato-box"><span class="dato-titulo">LADO</span><span id="ui-pos" class="dato-valor" style="color:#0f0">---</span></div>
+                <div class="dato-box"><span class="dato-titulo">VALOR</span><span id="ui-puntos" class="dato-valor" style="color:#ff0">0</span></div>
             </div>
+
             <div id="botonera">
-                <button id="btn-i" class="btn-poder" data-tipo="ataque"><span>I</span><span id="v-i" class="btn-valor">0</span></button>
-                <button id="btn-a" class="btn-poder" data-tipo="cura"><span>A</span><span id="v-a" class="btn-valor">0</span></button>
-                <button id="btn-t" class="btn-poder" data-tipo="defensa"><span>T</span><span id="v-t" class="btn-valor">0</span></button>
-                <button id="btn-m" class="btn-poder" data-tipo="magia"><span>M</span><span id="v-m" class="btn-valor">0</span></button>
+                <button id="btn-i" class="btn-poder" data-tipo="ataque"><span>I</span><span class="btn-valor">6</span></button>
+                <button id="btn-a" class="btn-poder" data-tipo="cura"><span>A</span><span class="btn-valor">1</span></button>
+                <button id="btn-t" class="btn-poder" data-tipo="defensa"><span>T</span><span class="btn-valor">2</span></button>
+                <button id="btn-m" class="btn-poder" data-tipo="magia"><span>M</span><span class="btn-valor">1</span></button>
             </div>
         </div>
     </div>
 
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <a-scene 
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
+        vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- TARGETS ASIGNADOS A CADA LADO (DRACO SICA) -->
-        <a-entity mindar-image-target="targetIndex: 0" data-pos="NORTE" data-accion="IMPETUS"></a-entity>
-        <a-entity mindar-image-target="targetIndex: 1" data-pos="ESTE" data-accion="AUXILIUM"></a-entity>
-        <a-entity mindar-image-target="targetIndex: 2" data-pos="SUR" data-accion="TUTELA"></a-entity>
-        <a-entity mindar-image-target="targetIndex: 3" data-pos="OESTE" data-accion="MYSTERIUM"></a-entity>
+        <!-- TARGETS DRACO SICA (0 A 3) -->
+        <a-entity mindar-image-target="targetIndex: 0" data-pos="NORTE (IMPETUS)"></a-entity>
+        <a-entity mindar-image-target="targetIndex: 1" data-pos="ESTE (AUXILIUM)"></a-entity>
+        <a-entity mindar-image-target="targetIndex: 2" data-pos="SUR (TUTELA)"></a-entity>
+        <a-entity mindar-image-target="targetIndex: 3" data-pos="OESTE (MYSTERIUM)"></a-entity>
     </a-scene>
 
     <script>
-        // VALORES EXACTOS PROPORCIONADOS POR TI
-        const STATS = {
-            "DRACO SICA": { ataque: 6, cura: 1, defensa: 2, magia: 1 }
-        };
+        // 1. CONFIGURACIÓN DE VALORES (ESTRICTOS)
+        const VALORES = { ataque: 6, cura: 1, defensa: 2, magia: 1 };
+        let sistemaListo = false;
 
-        let detectado = false;
-        let timerPerdida = null;
+        // 2. LÓGICA DE INICIO (ANTI-CUELGUE)
+        const btnComenzar = document.getElementById('btn-comenzar');
+        const statusCarga = document.getElementById('status-carga');
+        const overlay = document.getElementById('overlay-inicio');
+        const sceneEl = document.querySelector('a-scene');
 
-        const motor = {
-            init: function() {
-                const targets = document.querySelectorAll('[mindar-image-target]');
-                targets.forEach(t => {
-                    t.addEventListener("targetFound", () => {
-                        if(timerPerdida) clearTimeout(timerPerdida);
-                        detectado = true;
-                        
-                        // Sincronizar UI
-                        document.getElementById('val-carta').innerText = "DRACO";
-                        document.getElementById('val-arma').innerText = "SICA";
-                        document.getElementById('val-pos').innerText = t.dataset.pos;
-                        
-                        // Cargar valores en botones
-                        document.getElementById('v-i').innerText = STATS["DRACO SICA"].ataque;
-                        document.getElementById('v-a').innerText = STATS["DRACO SICA"].cura;
-                        document.getElementById('v-t').innerText = STATS["DRACO SICA"].defensa;
-                        document.getElementById('v-m').innerText = STATS["DRACO SICA"].magia;
+        btnComenzar.addEventListener('click', () => {
+            btnComenzar.style.display = 'none';
+            statusCarga.innerText = "ESTABLECIENDO ENLACE RA...";
+            
+            // Iniciar MindAR
+            const arSystem = sceneEl.systems["mindar-image-system"];
+            arSystem.start();
 
-                        document.querySelectorAll('.btn-poder').forEach(b => b.classList.add('activo'));
-                    });
+            // Timeout de seguridad: Si en 5 segundos no responde arReady, forzamos entrada
+            setTimeout(() => { if(!sistemaListo) finalizarCarga(); }, 5000);
+        });
 
-                    t.addEventListener("targetLost", () => {
-                        timerPerdida = setTimeout(() => {
-                            detectado = false;
-                            document.querySelectorAll('.btn-poder').forEach(b => b.classList.remove('activo'));
-                            document.getElementById('val-pos').innerText = "---";
-                        }, 1500);
-                    });
+        sceneEl.addEventListener('arReady', () => { finalizarCarga(); });
+
+        function finalizarCarga() {
+            sistemaListo = true;
+            overlay.style.display = 'none';
+            console.log("Sistema Iniciado Correctamente");
+            iniciarDeteccion();
+        }
+
+        // 3. LÓGICA DE DETECCIÓN
+        function iniciarDeteccion() {
+            const targets = document.querySelectorAll('[mindar-image-target]');
+            targets.forEach(t => {
+                t.addEventListener("targetFound", () => {
+                    document.getElementById('ui-casa').innerText = "DRACO";
+                    document.getElementById('ui-arma').innerText = "SICA";
+                    document.getElementById('ui-pos').innerText = t.dataset.pos;
+                    
+                    // Activar botones
+                    document.querySelectorAll('.btn-poder').forEach(b => b.classList.add('activo'));
                 });
-            }
-        };
 
-        // LÓGICA DE BOTONES: VIDEO Y VALOR
+                t.addEventListener("targetLost", () => {
+                    // Opcional: limpiar UI al perder target
+                    document.getElementById('ui-pos').innerText = "---";
+                });
+            });
+        }
+
+        // 4. LÓGICA DE BOTONES (VIDEOS Y VALORES)
         document.querySelectorAll('.btn-poder').forEach(btn => {
             btn.addEventListener('click', () => {
-                if(!btn.classList.contains('activo')) return;
-
                 const tipo = btn.getAttribute('data-tipo');
-                const vPlayer = document.getElementById('video-player');
-                const placeholder = document.getElementById('placeholder-text');
-                const valPuntos = document.getElementById('val-puntos');
+                const visor = document.getElementById('video-player');
+                const txtStandby = document.getElementById('placeholder-text');
+                const uiPuntos = document.getElementById('ui-puntos');
 
-                let valor = 0;
-                let videoFile = "";
+                let v = 0;
+                let file = "";
 
-                // Mapeo corregido
-                if(tipo === 'ataque') { valor = STATS["DRACO SICA"].ataque; videoFile = "ataque.mp4"; }
-                if(tipo === 'cura')   { valor = STATS["DRACO SICA"].cura; videoFile = "cura.mp4"; }
-                if(tipo === 'defensa'){ valor = STATS["DRACO SICA"].defensa; videoFile = "defensa.mp4"; }
-                if(tipo === 'magia')  { valor = STATS["DRACO SICA"].magia; videoFile = "magia.mp4"; }
+                if(tipo === 'ataque') { v = VALORES.ataque; file = "ataque.mp4"; }
+                if(tipo === 'cura')   { v = VALORES.cura; file = "cura.mp4"; }
+                if(tipo === 'defensa'){ v = VALORES.defensa; file = "defensa.mp4"; }
+                if(tipo === 'magia')  { v = VALORES.magia; file = "magia.mp4"; }
 
-                // Mostrar en visor
-                placeholder.style.display = 'none';
-                vPlayer.style.display = 'block';
-                vPlayer.src = videoFile;
-                vPlayer.play().catch(e => console.log("Error video:", e));
-
-                // Mostrar valor
-                valPuntos.innerText = valor;
+                // Actualizar UI
+                uiPuntos.innerText = v;
+                
+                // Reproducir Video
+                txtStandby.style.display = 'none';
+                visor.style.display = 'block';
+                visor.src = file;
+                visor.play().catch(e => {
+                    console.error("Error al reproducir video:", e);
+                    resetVisor();
+                });
             });
         });
 
-        // REINICIAR VISOR AL TERMINAR VIDEO
-        document.getElementById('video-player').addEventListener('ended', () => {
-            document.getElementById('video-player').style.display = 'none';
-            document.getElementById('placeholder-text').style.display = 'block';
-        });
+        function resetVisor() {
+            const visor = document.getElementById('video-player');
+            const txtStandby = document.getElementById('placeholder-text');
+            visor.style.display = 'none';
+            txtStandby.style.display = 'block';
+        }
 
-        // INICIO
-        document.getElementById('btn-comenzar').addEventListener('click', () => {
-            const scene = document.querySelector('a-scene');
-            scene.systems["mindar-image-system"].start();
-            document.getElementById('overlay-inicio').style.display = 'none';
-            motor.init();
-        });
+        document.getElementById('video-player').addEventListener('ended', resetVisor);
     </script>
 </body>
 </html>
