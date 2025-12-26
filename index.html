@@ -3,112 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: REVELATIONS - MOTOR TÉCNICO</title>
-    
-    <!-- LIBRERÍAS DE VISIÓN ARTIFICIAL Y REALIDAD AUMENTADA -->
+    <title>DOMUS MAGI: REVELATIONS</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        /* Configuración técnica del visor de cámara */
-        body { margin: 0; overflow: hidden; background: #000; }
-        .a-canvas { pointer-events: none; }
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; color: white; }
+
+        /* --- INTERFAZ HUD --- */
+        #ui-wrapper {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; z-index: 10; pointer-events: none;
+        }
+
+        /* 1. VISOR SUPERIOR (35%) */
+        #visor-superior {
+            width: 100%; height: 35%; background: #000;
+            border-bottom: 2px solid #fff; pointer-events: auto;
+            display: flex; justify-content: center; align-items: center; position: relative;
+        }
+        #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
+        #placeholder-text { color: #444; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* 2. ZONA CENTRAL (AR) */
+        #zona-ar { flex-grow: 1; }
+
+        /* 3. PANEL INFERIOR (DATOS + BOTONES) */
+        #zona-inferior {
+            width: 100%; background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid #fff; pointer-events: auto;
+        }
+
+        #panel-datos {
+            display: flex; justify-content: space-around; padding: 10px;
+            border-bottom: 1px solid #333; background: #0a0a0a;
+        }
+        .dato-box { text-align: center; }
+        .dato-titulo { font-size: 9px; color: #888; display: block; }
+        .dato-valor { font-size: 14px; font-weight: bold; color: #0f0; font-family: monospace; }
+
+        #botonera { display: flex; justify-content: center; gap: 10px; padding: 15px; }
+        
+        .btn-poder {
+            width: 65px; height: 65px; border-radius: 10px; border: 2px solid #444;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: #222; color: #555; opacity: 0.4; transition: all 0.3s;
+            pointer-events: none;
+        }
+        
+        .btn-poder.activo {
+            opacity: 1; border-color: #fff; color: white; cursor: pointer; pointer-events: auto;
+        }
+
+        .btn-poder.activo:active { transform: scale(0.9); }
+        .btn-v { font-size: 10px; color: #ff0; font-weight: bold; }
+
+        /* BOTONES POR ELEMENTO */
+        #btn-i.activo { background: linear-gradient(135deg, #c0392b, #ff0000); }
+        #btn-a.activo { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        #btn-t.activo { background: linear-gradient(135deg, #2c3e50, #7f8c8d); }
+        #btn-m.activo { background: linear-gradient(135deg, #8e44ad, #9b59b6); }
+
+        /* OVERLAY INICIO */
+        #overlay-inicio {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: #000; z-index: 1000; display: flex; 
+            flex-direction: column; justify-content: center; align-items: center;
+        }
+        #btn-comenzar {
+            padding: 20px 40px; font-size: 18px; background: #0f0; color: #000;
+            border: none; border-radius: 50px; cursor: pointer; font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <!-- 📜 TÍTULO 1: ESCENA RA (RECONOCIMIENTO DE MARCO DE CASA Y SILUETA DE ARMA) -->
+    <div id="overlay-inicio">
+        <h1 style="letter-spacing: 5px;">DOMUS MAGI</h1>
+        <button id="btn-comenzar">INICIAR SISTEMA</button>
+    </div>
+
+    <div id="ui-wrapper">
+        <div id="visor-superior">
+            <span id="placeholder-text">Visor de Combate Inactivo</span>
+            <video id="video-player" playsinline></video>
+        </div>
+
+        <div id="zona-ar"></div>
+
+        <div id="zona-inferior">
+            <div id="panel-datos">
+                <div class="dato-box"><span class="dato-titulo">CASA</span><span id="txt-casa" class="dato-valor">---</span></div>
+                <div class="dato-box"><span class="dato-titulo">ARMA</span><span id="txt-arma" class="dato-valor">---</span></div>
+                <div class="dato-box"><span class="dato-titulo">ACCIÓN</span><span id="txt-accion" class="dato-valor">---</span></div>
+                <div class="dato-box"><span class="dato-titulo">VALOR</span><span id="txt-puntos" class="dato-valor">0</span></div>
+            </div>
+
+            <div id="botonera">
+                <button id="btn-i" class="btn-poder" data-tipo="IMPETUS"><span>I</span><span id="val-i" class="btn-v">0</span></button>
+                <button id="btn-a" class="btn-poder" data-tipo="AUXILIUM"><span>A</span><span id="val-a" class="btn-v">0</span></button>
+                <button id="btn-t" class="btn-poder" data-tipo="TUTELA"><span>T</span><span id="val-t" class="btn-v">0</span></button>
+                <button id="btn-m" class="btn-poder" data-tipo="MYSTERIUM"><span>M</span><span id="val-m" class="btn-v">0</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📜 TÍTULO 1: ESCENA RA (16 TARGETS: 4 POSICIONES POR 4 CASAS) -->
     <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiScanning: no;" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false">
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
+        vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- MAPEADO DE TARGETS: Vincula la imagen física con la Identidad Técnica -->
-        <!-- El Target detecta el Marco (Casa) y la Silueta Central (Arma) simultáneamente -->
-        
-        <a-entity id="target0" mindar-image-target="targetIndex: 0" 
-                  data-casa="CAELUM (AZUL)" data-arma="SICA (DAGA)" data-nivel="1"></a-entity>
-        
-        <a-entity id="target1" mindar-image-target="targetIndex: 1" 
-                  data-casa="TERRA (ROJO)" data-arma="SICA (DAGA)" data-nivel="1"></a-entity>
-        
-        <a-entity id="target2" mindar-image-target="targetIndex: 2" 
-                  data-casa="AQUA (VERDE)" data-arma="SCUTUM (ESCUDO)" data-nivel="5"></a-entity>
-        
-        <a-entity id="target3" mindar-image-target="targetIndex: 3" 
-                  data-casa="DIMENSIO (VIOLETA)" data-arma="CORONA (DEIDAD)" data-nivel="10"></a-entity>
+        <!-- POSICIONES DRACO (Indices 0-3) -->
+        <a-entity mindar-image-target="targetIndex: 0" data-casa="DRACO" data-arma="SICA" data-pos="NORTE"></a-entity>
+        <a-entity mindar-image-target="targetIndex: 1" data-casa="DRACO" data-arma="SICA" data-pos="ESTE"></a-entity>
+        <a-entity mindar-image-target="targetIndex: 2" data-casa="DRACO" data-arma="SICA" data-pos="SUR"></a-entity>
+        <a-entity mindar-image-target="targetIndex: 3" data-casa="DRACO" data-arma="SICA" data-pos="OESTE"></a-entity>
 
+        <!-- POSICIONES LEO (Indices 4-7) -->
+        <a-entity mindar-image-target="targetIndex: 4" data-casa="LEO" data-arma="SICA" data-pos="NORTE"></a-entity>
+        <a-entity mindar-image-target="targetIndex: 5" data-casa="LEO" data-arma="SICA" data-pos="ESTE"></a-entity>
+        <a-entity mindar-image-target="targetIndex: 6" data-casa="LEO" data-arma="SICA" data-pos="SUR"></a-entity>
+        <a-entity mindar-image-target="targetIndex: 7" data-casa="LEO" data-arma="SICA" data-pos="OESTE"></a-entity>
+
+        <!-- Añadir el resto de indices (8-11 para Aper, 12-15 para Aquila) siguiendo el mismo patrón -->
     </a-scene>
 
-    <!-- 📜 TÍTULO 2: MOTOR DE ORIENTACIÓN ASIMÉTRICA (DETECCIÓN DE LADO POR PUNTA BLANCA) -->
+    <!-- 📜 TÍTULO 2: LÓGICA DE IDENTIFICACIÓN, ORIENTACIÓN Y HUD -->
     <script>
-        const MOTOR_DM = {
-            entidadActiva: null,
-            loopId: null,
+        const DB_CARTAS = {
+            "DRACO": { i: 6, a: 2, t: 2, m: 4, arma: "SICA (NV.1)" },
+            "LEO":   { i: 4, a: 1, t: 5, m: 2, arma: "SICA (NV.1)" }
+        };
 
+        let cartaFijada = null;
+
+        const MOTOR_DM = {
             init: function() {
-                const entities = document.querySelectorAll('[mindar-image-target]');
+                const targets = document.querySelectorAll('[mindar-image-target]');
                 
-                entities.forEach(entity => {
-                    // EVENTO: CARTA DETECTADA
-                    entity.addEventListener("targetFound", () => {
-                        this.entidadActiva = entity;
-                        const d = entity.dataset;
-                        console.log(`[IDENTIDAD] CASA: ${d.casa} | ARMA: ${d.arma} | NIVEL: ${d.nivel}`);
-                        this.rastrearGiro();
+                targets.forEach(t => {
+                    t.addEventListener("targetFound", () => {
+                        const casa = t.dataset.casa;
+                        const pos = t.dataset.pos;
+                        const info = DB_CARTAS[casa];
+
+                        if (!info) return;
+                        cartaFijada = info;
+
+                        // ACTUALIZAR DATOS EN PANTALLA
+                        document.getElementById('txt-casa').innerText = casa;
+                        document.getElementById('txt-arma').innerText = info.arma;
+                        document.getElementById('txt-accion').innerText = pos;
+                        document.getElementById('txt-casa').style.color = "#0f0";
+
+                        // ACTIVAR BOTONERA CON VALORES
+                        this.activarBotones(info);
                     });
 
-                    // EVENTO: CARTA RETIRADA
-                    entity.addEventListener("targetLost", () => {
-                        cancelAnimationFrame(this.loopId);
-                        this.entidadActiva = null;
-                        console.log("[SISTEMA] Target Perdido");
+                    t.addEventListener("targetLost", () => {
+                        this.desactivarBotones();
                     });
                 });
             },
 
-            // LÓGICA DE ORIENTACIÓN BASADA EN EL MARCADOR ASIMÉTRICO (Punta Blanca = 0°)
-            rastrearGiro: function() {
-                const actualizar = () => {
-                    if (!this.entidadActiva) return;
+            activarBotones: function(info) {
+                document.getElementById('val-i').innerText = info.i;
+                document.getElementById('val-a').innerText = info.a;
+                document.getElementById('val-t').innerText = info.t;
+                document.getElementById('val-m').innerText = info.m;
+                document.querySelectorAll('.btn-poder').forEach(b => b.classList.add('activo'));
+            },
 
-                    // Extraer rotación física del eje Z (el plano de la mesa)
-                    const rotZ = this.entidadActiva.object3D.rotation.z;
-                    
-                    // Convertir radianes a grados absolutos (0 a 360)
-                    let grados = rotZ * (180 / Math.PI);
-                    if (grados < 0) grados += 360;
-
-                    let ladoActivo = "";
-
-                    /**
-                     * DETERMINACIÓN DE LADO SEGÚN POSICIÓN DE LA PUNTA BLANCA
-                     * Cada sector de 90° activa una función específica (Punto 7 Estructura Final)
-                     */
-                    if (grados >= 315 || grados < 45) {
-                        ladoActivo = "NORTE (IMPETUS - ATAQUE)";
-                    } else if (grados >= 45 && grados < 135) {
-                        ladoActivo = "ESTE (AUXILIUM - CURA)";
-                    } else if (grados >= 135 && grados < 225) {
-                        ladoActivo = "SUR (TUTELA - DEFENSA)";
-                    } else if (grados >= 225 && grados < 315) {
-                        ladoActivo = "OESTE (MYSTERIUM - MAGIA)";
-                    }
-
-                    // SALIDA DE DATOS TÉCNICOS POR CONSOLA
-                    console.log(`[ORIENTACIÓN] Posición: ${ladoActivo} | Ángulo: ${Math.round(grados)}°`);
-
-                    this.loopId = requestAnimationFrame(actualizar);
-                };
-                actualizar();
+            desactivarBotones: function() {
+                document.querySelectorAll('.btn-poder').forEach(b => b.classList.remove('activo'));
+                document.getElementById('txt-casa').innerText = "---";
+                document.getElementById('txt-accion').innerText = "---";
+                cartaFijada = null;
             }
         };
 
-        // Inicialización del motor técnico al cargar la ventana
-        window.onload = () => MOTOR_DM.init();
-    </script>
+        // EVENTOS DE BOTONES PODER
+        document.querySelectorAll('.btn-poder').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!cartaFijada) return;
+                const tipo = btn.dataset.tipo;
+                const puntos = cartaFijada[tipo[0].toLowerCase()]; // Obtiene i, a, t o m
 
+                // Acción en Visor
+                const video = document.getElementById('video-player');
+                const placeholder = document.getElementById('placeholder-text');
+                
+                placeholder.style.display = 'none';
+                video.style.display = 'block';
+                video.src = `./assets/${tipo.toLowerCase()}.mp4`;
+                video.play();
+
+                document.getElementById('txt-puntos').innerText = puntos;
+                console.log(`EJECUTADO: ${tipo} con valor ${puntos}`);
+            });
+        });
+
+        // CONTROL DE INICIO
+        document.getElementById('btn-comenzar').addEventListener('click', () => {
+            document.querySelector('a-scene').systems["mindar-image-system"].start();
+            document.getElementById('overlay-inicio').style.display = 'none';
+            MOTOR_DM.init();
+        });
+
+        document.getElementById('video-player').onended = function() {
+            this.style.display = 'none';
+            document.getElementById('placeholder-text').style.display = 'block';
+        };
+    </script>
 </body>
 </html>
