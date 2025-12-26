@@ -47,12 +47,41 @@
             display: flex; justify-content: center; gap: 12px; padding: 15px;
         }
         .btn-poder {
-            width: 65px; height: 65px; border-radius: 12px; border: 2px solid #fff;
-            font-size: 24px; font-weight: bold; color: white; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.1s;
+            width: 65px; height: 65px; border-radius: 12px; border: 2px solid #555;
+            font-size: 24px; font-weight: bold; color: #555; cursor: not-allowed;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: all 0.3s; position: relative; overflow: hidden;
+            opacity: 0.4;
         }
-        .btn-poder:active { transform: scale(0.9); }
+        
+        .btn-poder.activo {
+            cursor: pointer;
+            opacity: 1;
+            border-color: #fff;
+            color: white;
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+        
+        .btn-poder.activo:active { 
+            transform: scale(0.9); 
+        }
+
+        /* Animación de brillo */
+        @keyframes brillo {
+            0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.5); }
+            50% { box-shadow: 0 0 40px rgba(255,255,255,0.9), 0 0 60px rgba(255,255,255,0.6); }
+        }
+        
+        .btn-poder.activo {
+            animation: brillo 2s infinite;
+        }
+
+        .btn-valor {
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 2px;
+            color: #ff0;
+        }
 
         #btn-i { background: #c0392b; } /* IMPETUS */
         #btn-t { background: #555555; } /* TUTELA */
@@ -108,7 +137,7 @@
         <div id="zona-inferior">
             <div id="panel-datos">
                 <div class="dato-box">
-                    <span class="dato-titulo">CARTA</span>
+                    <span class="dato-titulo">CASA</span>
                     <span id="val-carta" class="dato-valor" style="color:#ff0">---</span>
                 </div>
                 <div class="dato-box">
@@ -116,16 +145,28 @@
                     <span id="val-accion" class="dato-valor">---</span>
                 </div>
                 <div class="dato-box">
-                    <span class="dato-titulo">VALOR</span>
+                    <span class="dato-titulo">FUERZA</span>
                     <span id="val-puntos" class="dato-valor">0</span>
                 </div>
             </div>
 
             <div id="botonera">
-                <button id="btn-i" class="btn-poder" data-tipo="ataque">I</button>
-                <button id="btn-t" class="btn-poder" data-tipo="defensa">T</button>
-                <button id="btn-a" class="btn-poder" data-tipo="cura">A</button>
-                <button id="btn-m" class="btn-poder" data-tipo="magia">M</button>
+                <button id="btn-i" class="btn-poder" data-tipo="ataque">
+                    <span>I</span>
+                    <span class="btn-valor" id="val-i">0</span>
+                </button>
+                <button id="btn-t" class="btn-poder" data-tipo="defensa">
+                    <span>T</span>
+                    <span class="btn-valor" id="val-t">0</span>
+                </button>
+                <button id="btn-a" class="btn-poder" data-tipo="cura">
+                    <span>A</span>
+                    <span class="btn-valor" id="val-a">0</span>
+                </button>
+                <button id="btn-m" class="btn-poder" data-tipo="magia">
+                    <span>M</span>
+                    <span class="btn-valor" id="val-m">0</span>
+                </button>
             </div>
         </div>
     </div>
@@ -198,6 +239,7 @@
         let cartaFijada = null;
         let cartaActual = null;
         let timerPerdida = null;
+        let botonesActivos = false;
 
         // ELEMENTOS DOM
         const lblCarta = document.getElementById('val-carta');
@@ -205,6 +247,54 @@
         const lblPuntos = document.getElementById('val-puntos');
         const videoPlayer = document.getElementById('video-player');
         const placeholder = document.getElementById('placeholder-text');
+        
+        const btnI = document.getElementById('btn-i');
+        const btnT = document.getElementById('btn-t');
+        const btnA = document.getElementById('btn-a');
+        const btnM = document.getElementById('btn-m');
+        
+        const valI = document.getElementById('val-i');
+        const valT = document.getElementById('val-t');
+        const valA = document.getElementById('val-a');
+        const valM = document.getElementById('val-m');
+
+        // FUNCIÓN PARA ACTIVAR BOTONES
+        function activarBotones(datos) {
+            botonesActivos = true;
+            
+            // Actualizar valores en cada botón
+            valI.innerText = datos.ataque;
+            valT.innerText = datos.defensa;
+            valA.innerText = datos.cura;
+            valM.innerText = datos.magia;
+            
+            // Activar clase CSS
+            btnI.classList.add('activo');
+            btnT.classList.add('activo');
+            btnA.classList.add('activo');
+            btnM.classList.add('activo');
+            
+            console.log('✨ Botonera ACTIVADA con valores:', datos);
+        }
+
+        // FUNCIÓN PARA DESACTIVAR BOTONES
+        function desactivarBotones() {
+            botonesActivos = false;
+            
+            // Resetear valores
+            valI.innerText = '0';
+            valT.innerText = '0';
+            valA.innerText = '0';
+            valM.innerText = '0';
+            
+            // Quitar clase CSS
+            btnI.classList.remove('activo');
+            btnT.classList.remove('activo');
+            btnA.classList.remove('activo');
+            btnM.classList.remove('activo');
+            
+            console.log('🔒 Botonera DESACTIVADA');
+        }
 
         // FUNCIÓN PARA REINICIAR DETECCIÓN
         function reiniciarDeteccion() {
@@ -214,7 +304,8 @@
             lblCarta.style.color = "#ff0";
             lblAccion.innerText = '---';
             lblPuntos.innerText = '0';
-            console.log('🔄 Sistema reiniciado - esperando nueva carta');
+            desactivarBotones();
+            console.log('🔄 Sistema reiniciado - esperando nueva casa');
         }
 
         // INICIAR SISTEMA
@@ -247,7 +338,7 @@
                 const nombre = el.getAttribute('data-nombre');
                 
                 el.addEventListener('targetFound', () => {
-                    console.log('✅ CARTA DETECTADA:', nombre);
+                    console.log('✅ CASA DETECTADA:', nombre);
                     
                     // Cancelar timer de pérdida si existe
                     if (timerPerdida) {
@@ -261,10 +352,13 @@
                     
                     lblCarta.innerText = nombre;
                     lblCarta.style.color = "#0f0";
+                    
+                    // ACTIVAR BOTONES CON LOS VALORES
+                    activarBotones(cartaFijada);
                 });
                 
                 el.addEventListener('targetLost', () => {
-                    console.log('⚠️ Carta perdida:', nombre);
+                    console.log('⚠️ Casa perdida:', nombre);
                     
                     // Solo reiniciar si es la carta que estaba activa
                     if (cartaActual === nombre) {
@@ -280,8 +374,9 @@
         // LÓGICA DE LOS 4 BOTONES (I, T, A, M)
         document.querySelectorAll('.btn-poder').forEach(btn => {
             btn.addEventListener('click', () => {
-                if (!cartaFijada) {
-                    alert("⚠️ ESCANEANDO... Por favor, enfoca una carta primero.");
+                // Verificar si los botones están activos
+                if (!botonesActivos || !cartaFijada) {
+                    console.log('⚠️ Botones inactivos - esperando detección de casa');
                     return;
                 }
 
@@ -325,7 +420,7 @@
                 // ACTUALIZAR INTERFAZ
                 lblPuntos.innerText = puntos;
                 
-                console.log(`🎯 Acción ejecutada: ${lblAccion.innerText} = ${puntos} pts`);
+                console.log(`🎯 Acción ejecutada: ${lblAccion.innerText} = ${puntos} FUERZA`);
             });
         });
 
