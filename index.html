@@ -62,12 +62,29 @@
         /* PANTALLA DE INICIO */
         #overlay-inicio {
             position: absolute; top:0; left:0; width:100%; height:100%;
-            background: #000; z-index: 10000; display: flex; 
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+            z-index: 10000; display: flex; 
             flex-direction: column; justify-content: center; align-items: center;
         }
+        #titulo-inicio {
+            color: #fff; font-size: 32px; font-weight: bold;
+            text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+            margin-bottom: 10px; letter-spacing: 4px;
+        }
+        #subtitulo-inicio {
+            color: #888; font-size: 14px; margin-bottom: 40px;
+            text-transform: uppercase; letter-spacing: 2px;
+        }
         #btn-comenzar {
-            padding: 20px 40px; font-size: 20px; background: #28a745; 
+            padding: 20px 40px; font-size: 20px; 
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white; border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+            transition: all 0.3s;
+        }
+        #btn-comenzar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
         }
     </style>
 </head>
@@ -75,7 +92,8 @@
 
     <!-- PANTALLA DE INICIO PARA ACTIVAR AUDIO/CÁMARA -->
     <div id="overlay-inicio">
-        <h1 style="color: white; margin-bottom: 30px;">DOMUS MAGI</h1>
+        <h1 id="titulo-inicio">DOMUS MAGI</h1>
+        <p id="subtitulo-inicio">Sistema de Combate Revelations</p>
         <button id="btn-comenzar">INICIAR SISTEMA</button>
     </div>
 
@@ -112,19 +130,63 @@
         </div>
     </div>
 
-    <!-- ESCENA DE REALIDAD AUMENTADA -->
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <!-- ESCENA DE REALIDAD AUMENTADA MEJORADA -->
+    <a-scene 
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false"
+        renderer="colorManagement: true; physicallyCorrectLights: true;">
+        
+        <a-camera position="0 0 0" look-controls="enabled: false" camera="active: true"></a-camera>
 
-        <!-- MAPEO DE TARGETS (Asegúrate que el orden en el .mind coincida) -->
-        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA"></a-entity>
-        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA"></a-entity>
-        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA"></a-entity>
-        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA"></a-entity>
+        <!-- MAPEO DE TARGETS CON ROTACIÓN AUTOMÁTICA -->
+        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA">
+            <a-plane 
+                position="0 0 0" 
+                rotation="0 0 0" 
+                width="1" 
+                height="1" 
+                material="transparent: true; opacity: 0.8; color: #ff0000; shader: flat;"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+            </a-plane>
+        </a-entity>
+
+        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA">
+            <a-plane 
+                position="0 0 0" 
+                rotation="0 0 0" 
+                width="1" 
+                height="1" 
+                material="transparent: true; opacity: 0.8; color: #ff8800; shader: flat;"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+            </a-plane>
+        </a-entity>
+
+        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA">
+            <a-plane 
+                position="0 0 0" 
+                rotation="0 0 0" 
+                width="1" 
+                height="1" 
+                material="transparent: true; opacity: 0.8; color: #cc0000; shader: flat;"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+            </a-plane>
+        </a-entity>
+
+        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA">
+            <a-plane 
+                position="0 0 0" 
+                rotation="0 0 0" 
+                width="1" 
+                height="1" 
+                material="transparent: true; opacity: 0.8; color: #8b4513; shader: flat;"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+            </a-plane>
+        </a-entity>
     </a-scene>
 
     <script>
-        // 1. BASE DE DATOS DE VALORES (Ajustar según tus tablas)
+        // 1. BASE DE DATOS DE VALORES
         const DB_PODER = {
             "DRACO SICA": { ataque: 6, defensa: 2, magia: 1, cura: 1 },
             "LEO SICA":   { ataque: 4, defensa: 4, magia: 1, cura: 1 },
@@ -135,6 +197,7 @@
         // VARIABLES DE CONTROL
         let cartaFijada = null;
         let cartaActual = null;
+        let timerPerdida = null;
 
         // ELEMENTOS DOM
         const lblCarta = document.getElementById('val-carta');
@@ -163,6 +226,7 @@
             // Función para iniciar MindAR
             const startMindAR = () => {
                 sceneEl.systems["mindar-image-system"].start();
+                console.log('✅ Sistema MindAR iniciado');
             };
             
             // Si la escena ya está cargada, iniciar inmediatamente
@@ -174,7 +238,7 @@
             }
         });
 
-        // DETECCIÓN DE CARTAS
+        // DETECCIÓN DE CARTAS CON ESTABILIZACIÓN
         const sceneEl = document.querySelector('a-scene');
         sceneEl.addEventListener('loaded', () => {
             const targets = document.querySelectorAll('[mindar-image-target]');
@@ -184,6 +248,12 @@
                 
                 el.addEventListener('targetFound', () => {
                     console.log('✅ CARTA DETECTADA:', nombre);
+                    
+                    // Cancelar timer de pérdida si existe
+                    if (timerPerdida) {
+                        clearTimeout(timerPerdida);
+                        timerPerdida = null;
+                    }
                     
                     // Actualizar carta actual
                     cartaActual = nombre;
@@ -198,9 +268,10 @@
                     
                     // Solo reiniciar si es la carta que estaba activa
                     if (cartaActual === nombre) {
-                        setTimeout(() => {
+                        // Dar un margen de 1 segundo antes de reiniciar
+                        timerPerdida = setTimeout(() => {
                             reiniciarDeteccion();
-                        }, 500);
+                        }, 1000);
                     }
                 });
             });
@@ -210,7 +281,7 @@
         document.querySelectorAll('.btn-poder').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (!cartaFijada) {
-                    alert("ESCANEANDO... Por favor, enfoca una carta primero.");
+                    alert("⚠️ ESCANEANDO... Por favor, enfoca una carta primero.");
                     return;
                 }
 
@@ -223,21 +294,25 @@
                         puntos = cartaFijada.ataque; 
                         archivoVideo = "ataque.mp4";
                         lblAccion.innerText = "IMPETUS";
+                        lblAccion.style.color = "#f00";
                         break;
                     case 'defensa': 
                         puntos = cartaFijada.defensa; 
                         archivoVideo = "defensa.mp4";
                         lblAccion.innerText = "TUTELA";
+                        lblAccion.style.color = "#888";
                         break;
                     case 'cura': 
                         puntos = cartaFijada.cura; 
                         archivoVideo = "cura.mp4";
                         lblAccion.innerText = "AUXILIUM";
+                        lblAccion.style.color = "#0f0";
                         break;
                     case 'magia': 
                         puntos = cartaFijada.magia; 
                         archivoVideo = "magia.mp4";
                         lblAccion.innerText = "MYSTERIUM";
+                        lblAccion.style.color = "#a0f";
                         break;
                 }
 
@@ -249,7 +324,16 @@
 
                 // ACTUALIZAR INTERFAZ
                 lblPuntos.innerText = puntos;
+                
+                console.log(`🎯 Acción ejecutada: ${lblAccion.innerText} = ${puntos} pts`);
             });
+        });
+
+        // Resetear visor cuando termina el video
+        videoPlayer.addEventListener('ended', () => {
+            videoPlayer.style.display = 'none';
+            placeholder.style.display = 'block';
+            console.log('📺 Video finalizado');
         });
     </script>
 </body>
