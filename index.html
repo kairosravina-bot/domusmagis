@@ -4,74 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOMUS MAGI: REVELATIONS</title>
-    <!-- LIBRERÍAS -->
+    
+    <!-- LIBRERÍAS DE ALTA ESTABILIDAD -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; font-family: sans-serif; background: #000; }
-        
-        /* HUD UI */
-        #ui-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; z-index: 10; pointer-events: none; }
-        
-        /* VISOR (35%) */
-        #visor-superior { 
-            width: 100%; height: 35vh; background: #000; border-bottom: 2px solid #fff; 
-            pointer-events: auto; display: flex; justify-content: center; align-items: center; 
-            overflow: hidden; position: relative; 
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
+
+        /* HUD SOBRE LA CÁMARA */
+        #ui-wrapper {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; z-index: 10; pointer-events: none;
+        }
+
+        /* VISOR DE VIDEO (35%) */
+        #visor-superior {
+            width: 100%; height: 35vh; background: #000; border-bottom: 2px solid #fff;
+            display: flex; justify-content: center; align-items: center; 
+            pointer-events: auto; position: relative;
         }
         #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
-        #placeholder-text { color: #555; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+        #placeholder-text { color: #0f0; font-weight: bold; letter-spacing: 2px; }
 
+        /* ESPACIO PARA RA */
         #zona-ar { flex-grow: 1; }
 
         /* PANEL INFERIOR */
-        #zona-inferior { width: 100%; background: rgba(0, 0, 0, 0.9); border-top: 2px solid #fff; pointer-events: auto; }
-        #panel-datos { display: flex; justify-content: space-around; padding: 10px 5px; background: #0a0a0a; border-bottom: 1px solid #333; }
+        #zona-inferior {
+            width: 100%; background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid #fff; pointer-events: auto;
+        }
+        #panel-datos {
+            display: flex; justify-content: space-around; padding: 10px 5px;
+            background: #0a0a0a; border-bottom: 1px solid #333;
+        }
         .dato-box { text-align: center; flex: 1; }
         .dato-titulo { font-size: 9px; color: #888; display: block; }
         .dato-valor { font-size: 15px; font-weight: bold; color: #0f0; font-family: monospace; }
 
         /* BOTONERA */
         #botonera { display: flex; justify-content: center; gap: 10px; padding: 15px; }
-        .btn-poder { 
-            width: 65px; height: 65px; border-radius: 10px; border: 2px solid #444; 
-            background: #111; color: #444; font-size: 22px; font-weight: bold;
+        .btn-poder {
+            width: 65px; height: 65px; border-radius: 10px; border: 2px solid #444;
+            background: #111; color: #fff; font-size: 20px; font-weight: bold;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0.3; transition: 0.3s; pointer-events: none;
+            opacity: 0.3; pointer-events: none; transition: 0.3s;
         }
-        .btn-poder.activo { opacity: 1; border-color: #fff; color: #fff; pointer-events: auto; cursor: pointer; }
+        .btn-poder.activo { opacity: 1; border-color: #fff; pointer-events: auto; cursor: pointer; }
         .btn-valor { font-size: 11px; color: #ff0; margin-top: 2px; }
 
         #btn-i.activo { background: linear-gradient(135deg, #900, #f00); }
         #btn-a.activo { background: linear-gradient(135deg, #060, #0f0); }
-        #btn-t.activo { background: linear-gradient(135deg, #333, #777); }
+        #btn-t.activo { background: linear-gradient(135deg, #444, #777); }
         #btn-m.activo { background: linear-gradient(135deg, #606, #a0f); }
 
-        /* PANTALLA CARGA */
-        #overlay-inicio { 
-            position: absolute; top:0; left:0; width:100%; height:100%; 
-            background: #000; z-index: 10000; display: flex; 
-            flex-direction: column; justify-content: center; align-items: center; 
+        /* PANTALLA DE CARGA */
+        #overlay-inicio {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: #000; z-index: 1000; display: flex; 
+            flex-direction: column; justify-content: center; align-items: center;
         }
-        #btn-comenzar { 
-            padding: 15px 40px; font-size: 20px; background: #28a745; color: white; 
+        #btn-comenzar {
+            padding: 15px 40px; font-size: 20px; background: #28a745; color: #fff;
             border: none; border-radius: 50px; cursor: pointer; font-weight: bold;
         }
     </style>
 </head>
 <body>
 
+    <!-- OVERLAY DE INICIO -->
     <div id="overlay-inicio">
-        <h1 id="txt-logo" style="color:white; letter-spacing:8px;">DOMUS MAGI</h1>
+        <h1 style="color:white; letter-spacing:5px;">DOMUS MAGI</h1>
         <button id="btn-comenzar">INICIAR SISTEMA</button>
         <div id="status-carga" style="color:#0f0; margin-top:15px; font-family:monospace;"></div>
     </div>
 
+    <!-- INTERFAZ HUD -->
     <div id="ui-wrapper">
         <div id="visor-superior">
             <span id="placeholder-text">SISTEMA EN ESPERA</span>
-            <video id="video-player" playsinline preload="auto"></video>
+            <video id="video-player" playsinline></video>
         </div>
 
         <div id="zona-ar"></div>
@@ -93,13 +106,14 @@
         </div>
     </div>
 
+    <!-- ESCENA AR (CÁMARA AL FINAL) -->
     <a-scene 
         mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
         vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- TARGETS DRACO SICA (0 A 3) -->
+        <!-- 4 TARGETS PARA DRACO SICA -->
         <a-entity mindar-image-target="targetIndex: 0" data-pos="NORTE (IMPETUS)"></a-entity>
         <a-entity mindar-image-target="targetIndex: 1" data-pos="ESTE (AUXILIUM)"></a-entity>
         <a-entity mindar-image-target="targetIndex: 2" data-pos="SUR (TUTELA)"></a-entity>
@@ -107,39 +121,33 @@
     </a-scene>
 
     <script>
-        // 1. CONFIGURACIÓN DE VALORES (ESTRICTOS)
-        const VALORES = { ataque: 6, cura: 1, defensa: 2, magia: 1 };
-        let sistemaListo = false;
-
-        // 2. LÓGICA DE INICIO (ANTI-CUELGUE)
+        // CONFIGURACIÓN DE PODERES
+        const PODERES = { ataque: 6, cura: 1, defensa: 2, magia: 1 };
+        
         const btnComenzar = document.getElementById('btn-comenzar');
-        const statusCarga = document.getElementById('status-carga');
         const overlay = document.getElementById('overlay-inicio');
+        const status = document.getElementById('status-carga');
         const sceneEl = document.querySelector('a-scene');
 
+        // FUNCIÓN DE INICIO FORZADO
         btnComenzar.addEventListener('click', () => {
             btnComenzar.style.display = 'none';
-            statusCarga.innerText = "ESTABLECIENDO ENLACE RA...";
-            
-            // Iniciar MindAR
+            status.innerText = "ACCEDIENDO A CÁMARA...";
+
+            // Iniciar MindAR manualmente
             const arSystem = sceneEl.systems["mindar-image-system"];
             arSystem.start();
 
-            // Timeout de seguridad: Si en 5 segundos no responde arReady, forzamos entrada
-            setTimeout(() => { if(!sistemaListo) finalizarCarga(); }, 5000);
+            // Quitamos el overlay tras 3 segundos pase lo que pase
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                console.log("Sistema liberado");
+                activarListeners();
+            }, 3000);
         });
 
-        sceneEl.addEventListener('arReady', () => { finalizarCarga(); });
-
-        function finalizarCarga() {
-            sistemaListo = true;
-            overlay.style.display = 'none';
-            console.log("Sistema Iniciado Correctamente");
-            iniciarDeteccion();
-        }
-
-        // 3. LÓGICA DE DETECCIÓN
-        function iniciarDeteccion() {
+        // DETECCIÓN DE TARGETS
+        function activarListeners() {
             const targets = document.querySelectorAll('[mindar-image-target]');
             targets.forEach(t => {
                 t.addEventListener("targetFound", () => {
@@ -152,37 +160,35 @@
                 });
 
                 t.addEventListener("targetLost", () => {
-                    // Opcional: limpiar UI al perder target
                     document.getElementById('ui-pos').innerText = "---";
                 });
             });
         }
 
-        // 4. LÓGICA DE BOTONES (VIDEOS Y VALORES)
+        // CONTROL DE BOTONES Y VIDEOS
         document.querySelectorAll('.btn-poder').forEach(btn => {
             btn.addEventListener('click', () => {
+                if(!btn.classList.contains('activo')) return;
+
                 const tipo = btn.getAttribute('data-tipo');
                 const visor = document.getElementById('video-player');
-                const txtStandby = document.getElementById('placeholder-text');
+                const standby = document.getElementById('placeholder-text');
                 const uiPuntos = document.getElementById('ui-puntos');
 
-                let v = 0;
-                let file = "";
+                let valor = 0;
+                let archivo = "";
 
-                if(tipo === 'ataque') { v = VALORES.ataque; file = "ataque.mp4"; }
-                if(tipo === 'cura')   { v = VALORES.cura; file = "cura.mp4"; }
-                if(tipo === 'defensa'){ v = VALORES.defensa; file = "defensa.mp4"; }
-                if(tipo === 'magia')  { v = VALORES.magia; file = "magia.mp4"; }
+                if(tipo === 'ataque') { valor = PODERES.ataque; archivo = "ataque.mp4"; }
+                if(tipo === 'cura')   { valor = PODERES.cura;   archivo = "cura.mp4"; }
+                if(tipo === 'defensa'){ valor = PODERES.defensa; archivo = "defensa.mp4"; }
+                if(tipo === 'magia')  { valor = PODERES.magia;   archivo = "magia.mp4"; }
 
-                // Actualizar UI
-                uiPuntos.innerText = v;
-                
-                // Reproducir Video
-                txtStandby.style.display = 'none';
+                uiPuntos.innerText = valor;
+                standby.style.display = 'none';
                 visor.style.display = 'block';
-                visor.src = file;
-                visor.play().catch(e => {
-                    console.error("Error al reproducir video:", e);
+                visor.src = archivo;
+                visor.play().catch(err => {
+                    console.log("Error video:", err);
                     resetVisor();
                 });
             });
@@ -190,9 +196,9 @@
 
         function resetVisor() {
             const visor = document.getElementById('video-player');
-            const txtStandby = document.getElementById('placeholder-text');
+            const standby = document.getElementById('placeholder-text');
             visor.style.display = 'none';
-            txtStandby.style.display = 'block';
+            standby.style.display = 'block';
         }
 
         document.getElementById('video-player').addEventListener('ended', resetVisor);
