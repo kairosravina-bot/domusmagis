@@ -245,7 +245,7 @@
             "AQUILA SICA": { ataque: 4, defensa: 2, magia: 3, cura: 1, color: "rgba(138, 43, 226, 0.6)" }
         };
 
-        // VARIABLES Y ELEMENTOS (igual que antes)
+        // VARIABLES Y ELEMENTOS
         let cartaFijada = null;
         let cartaActual = null;
         let ladoActual = null;
@@ -269,7 +269,7 @@
         const valA = document.getElementById('val-a');
         const valM = document.getElementById('val-m');
 
-        // FUNCIONES DE BOTONES Y RESETEO (sin cambios)
+        // FUNCIONES (sin cambios)
         function activarBotones(datos) {
             botonesActivos = true;
             valI.innerText = datos.ataque;
@@ -280,6 +280,7 @@
             btnT.classList.add('activo');
             btnA.classList.add('activo');
             btnM.classList.add('activo');
+            console.log('✨ Botonera ACTIVADA');
         }
 
         function desactivarBotones() {
@@ -292,6 +293,7 @@
             btnT.classList.remove('activo');
             btnA.classList.remove('activo');
             btnM.classList.remove('activo');
+            console.log('🔒 Botonera DESACTIVADA');
         }
 
         function reiniciarDeteccion() {
@@ -306,6 +308,7 @@
             lblAccion.style.color = "#0f0";
             lblPuntos.innerText = '0';
             desactivarBotones();
+            console.log('🔄 Sistema reiniciado');
         }
 
         function resetearVisor() {
@@ -315,9 +318,10 @@
             lblAccion.innerText = '---';
             lblAccion.style.color = '#0f0';
             lblPuntos.innerText = '0';
+            console.log('📺 Visor reseteado');
         }
 
-        // === NUEVA LÓGICA DE INICIO CON REINTENTO ===
+        // INICIO SIMPLIFICADO
         let sistemaIniciado = false;
         const btnComenzar = document.getElementById('btn-comenzar');
         const btnReintentarAR = document.getElementById('btn-reintentar-ar');
@@ -327,97 +331,88 @@
 
         async function iniciarMindAR() {
             try {
-                estadoCarga.innerText = '⏳ Iniciando cámara AR...';
+                estadoCarga.innerText = '⏳ Cargando sistema AR...';
                 btnReintentarAR.style.display = 'none';
 
-                await new Promise(resolve => {
-                    if (sceneEl.hasLoaded) resolve();
-                    else sceneEl.addEventListener('loaded', resolve, { once: true });
-                });
+                // Esperar carga de escena (mínimo delay)
+                if (!sceneEl.hasLoaded) {
+                    await new Promise(resolve => sceneEl.addEventListener('loaded', resolve, { once: true }));
+                }
 
                 arSystem = sceneEl.systems["mindar-image-system"];
 
-                // Si ya estaba corriendo, lo detenemos primero (clave para reiniciar el video feed)
+                // Si ya iniciado, stop primero
                 if (sistemaIniciado) {
                     arSystem.stop();
-                    await new Promise(r => setTimeout(r, 300));
                 }
 
                 arSystem.start();
-
                 sistemaIniciado = true;
-                estadoCarga.innerText = '✓ Sistema AR activo';
-                await new Promise(r => setTimeout(r, 800));
-                document.getElementById('overlay-inicio').style.display = 'none';
+
+                estadoCarga.innerText = '✓ AR iniciado';
+                console.log('✅ MindAR iniciado');
+
+                setTimeout(() => {
+                    document.getElementById('overlay-inicio').style.display = 'none';
+                }, 500);
 
             } catch (err) {
-                console.error('Error iniciando MindAR:', err);
-                estadoCarga.innerText = '❌ Fallo al activar cámara AR';
+                console.error('❌ Error iniciando AR:', err);
+                estadoCarga.innerText = '❌ Fallo en cámara AR: ' + err.message;
                 estadoCarga.style.color = '#f00';
                 btnReintentarAR.style.display = 'block';
             }
         }
 
-        btnComenzar.addEventListener('click', async () => {
+        btnComenzar.addEventListener('click', () => {
             if (sistemaIniciado) return;
-
-            try {
-                btnComenzar.disabled = true;
-                estadoCarga.innerText = '⏳ Solicitando permisos de cámara...';
-
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' }
-                });
-
-                estadoCarga.innerText = '✓ Permisos concedidos';
-                stream.getTracks().forEach(t => t.stop());
-
-                await new Promise(r => setTimeout(r, 500));
-                await iniciarMindAR();
-
-            } catch (err) {
-                estadoCarga.innerText = '❌ Error de permisos: ' + err.message;
-                estadoCarga.style.color = '#f00';
-                btnComenzar.disabled = false;
-            }
+            btnComenzar.disabled = true;
+            iniciarMindAR();
         });
 
-        // Reintento específico para la cámara AR
-        btnReintentarAR.addEventListener('click', async () => {
+        btnReintentarAR.addEventListener('click', () => {
             btnReintentarAR.disabled = true;
-            await iniciarMindAR();
-            btnReintentarAR.disabled = false;
+            iniciarMindAR().finally(() => btnReintentarAR.disabled = false);
         });
 
-        // DETECCIÓN DE TARGETS (sin cambios)
+        // DETECCIÓN
         const inicializarDeteccion = () => {
+            console.log('🔧 Inicializando detección...');
             const targets = document.querySelectorAll('[mindar-image-target]');
-            targets.forEach(el => {
+            targets.forEach((el) => {
                 const nombre = el.getAttribute('data-nombre');
                 const lado = el.getAttribute('data-lado');
 
                 el.addEventListener('targetFound', () => {
+                    console.log('✅ DETECTADO:', nombre);
                     if (timerPerdida) clearTimeout(timerPerdida);
                     cartaActual = nombre;
                     ladoActual = lado;
                     cartaFijada = DB_PODER[nombre];
-                    lblCarta.innerText = nombre; lblCarta.style.color = "#0f0";
-                    lblArma.innerText = lado; lblArma.style.color = "#0f0";
+                    lblCarta.innerText = nombre;
+                    lblCarta.style.color = "#0f0";
+                    lblArma.innerText = lado;
+                    lblArma.style.color = "#0f0";
                     activarBotones(cartaFijada);
                 });
 
                 el.addEventListener('targetLost', () => {
+                    console.log('⚠️ Perdido:', nombre);
                     if (cartaActual === nombre) {
                         timerPerdida = setTimeout(reiniciarDeteccion, 1000);
                     }
                 });
             });
+            console.log('✅ Detección lista');
         };
 
-        if (sceneEl.hasLoaded) inicializarDeteccion();
-        else sceneEl.addEventListener('loaded', inicializarDeteccion, { once: true });
+        if (sceneEl.hasLoaded) {
+            inicializarDeteccion();
+        } else {
+            sceneEl.addEventListener('loaded', inicializarDeteccion, { once: true });
+        }
 
-        // BOTONES DE ACCIÓN (sin cambios)
+        // BOTONES ACCIÓN
         document.querySelectorAll('.btn-poder').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (!botonesActivos || !cartaFijada) return;
@@ -425,8 +420,7 @@
                 const tipo = btn.getAttribute('data-tipo');
                 let puntos = 0;
                 let archivoVideo = "";
-
-                switch(tipo) {
+                switch (tipo) {
                     case 'ataque': puntos = cartaFijada.ataque; archivoVideo = "ataque.mp4"; lblAccion.innerText = "IMPETUS"; lblAccion.style.color = "#f00"; break;
                     case 'defensa': puntos = cartaFijada.defensa; archivoVideo = "defensa.mp4"; lblAccion.innerText = "TUTELA"; lblAccion.style.color = "#888"; break;
                     case 'cura': puntos = cartaFijada.cura; archivoVideo = "cura.mp4"; lblAccion.innerText = "AUXILIUM"; lblAccion.style.color = "#0f0"; break;
@@ -439,11 +433,15 @@
                 videoPlayer.play();
                 lblPuntos.innerText = puntos;
                 lblPuntos.style.color = "#ff0";
+                console.log(`🎯 Acción: ${lblAccion.innerText} = ${puntos}`);
             });
         });
 
         videoPlayer.addEventListener('ended', resetearVisor);
-        videoPlayer.addEventListener('error', () => { console.log('Error video'); resetearVisor(); });
+        videoPlayer.addEventListener('error', () => {
+            console.log('❌ Error video');
+            resetearVisor();
+        });
     </script>
 </body>
 </html>
