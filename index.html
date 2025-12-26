@@ -36,15 +36,17 @@
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 255, 0, 0.2);
+            background: rgba(0, 255, 0, 0.6);
             border: 2px solid #0f0;
             padding: 8px 20px;
             border-radius: 20px;
-            color: #0f0;
+            color: #fff;
             font-size: 14px;
             font-weight: bold;
             display: none;
             z-index: 20;
+            text-shadow: 0 0 5px rgba(0,0,0,0.8);
+            transition: all 0.3s ease;
         }
 
         /* 2. ZONA CENTRAL (ESPACIO PARA AR) */
@@ -184,13 +186,13 @@
                     <span>I</span>
                     <span class="btn-valor" id="val-i">0</span>
                 </button>
-                <button id="btn-t" class="btn-poder" data-tipo="defensa">
-                    <span>T</span>
-                    <span class="btn-valor" id="val-t">0</span>
-                </button>
                 <button id="btn-a" class="btn-poder" data-tipo="cura">
                     <span>A</span>
                     <span class="btn-valor" id="val-a">0</span>
+                </button>
+                <button id="btn-t" class="btn-poder" data-tipo="defensa">
+                    <span>T</span>
+                    <span class="btn-valor" id="val-t">0</span>
                 </button>
                 <button id="btn-m" class="btn-poder" data-tipo="magia">
                     <span>M</span>
@@ -216,7 +218,7 @@
                 rotation="0 0 0" 
                 width="1" 
                 height="1" 
-                material="transparent: true; opacity: 0.8; color: #ff0000; shader: flat;"
+                material="transparent: true; opacity: 0.6; color: #ff0000; shader: flat;"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
             </a-plane>
         </a-entity>
@@ -227,7 +229,7 @@
                 rotation="0 0 0" 
                 width="1" 
                 height="1" 
-                material="transparent: true; opacity: 0.8; color: #ff8800; shader: flat;"
+                material="transparent: true; opacity: 0.6; color: #00ff00; shader: flat;"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
             </a-plane>
         </a-entity>
@@ -238,7 +240,7 @@
                 rotation="0 0 0" 
                 width="1" 
                 height="1" 
-                material="transparent: true; opacity: 0.8; color: #cc0000; shader: flat;"
+                material="transparent: true; opacity: 0.6; color: #ffffff; shader: flat;"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
             </a-plane>
         </a-entity>
@@ -249,19 +251,31 @@
                 rotation="0 0 0" 
                 width="1" 
                 height="1" 
-                material="transparent: true; opacity: 0.8; color: #8b4513; shader: flat;"
+                material="transparent: true; opacity: 0.6; color: #8a2be2; shader: flat;"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
             </a-plane>
         </a-entity>
     </a-scene>
 
     <script>
-        // 1. BASE DE DATOS DE VALORES
+        // 1. BASE DE DATOS DE VALORES CON COLORES
         const DB_PODER = {
-            "DRACO SICA": { ataque: 6, defensa: 2, magia: 1, cura: 1 },
-            "LEO SICA":   { ataque: 4, defensa: 4, magia: 1, cura: 1 },
-            "APER SICA":  { ataque: 3, defensa: 5, magia: 1, cura: 1 },
-            "AQUILA SICA":{ ataque: 4, defensa: 2, magia: 3, cura: 1 }
+            "DRACO SICA": { 
+                ataque: 6, defensa: 2, magia: 1, cura: 1,
+                color: "rgba(255, 0, 0, 0.6)" // ROJO
+            },
+            "LEO SICA": { 
+                ataque: 4, defensa: 4, magia: 1, cura: 1,
+                color: "rgba(0, 255, 0, 0.6)" // VERDE
+            },
+            "APER SICA": { 
+                ataque: 3, defensa: 5, magia: 1, cura: 1,
+                color: "rgba(255, 255, 255, 0.6)" // BLANCO
+            },
+            "AQUILA SICA": { 
+                ataque: 4, defensa: 2, magia: 3, cura: 1,
+                color: "rgba(138, 43, 226, 0.6)" // VIOLETA
+            }
         };
 
         // VARIABLES DE CONTROL
@@ -293,11 +307,16 @@
         function activarBotones(datos) {
             botonesActivos = true;
             
-            // Actualizar valores en cada botón
+            // Actualizar valores en cada botón Y en el display principal
             valI.innerText = datos.ataque;
             valT.innerText = datos.defensa;
             valA.innerText = datos.cura;
             valM.innerText = datos.magia;
+            
+            // MOSTRAR FUERZA INICIAL (suma de todos los poderes o el más alto)
+            const fuerzaTotal = Math.max(datos.ataque, datos.defensa, datos.cura, datos.magia);
+            lblPuntos.innerText = fuerzaTotal;
+            lblPuntos.style.color = "#0f0";
             
             // Activar clase CSS con animación
             btnI.classList.add('activo');
@@ -399,9 +418,11 @@
                     lblCarta.innerText = nombre;
                     lblCarta.style.color = "#0f0";
                     
-                    // Mostrar lado escaneado
+                    // Mostrar lado escaneado CON COLOR DE LA CARTA
                     lblLado.innerText = `LADO: ${lado}`;
                     lblLado.style.display = 'block';
+                    lblLado.style.background = cartaFijada.color;
+                    lblLado.style.borderColor = cartaFijada.color.replace('0.6', '1');
                     
                     // ACTIVAR BOTONES CON LOS VALORES
                     activarBotones(cartaFijada);
