@@ -269,7 +269,7 @@
         const valA = document.getElementById('val-a');
         const valM = document.getElementById('val-m');
 
-        // FUNCIONES (sin cambios)
+        // FUNCIONES
         function activarBotones(datos) {
             botonesActivos = true;
             valI.innerText = datos.ataque;
@@ -321,11 +321,12 @@
             console.log('📺 Visor reseteado');
         }
 
-        // INICIO SIMPLIFICADO
+        // INICIO CON EVENTOS ARREADY / ARERROR
         let sistemaIniciado = false;
         const btnComenzar = document.getElementById('btn-comenzar');
         const btnReintentarAR = document.getElementById('btn-reintentar-ar');
         const estadoCarga = document.getElementById('estado-carga');
+        const overlayInicio = document.getElementById('overlay-inicio');
         const sceneEl = document.querySelector('a-scene');
         let arSystem = null;
 
@@ -334,14 +335,12 @@
                 estadoCarga.innerText = '⏳ Cargando sistema AR...';
                 btnReintentarAR.style.display = 'none';
 
-                // Esperar carga de escena (mínimo delay)
                 if (!sceneEl.hasLoaded) {
                     await new Promise(resolve => sceneEl.addEventListener('loaded', resolve, { once: true }));
                 }
 
                 arSystem = sceneEl.systems["mindar-image-system"];
 
-                // Si ya iniciado, stop primero
                 if (sistemaIniciado) {
                     arSystem.stop();
                 }
@@ -349,20 +348,32 @@
                 arSystem.start();
                 sistemaIniciado = true;
 
-                estadoCarga.innerText = '✓ AR iniciado';
                 console.log('✅ MindAR iniciado');
-
-                setTimeout(() => {
-                    document.getElementById('overlay-inicio').style.display = 'none';
-                }, 500);
 
             } catch (err) {
                 console.error('❌ Error iniciando AR:', err);
-                estadoCarga.innerText = '❌ Fallo en cámara AR: ' + err.message;
+                estadoCarga.innerText = '❌ Fallo inicial: ' + err.message;
                 estadoCarga.style.color = '#f00';
                 btnReintentarAR.style.display = 'block';
             }
         }
+
+        // Listeners para eventos de MindAR
+        sceneEl.addEventListener('arReady', () => {
+            console.log('✅ AR listo para escanear');
+            estadoCarga.innerText = '✓ AR activo - Apunta la cámara';
+            setTimeout(() => {
+                overlayInicio.style.display = 'none';
+            }, 500);
+        });
+
+        sceneEl.addEventListener('arError', (event) => {
+            console.error('❌ Error AR:', event.detail);
+            estadoCarga.innerText = '❌ Error AR: ' + (event.detail ? event.detail.error : 'Desconocido') + '. Reintenta.';
+            estadoCarga.style.color = '#f00';
+            btnReintentarAR.style.display = 'block';
+            sistemaIniciado = false;
+        });
 
         btnComenzar.addEventListener('click', () => {
             if (sistemaIniciado) return;
