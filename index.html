@@ -71,20 +71,10 @@
             transform: scale(0.9); 
         }
 
-        /* Animación de brillo pulsante */
         @keyframes brilloPulso {
-            0% { 
-                box-shadow: 0 0 10px rgba(255,255,255,0.3);
-                transform: scale(1);
-            }
-            50% { 
-                box-shadow: 0 0 30px rgba(255,255,255,0.8), 0 0 50px rgba(255,255,255,0.5);
-                transform: scale(1.05);
-            }
-            100% { 
-                box-shadow: 0 0 10px rgba(255,255,255,0.3);
-                transform: scale(1);
-            }
+            0% { box-shadow: 0 0 10px rgba(255,255,255,0.3); transform: scale(1); }
+            50% { box-shadow: 0 0 30px rgba(255,255,255,0.8), 0 0 50px rgba(255,255,255,0.5); transform: scale(1.05); }
+            100% { box-shadow: 0 0 10px rgba(255,255,255,0.3); transform: scale(1); }
         }
 
         .btn-valor {
@@ -122,32 +112,39 @@
             box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
             transition: all 0.3s;
         }
-        #btn-comenzar:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
-        }
-        #btn-comenzar:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+        #btn-comenzar:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6); }
+        #btn-comenzar:disabled { opacity: 0.6; cursor: not-allowed; }
         
-        /* Estado de carga */
         #estado-carga {
             color: #0f0;
             font-size: 14px;
             margin-top: 20px;
             min-height: 30px;
         }
+
+        /* Botón reintento AR */
+        #btn-reintentar-ar {
+            margin-top: 20px;
+            padding: 12px 28px;
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA DE INICIO PARA ACTIVAR AUDIO/CÁMARA -->
+    <!-- PANTALLA DE INICIO -->
     <div id="overlay-inicio">
         <h1 id="titulo-inicio">DOMUS MAGI</h1>
         <p id="subtitulo-inicio">Sistema de Combate Revelations</p>
         <button id="btn-comenzar">INICIAR SISTEMA</button>
         <div id="estado-carga"></div>
+        <button id="btn-reintentar-ar">REINTENTAR AR</button>
     </div>
 
     <div id="ui-wrapper">
@@ -199,7 +196,7 @@
         </div>
     </div>
 
-    <!-- ESCENA DE REALIDAD AUMENTADA MEJORADA -->
+    <!-- ESCENA AR -->
     <a-scene 
         mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001; missTolerance: 5; warmupTolerance: 5;" 
         vr-mode-ui="enabled: false" 
@@ -209,46 +206,30 @@
         
         <a-camera position="0 0 0" look-controls="enabled: false" camera="active: true"></a-camera>
 
-        <!-- MAPEO DE TARGETS CON ROTACIÓN AUTOMÁTICA -->
+        <!-- TARGETS -->
         <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA" data-lado="SICA-1">
-            <a-plane 
-                position="0 0 0" 
-                rotation="0 0 0" 
-                width="1" 
-                height="1" 
+            <a-plane position="0 0 0" rotation="0 0 0" width="1" height="1"
                 material="transparent: true; opacity: 0.6; color: #ff0000; shader: flat;"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
             </a-plane>
         </a-entity>
 
         <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA" data-lado="SICA-2">
-            <a-plane 
-                position="0 0 0" 
-                rotation="0 0 0" 
-                width="1" 
-                height="1" 
+            <a-plane position="0 0 0" rotation="0 0 0" width="1" height="1"
                 material="transparent: true; opacity: 0.6; color: #00ff00; shader: flat;"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
             </a-plane>
         </a-entity>
 
         <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA" data-lado="SICA-4">
-            <a-plane 
-                position="0 0 0" 
-                rotation="0 0 0" 
-                width="1" 
-                height="1" 
+            <a-plane position="0 0 0" rotation="0 0 0" width="1" height="1"
                 material="transparent: true; opacity: 0.6; color: #ffffff; shader: flat;"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
             </a-plane>
         </a-entity>
 
         <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA" data-lado="SICA-5">
-            <a-plane 
-                position="0 0 0" 
-                rotation="0 0 0" 
-                width="1" 
-                height="1" 
+            <a-plane position="0 0 0" rotation="0 0 0" width="1" height="1"
                 material="transparent: true; opacity: 0.6; color: #8a2be2; shader: flat;"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
             </a-plane>
@@ -256,34 +237,21 @@
     </a-scene>
 
     <script>
-        // 1. BASE DE DATOS DE VALORES CON COLORES
+        // BASE DE DATOS
         const DB_PODER = {
-            "DRACO SICA": { 
-                ataque: 6, defensa: 2, magia: 1, cura: 1,
-                color: "rgba(255, 0, 0, 0.6)" // ROJO
-            },
-            "LEO SICA": { 
-                ataque: 4, defensa: 4, magia: 1, cura: 1,
-                color: "rgba(0, 255, 0, 0.6)" // VERDE
-            },
-            "APER SICA": { 
-                ataque: 3, defensa: 5, magia: 1, cura: 1,
-                color: "rgba(255, 255, 255, 0.6)" // BLANCO
-            },
-            "AQUILA SICA": { 
-                ataque: 4, defensa: 2, magia: 3, cura: 1,
-                color: "rgba(138, 43, 226, 0.6)" // VIOLETA
-            }
+            "DRACO SICA": { ataque: 6, defensa: 2, magia: 1, cura: 1, color: "rgba(255, 0, 0, 0.6)" },
+            "LEO SICA": { ataque: 4, defensa: 4, magia: 1, cura: 1, color: "rgba(0, 255, 0, 0.6)" },
+            "APER SICA": { ataque: 3, defensa: 5, magia: 1, cura: 1, color: "rgba(255, 255, 255, 0.6)" },
+            "AQUILA SICA": { ataque: 4, defensa: 2, magia: 3, cura: 1, color: "rgba(138, 43, 226, 0.6)" }
         };
 
-        // VARIABLES DE CONTROL
+        // VARIABLES Y ELEMENTOS (igual que antes)
         let cartaFijada = null;
         let cartaActual = null;
         let ladoActual = null;
         let timerPerdida = null;
         let botonesActivos = false;
 
-        // ELEMENTOS DOM
         const lblCarta = document.getElementById('val-carta');
         const lblArma = document.getElementById('val-arma');
         const lblAccion = document.getElementById('val-accion');
@@ -301,45 +269,31 @@
         const valA = document.getElementById('val-a');
         const valM = document.getElementById('val-m');
 
-        // FUNCIÓN PARA ACTIVAR BOTONES
+        // FUNCIONES DE BOTONES Y RESETEO (sin cambios)
         function activarBotones(datos) {
             botonesActivos = true;
-            
-            // Actualizar valores en cada botón
             valI.innerText = datos.ataque;
             valT.innerText = datos.defensa;
             valA.innerText = datos.cura;
             valM.innerText = datos.magia;
-            
-            // Activar clase CSS con animación
             btnI.classList.add('activo');
             btnT.classList.add('activo');
             btnA.classList.add('activo');
             btnM.classList.add('activo');
-            
-            console.log('✨ Botonera ACTIVADA con valores:', datos);
         }
 
-        // FUNCIÓN PARA DESACTIVAR BOTONES
         function desactivarBotones() {
             botonesActivos = false;
-            
-            // Resetear valores
             valI.innerText = '0';
             valT.innerText = '0';
             valA.innerText = '0';
             valM.innerText = '0';
-            
-            // Quitar clase CSS
             btnI.classList.remove('activo');
             btnT.classList.remove('activo');
             btnA.classList.remove('activo');
             btnM.classList.remove('activo');
-            
-            console.log('🔒 Botonera DESACTIVADA');
         }
 
-        // FUNCIÓN PARA REINICIAR DETECCIÓN
         function reiniciarDeteccion() {
             cartaFijada = null;
             cartaActual = null;
@@ -352,10 +306,8 @@
             lblAccion.style.color = "#0f0";
             lblPuntos.innerText = '0';
             desactivarBotones();
-            console.log('🔄 Sistema reiniciado - esperando nuevo escudo');
         }
 
-        // FUNCIÓN PARA RESETEAR VISOR
         function resetearVisor() {
             videoPlayer.style.display = 'none';
             videoPlayer.src = '';
@@ -363,227 +315,135 @@
             lblAccion.innerText = '---';
             lblAccion.style.color = '#0f0';
             lblPuntos.innerText = '0';
-            console.log('📺 Visor reseteado');
         }
 
-        // INICIAR SISTEMA CON MANEJO DE ERRORES ROBUSTO
+        // === NUEVA LÓGICA DE INICIO CON REINTENTO ===
         let sistemaIniciado = false;
         const btnComenzar = document.getElementById('btn-comenzar');
+        const btnReintentarAR = document.getElementById('btn-reintentar-ar');
         const estadoCarga = document.getElementById('estado-carga');
-        
+        const sceneEl = document.querySelector('a-scene');
+        let arSystem = null;
+
+        async function iniciarMindAR() {
+            try {
+                estadoCarga.innerText = '⏳ Iniciando cámara AR...';
+                btnReintentarAR.style.display = 'none';
+
+                await new Promise(resolve => {
+                    if (sceneEl.hasLoaded) resolve();
+                    else sceneEl.addEventListener('loaded', resolve, { once: true });
+                });
+
+                arSystem = sceneEl.systems["mindar-image-system"];
+
+                // Si ya estaba corriendo, lo detenemos primero (clave para reiniciar el video feed)
+                if (sistemaIniciado) {
+                    arSystem.stop();
+                    await new Promise(r => setTimeout(r, 300));
+                }
+
+                arSystem.start();
+
+                sistemaIniciado = true;
+                estadoCarga.innerText = '✓ Sistema AR activo';
+                await new Promise(r => setTimeout(r, 800));
+                document.getElementById('overlay-inicio').style.display = 'none';
+
+            } catch (err) {
+                console.error('Error iniciando MindAR:', err);
+                estadoCarga.innerText = '❌ Fallo al activar cámara AR';
+                estadoCarga.style.color = '#f00';
+                btnReintentarAR.style.display = 'block';
+            }
+        }
+
         btnComenzar.addEventListener('click', async () => {
             if (sistemaIniciado) return;
-            
+
             try {
                 btnComenzar.disabled = true;
                 estadoCarga.innerText = '⏳ Solicitando permisos de cámara...';
-                
-                // Solicitar permisos de cámara explícitamente
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: 'environment',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    } 
+
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
                 });
-                
-                estadoCarga.innerText = '✓ Cámara activada';
-                console.log('✅ Permisos de cámara concedidos');
-                
-                // Detener el stream temporal (MindAR creará el suyo)
-                stream.getTracks().forEach(track => track.stop());
-                
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                estadoCarga.innerText = '⏳ Iniciando sistema AR...';
-                
-                const sceneEl = document.querySelector('a-scene');
-                
-                // Esperar a que la escena esté completamente cargada
-                await new Promise((resolve) => {
-                    if (sceneEl.hasLoaded) {
-                        resolve();
-                    } else {
-                        sceneEl.addEventListener('loaded', () => resolve(), { once: true });
-                    }
-                });
-                
-                estadoCarga.innerText = '⏳ Cargando detectores...';
-                console.log('✅ Escena A-Frame cargada');
-                
-                // Iniciar MindAR con timeout de seguridad
-                const startPromise = new Promise((resolve, reject) => {
-                    const timeout = setTimeout(() => {
-                        reject(new Error('Timeout al iniciar MindAR'));
-                    }, 10000);
-                    
-                    try {
-                        const arSystem = sceneEl.systems["mindar-image-system"];
-                        arSystem.start();
-                        clearTimeout(timeout);
-                        resolve();
-                    } catch (err) {
-                        clearTimeout(timeout);
-                        reject(err);
-                    }
-                });
-                
-                await startPromise;
-                
-                sistemaIniciado = true;
-                estadoCarga.innerText = '✓ Sistema AR iniciado correctamente';
-                console.log('✅ Sistema MindAR iniciado correctamente');
-                
-                // Esperar 1 segundo y ocultar overlay
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                document.getElementById('overlay-inicio').style.display = 'none';
-                
-            } catch (error) {
-                console.error('❌ Error al iniciar sistema:', error);
-                estadoCarga.innerText = '❌ Error: ' + error.message;
+
+                estadoCarga.innerText = '✓ Permisos concedidos';
+                stream.getTracks().forEach(t => t.stop());
+
+                await new Promise(r => setTimeout(r, 500));
+                await iniciarMindAR();
+
+            } catch (err) {
+                estadoCarga.innerText = '❌ Error de permisos: ' + err.message;
                 estadoCarga.style.color = '#f00';
-                
-                // Reintentar después de 2 segundos
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                estadoCarga.innerText = '🔄 Toca el botón nuevamente para reintentar';
-                estadoCarga.style.color = '#ff0';
                 btnComenzar.disabled = false;
             }
         });
 
-        // DETECCIÓN DE CARTAS CON MANEJO ROBUSTO
-        const sceneEl = document.querySelector('a-scene');
-        
-        // Esperar a que la escena esté lista ANTES de agregar listeners
+        // Reintento específico para la cámara AR
+        btnReintentarAR.addEventListener('click', async () => {
+            btnReintentarAR.disabled = true;
+            await iniciarMindAR();
+            btnReintentarAR.disabled = false;
+        });
+
+        // DETECCIÓN DE TARGETS (sin cambios)
         const inicializarDeteccion = () => {
-            console.log('🔧 Inicializando sistema de detección...');
-            
             const targets = document.querySelectorAll('[mindar-image-target]');
-            console.log(`📍 Encontrados ${targets.length} targets`);
-            
-            if (targets.length === 0) {
-                console.error('❌ No se encontraron targets');
-                return;
-            }
-            
-            targets.forEach((el, index) => {
+            targets.forEach(el => {
                 const nombre = el.getAttribute('data-nombre');
                 const lado = el.getAttribute('data-lado');
-                
-                console.log(`📌 Configurando target ${index}: ${nombre} (${lado})`);
-                
+
                 el.addEventListener('targetFound', () => {
-                    console.log('✅ ESCUDO DETECTADO:', nombre, '| LADO:', lado);
-                    
-                    // Cancelar timer de pérdida si existe
-                    if (timerPerdida) {
-                        clearTimeout(timerPerdida);
-                        timerPerdida = null;
-                    }
-                    
-                    // Actualizar carta actual
+                    if (timerPerdida) clearTimeout(timerPerdida);
                     cartaActual = nombre;
                     ladoActual = lado;
                     cartaFijada = DB_PODER[nombre];
-                    
-                    // ACTUALIZAR PANEL DE DATOS
-                    lblCarta.innerText = nombre;
-                    lblCarta.style.color = "#0f0";
-                    
-                    lblArma.innerText = lado;
-                    lblArma.style.color = "#0f0";
-                    
-                    // ACTIVAR BOTONES CON LOS VALORES
+                    lblCarta.innerText = nombre; lblCarta.style.color = "#0f0";
+                    lblArma.innerText = lado; lblArma.style.color = "#0f0";
                     activarBotones(cartaFijada);
                 });
-                
+
                 el.addEventListener('targetLost', () => {
-                    console.log('⚠️ Escudo perdido:', nombre);
-                    
-                    // Solo reiniciar si es la carta que estaba activa
                     if (cartaActual === nombre) {
-                        // Dar un margen de 1 segundo antes de reiniciar
-                        timerPerdida = setTimeout(() => {
-                            reiniciarDeteccion();
-                        }, 1000);
+                        timerPerdida = setTimeout(reiniciarDeteccion, 1000);
                     }
                 });
             });
-            
-            console.log('✅ Sistema de detección inicializado correctamente');
         };
-        
-        // Asegurar que se ejecuta cuando la escena está lista
-        if (sceneEl.hasLoaded) {
-            inicializarDeteccion();
-        } else {
-            sceneEl.addEventListener('loaded', inicializarDeteccion, { once: true });
-        }
 
-        // LÓGICA DE LOS 4 BOTONES (I, T, A, M)
+        if (sceneEl.hasLoaded) inicializarDeteccion();
+        else sceneEl.addEventListener('loaded', inicializarDeteccion, { once: true });
+
+        // BOTONES DE ACCIÓN (sin cambios)
         document.querySelectorAll('.btn-poder').forEach(btn => {
             btn.addEventListener('click', () => {
-                // Verificar si los botones están activos
-                if (!botonesActivos || !cartaFijada) {
-                    console.log('⚠️ Botones inactivos - esperando detección de casa');
-                    return;
-                }
+                if (!botonesActivos || !cartaFijada) return;
 
                 const tipo = btn.getAttribute('data-tipo');
                 let puntos = 0;
                 let archivoVideo = "";
 
                 switch(tipo) {
-                    case 'ataque': 
-                        puntos = cartaFijada.ataque; 
-                        archivoVideo = "ataque.mp4";
-                        lblAccion.innerText = "IMPETUS";
-                        lblAccion.style.color = "#f00";
-                        break;
-                    case 'defensa': 
-                        puntos = cartaFijada.defensa; 
-                        archivoVideo = "defensa.mp4";
-                        lblAccion.innerText = "TUTELA";
-                        lblAccion.style.color = "#888";
-                        break;
-                    case 'cura': 
-                        puntos = cartaFijada.cura; 
-                        archivoVideo = "cura.mp4";
-                        lblAccion.innerText = "AUXILIUM";
-                        lblAccion.style.color = "#0f0";
-                        break;
-                    case 'magia': 
-                        puntos = cartaFijada.magia; 
-                        archivoVideo = "magia.mp4";
-                        lblAccion.innerText = "MYSTERIUM";
-                        lblAccion.style.color = "#a0f";
-                        break;
+                    case 'ataque': puntos = cartaFijada.ataque; archivoVideo = "ataque.mp4"; lblAccion.innerText = "IMPETUS"; lblAccion.style.color = "#f00"; break;
+                    case 'defensa': puntos = cartaFijada.defensa; archivoVideo = "defensa.mp4"; lblAccion.innerText = "TUTELA"; lblAccion.style.color = "#888"; break;
+                    case 'cura': puntos = cartaFijada.cura; archivoVideo = "cura.mp4"; lblAccion.innerText = "AUXILIUM"; lblAccion.style.color = "#0f0"; break;
+                    case 'magia': puntos = cartaFijada.magia; archivoVideo = "magia.mp4"; lblAccion.innerText = "MYSTERIUM"; lblAccion.style.color = "#a0f"; break;
                 }
 
-                // EJECUTAR VIDEO
                 placeholder.style.display = 'none';
                 videoPlayer.style.display = 'block';
                 videoPlayer.src = archivoVideo;
                 videoPlayer.play();
-
-                // ACTUALIZAR VALOR (FUERZA)
                 lblPuntos.innerText = puntos;
                 lblPuntos.style.color = "#ff0";
-                
-                console.log(`🎯 Acción ejecutada: ${lblAccion.innerText} = ${puntos} VALOR | ARMA: ${ladoActual}`);
             });
         });
 
-        // RESETEAR VISOR CUANDO TERMINA EL VIDEO
-        videoPlayer.addEventListener('ended', () => {
-            resetearVisor();
-        });
-
-        // RESETEAR VISOR SI HAY ERROR EN EL VIDEO
-        videoPlayer.addEventListener('error', () => {
-            console.log('❌ Error cargando video');
-            resetearVisor();
-        });
+        videoPlayer.addEventListener('ended', resetearVisor);
+        videoPlayer.addEventListener('error', () => { console.log('Error video'); resetearVisor(); });
     </script>
 </body>
 </html>
