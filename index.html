@@ -126,6 +126,18 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
         }
+        #btn-comenzar:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* Estado de carga */
+        #estado-carga {
+            color: #0f0;
+            font-size: 14px;
+            margin-top: 20px;
+            min-height: 30px;
+        }
     </style>
 </head>
 <body>
@@ -135,6 +147,7 @@
         <h1 id="titulo-inicio">DOMUS MAGI</h1>
         <p id="subtitulo-inicio">Sistema de Combate Revelations</p>
         <button id="btn-comenzar">INICIAR SISTEMA</button>
+        <div id="estado-carga"></div>
     </div>
 
     <div id="ui-wrapper">
@@ -188,10 +201,11 @@
 
     <!-- ESCENA DE REALIDAD AUMENTADA MEJORADA -->
     <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001; missTolerance: 5; warmupTolerance: 5;" 
         vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false"
-        renderer="colorManagement: true; physicallyCorrectLights: true;">
+        renderer="colorManagement: true; physicallyCorrectLights: true; logarithmicDepthBuffer: true;"
+        loading-screen="enabled: false">
         
         <a-camera position="0 0 0" look-controls="enabled: false" camera="active: true"></a-camera>
 
@@ -352,35 +366,111 @@
             console.log('📺 Visor reseteado');
         }
 
-        // INICIAR SISTEMA
-        document.getElementById('btn-comenzar').addEventListener('click', () => {
-            document.getElementById('overlay-inicio').style.display = 'none';
+        // INICIAR SISTEMA CON MANEJO DE ERRORES ROBUSTO
+        let sistemaIniciado = false;
+        const btnComenzar = document.getElementById('btn-comenzar');
+        const estadoCarga = document.getElementById('estado-carga');
+        
+        btnComenzar.addEventListener('click', async () => {
+            if (sistemaIniciado) return;
             
-            const sceneEl = document.querySelector('a-scene');
-            
-            // Función para iniciar MindAR
-            const startMindAR = () => {
-                sceneEl.systems["mindar-image-system"].start();
-                console.log('✅ Sistema MindAR iniciado');
-            };
-            
-            // Si la escena ya está cargada, iniciar inmediatamente
-            if (sceneEl.hasLoaded) {
-                startMindAR();
-            } else {
-                // Si no, esperar a que cargue
-                sceneEl.addEventListener('loaded', startMindAR);
+            try {
+                btnComenzar.disabled = true;
+                estadoCarga.innerText = '⏳ Solicitando permisos de cámara...';
+                
+                // Solicitar permisos de cámara explícitamente
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                estadoCarga.innerText = '✓ Cámara activada';
+                console.log('✅ Permisos de cámara concedidos');
+                
+                // Detener el stream temporal (MindAR creará el suyo)
+                stream.getTracks().forEach(track => track.stop());
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                estadoCarga.innerText = '⏳ Iniciando sistema AR...';
+                
+                const sceneEl = document.querySelector('a-scene');
+                
+                // Esperar a que la escena esté completamente cargada
+                await new Promise((resolve) => {
+                    if (sceneEl.hasLoaded) {
+                        resolve();
+                    } else {
+                        sceneEl.addEventListener('loaded', () => resolve(), { once: true });
+                    }
+                });
+                
+                estadoCarga.innerText = '⏳ Cargando detectores...';
+                console.log('✅ Escena A-Frame cargada');
+                
+                // Iniciar MindAR con timeout de seguridad
+                const startPromise = new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => {
+                        reject(new Error('Timeout al iniciar MindAR'));
+                    }, 10000);
+                    
+                    try {
+                        const arSystem = sceneEl.systems["mindar-image-system"];
+                        arSystem.start();
+                        clearTimeout(timeout);
+                        resolve();
+                    } catch (err) {
+                        clearTimeout(timeout);
+                        reject(err);
+                    }
+                });
+                
+                await startPromise;
+                
+                sistemaIniciado = true;
+                estadoCarga.innerText = '✓ Sistema AR iniciado correctamente';
+                console.log('✅ Sistema MindAR iniciado correctamente');
+                
+                // Esperar 1 segundo y ocultar overlay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                document.getElementById('overlay-inicio').style.display = 'none';
+                
+            } catch (error) {
+                console.error('❌ Error al iniciar sistema:', error);
+                estadoCarga.innerText = '❌ Error: ' + error.message;
+                estadoCarga.style.color = '#f00';
+                
+                // Reintentar después de 2 segundos
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                estadoCarga.innerText = '🔄 Toca el botón nuevamente para reintentar';
+                estadoCarga.style.color = '#ff0';
+                btnComenzar.disabled = false;
             }
         });
 
-        // DETECCIÓN DE CARTAS CON ESTABILIZACIÓN
+        // DETECCIÓN DE CARTAS CON MANEJO ROBUSTO
         const sceneEl = document.querySelector('a-scene');
-        sceneEl.addEventListener('loaded', () => {
-            const targets = document.querySelectorAll('[mindar-image-target]');
+        
+        // Esperar a que la escena esté lista ANTES de agregar listeners
+        const inicializarDeteccion = () => {
+            console.log('🔧 Inicializando sistema de detección...');
             
-            targets.forEach(el => {
+            const targets = document.querySelectorAll('[mindar-image-target]');
+            console.log(`📍 Encontrados ${targets.length} targets`);
+            
+            if (targets.length === 0) {
+                console.error('❌ No se encontraron targets');
+                return;
+            }
+            
+            targets.forEach((el, index) => {
                 const nombre = el.getAttribute('data-nombre');
                 const lado = el.getAttribute('data-lado');
+                
+                console.log(`📌 Configurando target ${index}: ${nombre} (${lado})`);
                 
                 el.addEventListener('targetFound', () => {
                     console.log('✅ ESCUDO DETECTADO:', nombre, '| LADO:', lado);
@@ -419,7 +509,16 @@
                     }
                 });
             });
-        });
+            
+            console.log('✅ Sistema de detección inicializado correctamente');
+        };
+        
+        // Asegurar que se ejecuta cuando la escena está lista
+        if (sceneEl.hasLoaded) {
+            inicializarDeteccion();
+        } else {
+            sceneEl.addEventListener('loaded', inicializarDeteccion, { once: true });
+        }
 
         // LÓGICA DE LOS 4 BOTONES (I, T, A, M)
         document.querySelectorAll('.btn-poder').forEach(btn => {
