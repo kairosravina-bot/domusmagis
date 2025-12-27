@@ -4,331 +4,342 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOMUS MAGI: REVELATIONS</title>
-    <!-- LIBRERÍAS ESTABLES -->
+    
+    <!-- LIBRERÍAS -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
-
+    
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; }
-
-        /* --- INTERFAZ --- */
-        #ui-wrapper {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; z-index: 10; pointer-events: none;
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: black; }
+        
+        /* 1. PANTALLA DE INICIO */
+        #start-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: gold;
+        }
+        #btn-start {
+            padding: 15px 40px; font-size: 20px; background: #440066;
+            color: white; border: 2px solid gold; cursor: pointer; margin-top: 20px;
+            text-transform: uppercase; font-weight: bold;
         }
 
-        /* 1. VISOR SUPERIOR (35%) */
-        #visor-superior {
-            width: 100%; height: 35%; background: #000;
-            border-bottom: 3px solid #fff; pointer-events: auto;
-            display: flex; justify-content: center; align-items: center; overflow: hidden;
-            position: relative;
-        }
-        #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
-        #placeholder-text { 
-            color: #444; font-weight: bold; text-transform: uppercase; 
-            letter-spacing: 2px; text-align: center; padding: 10px;
+        /* 2. HUD SUPERIOR */
+        #top-hud {
+            position: absolute; top: 0; width: 100%; height: 40%;
+            background: rgba(0, 0, 0, 0.6); z-index: 10;
+            display: none; flex-direction: column;
         }
 
-        /* 2. ZONA CENTRAL (ESPACIO PARA AR) */
-        #zona-ar { flex-grow: 1; }
-
-        /* 3. PANEL INFERIOR (DATOS + BOTONES) */
-        #zona-inferior {
-            width: 100%; height: auto; background: rgba(0, 0, 0, 0.9);
-            border-top: 2px solid #fff; pointer-events: auto; padding-bottom: env(safe-area-inset-bottom);
+        /* Barras de Vida */
+        #hp-panel {
+            width: 100%; height: 25px; display: flex; justify-content: space-between;
+            padding: 2px 5px; box-sizing: border-box; background: #111;
         }
+        .hp-bar-container { width: 48%; height: 100%; border: 1px solid #777; position: relative; background: #222; }
+        .hp-fill { height: 100%; transition: width 0.3s; }
+        #player-hp { background: linear-gradient(90deg, #00ff00, #005500); width: 100%; }
+        #enemy-hp { background: linear-gradient(90deg, #ff0000, #550000); width: 100%; }
+        .hp-text { position: absolute; top: 0; left: 5px; color: white; font-size: 11px; line-height: 20px; font-weight: bold; text-shadow: 1px 1px 0 #000; z-index: 2; }
 
-        #panel-datos {
-            display: flex; justify-content: space-around; padding: 12px 5px;
-            border-bottom: 1px solid #333; background: #0a0a0a;
-        }
-        .dato-box { text-align: center; flex: 1; }
-        .dato-titulo { font-size: 9px; color: #888; display: block; margin-bottom: 2px; }
-        .dato-valor { font-size: 16px; font-weight: bold; color: #0f0; font-family: monospace; }
-
-        #botonera {
-            display: flex; justify-content: center; gap: 12px; padding: 15px;
-        }
-        .btn-poder {
-            width: 65px; height: 65px; border-radius: 12px; border: 2px solid #555;
-            font-size: 24px; font-weight: bold; color: #555; cursor: not-allowed;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: all 0.3s; position: relative; overflow: hidden;
-            opacity: 0.4;
-            background-size: 200% 200%;
+        /* Visor de Video (Sin fondo verde, video estándar) */
+        #video-visor {
+            flex-grow: 1; position: relative; 
+            display: flex; justify-content: center; align-items: center;
+            background: #000; border-bottom: 2px solid gold;
         }
         
-        .btn-poder.activo {
-            cursor: pointer;
-            opacity: 1;
-            border-color: #fff;
-            color: white;
-            animation: brilloPulso 1.5s ease-in-out infinite;
-        }
-        
-        .btn-poder.activo:active { 
-            transform: scale(0.9); 
-        }
-
-        @keyframes brilloPulso {
-            0% { box-shadow: 0 0 10px rgba(255,255,255,0.3); transform: scale(1); }
-            50% { box-shadow: 0 0 30px rgba(255,255,255,0.8), 0 0 50px rgba(255,255,255,0.5); transform: scale(1.05); }
-            100% { box-shadow: 0 0 10px rgba(255,255,255,0.3); transform: scale(1); }
-        }
-
-        .btn-valor {
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 2px;
-            color: #ff0;
-        }
-
-        #btn-i { background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%); }
-        #btn-t { background: linear-gradient(135deg, #555555 0%, #777777 100%); }
-        #btn-m { background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%); }
-        #btn-a { background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); }
-
-        /* PANTALLA DE INICIO */
-        #overlay-inicio {
-            position: absolute; top:0; left:0; width:100%; height:100%;
-            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
-            z-index: 10000; display: flex; 
-            flex-direction: column; justify-content: center; align-items: center;
-        }
-        #titulo-inicio {
-            color: #fff; font-size: 32px; font-weight: bold;
-            text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
-            margin-bottom: 10px; letter-spacing: 4px;
-        }
-        #subtitulo-inicio {
-            color: #888; font-size: 14px; margin-bottom: 40px;
-            text-transform: uppercase; letter-spacing: 2px;
-        }
-        #btn-comenzar {
-            padding: 20px 40px; font-size: 20px; 
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white; border: none; border-radius: 50px; cursor: pointer;
-            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
-            transition: all 0.3s;
-        }
-        #btn-comenzar:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6); }
-        #btn-comenzar:disabled { opacity: 0.6; cursor: not-allowed; }
-        
-        #estado-carga {
-            color: #0f0;
-            font-size: 14px;
-            margin-top: 20px;
-            min-height: 30px;
-        }
-
-        #btn-reintentar-ar {
-            margin-top: 20px;
-            padding: 12px 28px;
-            background: #ff9800;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-size: 16px;
-            cursor: pointer;
+        /* Etiqueta de video real */
+        #main-video {
+            width: 100%; height: 100%; 
+            object-fit: contain; /* Mantiene la proporción sin recortar */
             display: none;
         }
+        
+        #video-placeholder-text {
+            color: #666; font-size: 14px; letter-spacing: 2px;
+            position: absolute;
+        }
+
+        /* 3. ZONA INFERIOR (DATOS Y BOTONES) */
+        #bottom-panel {
+            position: absolute; bottom: 0; width: 100%; height: 20%;
+            background: rgba(10, 10, 10, 0.95); z-index: 10;
+            display: none; flex-direction: column;
+            border-top: 2px solid #444;
+        }
+        
+        #data-display {
+            height: 35%; color: white; 
+            display: flex; flex-direction: column; 
+            align-items: center; justify-content: center;
+            text-align: center;
+            font-family: monospace;
+            padding-top: 5px;
+        }
+        
+        #card-name { font-size: 14px; color: gold; text-transform: uppercase; }
+        #card-stats { font-size: 16px; font-weight: bold; margin-top: 2px; }
+        .stat-highlight { color: cyan; font-size: 18px; }
+
+        #tactical-buttons {
+            height: 65%; display: flex; justify-content: space-evenly; align-items: center;
+            padding-bottom: 10px;
+        }
+
+        .tac-btn {
+            width: 55px; height: 55px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.5); font-weight: bold; font-size: 20px;
+            cursor: pointer; color: white; transition: transform 0.1s;
+            text-shadow: 0 0 5px black;
+        }
+        .tac-btn:active { transform: scale(0.9); border-color: white; }
+
+        /* Colores Botones */
+        #btn-I { background: radial-gradient(circle, #ff4444, #880000); }
+        #btn-T { background: radial-gradient(circle, #888888, #444444); }
+        #btn-A { background: radial-gradient(circle, #44ff44, #005500); }
+        #btn-M { background: radial-gradient(circle, #aa44ff, #440088); }
+
     </style>
 </head>
 <body>
 
-    <div id="overlay-inicio">
-        <h1 id="titulo-inicio">DOMUS MAGI</h1>
-        <p id="subtitulo-inicio">Sistema de Combate Revelations</p>
-        <button id="btn-comenzar">INICIAR SISTEMA</button>
-        <div id="estado-carga"></div>
-        <button id="btn-reintentar-ar">REINTENTAR AR</button>
+    <!-- PANTALLA INICIO -->
+    <div id="start-screen">
+        <h1>DOMUS MAGI</h1>
+        <h3>REVELATIONS</h3>
+        <button id="btn-start">INICIAR SISTEMA</button>
     </div>
 
-    <div id="ui-wrapper">
-        <div id="visor-superior">
-            <span id="placeholder-text">Visor de Combate Inactivo</span>
-            <video id="video-player" playsinline></video>
-        </div>
-
-        <div id="zona-ar"></div>
-
-        <div id="zona-inferior">
-            <div id="panel-datos">
-                <div class="dato-box">
-                    <span class="dato-titulo">ESCUDO:</span>
-                    <span id="val-carta" class="dato-valor" style="color:#ff0">---</span>
-                </div>
-                <div class="dato-box">
-                    <span class="dato-titulo">ARMA:</span>
-                    <span id="val-arma" class="dato-valor">---</span>
-                </div>
-                <div class="dato-box">
-                    <span class="dato-titulo">ORIENTACIÓN:</span>
-                    <span id="val-accion" class="dato-valor">---</span>
-                </div>
-                <div class="dato-box">
-                    <span class="dato-titulo">VALOR:</span>
-                    <span id="val-puntos" class="dato-valor">0</span>
-                </div>
+    <!-- HUD SUPERIOR -->
+    <div id="top-hud">
+        <div id="hp-panel">
+            <div class="hp-bar-container">
+                <div id="player-hp" class="hp-fill"></div>
+                <span class="hp-text">MAGUS HP: <span id="p-val">100</span></span>
             </div>
-
-            <div id="botonera">
-                <button id="btn-i" class="btn-poder" data-tipo="ataque">
-                    <span>I</span>
-                    <span class="btn-valor" id="val-i">0</span>
-                </button>
-                <button id="btn-a" class="btn-poder" data-tipo="cura">
-                    <span>A</span>
-                    <span class="btn-valor" id="val-a">0</span>
-                </button>
-                <button id="btn-t" class="btn-poder" data-tipo="defensa">
-                    <span>T</span>
-                    <span class="btn-valor" id="val-t">0</span>
-                </button>
-                <button id="btn-m" class="btn-poder" data-tipo="magia">
-                    <span>M</span>
-                    <span class="btn-valor" id="val-m">0</span>
-                </button>
+            <div class="hp-bar-container">
+                <div id="enemy-hp" class="hp-fill"></div>
+                <span class="hp-text" style="right: 5px; left: auto;">ENEMIGO HP: <span id="e-val">100</span></span>
             </div>
         </div>
-    </div>
-
-    <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001; missTolerance: 5; warmupTolerance: 5;" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false"
-        renderer="colorManagement: true; physicallyCorrectLights: true; logarithmicDepthBuffer: true;"
-        loading-screen="enabled: false">
         
-        <a-camera position="0 0 0" look-controls="enabled: false" camera="active: true"></a-camera>
+        <div id="video-visor">
+            <div id="video-placeholder-text">ESPERANDO SEÑAL DE CARTA...</div>
+            <!-- Video estándar MP4 sin fondo verde -->
+            <video id="main-video" playsinline muted></video>
+        </div>
+    </div>
 
-        <!-- TARGETS DRACO SICA ORIENTACIONES -->
-        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA" data-lado="NORTE">
-            <a-plane position="0 0 0" rotation="0 0 0" width="1" height="1" material="transparent: true; opacity: 0.3; color: #ff0000; shader: flat;"></a-plane>
-        </a-entity>
+    <!-- PANEL INFERIOR -->
+    <div id="bottom-panel">
+        <div id="data-display">
+            <div id="card-name">BUSCANDO OBJETIVO...</div>
+            <div id="card-stats">--</div>
+        </div>
+        <div id="tactical-buttons">
+            <button id="btn-I" class="tac-btn">I</button>
+            <button id="btn-T" class="tac-btn">T</button>
+            <button id="btn-A" class="tac-btn">A</button>
+            <button id="btn-M" class="tac-btn">M</button>
+        </div>
+    </div>
 
-        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="DRACO SICA" data-lado="ESTE">
-            <a-plane position="0 0 0" rotation="0 0 0" width="1" height="1" material="transparent: true; opacity: 0.3; color: #ff0000; shader: flat;"></a-plane>
-        </a-entity>
-
-        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="DRACO SICA" data-lado="SUR">
-            <a-plane position="0 0 0" rotation="0 0 0" width="1" height="1" material="transparent: true; opacity: 0.3; color: #ff0000; shader: flat;"></a-plane>
-        </a-entity>
-
-        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="DRACO SICA" data-lado="OESTE">
-            <a-plane position="0 0 0" rotation="0 0 0" width="1" height="1" material="transparent: true; opacity: 0.3; color: #ff0000; shader: flat;"></a-plane>
-        </a-entity>
+    <!-- ESCENA AR -->
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF:0.0001; filterBeta: 0.001;" 
+             color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
+             vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-entity id="targets-wrapper"></a-entity>
     </a-scene>
 
     <script>
-        // PODERES ACTUALIZADOS: I:6, A:1, T:2, M:1
-        const DB_PODER = {
-            "DRACO SICA": { ataque: 6, defensa: 2, magia: 1, cura: 1, color: "rgba(255, 0, 0, 0.6)" }
+        // --- 1. VARIABLES DE JUEGO ---
+        let playerLife = 100;
+        let enemyLife = 100;
+        
+        // Diccionario para traducir letras a nombres completos
+        const typeNames = {
+            'I': 'IMPETUS',
+            'T': 'TUTELA',
+            'A': 'AUXILIUM',
+            'M': 'MYSTERIUM'
         };
 
-        let cartaFijada = null;
-        let cartaActual = null;
-        let timerPerdida = null;
-        let botonesActivos = false;
+        // Estado actual
+        let currentCard = {
+            house: "",
+            weapon: "",
+            modeFull: "ESPERANDO", // El nombre completo (ej: IMPETUS)
+            modeCode: "",          // La letra (ej: I)
+            value: 0
+        };
 
-        const lblCarta = document.getElementById('val-carta');
-        const lblArma = document.getElementById('val-arma');
-        const lblAccion = document.getElementById('val-accion');
-        const lblPuntos = document.getElementById('val-puntos');
-        const videoPlayer = document.getElementById('video-player');
-        const placeholder = document.getElementById('placeholder-text');
+        // --- 2. LISTA DE MARCADORES ---
+        // Deben coincidir con tu archivo .mind
+        const markerNames = [
+            "DRACO_SICA_1_I_6",  
+            "DRACO_SICA_1_A_1",  
+            "DRACO_SICA_1_T_2",  
+            "DRACO_SICA_1_M_1"   
+        ];
+
+        // --- 3. INICIO ---
+        document.getElementById('btn-start').addEventListener('click', () => {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('top-hud').style.display = 'flex';
+            document.getElementById('bottom-panel').style.display = 'flex';
+            
+            document.querySelector('a-scene').systems["mindar-image-system"].start();
+            setupMarkers();
+        });
+
+        function setupMarkers() {
+            const wrapper = document.getElementById('targets-wrapper');
+            markerNames.forEach((name, index) => {
+                const el = document.createElement('a-entity');
+                el.setAttribute('mindar-image-target', `targetIndex: ${index}`);
+                el.addEventListener('targetFound', () => { parseCardData(name); });
+                wrapper.appendChild(el);
+            });
+        }
+
+        // --- 4. PARSEO DE DATOS (FIX SOLICITADO) ---
+        function parseCardData(filename) {
+            // filename ej: DRACO_SICA_1_I_6
+            const parts = filename.split('_'); 
+            
+            if (parts.length >= 5) {
+                const house = parts[0];   // DRACO
+                const weapon = parts[1];  // SICA
+                const modeLet = parts[3]; // I
+                const val = parseInt(parts[4]); // 6
+
+                // Guardamos datos
+                currentCard.house = house;
+                currentCard.weapon = weapon;
+                currentCard.modeCode = modeLet;
+                currentCard.modeFull = typeNames[modeLet] || "DESCONOCIDO";
+                currentCard.value = val;
+
+                updateDisplay();
+            }
+        }
+
+        function updateDisplay() {
+            // Actualizar textos HTML
+            const nameDiv = document.getElementById('card-name');
+            const statsDiv = document.getElementById('card-stats');
+            
+            // Texto superior: DRACO - SICA - IMPETUS
+            nameDiv.innerText = `${currentCard.house} - ${currentCard.weapon} - ${currentCard.modeFull}`;
+            
+            // Texto inferior: VALOR 6
+            statsDiv.innerHTML = `POTENCIA: <span class="stat-highlight">${currentCard.value}</span>`;
+            
+            // Feedback en consola
+            console.log(`Detectado: ${currentCard.house} ${currentCard.modeFull} con valor ${currentCard.value}`);
+        }
+
+        // --- 5. LOGICA DE BOTONES ---
+        // Solo funcionan si la carta está en la posición correcta (ej: Carta rotada en I para usar Botón I)
         
-        const valI = document.getElementById('val-i');
-        const valT = document.getElementById('val-t');
-        const valA = document.getElementById('val-a');
-        const valM = document.getElementById('val-m');
-
-        function activarBotones(datos) {
-            botonesActivos = true;
-            valI.innerText = datos.ataque;
-            valT.innerText = datos.defensa;
-            valA.innerText = datos.cura;
-            valM.innerText = datos.magia;
-            document.querySelectorAll('.btn-poder').forEach(b => b.classList.add('activo'));
-        }
-
-        function desactivarBotones() {
-            botonesActivos = false;
-            valI.innerText = '0'; valT.innerText = '0'; valA.innerText = '0'; valM.innerText = '0';
-            document.querySelectorAll('.btn-poder').forEach(b => b.classList.remove('activo'));
-        }
-
-        function reiniciarDeteccion() {
-            cartaFijada = null; cartaActual = null;
-            lblCarta.innerText = '---'; lblArma.innerText = '---'; lblAccion.innerText = '---'; lblPuntos.innerText = '0';
-            desactivarBotones();
-        }
-
-        function resetearVisor() {
-            videoPlayer.style.display = 'none'; videoPlayer.src = '';
-            placeholder.style.display = 'block'; lblPuntos.innerText = '0';
-        }
-
-        let sistemaIniciado = false;
-        const btnComenzar = document.getElementById('btn-comenzar');
-        const sceneEl = document.querySelector('a-scene');
-
-        async function iniciarMindAR() {
-            try {
-                document.getElementById('estado-carga').innerText = '⏳ Cargando sistema AR...';
-                if (!sceneEl.hasLoaded) { await new Promise(resolve => sceneEl.addEventListener('loaded', resolve, { once: true })); }
-                const arSystem = sceneEl.systems["mindar-image-system"];
-                arSystem.start();
-                sistemaIniciado = true;
-            } catch (err) { console.error(err); }
-        }
-
-        sceneEl.addEventListener('arReady', () => {
-            document.getElementById('overlay-inicio').style.display = 'none';
-            inicializarDeteccion();
+        document.getElementById('btn-I').addEventListener('click', () => {
+            if (currentCard.modeCode === 'I') {
+                performAttack(currentCard.value);
+            } else {
+                alert("¡GIRA LA CARTA A POSICIÓN DE ATAQUE (IMPETUS)!");
+            }
         });
 
-        btnComenzar.addEventListener('click', () => { if (!sistemaIniciado) iniciarMindAR(); });
-
-        function inicializarDeteccion() {
-            const targets = document.querySelectorAll('[mindar-image-target]');
-            targets.forEach((el) => {
-                el.addEventListener('targetFound', () => {
-                    if (timerPerdida) clearTimeout(timerPerdida);
-                    const nombre = el.getAttribute('data-nombre');
-                    const lado = el.getAttribute('data-lado');
-                    cartaActual = nombre;
-                    cartaFijada = DB_PODER[nombre];
-                    lblCarta.innerText = "DRACO";
-                    lblArma.innerText = "SICA";
-                    lblAccion.innerText = lado;
-                    activarBotones(cartaFijada);
-                });
-                el.addEventListener('targetLost', () => {
-                    if (cartaActual) timerPerdida = setTimeout(reiniciarDeteccion, 1500);
-                });
-            });
-        }
-
-        document.querySelectorAll('.btn-poder').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (!botonesActivos || !cartaFijada) return;
-                const tipo = btn.getAttribute('data-tipo');
-                let pts = 0; let vid = "";
-                if(tipo === 'ataque') { pts = cartaFijada.ataque; vid = "ataque.mp4"; }
-                if(tipo === 'defensa') { pts = cartaFijada.defensa; vid = "defensa.mp4"; }
-                if(tipo === 'cura') { pts = cartaFijada.cura; vid = "cura.mp4"; }
-                if(tipo === 'magia') { pts = cartaFijada.magia; vid = "magia.mp4"; }
-                placeholder.style.display = 'none';
-                videoPlayer.style.display = 'block';
-                videoPlayer.src = vid;
-                videoPlayer.play();
-                lblPuntos.innerText = pts;
-            });
+        document.getElementById('btn-T').addEventListener('click', () => {
+            if (currentCard.modeCode === 'T') {
+                alert(`DEFENSA ${currentCard.modeFull} ACTIVA: +${currentCard.value}`);
+            } else {
+                alert("¡GIRA LA CARTA A TUTELA!");
+            }
         });
 
-        videoPlayer.addEventListener('ended', resetearVisor);
+        document.getElementById('btn-A').addEventListener('click', () => {
+            if (currentCard.modeCode === 'A') {
+                healPlayer(currentCard.value);
+            } else {
+                alert("¡GIRA LA CARTA A AUXILIUM!");
+            }
+        });
+
+        document.getElementById('btn-M').addEventListener('click', () => {
+            if (currentCard.modeCode === 'M') {
+                performMagic(currentCard.value);
+            } else {
+                alert("¡GIRA LA CARTA A MYSTERIUM!");
+            }
+        });
+
+        // --- 6. FUNCIONES DE COMBATE Y VIDEO ---
+
+        function performAttack(dmg) {
+            enemyLife = Math.max(0, enemyLife - dmg);
+            updateBars();
+            playVideo(`${currentCard.house}_ATK`); // Nombre genérico de video
+        }
+
+        function performMagic(dmg) {
+            enemyLife = Math.max(0, enemyLife - (dmg * 2));
+            updateBars();
+            playVideo(`${currentCard.house}_MAG`);
+        }
+
+        function healPlayer(amount) {
+            playerLife = Math.min(100, playerLife + (amount * 5));
+            updateBars();
+        }
+
+        function updateBars() {
+            document.getElementById('player-hp').style.width = playerLife + '%';
+            document.getElementById('enemy-hp').style.width = enemyLife + '%';
+            document.getElementById('p-val').innerText = Math.floor(playerLife);
+            document.getElementById('e-val').innerText = Math.floor(enemyLife);
+            
+            if (enemyLife <= 0) alert("VICTORIA - ENEMIGO ABATIDO");
+        }
+
+        // --- REPRODUCTOR DE VIDEO ---
+        function playVideo(videoName) {
+            const videoEl = document.getElementById('main-video');
+            const placeholder = document.getElementById('video-placeholder-text');
+            
+            // Ocultar texto, mostrar video
+            placeholder.style.display = 'none';
+            videoEl.style.display = 'block';
+
+            // AQUÍ: Como no tienes los archivos aún, he puesto una ruta de ejemplo.
+            // Cuando tengas los mp4, guárdalos en una carpeta 'videos' y usa:
+            // videoEl.src = `videos/${videoName}.mp4`;
+            
+            // Por ahora, simulamos que carga algo para que no de error 404
+            console.log(`Intentando reproducir: videos/${videoName}.mp4`);
+            
+            // Si tuvieras el archivo, descomenta esto:
+            // videoEl.play();
+
+            // Simulación visual (borrar cuando tengas videos reales)
+            videoEl.style.backgroundColor = getFactionColor(currentCard.house);
+            setTimeout(() => {
+                videoEl.style.display = 'none';
+                placeholder.style.display = 'block';
+                videoEl.style.backgroundColor = 'transparent';
+            }, 2000);
+        }
+
+        function getFactionColor(house) {
+            if (house === 'DRACO') return '#990000';
+            if (house === 'CAELUM') return '#000099';
+            return '#333';
+        }
+
     </script>
 </body>
 </html>
