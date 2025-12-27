@@ -3,73 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: 4 TARGETS FIXED</title>
-    
+    <title>DOMUS MAGI: REVELATIONS</title>
     <!-- LIBRERÍAS ESTABLES -->
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Courier New', Courier, monospace; background: #000; }
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; }
 
-        /* DEBUGGER EN PANTALLA (Para saber si es la cámara o el código) */
+        /* DEBUG */
         #debug {
-            position: absolute; top: 0; left: 0; width: 100%; padding: 5px;
-            background: rgba(255, 0, 0, 0.5); color: white; font-weight: bold;
-            z-index: 9999; pointer-events: none; text-align: center;
+            position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.8); color: white; padding: 8px 20px;
+            border-radius: 20px; z-index: 9999; pointer-events: none;
+            font-size: 12px; font-weight: bold;
         }
 
-        /* CAPA DE UI */
-        #ui-layer {
+        /* --- INTERFAZ --- */
+        #ui-wrapper {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10; display: flex; flex-direction: column; pointer-events: none;
+            display: flex; flex-direction: column; z-index: 10; pointer-events: none;
         }
 
-        /* VISOR DE VIDEO */
-        #video-area {
-            width: 100%; height: 40%; background: #000; position: relative;
-            border-bottom: 2px solid #fff; pointer-events: auto;
+        /* 1. VISOR SUPERIOR (35%) */
+        #visor-superior {
+            width: 100%; height: 35%; background: #000;
+            border-bottom: 3px solid #fff; pointer-events: auto;
+            display: flex; justify-content: center; align-items: center; overflow: hidden;
+            position: relative;
         }
         #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
-        #video-placeholder { 
-            width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
-            color: #444; font-size: 20px; font-weight: bold; text-transform: uppercase;
+        #placeholder-text { 
+            color: #444; font-weight: bold; text-transform: uppercase; 
+            letter-spacing: 2px; text-align: center; padding: 10px;
         }
 
-        /* ZONA TRANSPARENTE */
-        #ar-space { flex-grow: 1; }
+        /* 2. ZONA CENTRAL (ESPACIO PARA AR) */
+        #zona-ar { flex-grow: 1; }
 
-        /* CONTROLES */
-        #controls {
-            background: rgba(0,0,0,0.9); padding: 15px; border-top: 2px solid #fff; pointer-events: auto;
+        /* 3. PANEL INFERIOR (DATOS + BOTONES) */
+        #zona-inferior {
+            width: 100%; height: auto; background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid #fff; pointer-events: auto; padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        #panel-datos {
+            display: flex; justify-content: space-around; padding: 12px 5px;
+            border-bottom: 1px solid #333; background: #0a0a0a;
+        }
+        .dato-box { text-align: center; flex: 1; }
+        .dato-titulo { font-size: 9px; color: #888; display: block; margin-bottom: 2px; }
+        .dato-valor { font-size: 16px; font-weight: bold; color: #0f0; font-family: monospace; }
+
+        #botonera {
+            display: flex; justify-content: center; gap: 12px; padding: 15px;
+        }
+        .btn-poder {
+            width: 65px; height: 65px; border-radius: 12px; border: 2px solid #555;
+            font-size: 24px; font-weight: bold; color: #555; cursor: not-allowed;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: all 0.3s; position: relative; overflow: hidden;
+            opacity: 0.4;
         }
         
-        .btn-container { display: flex; justify-content: center; gap: 10px; }
+        .btn-poder.activo {
+            cursor: pointer;
+            opacity: 1;
+            border-color: #fff;
+            color: white;
+            animation: brilloPulso 1.5s ease-in-out infinite;
+        }
         
-        .btn {
-            width: 70px; height: 70px; border-radius: 12px; border: 2px solid #333;
-            background: #111; color: #555; font-size: 24px; font-weight: bold;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s; cursor: not-allowed;
+        .btn-poder.activo:active { 
+            transform: scale(0.9); 
         }
 
-        /* ESTADOS ACTIVOS */
-        .btn.active { cursor: pointer; transform: scale(1.1); color: #fff; animation: parpadeo 1s infinite; }
-        
-        .btn#btn-i.active { background: #c0392b; border-color: #e74c3c; box-shadow: 0 0 15px #c0392b; }
-        .btn#btn-t.active { background: #7f8c8d; border-color: #bdc3c7; box-shadow: 0 0 15px #7f8c8d; }
-        .btn#btn-a.active { background: #27ae60; border-color: #2ecc71; box-shadow: 0 0 15px #27ae60; }
-        .btn#btn-m.active { background: #8e44ad; border-color: #9b59b6; box-shadow: 0 0 15px #8e44ad; }
-
-        @keyframes parpadeo { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
-
-        /* PANTALLA DE INICIO (OBLIGATORIA PARA AUDIO/VIDEO) */
-        #start-overlay {
-            position: absolute; top:0; left:0; width:100%; height:100%; background: #000;
-            z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        /* Animación de brillo pulsante */
+        @keyframes brilloPulso {
+            0% { 
+                box-shadow: 0 0 10px rgba(255,255,255,0.3);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(255,255,255,0.8), 0 0 50px rgba(255,255,255,0.5);
+                transform: scale(1.05);
+            }
+            100% { 
+                box-shadow: 0 0 10px rgba(255,255,255,0.3);
+                transform: scale(1);
+            }
         }
-        #start-btn {
-            padding: 20px 50px; font-size: 20px; background: #0f0; border: none; font-weight: bold; cursor: pointer;
+
+        .btn-valor {
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 2px;
+            color: #ff0;
+        }
+
+        #btn-i { background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%); }
+        #btn-t { background: linear-gradient(135deg, #555555 0%, #777777 100%); }
+        #btn-m { background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%); }
+        #btn-a { background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); }
+
+        /* PANTALLA DE INICIO */
+        #overlay-inicio {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+            z-index: 10000; display: flex; 
+            flex-direction: column; justify-content: center; align-items: center;
+        }
+        #titulo-inicio {
+            color: #fff; font-size: 32px; font-weight: bold;
+            text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+            margin-bottom: 10px; letter-spacing: 4px;
+        }
+        #subtitulo-inicio {
+            color: #888; font-size: 14px; margin-bottom: 40px;
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+        #btn-comenzar {
+            padding: 20px 40px; font-size: 20px; 
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white; border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+            transition: all 0.3s;
+        }
+        #btn-comenzar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
+        }
+        #btn-comenzar:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* Estado de carga */
+        #estado-carga {
+            color: #0f0;
+            font-size: 14px;
+            margin-top: 20px;
+            min-height: 30px;
         }
     </style>
 </head>
@@ -77,163 +151,437 @@
 
     <div id="debug">Esperando inicio...</div>
 
-    <div id="start-overlay">
-        <h1 style="color:white">DOMUS MAGI</h1>
-        <p style="color:#888">Sistema 4-Targets</p>
-        <button id="start-btn">INICIAR CÁMARA</button>
+    <!-- PANTALLA DE INICIO PARA ACTIVAR AUDIO/CÁMARA -->
+    <div id="overlay-inicio">
+        <h1 id="titulo-inicio">DOMUS MAGI</h1>
+        <p id="subtitulo-inicio">Sistema de Combate Revelations</p>
+        <button id="btn-comenzar">INICIAR SISTEMA</button>
+        <div id="estado-carga"></div>
     </div>
 
-    <div id="ui-layer">
-        <div id="video-area">
-            <div id="video-placeholder">VISOR LISTO</div>
+    <div id="ui-wrapper">
+        <div id="visor-superior">
+            <span id="placeholder-text">Visor de Combate Inactivo</span>
             <video id="video-player" playsinline webkit-playsinline></video>
         </div>
-        
-        <div id="ar-space"></div>
 
-        <div id="controls">
-            <div class="btn-container">
-                <!-- Data-file debe coincidir EXACTAMENTE con el nombre de tu archivo -->
-                <button id="btn-i" class="btn" data-file="ataque.mp4">I</button>
-                <button id="btn-a" class="btn" data-file="cura.mp4">A</button>
-                <button id="btn-t" class="btn" data-file="defensa.mp4">T</button>
-                <button id="btn-m" class="btn" data-file="magia.mp4">M</button>
+        <div id="zona-ar"></div>
+
+        <div id="zona-inferior">
+            <div id="panel-datos">
+                <div class="dato-box">
+                    <span class="dato-titulo">ESCUDO:</span>
+                    <span id="val-carta" class="dato-valor" style="color:#ff0">---</span>
+                </div>
+                <div class="dato-box">
+                    <span class="dato-titulo">ARMA:</span>
+                    <span id="val-arma" class="dato-valor">---</span>
+                </div>
+                <div class="dato-box">
+                    <span class="dato-titulo">ACCION:</span>
+                    <span id="val-accion" class="dato-valor">---</span>
+                </div>
+                <div class="dato-box">
+                    <span class="dato-titulo">VALOR:</span>
+                    <span id="val-puntos" class="dato-valor">0</span>
+                </div>
+            </div>
+
+            <div id="botonera">
+                <button id="btn-i" class="btn-poder" data-tipo="ataque" data-video="ataque.mp4">
+                    <span>I</span>
+                    <span class="btn-valor" id="val-i">0</span>
+                </button>
+                <button id="btn-a" class="btn-poder" data-tipo="cura" data-video="cura.mp4">
+                    <span>A</span>
+                    <span class="btn-valor" id="val-a">0</span>
+                </button>
+                <button id="btn-t" class="btn-poder" data-tipo="defensa" data-video="defensa.mp4">
+                    <span>T</span>
+                    <span class="btn-valor" id="val-t">0</span>
+                </button>
+                <button id="btn-m" class="btn-poder" data-tipo="magia" data-video="magia.mp4">
+                    <span>M</span>
+                    <span class="btn-valor" id="val-m">0</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- CONFIGURACIÓN AR CRÍTICA: maxTrack: 1 evita confusión entre targets similares -->
+    <!-- ESCENA DE REALIDAD AUMENTADA -->
     <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 1; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; maxTrack: 1; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001; missTolerance: 5; warmupTolerance: 5;" 
         vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false"
-        renderer="colorManagement: true; physicallyCorrectLights: true;">
+        renderer="colorManagement: true; physicallyCorrectLights: true; logarithmicDepthBuffer: true;"
+        loading-screen="enabled: false">
         
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-camera position="0 0 0" look-controls="enabled: false" camera="active: true"></a-camera>
 
-        <!-- TARGET 0: NORTE (ATAQUE) -->
-        <a-entity id="t0" mindar-image-target="targetIndex: 0">
-            <a-plane color="red" opacity="0.5" width="1" height="1"></a-plane>
+        <!-- TARGETS -->
+        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-nombre="DRACO SICA" data-lado="SICA-1">
+            <a-plane position="0 0 0" rotation="0 0 0" width="1" height="1" 
+                material="transparent: true; opacity: 0.6; color: #ff0000; shader: flat;"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+            </a-plane>
         </a-entity>
 
-        <!-- TARGET 1: ESTE (CURA) -->
-        <a-entity id="t1" mindar-image-target="targetIndex: 1">
-            <a-plane color="green" opacity="0.5" width="1" height="1"></a-plane>
+        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-nombre="LEO SICA" data-lado="SICA-2">
+            <a-plane position="0 0 0" rotation="0 0 0" width="1" height="1" 
+                material="transparent: true; opacity: 0.6; color: #00ff00; shader: flat;"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+            </a-plane>
         </a-entity>
 
-        <!-- TARGET 2: SUR (DEFENSA) -->
-        <a-entity id="t2" mindar-image-target="targetIndex: 2">
-            <a-plane color="gray" opacity="0.5" width="1" height="1"></a-plane>
+        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-nombre="APER SICA" data-lado="SICA-4">
+            <a-plane position="0 0 0" rotation="0 0 0" width="1" height="1" 
+                material="transparent: true; opacity: 0.6; color: #ffffff; shader: flat;"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+            </a-plane>
         </a-entity>
 
-        <!-- TARGET 3: OESTE (MAGIA) -->
-        <a-entity id="t3" mindar-image-target="targetIndex: 3">
-            <a-plane color="purple" opacity="0.5" width="1" height="1"></a-plane>
+        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-nombre="AQUILA SICA" data-lado="SICA-5">
+            <a-plane position="0 0 0" rotation="0 0 0" width="1" height="1" 
+                material="transparent: true; opacity: 0.6; color: #8a2be2; shader: flat;"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+            </a-plane>
         </a-entity>
     </a-scene>
 
     <script>
+        // 1. BASE DE DATOS DE VALORES CON COLORES
+        const DB_PODER = {
+            "DRACO SICA": { ataque: 6, defensa: 2, magia: 1, cura: 1, color: "rgba(255, 0, 0, 0.6)" },
+            "LEO SICA": { ataque: 4, defensa: 4, magia: 1, cura: 1, color: "rgba(0, 255, 0, 0.6)" },
+            "APER SICA": { ataque: 3, defensa: 5, magia: 1, cura: 1, color: "rgba(255, 255, 255, 0.6)" },
+            "AQUILA SICA": { ataque: 4, defensa: 2, magia: 3, cura: 1, color: "rgba(138, 43, 226, 0.6)" }
+        };
+
+        // VARIABLES DE CONTROL
+        let cartaFijada = null;
+        let cartaActual = null;
+        let ladoActual = null;
+        let timerPerdida = null;
+        let botonesActivos = false;
+
+        // ELEMENTOS DOM
         const debug = document.getElementById('debug');
+        const lblCarta = document.getElementById('val-carta');
+        const lblArma = document.getElementById('val-arma');
+        const lblAccion = document.getElementById('val-accion');
+        const lblPuntos = document.getElementById('val-puntos');
         const videoPlayer = document.getElementById('video-player');
-        const videoPlaceholder = document.getElementById('video-placeholder');
+        const placeholder = document.getElementById('placeholder-text');
         
         const btnI = document.getElementById('btn-i');
-        const btnA = document.getElementById('btn-a');
         const btnT = document.getElementById('btn-t');
+        const btnA = document.getElementById('btn-a');
         const btnM = document.getElementById('btn-m');
+        
+        const valI = document.getElementById('val-i');
+        const valT = document.getElementById('val-t');
+        const valA = document.getElementById('val-a');
+        const valM = document.getElementById('val-m');
 
-        let targetActual = -1; // -1: Ninguno
-
-        // 1. INICIO SEGURO
-        document.getElementById('start-btn').addEventListener('click', function() {
-            document.getElementById('start-overlay').style.display = 'none';
-            document.querySelector('a-scene').systems['mindar-image-system'].start();
-            debug.innerText = "SISTEMA ACTIVO. Buscando targets...";
-        });
-
-        // 2. GESTIÓN DE TARGETS (Index 0, 1, 2, 3)
-        function resetBotones() {
-            document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+        // FUNCIÓN PARA ACTIVAR BOTONES
+        function activarBotones(datos) {
+            botonesActivos = true;
+            
+            valI.innerText = datos.ataque;
+            valT.innerText = datos.defensa;
+            valA.innerText = datos.cura;
+            valM.innerText = datos.magia;
+            
+            btnI.classList.add('activo');
+            btnT.classList.add('activo');
+            btnA.classList.add('activo');
+            btnM.classList.add('activo');
+            
+            debug.innerText = '✨ Botones activos - Selecciona acción';
+            console.log('✨ Botonera ACTIVADA con valores:', datos);
         }
 
-        function activarTarget(index) {
-            targetActual = index;
-            resetBotones();
+        // FUNCIÓN PARA DESACTIVAR BOTONES
+        function desactivarBotones() {
+            botonesActivos = false;
             
-            // Lógica según tu diseño de 4 lados
-            if (index === 0) {
-                debug.innerText = "DETECTADO: TARGET 0 (NORTE/ATAQUE)";
-                btnI.classList.add('active');
-            } else if (index === 1) {
-                debug.innerText = "DETECTADO: TARGET 1 (ESTE/CURA)";
-                btnA.classList.add('active');
-            } else if (index === 2) {
-                debug.innerText = "DETECTADO: TARGET 2 (SUR/DEFENSA)";
-                btnT.classList.add('active');
-            } else if (index === 3) {
-                debug.innerText = "DETECTADO: TARGET 3 (OESTE/MAGIA)";
-                btnM.classList.add('active');
+            valI.innerText = '0';
+            valT.innerText = '0';
+            valA.innerText = '0';
+            valM.innerText = '0';
+            
+            btnI.classList.remove('activo');
+            btnT.classList.remove('activo');
+            btnA.classList.remove('activo');
+            btnM.classList.remove('activo');
+            
+            console.log('🔒 Botonera DESACTIVADA');
+        }
+
+        // FUNCIÓN PARA REINICIAR DETECCIÓN
+        function reiniciarDeteccion() {
+            cartaFijada = null;
+            cartaActual = null;
+            ladoActual = null;
+            lblCarta.innerText = '---';
+            lblCarta.style.color = "#ff0";
+            lblArma.innerText = '---';
+            lblArma.style.color = "#0f0";
+            lblAccion.innerText = '---';
+            lblAccion.style.color = "#0f0";
+            lblPuntos.innerText = '0';
+            desactivarBotones();
+            debug.innerText = 'Buscando escudo...';
+            console.log('🔄 Sistema reiniciado - esperando nuevo escudo');
+        }
+
+        // FUNCIÓN PARA RESETEAR VISOR
+        function resetearVisor() {
+            videoPlayer.pause();
+            videoPlayer.style.display = 'none';
+            videoPlayer.src = '';
+            placeholder.style.display = 'block';
+            lblAccion.innerText = '---';
+            lblAccion.style.color = '#0f0';
+            lblPuntos.innerText = '0';
+            debug.innerText = 'Video finalizado - Listo';
+            console.log('📺 Visor reseteado');
+        }
+
+        // FUNCIÓN PARA REPRODUCIR VIDEO
+        function reproducirVideo(archivoVideo, nombreAccion, puntos, colorAccion) {
+            debug.innerText = `Cargando ${archivoVideo}...`;
+            
+            placeholder.style.display = 'none';
+            videoPlayer.style.display = 'block';
+            videoPlayer.src = archivoVideo;
+            
+            lblAccion.innerText = nombreAccion;
+            lblAccion.style.color = colorAccion;
+            lblPuntos.innerText = puntos;
+            lblPuntos.style.color = "#ff0";
+            
+            videoPlayer.load();
+            
+            const playPromise = videoPlayer.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    debug.innerText = `Reproduciendo ${nombreAccion}`;
+                    console.log(`🎯 Video ${archivoVideo} reproduciendo correctamente`);
+                }).catch(error => {
+                    debug.innerText = `ERROR: ${error.message}`;
+                    console.error('❌ Error reproduciendo video:', error);
+                    resetearVisor();
+                });
             }
         }
 
-        // Asignar eventos a los targets de A-Frame
-        const targets = [
-            document.getElementById('t0'),
-            document.getElementById('t1'),
-            document.getElementById('t2'),
-            document.getElementById('t3')
-        ];
-
-        targets.forEach((t, i) => {
-            t.addEventListener('targetFound', () => {
-                activarTarget(i);
-            });
-            t.addEventListener('targetLost', () => {
-                // Pequeño delay para no parpadear si se pierde por un microsegundo
-                setTimeout(() => {
-                    if (targetActual === i) { 
-                        debug.innerText = "Buscando...";
-                        resetBotones();
-                        targetActual = -1;
+        // INICIAR SISTEMA CON MANEJO DE ERRORES ROBUSTO
+        let sistemaIniciado = false;
+        const btnComenzar = document.getElementById('btn-comenzar');
+        const estadoCarga = document.getElementById('estado-carga');
+        
+        btnComenzar.addEventListener('click', async () => {
+            if (sistemaIniciado) return;
+            
+            try {
+                btnComenzar.disabled = true;
+                estadoCarga.innerText = '⏳ Solicitando permisos de cámara...';
+                debug.innerText = 'Solicitando cámara...';
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                estadoCarga.innerText = '✓ Cámara activada';
+                debug.innerText = 'Cámara OK';
+                console.log('✅ Permisos de cámara concedidos');
+                
+                stream.getTracks().forEach(track => track.stop());
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                estadoCarga.innerText = '⏳ Iniciando sistema AR...';
+                debug.innerText = 'Iniciando AR...';
+                
+                const sceneEl = document.querySelector('a-scene');
+                
+                await new Promise((resolve) => {
+                    if (sceneEl.hasLoaded) {
+                        resolve();
+                    } else {
+                        sceneEl.addEventListener('loaded', () => resolve(), { once: true });
                     }
-                }, 500);
-            });
+                });
+                
+                estadoCarga.innerText = '⏳ Cargando detectores...';
+                debug.innerText = 'Cargando detectores...';
+                console.log('✅ Escena A-Frame cargada');
+                
+                const startPromise = new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => {
+                        reject(new Error('Timeout al iniciar MindAR'));
+                    }, 15000);
+                    
+                    try {
+                        const arSystem = sceneEl.systems["mindar-image-system"];
+                        arSystem.start();
+                        clearTimeout(timeout);
+                        resolve();
+                    } catch (err) {
+                        clearTimeout(timeout);
+                        reject(err);
+                    }
+                });
+                
+                await startPromise;
+                
+                sistemaIniciado = true;
+                estadoCarga.innerText = '✓ Sistema AR iniciado correctamente';
+                debug.innerText = 'Sistema activo - Buscando escudo...';
+                console.log('✅ Sistema MindAR iniciado correctamente');
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                document.getElementById('overlay-inicio').style.display = 'none';
+                
+            } catch (error) {
+                console.error('❌ Error al iniciar sistema:', error);
+                estadoCarga.innerText = '❌ Error: ' + error.message;
+                estadoCarga.style.color = '#f00';
+                debug.innerText = 'ERROR: ' + error.message;
+                debug.style.background = 'rgba(255,0,0,0.9)';
+                
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                estadoCarga.innerText = '🔄 Toca el botón nuevamente para reintentar';
+                estadoCarga.style.color = '#ff0';
+                btnComenzar.disabled = false;
+            }
         });
 
-        // 3. REPRODUCCIÓN DE VIDEO (MANEJO DE ERRORES)
-        document.querySelectorAll('.btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                if (!this.classList.contains('active')) return; // Si no está activo, no hace nada
-
-                const archivo = this.getAttribute('data-file');
-                debug.innerText = "Cargando video: " + archivo;
-
-                videoPlaceholder.style.display = 'none';
-                videoPlayer.style.display = 'block';
+        // DETECCIÓN DE CARTAS CON MANEJO ROBUSTO
+        const sceneEl = document.querySelector('a-scene');
+        
+        const inicializarDeteccion = () => {
+            console.log('🔧 Inicializando sistema de detección...');
+            debug.innerText = 'Sistema listo - Buscando escudo...';
+            
+            const targets = document.querySelectorAll('[mindar-image-target]');
+            console.log(`📍 Encontrados ${targets.length} targets`);
+            
+            if (targets.length === 0) {
+                console.error('❌ No se encontraron targets');
+                debug.innerText = 'ERROR: No hay targets';
+                return;
+            }
+            
+            targets.forEach((el, index) => {
+                const nombre = el.getAttribute('data-nombre');
+                const lado = el.getAttribute('data-lado');
                 
-                videoPlayer.src = archivo;
-                videoPlayer.load();
+                console.log(`📌 Configurando target ${index}: ${nombre} (${lado})`);
                 
-                var playPromise = videoPlayer.play();
+                el.addEventListener('targetFound', () => {
+                    console.log('✅ ESCUDO DETECTADO:', nombre, '| LADO:', lado);
+                    debug.innerText = `✅ ${nombre} detectado`;
+                    
+                    if (timerPerdida) {
+                        clearTimeout(timerPerdida);
+                        timerPerdida = null;
+                    }
+                    
+                    cartaActual = nombre;
+                    ladoActual = lado;
+                    cartaFijada = DB_PODER[nombre];
+                    
+                    lblCarta.innerText = nombre;
+                    lblCarta.style.color = "#0f0";
+                    
+                    lblArma.innerText = lado;
+                    lblArma.style.color = "#0f0";
+                    
+                    activarBotones(cartaFijada);
+                });
+                
+                el.addEventListener('targetLost', () => {
+                    console.log('⚠️ Escudo perdido:', nombre);
+                    debug.innerText = `⚠️ ${nombre} perdido`;
+                    
+                    if (cartaActual === nombre) {
+                        timerPerdida = setTimeout(() => {
+                            reiniciarDeteccion();
+                        }, 1000);
+                    }
+                });
+            });
+            
+            console.log('✅ Sistema de detección inicializado correctamente');
+        };
+        
+        if (sceneEl.hasLoaded) {
+            inicializarDeteccion();
+        } else {
+            sceneEl.addEventListener('loaded', inicializarDeteccion, { once: true });
+        }
 
-                if (playPromise !== undefined) {
-                    playPromise.then(_ => {
-                        debug.innerText = "REPRODUCIENDO...";
-                    })
-                    .catch(error => {
-                        debug.innerText = "ERROR VIDEO: " + error;
-                        console.error("Video error:", error);
-                    });
+        // LÓGICA DE LOS 4 BOTONES (I, A, T, M)
+        document.querySelectorAll('.btn-poder').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!botonesActivos || !cartaFijada) {
+                    console.log('⚠️ Botones inactivos - esperando detección de escudo');
+                    debug.innerText = '⚠️ Esperando detección de escudo';
+                    return;
                 }
+
+                const tipo = btn.getAttribute('data-tipo');
+                const archivoVideo = btn.getAttribute('data-video');
+                let puntos = 0;
+                let nombreAccion = "";
+                let colorAccion = "#fff";
+
+                switch(tipo) {
+                    case 'ataque': 
+                        puntos = cartaFijada.ataque; 
+                        nombreAccion = "IMPETUS";
+                        colorAccion = "#f00";
+                        break;
+                    case 'defensa': 
+                        puntos = cartaFijada.defensa; 
+                        nombreAccion = "TUTELA";
+                        colorAccion = "#888";
+                        break;
+                    case 'cura': 
+                        puntos = cartaFijada.cura; 
+                        nombreAccion = "AUXILIUM";
+                        colorAccion = "#0f0";
+                        break;
+                    case 'magia': 
+                        puntos = cartaFijada.magia; 
+                        nombreAccion = "MYSTERIUM";
+                        colorAccion = "#a0f";
+                        break;
+                }
+
+                reproducirVideo(archivoVideo, nombreAccion, puntos, colorAccion);
+                
+                console.log(`🎯 Acción ejecutada: ${nombreAccion} = ${puntos} VALOR | ARMA: ${ladoActual}`);
             });
         });
 
+        // EVENTOS DEL VIDEO
         videoPlayer.addEventListener('ended', () => {
-            videoPlayer.style.display = 'none';
-            videoPlaceholder.style.display = 'flex';
-            debug.innerText = "Video finalizado. Listo.";
+            resetearVisor();
         });
 
+        videoPlayer.addEventListener('error', (e) => {
+            console.log('❌ Error cargando video:', e);
+            debug.innerText = '❌ Error cargando video';
+            resetearVisor();
+        });
     </script>
 </body>
 </html>
