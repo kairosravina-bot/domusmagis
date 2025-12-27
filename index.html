@@ -3,265 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI FINAL</title>
+    <title>DOMUS MAGI: 4 TARGETS FIXED</title>
     
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
-    
+    <!-- LIBRERÍAS ESTABLES -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
     <style>
-        body { margin: 0; overflow: hidden; font-family: monospace; background: black; }
+        body { margin: 0; overflow: hidden; font-family: 'Courier New', Courier, monospace; background: #000; }
 
-        /* INTERFAZ (HUD) */
-        #hud-layer {
+        /* DEBUGGER EN PANTALLA (Para saber si es la cámara o el código) */
+        #debug {
+            position: absolute; top: 0; left: 0; width: 100%; padding: 5px;
+            background: rgba(255, 0, 0, 0.5); color: white; font-weight: bold;
+            z-index: 9999; pointer-events: none; text-align: center;
+        }
+
+        /* CAPA DE UI */
+        #ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 999; pointer-events: none;
-            display: flex; flex-direction: column; justify-content: space-between;
+            z-index: 10; display: flex; flex-direction: column; pointer-events: none;
         }
 
-        /* BOTÓN DE INICIO */
-        #start-btn {
-            pointer-events: auto;
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            padding: 20px 40px; background: #609; color: white; border: 2px solid gold;
-            font-size: 20px; font-weight: bold; cursor: pointer; z-index: 1000;
+        /* VISOR DE VIDEO */
+        #video-area {
+            width: 100%; height: 40%; background: #000; position: relative;
+            border-bottom: 2px solid #fff; pointer-events: auto;
+        }
+        #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
+        #video-placeholder { 
+            width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+            color: #444; font-size: 20px; font-weight: bold; text-transform: uppercase;
         }
 
-        /* PANELES */
-        .panel { background: rgba(0,0,0,0.8); padding: 10px; pointer-events: auto; }
+        /* ZONA TRANSPARENTE */
+        #ar-space { flex-grow: 1; }
 
-        /* ARRIBA: HP Y VIDEO */
-        #top-panel { border-bottom: 2px solid white; text-align: center; }
+        /* CONTROLES */
+        #controls {
+            background: rgba(0,0,0,0.9); padding: 15px; border-top: 2px solid #fff; pointer-events: auto;
+        }
         
-        #hp-display { color: white; display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
-        .hp-val { font-weight: bold; color: yellow; }
-
-        #video-container {
-            width: 100%; height: 220px; background: #000; 
+        .btn-container { display: flex; justify-content: center; gap: 10px; }
+        
+        .btn {
+            width: 70px; height: 70px; border-radius: 12px; border: 2px solid #333;
+            background: #111; color: #555; font-size: 24px; font-weight: bold;
             display: flex; align-items: center; justify-content: center;
-            border: 1px solid #555; position: relative;
+            transition: all 0.2s; cursor: not-allowed;
         }
-        /* El video ocupará el espacio correctamente */
-        video { width: 100%; height: 100%; object-fit: contain; z-index: 20; display: none; }
-        #vid-text { color: gray; position: absolute; z-index: 10; }
 
-        /* ABAJO: INFO Y BOTONES */
-        #bottom-panel { border-top: 2px solid white; }
-
-        #info-box { color: cyan; margin-bottom: 10px; text-align: center; }
-        #text-action { font-size: 20px; font-weight: bold; color: gold; text-transform: uppercase; margin: 5px 0; }
-        #text-value { font-size: 16px; color: white; }
-
-        #buttons-row { display: flex; justify-content: space-around; }
-        .game-btn {
-            width: 60px; height: 60px; border-radius: 50%; border: 3px solid white;
-            font-size: 24px; font-weight: bold; color: white; cursor: pointer;
-            text-shadow: 2px 2px 0 black;
-        }
-        .game-btn:active { transform: scale(0.9); border-color: gold; }
+        /* ESTADOS ACTIVOS */
+        .btn.active { cursor: pointer; transform: scale(1.1); color: #fff; animation: parpadeo 1s infinite; }
         
+        .btn#btn-i.active { background: #c0392b; border-color: #e74c3c; box-shadow: 0 0 15px #c0392b; }
+        .btn#btn-t.active { background: #7f8c8d; border-color: #bdc3c7; box-shadow: 0 0 15px #7f8c8d; }
+        .btn#btn-a.active { background: #27ae60; border-color: #2ecc71; box-shadow: 0 0 15px #27ae60; }
+        .btn#btn-m.active { background: #8e44ad; border-color: #9b59b6; box-shadow: 0 0 15px #8e44ad; }
+
+        @keyframes parpadeo { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        /* PANTALLA DE INICIO (OBLIGATORIA PARA AUDIO/VIDEO) */
+        #start-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%; background: #000;
+            z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        #start-btn {
+            padding: 20px 50px; font-size: 20px; background: #0f0; border: none; font-weight: bold; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <button id="start-btn">INICIAR SISTEMA</button>
+    <div id="debug">Esperando inicio...</div>
 
-    <div id="hud-layer" style="display:none;">
-        
-        <!-- PANEL SUPERIOR -->
-        <div id="top-panel" class="panel">
-            <div id="hp-display">
-                <span>TU VIDA: <span id="hp-player" class="hp-val">100</span></span>
-                <span>RIVAL: <span id="hp-enemy" class="hp-val">100</span></span>
-            </div>
-            <div id="video-container">
-                <span id="vid-text">ESCANEA CARTA...</span>
-                <video id="main-video" playsinline muted></video>
-            </div>
+    <div id="start-overlay">
+        <h1 style="color:white">DOMUS MAGI</h1>
+        <p style="color:#888">Sistema 4-Targets</p>
+        <button id="start-btn">INICIAR CÁMARA</button>
+    </div>
+
+    <div id="ui-layer">
+        <div id="video-area">
+            <div id="video-placeholder">VISOR LISTO</div>
+            <video id="video-player" playsinline webkit-playsinline></video>
         </div>
+        
+        <div id="ar-space"></div>
 
-        <!-- PANEL INFERIOR -->
-        <div id="bottom-panel" class="panel">
-            <div id="info-box">
-                <div id="text-status">ESPERANDO OBJETIVO</div>
-                <div id="text-action">--</div>
-                <div id="text-value">VALOR: 0</div>
-            </div>
-
-            <div id="buttons-row">
-                <!-- BOTONES QUE DISPARAN EL VIDEO -->
-                <button id="btn-I" class="game-btn" style="background:#b00;">I</button>
-                <button id="btn-T" class="game-btn" style="background:#555;">T</button>
-                <button id="btn-A" class="game-btn" style="background:#080;">A</button>
-                <button id="btn-M" class="game-btn" style="background:#608;">M</button>
+        <div id="controls">
+            <div class="btn-container">
+                <!-- Data-file debe coincidir EXACTAMENTE con el nombre de tu archivo -->
+                <button id="btn-i" class="btn" data-file="ataque.mp4">I</button>
+                <button id="btn-a" class="btn" data-file="cura.mp4">A</button>
+                <button id="btn-t" class="btn" data-file="defensa.mp4">T</button>
+                <button id="btn-m" class="btn" data-file="magia.mp4">M</button>
             </div>
         </div>
     </div>
 
-    <!-- ESCENA MINDAR -->
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; uiLoading: no; uiScanning: no; filterMinCF:0.0001; filterBeta: 0.001;" 
-             color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
-             vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <!-- CONFIGURACIÓN AR CRÍTICA: maxTrack: 1 evita confusión entre targets similares -->
+    <a-scene 
+        mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 1; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false"
+        renderer="colorManagement: true; physicallyCorrectLights: true;">
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-entity id="marker-generator"></a-entity>
+
+        <!-- TARGET 0: NORTE (ATAQUE) -->
+        <a-entity id="t0" mindar-image-target="targetIndex: 0">
+            <a-plane color="red" opacity="0.5" width="1" height="1"></a-plane>
+        </a-entity>
+
+        <!-- TARGET 1: ESTE (CURA) -->
+        <a-entity id="t1" mindar-image-target="targetIndex: 1">
+            <a-plane color="green" opacity="0.5" width="1" height="1"></a-plane>
+        </a-entity>
+
+        <!-- TARGET 2: SUR (DEFENSA) -->
+        <a-entity id="t2" mindar-image-target="targetIndex: 2">
+            <a-plane color="gray" opacity="0.5" width="1" height="1"></a-plane>
+        </a-entity>
+
+        <!-- TARGET 3: OESTE (MAGIA) -->
+        <a-entity id="t3" mindar-image-target="targetIndex: 3">
+            <a-plane color="purple" opacity="0.5" width="1" height="1"></a-plane>
+        </a-entity>
     </a-scene>
 
     <script>
-        // --- ESTADO DEL JUEGO ---
-        let playerHP = 100;
-        let enemyHP = 100;
-        let isActionBlocked = false; // Para esperar los 2 segundos
+        const debug = document.getElementById('debug');
+        const videoPlayer = document.getElementById('video-player');
+        const videoPlaceholder = document.getElementById('video-placeholder');
+        
+        const btnI = document.getElementById('btn-i');
+        const btnA = document.getElementById('btn-a');
+        const btnT = document.getElementById('btn-t');
+        const btnM = document.getElementById('btn-m');
 
-        // Datos de la carta actual
-        let activeCard = {
-            found: false,
-            house: "",      // DRACO
-            type: "",       // I, T, A, M
-            typeName: "",   // IMPETUS...
-            val: 0          // 6
-        };
+        let targetActual = -1; // -1: Ninguno
 
-        // --- TUS MARCADORES ---
-        const markers = [
-            "DRACO_SICA_1_I_6", 
-            "DRACO_SICA_1_A_1", 
-            "DRACO_SICA_1_T_2", 
-            "DRACO_SICA_1_M_1"
-        ];
-
-        // --- ARRANQUE ---
+        // 1. INICIO SEGURO
         document.getElementById('start-btn').addEventListener('click', function() {
-            this.style.display = 'none';
-            document.getElementById('hud-layer').style.display = 'flex';
-            
-            const scene = document.querySelector('a-scene');
-            scene.systems["mindar-image-system"].start();
-            setupMarkers();
+            document.getElementById('start-overlay').style.display = 'none';
+            document.querySelector('a-scene').systems['mindar-image-system'].start();
+            debug.innerText = "SISTEMA ACTIVO. Buscando targets...";
         });
 
-        function setupMarkers() {
-            const container = document.getElementById('marker-generator');
-            
-            markers.forEach((name, idx) => {
-                const el = document.createElement('a-entity');
-                el.setAttribute('mindar-image-target', 'targetIndex: ' + idx);
-                
-                // AL DETECTAR
-                el.addEventListener('targetFound', () => {
-                    handleDetection(name);
-                });
+        // 2. GESTIÓN DE TARGETS (Index 0, 1, 2, 3)
+        function resetBotones() {
+            document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+        }
 
-                container.appendChild(el);
+        function activarTarget(index) {
+            targetActual = index;
+            resetBotones();
+            
+            // Lógica según tu diseño de 4 lados
+            if (index === 0) {
+                debug.innerText = "DETECTADO: TARGET 0 (NORTE/ATAQUE)";
+                btnI.classList.add('active');
+            } else if (index === 1) {
+                debug.innerText = "DETECTADO: TARGET 1 (ESTE/CURA)";
+                btnA.classList.add('active');
+            } else if (index === 2) {
+                debug.innerText = "DETECTADO: TARGET 2 (SUR/DEFENSA)";
+                btnT.classList.add('active');
+            } else if (index === 3) {
+                debug.innerText = "DETECTADO: TARGET 3 (OESTE/MAGIA)";
+                btnM.classList.add('active');
+            }
+        }
+
+        // Asignar eventos a los targets de A-Frame
+        const targets = [
+            document.getElementById('t0'),
+            document.getElementById('t1'),
+            document.getElementById('t2'),
+            document.getElementById('t3')
+        ];
+
+        targets.forEach((t, i) => {
+            t.addEventListener('targetFound', () => {
+                activarTarget(i);
             });
-        }
-
-        // --- PROCESAR DETECCIÓN ---
-        function handleDetection(nameStr) {
-            if (isActionBlocked) return; // Si estamos en medio de un ataque, ignorar cambios
-
-            const parts = nameStr.split('_');
-            if(parts.length >= 5) {
-                activeCard.found = true;
-                activeCard.house = parts[0];
-                activeCard.type = parts[3];
-                activeCard.val = parseInt(parts[4]);
-
-                // Traducción de nombres
-                if(activeCard.type === 'I') activeCard.typeName = "IMPETUS";
-                else if(activeCard.type === 'T') activeCard.typeName = "TUTELA";
-                else if(activeCard.type === 'A') activeCard.typeName = "AUXILIUM";
-                else if(activeCard.type === 'M') activeCard.typeName = "MYSTERIUM";
-                
-                // Actualizar interfaz visual
-                document.getElementById('text-status').innerText = activeCard.house + " DETECTADO";
-                document.getElementById('text-status').style.color = "#0f0";
-                document.getElementById('text-action').innerText = activeCard.typeName;
-                document.getElementById('text-value').innerText = "POTENCIA: " + activeCard.val;
-            }
-        }
-
-        // --- LÓGICA DE BOTONES: DISPARAN VIDEO + DAÑO ---
-        document.getElementById('btn-I').addEventListener('click', () => triggerAction('I'));
-        document.getElementById('btn-T').addEventListener('click', () => triggerAction('T'));
-        document.getElementById('btn-A').addEventListener('click', () => triggerAction('A'));
-        document.getElementById('btn-M').addEventListener('click', () => triggerAction('M'));
-
-        function triggerAction(btnType) {
-            // 1. Validaciones
-            if (!activeCard.found) {
-                alert("Primero escanea una carta.");
-                return;
-            }
-            if (isActionBlocked) return; // Evitar doble click rapido
-
-            // 2. Comprobar si el botón coincide con la carta
-            if (activeCard.type === btnType) {
-                
-                // BLOQUEAR SISTEMA TEMPORALMENTE
-                isActionBlocked = true;
-
-                // 3. DISPARAR VIDEO (Aquí es donde ocurre)
-                playVideo(activeCard.house, btnType);
-
-                // 4. APLICAR MATEMÁTICAS
-                if(btnType === 'I') enemyHP -= activeCard.val;
-                if(btnType === 'M') enemyHP -= (activeCard.val * 2);
-                if(btnType === 'A') playerHP += (activeCard.val * 5);
-                if(btnType === 'T') alert("Escudos arriba: " + activeCard.val);
-                
-                updateHP();
-
-                // 5. ESPERAR 2 SEGUNDOS Y REINICIAR
+            t.addEventListener('targetLost', () => {
+                // Pequeño delay para no parpadear si se pierde por un microsegundo
                 setTimeout(() => {
-                    resetCycle();
-                }, 2000);
+                    if (targetActual === i) { 
+                        debug.innerText = "Buscando...";
+                        resetBotones();
+                        targetActual = -1;
+                    }
+                }, 500);
+            });
+        });
 
-            } else {
-                alert("Botón incorrecto. La carta es " + activeCard.typeName);
-            }
-        }
+        // 3. REPRODUCCIÓN DE VIDEO (MANEJO DE ERRORES)
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (!this.classList.contains('active')) return; // Si no está activo, no hace nada
 
-        // --- REPRODUCTOR ---
-        function playVideo(house, type) {
-            const v = document.getElementById('main-video');
-            const t = document.getElementById('vid-text');
+                const archivo = this.getAttribute('data-file');
+                debug.innerText = "Cargando video: " + archivo;
 
-            t.style.display = 'none';
-            v.style.display = 'block';
-            
-            // Simulación visual (Fondo de color según tipo)
-            // Cuando tengas tus videos: v.src = "videos/" + house + "_" + type + ".mp4"; v.play();
-            if(type === 'I') v.style.background = '#900';
-            else if(type === 'A') v.style.background = '#090';
-            else if(type === 'M') v.style.background = '#609';
-            else v.style.background = '#555';
-            
-            console.log("REPRODUCIENDO VIDEO DE: " + house + " TIPO: " + type);
-        }
+                videoPlaceholder.style.display = 'none';
+                videoPlayer.style.display = 'block';
+                
+                videoPlayer.src = archivo;
+                videoPlayer.load();
+                
+                var playPromise = videoPlayer.play();
 
-        // --- REINICIAR CICLO ---
-        function resetCycle() {
-            const v = document.getElementById('main-video');
-            const t = document.getElementById('vid-text');
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        debug.innerText = "REPRODUCIENDO...";
+                    })
+                    .catch(error => {
+                        debug.innerText = "ERROR VIDEO: " + error;
+                        console.error("Video error:", error);
+                    });
+                }
+            });
+        });
 
-            // Ocultar video, mostrar texto
-            v.style.display = 'none';
-            v.style.background = 'black';
-            t.style.display = 'block';
-            t.innerText = "LISTO PARA SIGUIENTE TURNO";
-
-            // Limpiar datos
-            isActionBlocked = false;
-            document.getElementById('text-status').innerText = "ESPERANDO CARTA...";
-            document.getElementById('text-status').style.color = "cyan";
-        }
-
-        function updateHP() {
-            if(enemyHP < 0) enemyHP = 0;
-            if(playerHP > 100) playerHP = 100;
-            document.getElementById('hp-player').innerText = playerHP;
-            document.getElementById('hp-enemy').innerText = enemyHP;
-        }
+        videoPlayer.addEventListener('ended', () => {
+            videoPlayer.style.display = 'none';
+            videoPlaceholder.style.display = 'flex';
+            debug.innerText = "Video finalizado. Listo.";
+        });
 
     </script>
 </body>
