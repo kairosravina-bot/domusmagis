@@ -5,339 +5,293 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOMUS MAGI: REVELATIONS</title>
     
-    <!-- LIBRERÍAS -->
+    <!-- LIBRERÍAS (MindAR + A-Frame) -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: black; }
+        body { margin: 0; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
         
-        /* 1. PANTALLA DE INICIO */
+        /* PANTALLA DE INICIO (Cubre todo hasta dar click) */
         #start-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 999; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; color: gold;
+            background: black; z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: white;
         }
         #btn-start {
-            padding: 15px 40px; font-size: 20px; background: #440066;
-            color: white; border: 2px solid gold; cursor: pointer; margin-top: 20px;
-            text-transform: uppercase; font-weight: bold;
+            padding: 15px 40px; font-size: 20px; background: #8a2be2;
+            color: white; border: 2px solid white; cursor: pointer; margin-top: 20px;
         }
 
-        /* 2. HUD SUPERIOR */
-        #top-hud {
-            position: absolute; top: 0; width: 100%; height: 40%;
-            background: rgba(0, 0, 0, 0.6); z-index: 10;
-            display: none; flex-direction: column;
+        /* UI SUPERIOR: HP y VIDEO */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; /* DEJAR PASAR CLICKS A LA CÁMARA/ESCENA */
+            z-index: 10; display: none; flex-direction: column; justify-content: space-between;
         }
 
-        /* Barras de Vida */
-        #hp-panel {
-            width: 100%; height: 25px; display: flex; justify-content: space-between;
-            padding: 2px 5px; box-sizing: border-box; background: #111;
+        /* 1. Panel Superior: Vida y Video */
+        .top-panel {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            pointer-events: auto;
         }
-        .hp-bar-container { width: 48%; height: 100%; border: 1px solid #777; position: relative; background: #222; }
-        .hp-fill { height: 100%; transition: width 0.3s; }
-        #player-hp { background: linear-gradient(90deg, #00ff00, #005500); width: 100%; }
-        #enemy-hp { background: linear-gradient(90deg, #ff0000, #550000); width: 100%; }
-        .hp-text { position: absolute; top: 0; left: 5px; color: white; font-size: 11px; line-height: 20px; font-weight: bold; text-shadow: 1px 1px 0 #000; z-index: 2; }
+        
+        /* Barras de vida */
+        .bars-container { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .hp-box { width: 48%; color: white; font-size: 12px; }
+        .bar-bg { width: 100%; height: 10px; background: #333; border: 1px solid white; }
+        .bar-fill { height: 100%; transition: width 0.3s; }
+        #hp-p { background: #00ff00; width: 100%; }
+        #hp-e { background: #ff0000; width: 100%; }
 
-        /* Visor de Video (Sin fondo verde, video estándar) */
-        #video-visor {
-            flex-grow: 1; position: relative; 
+        /* Visor de Video (NORMAL, sin chroma) */
+        #video-container {
+            width: 100%; height: 180px; 
+            background: black; border: 1px solid #555;
             display: flex; justify-content: center; align-items: center;
-            background: #000; border-bottom: 2px solid gold;
+            overflow: hidden;
         }
-        
-        /* Etiqueta de video real */
-        #main-video {
-            width: 100%; height: 100%; 
-            object-fit: contain; /* Mantiene la proporción sin recortar */
-            display: none;
-        }
-        
-        #video-placeholder-text {
-            color: #666; font-size: 14px; letter-spacing: 2px;
-            position: absolute;
-        }
+        video { width: 100%; height: 100%; object-fit: contain; }
+        #vid-placeholder { color: gray; }
 
-        /* 3. ZONA INFERIOR (DATOS Y BOTONES) */
-        #bottom-panel {
-            position: absolute; bottom: 0; width: 100%; height: 20%;
-            background: rgba(10, 10, 10, 0.95); z-index: 10;
-            display: none; flex-direction: column;
-            border-top: 2px solid #444;
-        }
-        
-        #data-display {
-            height: 35%; color: white; 
-            display: flex; flex-direction: column; 
-            align-items: center; justify-content: center;
+        /* 2. Panel Inferior: Datos y Botones */
+        .bottom-panel {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            pointer-events: auto;
             text-align: center;
-            font-family: monospace;
-            padding-top: 5px;
-        }
-        
-        #card-name { font-size: 14px; color: gold; text-transform: uppercase; }
-        #card-stats { font-size: 16px; font-weight: bold; margin-top: 2px; }
-        .stat-highlight { color: cyan; font-size: 18px; }
-
-        #tactical-buttons {
-            height: 65%; display: flex; justify-content: space-evenly; align-items: center;
-            padding-bottom: 10px;
         }
 
-        .tac-btn {
-            width: 55px; height: 55px; border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.5); font-weight: bold; font-size: 20px;
-            cursor: pointer; color: white; transition: transform 0.1s;
-            text-shadow: 0 0 5px black;
+        /* TEXTO CORREGIDO: Nombre y Valor */
+        #scan-data {
+            color: cyan; margin-bottom: 10px; font-size: 14px; 
+            border-bottom: 1px solid #444; padding-bottom: 5px;
         }
-        .tac-btn:active { transform: scale(0.9); border-color: white; }
+        #val-display { color: yellow; font-size: 18px; font-weight: bold; }
 
-        /* Colores Botones */
-        #btn-I { background: radial-gradient(circle, #ff4444, #880000); }
-        #btn-T { background: radial-gradient(circle, #888888, #444444); }
-        #btn-A { background: radial-gradient(circle, #44ff44, #005500); }
-        #btn-M { background: radial-gradient(circle, #aa44ff, #440088); }
+        /* Botones */
+        .btn-row { display: flex; justify-content: space-around; }
+        .action-btn {
+            width: 50px; height: 50px; border-radius: 50%; border: 2px solid white;
+            font-weight: bold; font-size: 18px; cursor: pointer; color: white;
+        }
+        /* Colores botones */
+        .b-red { background: #900; }
+        .b-grey { background: #555; }
+        .b-green { background: #090; }
+        .b-purp { background: #609; }
 
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA INICIO -->
+    <!-- PANTALLA DE INICIO -->
     <div id="start-screen">
         <h1>DOMUS MAGI</h1>
-        <h3>REVELATIONS</h3>
-        <button id="btn-start">INICIAR SISTEMA</button>
+        <button id="btn-start">INICIAR CÁMARA</button>
     </div>
 
-    <!-- HUD SUPERIOR -->
-    <div id="top-hud">
-        <div id="hp-panel">
-            <div class="hp-bar-container">
-                <div id="player-hp" class="hp-fill"></div>
-                <span class="hp-text">MAGUS HP: <span id="p-val">100</span></span>
-            </div>
-            <div class="hp-bar-container">
-                <div id="enemy-hp" class="hp-fill"></div>
-                <span class="hp-text" style="right: 5px; left: auto;">ENEMIGO HP: <span id="e-val">100</span></span>
-            </div>
-        </div>
+    <!-- CAPA DE INTERFAZ (UI) -->
+    <div id="ui-layer">
         
-        <div id="video-visor">
-            <div id="video-placeholder-text">ESPERANDO SEÑAL DE CARTA...</div>
-            <!-- Video estándar MP4 sin fondo verde -->
-            <video id="main-video" playsinline muted></video>
+        <!-- ARRIBA: HP y VIDEO -->
+        <div class="top-panel">
+            <div class="bars-container">
+                <div class="hp-box">MAGUS: <span id="txt-hp-p">100</span>
+                    <div class="bar-bg"><div id="hp-p" class="bar-fill"></div></div>
+                </div>
+                <div class="hp-box" style="text-align: right;">RIVAL: <span id="txt-hp-e">100</span>
+                    <div class="bar-bg"><div id="hp-e" class="bar-fill"></div></div>
+                </div>
+            </div>
+            
+            <div id="video-container">
+                <div id="vid-placeholder">ESCANEA UNA CARTA</div>
+                <video id="hud-video" playsinline style="display:none"></video>
+            </div>
+        </div>
+
+        <!-- ABAJO: DATOS y BOTONES -->
+        <div class="bottom-panel">
+            <div id="scan-data">
+                <div id="card-text">ESPERANDO OBJETIVO...</div>
+                <div id="val-text">VALOR: <span id="val-display">--</span></div>
+            </div>
+            
+            <div class="btn-row">
+                <button id="btn-I" class="action-btn b-red">I</button>
+                <button id="btn-T" class="action-btn b-grey">T</button>
+                <button id="btn-A" class="action-btn b-green">A</button>
+                <button id="btn-M" class="action-btn b-purp">M</button>
+            </div>
         </div>
     </div>
 
-    <!-- PANEL INFERIOR -->
-    <div id="bottom-panel">
-        <div id="data-display">
-            <div id="card-name">BUSCANDO OBJETIVO...</div>
-            <div id="card-stats">--</div>
-        </div>
-        <div id="tactical-buttons">
-            <button id="btn-I" class="tac-btn">I</button>
-            <button id="btn-T" class="tac-btn">T</button>
-            <button id="btn-A" class="tac-btn">A</button>
-            <button id="btn-M" class="tac-btn">M</button>
-        </div>
-    </div>
-
-    <!-- ESCENA AR -->
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF:0.0001; filterBeta: 0.001;" 
+    <!-- ESCENA AR (Ocultamos el anillo de carga default con uiLoading:no) -->
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; uiLoading: no; filterMinCF:0.0001; filterBeta: 0.001;" 
              color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
              vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-entity id="targets-wrapper"></a-entity>
+        
+        <!-- Entidades generadas por script -->
+        <a-entity id="marker-group"></a-entity>
+
     </a-scene>
 
     <script>
-        // --- 1. VARIABLES DE JUEGO ---
-        let playerLife = 100;
-        let enemyLife = 100;
+        // --- VARIABLES ---
+        let pHP = 100;
+        let eHP = 100;
         
-        // Diccionario para traducir letras a nombres completos
-        const typeNames = {
-            'I': 'IMPETUS',
-            'T': 'TUTELA',
-            'A': 'AUXILIUM',
-            'M': 'MYSTERIUM'
+        // Estado de la carta actual
+        let currentScan = {
+            name: "",       // DRACO SICA
+            modeName: "",   // IMPETUS, TUTELA...
+            modeCode: "",   // I, T, A, M
+            value: 0        // 6, 1, 2...
         };
 
-        // Estado actual
-        let currentCard = {
-            house: "",
-            weapon: "",
-            modeFull: "ESPERANDO", // El nombre completo (ej: IMPETUS)
-            modeCode: "",          // La letra (ej: I)
-            value: 0
-        };
-
-        // --- 2. LISTA DE MARCADORES ---
-        // Deben coincidir con tu archivo .mind
-        const markerNames = [
-            "DRACO_SICA_1_I_6",  
-            "DRACO_SICA_1_A_1",  
-            "DRACO_SICA_1_T_2",  
-            "DRACO_SICA_1_M_1"   
+        // LISTA DE TUS ARCHIVOS (Igual que en targets.mind)
+        const markerList = [
+            "DRACO_SICA_1_I_6", 
+            "DRACO_SICA_1_A_1", 
+            "DRACO_SICA_1_T_2", 
+            "DRACO_SICA_1_M_1"
         ];
 
-        // --- 3. INICIO ---
-        document.getElementById('btn-start').addEventListener('click', () => {
+        // --- INICIO ---
+        const startBtn = document.getElementById('btn-start');
+        startBtn.addEventListener('click', () => {
+            // Ocultar pantalla negra de inicio
             document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('top-hud').style.display = 'flex';
-            document.getElementById('bottom-panel').style.display = 'flex';
+            // Mostrar UI del juego
+            document.getElementById('ui-layer').style.display = 'flex';
             
-            document.querySelector('a-scene').systems["mindar-image-system"].start();
-            setupMarkers();
+            // Arrancar MindAR
+            const scene = document.querySelector('a-scene');
+            scene.systems["mindar-image-system"].start();
+            
+            initMarkers();
         });
 
-        function setupMarkers() {
-            const wrapper = document.getElementById('targets-wrapper');
-            markerNames.forEach((name, index) => {
+        // --- GENERAR MARCADORES ---
+        function initMarkers() {
+            const group = document.getElementById('marker-group');
+            
+            markerList.forEach((name, idx) => {
                 const el = document.createElement('a-entity');
-                el.setAttribute('mindar-image-target', `targetIndex: ${index}`);
-                el.addEventListener('targetFound', () => { parseCardData(name); });
-                wrapper.appendChild(el);
+                el.setAttribute('mindar-image-target', `targetIndex: ${idx}`);
+                
+                el.addEventListener('targetFound', () => {
+                    readFileName(name);
+                });
+                
+                group.appendChild(el);
             });
         }
 
-        // --- 4. PARSEO DE DATOS (FIX SOLICITADO) ---
-        function parseCardData(filename) {
-            // filename ej: DRACO_SICA_1_I_6
-            const parts = filename.split('_'); 
+        // --- LÓGICA DE LECTURA (LO QUE PEDISTE) ---
+        function readFileName(fullName) {
+            // Formato: DRACO_SICA_1_I_6
+            const parts = fullName.split('_');
             
-            if (parts.length >= 5) {
-                const house = parts[0];   // DRACO
-                const weapon = parts[1];  // SICA
-                const modeLet = parts[3]; // I
-                const val = parseInt(parts[4]); // 6
+            if(parts.length >= 5) {
+                // 1. Nombre
+                const cardName = parts[0] + " - " + parts[1];
+                
+                // 2. Modo (Letra a Palabra Completa)
+                const code = parts[3];
+                let modeFull = "DESCONOCIDO";
+                if(code === 'I') modeFull = "IMPETUS";
+                if(code === 'T') modeFull = "TUTELA";
+                if(code === 'A') modeFull = "AUXILIUM";
+                if(code === 'M') modeFull = "MYSTERIUM";
 
-                // Guardamos datos
-                currentCard.house = house;
-                currentCard.weapon = weapon;
-                currentCard.modeCode = modeLet;
-                currentCard.modeFull = typeNames[modeLet] || "DESCONOCIDO";
-                currentCard.value = val;
+                // 3. Valor Numérico
+                const val = parseInt(parts[4]);
 
-                updateDisplay();
+                // Guardar en variable global
+                currentScan = { 
+                    name: cardName, 
+                    modeName: modeFull, 
+                    modeCode: code, 
+                    value: val 
+                };
+
+                updateScreenText();
             }
         }
 
-        function updateDisplay() {
-            // Actualizar textos HTML
-            const nameDiv = document.getElementById('card-name');
-            const statsDiv = document.getElementById('card-stats');
-            
-            // Texto superior: DRACO - SICA - IMPETUS
-            nameDiv.innerText = `${currentCard.house} - ${currentCard.weapon} - ${currentCard.modeFull}`;
-            
-            // Texto inferior: VALOR 6
-            statsDiv.innerHTML = `POTENCIA: <span class="stat-highlight">${currentCard.value}</span>`;
-            
-            // Feedback en consola
-            console.log(`Detectado: ${currentCard.house} ${currentCard.modeFull} con valor ${currentCard.value}`);
+        // --- ACTUALIZAR PANTALLA ---
+        function updateScreenText() {
+            document.getElementById('card-text').innerText = `${currentScan.name} [${currentScan.modeName}]`;
+            document.getElementById('val-display').innerText = currentScan.value;
         }
 
-        // --- 5. LOGICA DE BOTONES ---
-        // Solo funcionan si la carta está en la posición correcta (ej: Carta rotada en I para usar Botón I)
-        
+        // --- BOTONES DE ACCIÓN ---
         document.getElementById('btn-I').addEventListener('click', () => {
-            if (currentCard.modeCode === 'I') {
-                performAttack(currentCard.value);
+            if(currentScan.modeCode === 'I') {
+                eHP -= currentScan.value;
+                playVideoGeneric(); // Video normal
+                refreshHP();
             } else {
-                alert("¡GIRA LA CARTA A POSICIÓN DE ATAQUE (IMPETUS)!");
-            }
-        });
-
-        document.getElementById('btn-T').addEventListener('click', () => {
-            if (currentCard.modeCode === 'T') {
-                alert(`DEFENSA ${currentCard.modeFull} ACTIVA: +${currentCard.value}`);
-            } else {
-                alert("¡GIRA LA CARTA A TUTELA!");
+                alert("La carta no está en posición IMPETUS (Ataque)");
             }
         });
 
         document.getElementById('btn-A').addEventListener('click', () => {
-            if (currentCard.modeCode === 'A') {
-                healPlayer(currentCard.value);
+            if(currentScan.modeCode === 'A') {
+                pHP += (currentScan.value * 5); 
+                if(pHP > 100) pHP = 100;
+                refreshHP();
             } else {
-                alert("¡GIRA LA CARTA A AUXILIUM!");
+                alert("La carta no está en posición AUXILIUM (Curar)");
+            }
+        });
+
+        document.getElementById('btn-T').addEventListener('click', () => {
+            if(currentScan.modeCode === 'T') {
+                alert(`Defensa activada valor: ${currentScan.value}`);
+            } else {
+                alert("La carta no está en posición TUTELA (Defensa)");
             }
         });
 
         document.getElementById('btn-M').addEventListener('click', () => {
-            if (currentCard.modeCode === 'M') {
-                performMagic(currentCard.value);
+            if(currentScan.modeCode === 'M') {
+                eHP -= (currentScan.value * 2);
+                playVideoGeneric();
+                refreshHP();
             } else {
-                alert("¡GIRA LA CARTA A MYSTERIUM!");
+                alert("La carta no está en posición MYSTERIUM (Magia)");
             }
         });
 
-        // --- 6. FUNCIONES DE COMBATE Y VIDEO ---
-
-        function performAttack(dmg) {
-            enemyLife = Math.max(0, enemyLife - dmg);
-            updateBars();
-            playVideo(`${currentCard.house}_ATK`); // Nombre genérico de video
+        // --- UTILIDADES ---
+        function refreshHP() {
+            if(eHP < 0) eHP = 0;
+            document.getElementById('txt-hp-p').innerText = Math.floor(pHP);
+            document.getElementById('txt-hp-e').innerText = Math.floor(eHP);
+            document.getElementById('hp-p').style.width = pHP + "%";
+            document.getElementById('hp-e').style.width = eHP + "%";
         }
 
-        function performMagic(dmg) {
-            enemyLife = Math.max(0, enemyLife - (dmg * 2));
-            updateBars();
-            playVideo(`${currentCard.house}_MAG`);
-        }
-
-        function healPlayer(amount) {
-            playerLife = Math.min(100, playerLife + (amount * 5));
-            updateBars();
-        }
-
-        function updateBars() {
-            document.getElementById('player-hp').style.width = playerLife + '%';
-            document.getElementById('enemy-hp').style.width = enemyLife + '%';
-            document.getElementById('p-val').innerText = Math.floor(playerLife);
-            document.getElementById('e-val').innerText = Math.floor(enemyLife);
+        function playVideoGeneric() {
+            const vid = document.getElementById('hud-video');
+            const place = document.getElementById('vid-placeholder');
             
-            if (enemyLife <= 0) alert("VICTORIA - ENEMIGO ABATIDO");
-        }
-
-        // --- REPRODUCTOR DE VIDEO ---
-        function playVideo(videoName) {
-            const videoEl = document.getElementById('main-video');
-            const placeholder = document.getElementById('video-placeholder-text');
+            // Simulación de carga de video (aquí pondrás tu .src real)
+            place.style.display = 'none';
+            vid.style.display = 'block';
             
-            // Ocultar texto, mostrar video
-            placeholder.style.display = 'none';
-            videoEl.style.display = 'block';
-
-            // AQUÍ: Como no tienes los archivos aún, he puesto una ruta de ejemplo.
-            // Cuando tengas los mp4, guárdalos en una carpeta 'videos' y usa:
-            // videoEl.src = `videos/${videoName}.mp4`;
-            
-            // Por ahora, simulamos que carga algo para que no de error 404
-            console.log(`Intentando reproducir: videos/${videoName}.mp4`);
-            
-            // Si tuvieras el archivo, descomenta esto:
-            // videoEl.play();
-
-            // Simulación visual (borrar cuando tengas videos reales)
-            videoEl.style.backgroundColor = getFactionColor(currentCard.house);
+            // Como no hay archivo real, simulamos reproducción por 2 seg
+            vid.style.background = '#222'; 
             setTimeout(() => {
-                videoEl.style.display = 'none';
-                placeholder.style.display = 'block';
-                videoEl.style.backgroundColor = 'transparent';
+                vid.style.display = 'none';
+                place.style.display = 'block';
             }, 2000);
-        }
-
-        function getFactionColor(house) {
-            if (house === 'DRACO') return '#990000';
-            if (house === 'CAELUM') return '#000099';
-            return '#333';
         }
 
     </script>
