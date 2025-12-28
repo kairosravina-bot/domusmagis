@@ -5,11 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOMUS MAGI: REVELATIONS</title>
     
+    <!-- LIBRERÍAS ESTABLES -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; background: #000; }
+
+        /* DEBUGGER (Para saber si el sistema vive) */
+        #debug-console {
+            position: absolute; top: 5px; left: 5px; z-index: 9999;
+            color: red; font-size: 10px; font-family: monospace; pointer-events: none;
+        }
 
         /* UI LAYER */
         #ui-layer {
@@ -46,41 +53,22 @@
             pointer-events: auto;
         }
 
-        /* TANTEADOR DE DATOS (NUEVO DISEÑO 2 RENGLONES) */
         #scoreboard {
             padding: 10px; border-bottom: 1px solid #333;
             display: flex; flex-direction: column; gap: 8px;
         }
 
-        /* RENGLÓN 1: 3 COLUMNAS */
-        .row-top {
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px;
-        }
-        /* RENGLÓN 2: 2 COLUMNAS */
-        .row-bottom {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 5px;
-        }
+        .row-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+        .row-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
 
         .score-box { 
             background: rgba(255,255,255,0.1); padding: 8px 4px; 
-            border-radius: 6px; text-align: center; 
-            border: 1px solid #333;
+            border-radius: 6px; text-align: center; border: 1px solid #333;
         }
-        .label { 
-            color: #aaa; font-size: 10px; display: block; 
-            text-transform: uppercase; margin-bottom: 2px;
-        }
-        .val { 
-            color: #fff; font-size: 15px; font-weight: bold; /* Letra Mediana */
-            font-family: monospace; letter-spacing: 1px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
+        .label { color: #aaa; font-size: 10px; display: block; text-transform: uppercase; margin-bottom: 2px; }
+        .val { color: #fff; font-size: 15px; font-weight: bold; font-family: monospace; letter-spacing: 1px; }
 
-        /* BOTONERA */
-        #actions { 
-            display: flex; justify-content: center; gap: 15px; 
-            padding: 15px 10px; 
-        }
+        #actions { display: flex; justify-content: center; gap: 15px; padding: 15px 10px; }
         
         .btn-action {
             width: 65px; height: 65px; border-radius: 50%; 
@@ -91,14 +79,13 @@
         }
         .btn-sub { font-size: 11px; font-weight: normal; margin-top: -2px; }
 
-        /* ESTADOS ACTIVOS */
         .btn-action.unlocked {
             opacity: 1; cursor: pointer; color: white; border-color: white;
             box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1);
         }
         .btn-action.unlocked:active { transform: scale(0.95); }
 
-        /* COLORES */
+        /* Colores */
         #btn-i.unlocked { background: radial-gradient(#900, #300); border-color: #f55; }
         #btn-a.unlocked { background: radial-gradient(#090, #030); border-color: #5f5; }
         #btn-t.unlocked { background: radial-gradient(#777, #333); border-color: #ddd; }
@@ -108,8 +95,7 @@
         #start-screen {
             position: fixed; top:0; left:0; width:100%; height:100%;
             background: #000; z-index: 9999;
-            display: flex; flex-direction: column; 
-            align-items: center; justify-content: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         #btn-init {
             padding: 15px 50px; font-size: 18px; border-radius: 30px;
@@ -119,14 +105,15 @@
 </head>
 <body>
 
+    <div id="debug-console">System: Wait</div>
+
     <div id="start-screen">
         <h1 style="color:white; letter-spacing: 5px;">DOMUS MAGI</h1>
         <button id="btn-init">INICIAR SISTEMA</button>
+        <div id="loading-text" style="color:#888; margin-top:10px; display:none;">Cargando motor AR...</div>
     </div>
 
     <div id="ui-layer">
-        
-        <!-- VISOR -->
         <div id="video-container">
             <div id="system-msg">
                 SISTEMA VISUAL
@@ -137,36 +124,16 @@
 
         <div id="ar-zone"></div>
 
-        <!-- PANEL DE CONTROL -->
         <div id="control-panel">
-            
             <div id="scoreboard">
-                <!-- RENGLÓN 1: DATOS FIJOS -->
                 <div class="row-top">
-                    <div class="score-box">
-                        <span class="label">CASA</span>
-                        <span id="v-casa" class="val">---</span>
-                    </div>
-                    <div class="score-box">
-                        <span class="label">ESCUDO</span>
-                        <span id="v-escudo" class="val">---</span>
-                    </div>
-                    <div class="score-box">
-                        <span class="label">ARMA</span>
-                        <span id="v-arma" class="val">---</span>
-                    </div>
+                    <div class="score-box"><span class="label">CASA</span><span id="v-casa" class="val">---</span></div>
+                    <div class="score-box"><span class="label">ESCUDO</span><span id="v-escudo" class="val">---</span></div>
+                    <div class="score-box"><span class="label">ARMA</span><span id="v-arma" class="val">---</span></div>
                 </div>
-
-                <!-- RENGLÓN 2: DATOS DE JUEGO -->
                 <div class="row-bottom">
-                    <div class="score-box">
-                        <span class="label">POSICIÓN</span>
-                        <span id="v-posicion" class="val" style="color:#ff0">---</span>
-                    </div>
-                    <div class="score-box">
-                        <span class="label">VALOR</span>
-                        <span id="v-valor" class="val" style="color:#0f0">0</span>
-                    </div>
+                    <div class="score-box"><span class="label">POSICIÓN</span><span id="v-posicion" class="val" style="color:#ff0">---</span></div>
+                    <div class="score-box"><span class="label">VALOR</span><span id="v-valor" class="val" style="color:#0f0">0</span></div>
                 </div>
             </div>
 
@@ -179,23 +146,26 @@
         </div>
     </div>
 
-    <!-- ESCENA AR -->
+    <!-- ESCENA AR MEJORADA -->
+    <!-- 
+         missTolerance: Aumentado a 10 (permite perder frames sin cortar)
+         warmupTolerance: 5 (arranca más rápido)
+         filterMinCF: Reduce el temblor
+    -->
     <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF:0.0001; filterBeta: 0.001;" 
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; missTolerance: 10; warmupTolerance: 5; filterMinCF:0.0001; filterBeta: 0.001;" 
         vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false"
-        renderer="colorManagement: true; alpha: true">
+        renderer="colorManagement: true; alpha: true"
+        embedded>
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
         <a-entity id="carta-target" mindar-image-target="targetIndex: 0"></a-entity>
     </a-scene>
 
     <script>
-        // CONFIGURACIÓN DE LA CARTA
         const DATA_CARTA = {
-            casa: "DOMUS DRACO",
-            escudo: "DRAGÓN",
-            arma: "SICA",
+            casa: "DOMUS DRACO", escudo: "DRAGÓN", arma: "SICA",
             stats: {
                 IMPETUS:   { val: 6, vid: "ataque.mp4" },
                 AUXILIUM:  { val: 1, vid: "cura.mp4" },
@@ -204,39 +174,60 @@
             }
         };
 
-        // ELEMENTOS UI
         const lblEstado = document.getElementById('estado-tracking');
         const video = document.getElementById('main-video');
         const sysMsg = document.getElementById('system-msg');
         const botones = document.querySelectorAll('.btn-action');
-        
-        // CAMPOS DE TEXTO
+        const debugConsole = document.getElementById('debug-console');
+        const btnInit = document.getElementById('btn-init');
+        const loadingText = document.getElementById('loading-text');
+
         const uiCasa = document.getElementById('v-casa');
         const uiEscudo = document.getElementById('v-escudo');
         const uiArma = document.getElementById('v-arma');
         const uiPos = document.getElementById('v-posicion');
         const uiVal = document.getElementById('v-valor');
 
-        // INICIO
-        document.getElementById('btn-init').addEventListener('click', async () => {
-            document.getElementById('start-screen').style.display = 'none';
-            await document.querySelector('a-scene').systems['mindar-image-system'].start();
+        // --- INICIALIZACIÓN SEGURA ---
+        btnInit.addEventListener('click', () => {
+            btnInit.style.display = 'none';
+            loadingText.style.display = 'block';
+            
+            const sceneEl = document.querySelector('a-scene');
+            
+            // Función para arrancar MindAR
+            const startAR = async () => {
+                try {
+                    await sceneEl.systems['mindar-image-system'].start();
+                    document.getElementById('start-screen').style.display = 'none';
+                    debugConsole.innerText = "System: Running";
+                } catch (e) {
+                    console.error(e);
+                    debugConsole.innerText = "Error: " + e;
+                    loadingText.innerText = "Error de cámara. Recarga y permite permisos.";
+                }
+            };
+
+            // Esperar a que A-Frame esté cargado antes de llamar al sistema
+            if (sceneEl.hasLoaded) {
+                startAR();
+            } else {
+                sceneEl.addEventListener('loaded', startAR);
+            }
         });
 
-        // --- LÓGICA DE TRACKING (FUNDAMENTAL) ---
+        // --- TRACKING ---
         const target = document.getElementById('carta-target');
 
-        // 1. CUANDO ENFOCA
         target.addEventListener('targetFound', () => {
+            debugConsole.innerText = "System: Target Found";
             lblEstado.innerText = "ENFOCADA";
-            lblEstado.style.color = "#0f0"; // Verde
+            lblEstado.style.color = "#0f0";
             
-            // Llenar Datos Fijos
             uiCasa.innerText = DATA_CARTA.casa;
             uiEscudo.innerText = DATA_CARTA.escudo;
             uiArma.innerText = DATA_CARTA.arma;
 
-            // Desbloquear Botones
             botones.forEach(btn => {
                 const tipo = btn.getAttribute('data-type');
                 btn.querySelector('.btn-sub').innerText = DATA_CARTA.stats[tipo].val;
@@ -244,50 +235,43 @@
             });
         });
 
-        // 2. CUANDO PIERDE FOCO (REINICIO)
         target.addEventListener('targetLost', () => {
+            debugConsole.innerText = "System: Scanning...";
             lblEstado.innerText = "BUSCANDO...";
-            lblEstado.style.color = "#f00"; // Rojo
+            lblEstado.style.color = "#f00";
             
-            // Reiniciar Textos
             uiCasa.innerText = "---";
             uiEscudo.innerText = "---";
             uiArma.innerText = "---";
             uiPos.innerText = "---";
             uiVal.innerText = "0";
             
-            // Detener video si estaba sonando y volver al mensaje
             video.pause();
             video.style.display = 'none';
             sysMsg.style.display = 'block';
 
-            // BLOQUEAR Botones
             botones.forEach(btn => {
                 btn.classList.remove('unlocked');
             });
         });
 
-        // --- LÓGICA DE BOTONES ---
+        // --- BOTONES ---
         botones.forEach(btn => {
             btn.addEventListener('click', () => {
-                // Seguridad extra: si no tiene la clase 'unlocked', no hace nada
                 if (!btn.classList.contains('unlocked')) return;
 
                 const tipo = btn.getAttribute('data-type');
                 const data = DATA_CARTA.stats[tipo];
 
-                // 1. Llenar los campos de juego (Renglón 2)
                 uiPos.innerText = tipo;
                 uiVal.innerText = data.val;
-
-                // Color según tipo
+                
                 let color = "#fff";
                 if(tipo === 'IMPETUS') color = "#f55";
                 if(tipo === 'AUXILIUM') color = "#5f5";
                 if(tipo === 'MYSTERIUM') color = "#d5f";
                 uiPos.style.color = color;
 
-                // 2. Reproducir Video
                 sysMsg.style.display = 'none';
                 video.style.display = 'block';
                 video.src = data.vid;
@@ -295,7 +279,6 @@
             });
         });
 
-        // Al terminar video
         video.addEventListener('ended', () => {
             video.style.display = 'none';
             sysMsg.style.display = 'block';
