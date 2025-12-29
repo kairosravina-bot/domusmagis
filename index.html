@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOMUS MAGI - Detector AR</title>
+    <title>DOMUS MAGI - Detector 4 Cartas</title>
     
     <script type="importmap">
     {
@@ -74,11 +74,11 @@
             left: 50%;
             transform: translate(-50%, -50%);
             width: 60vw;
-            height: 80vw;
-            max-width: 280px;
-            max-height: 380px;
+            height: 60vw;
+            max-width: 300px;
+            max-height: 300px;
             border: 4px solid rgba(255, 0, 0, 0.7);
-            border-radius: 15px;
+            border-radius: 20px;
             box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
             pointer-events: none;
             z-index: 5;
@@ -100,12 +100,12 @@
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.9);
-            padding: 15px 30px;
-            border-radius: 10px;
-            border: 2px solid #fff;
+            padding: 20px 30px;
+            border-radius: 15px;
+            border: 3px solid #fff;
             z-index: 15;
             display: none;
-            min-width: 300px;
+            min-width: 320px;
         }
 
         #info-panel.visible {
@@ -124,26 +124,40 @@
             }
         }
 
+        #carta-titulo {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
         .info-item {
             color: #fff;
             font-size: 18px;
-            margin: 8px 0;
+            margin: 10px 0;
             text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .info-label {
             color: #888;
-            font-size: 12px;
+            font-size: 14px;
             text-transform: uppercase;
-            display: inline-block;
-            width: 80px;
-            text-align: right;
-            margin-right: 10px;
+            flex: 1;
+            text-align: left;
         }
 
         .info-value {
             font-weight: bold;
             letter-spacing: 1px;
+            font-size: 20px;
+            flex: 2;
+            text-align: right;
         }
 
         /* CONTROLES */
@@ -216,6 +230,12 @@
             letter-spacing: 1px;
         }
 
+        /* COLORES POR CASA */
+        .draco { color: #00d4ff; text-shadow: 0 0 10px #00d4ff; }
+        .aquila { color: #5fd4ff; text-shadow: 0 0 10px #5fd4ff; }
+        .leo { color: #ff9900; text-shadow: 0 0 10px #ff9900; }
+        .aper { color: #ff5500; text-shadow: 0 0 10px #ff5500; }
+
         /* RESPONSIVE */
         @media (max-width: 600px) {
             #mensaje {
@@ -228,12 +248,20 @@
             }
             
             #info-panel {
-                min-width: 250px;
-                padding: 12px 20px;
+                min-width: 280px;
+                padding: 15px 20px;
+            }
+            
+            #carta-titulo {
+                font-size: 20px;
             }
             
             .info-item {
                 font-size: 16px;
+            }
+            
+            .info-value {
+                font-size: 18px;
             }
         }
     </style>
@@ -253,22 +281,23 @@
 
     <!-- PANEL INFORMACIÓN -->
     <div id="info-panel">
+        <div id="carta-titulo">---</div>
         <div class="info-item">
             <span class="info-label">Casa:</span> 
-            <span class="info-value" style="color:#00ffff;">DOMUS DRACO</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Escudo:</span> 
-            <span class="info-value" style="color:#ffaa00;">DRAGÓN</span>
+            <span id="info-casa" class="info-value">---</span>
         </div>
         <div class="info-item">
             <span class="info-label">Arma:</span> 
-            <span class="info-value" style="color:#ff0;">SICA</span>
+            <span id="info-arma" class="info-value">SICA</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Nivel:</span> 
+            <span id="info-nivel" class="info-value">1</span>
         </div>
     </div>
 
     <!-- TEXTO AYUDA -->
-    <div id="hint-text">Ubica la carta en el marco rojo</div>
+    <div id="hint-text">Ubica cualquier carta en el marco rojo</div>
 
     <!-- CONTROLES -->
     <div id="controles">
@@ -284,88 +313,139 @@
         const mensaje = document.getElementById('mensaje');
         const guiaMarco = document.getElementById('guia-marco');
         const infoPanel = document.getElementById('info-panel');
+        const cartaTitulo = document.getElementById('carta-titulo');
+        const infoCasa = document.getElementById('info-casa');
+        const infoArma = document.getElementById('info-arma');
+        const infoNivel = document.getElementById('info-nivel');
         const hintText = document.getElementById('hint-text');
         const startButton = document.getElementById('startButton');
         const stopButton = document.getElementById('stopButton');
 
         // VARIABLES
         let mindarThree;
-        let isDetected = false;
         let isRunning = false;
 
-        // DATOS DE LA CARTA
-        const cartaData = {
-            casa: "DOMUS DRACO",
-            escudo: "DRAGÓN",
-            arma: "SICA",
-            stats: {
-                IMPETUS: 6,
-                AUXILIUM: 1,
-                TUTELA: 2,
-                MYSTERIUM: 1
+        // DATOS DE LAS 4 CARTAS
+        const cartasData = {
+            0: { // DOMUS DRACO
+                nombre: "DOMUS DRACO",
+                casa: "DRACO",
+                arma: "SICA",
+                nivel: 1,
+                color: "draco",
+                colorHex: 0x00d4ff
+            },
+            1: { // DOMUS AQUILA
+                nombre: "DOMUS AQUILA",
+                casa: "AQUILA",
+                arma: "SICA",
+                nivel: 1,
+                color: "aquila",
+                colorHex: 0x5fd4ff
+            },
+            2: { // DOMUS LEO
+                nombre: "DOMUS LEO",
+                casa: "LEO",
+                arma: "SICA",
+                nivel: 1,
+                color: "leo",
+                colorHex: 0xff9900
+            },
+            3: { // DOMUS APER
+                nombre: "DOMUS APER",
+                casa: "APER",
+                arma: "SICA",
+                nivel: 1,
+                color: "aper",
+                colorHex: 0xff5500
             }
         };
 
-        // INICIALIZAR AR
+        // INICIALIZAR AR CON 4 TARGETS
         const initAR = async () => {
-            console.log("🚀 Inicializando MindAR...");
+            console.log("🚀 Inicializando MindAR con 4 targets...");
 
             mindarThree = new MindARThree({
                 container: document.querySelector("#container"),
-                imageTargetSrc: "./targets.mind" // CAMBIA ESTA RUTA SI ES NECESARIO
+                imageTargetSrc: "./targets.mind" // Debe contener las 4 cartas
             });
 
             const { renderer, scene, camera } = mindarThree;
 
-            // Crear ancla (punto de detección)
-            const anchor = mindarThree.addAnchor(0);
+            // Crear anclas para cada carta (0 a 3)
+            for (let i = 0; i < 4; i++) {
+                const anchor = mindarThree.addAnchor(i);
+                const cartaInfo = cartasData[i];
 
-            // Crear objeto 3D visible sobre la carta
-            const geometry = new THREE.PlaneGeometry(1, 1.4); // Proporción de carta
-            const material = new THREE.MeshBasicMaterial({ 
-                color: 0x00ff00, 
-                transparent: true, 
-                opacity: 0.3,
-                side: THREE.DoubleSide
-            });
-            const plane = new THREE.Mesh(geometry, material);
-            anchor.group.add(plane);
+                // Crear plano 3D con color de la casa
+                const geometry = new THREE.PlaneGeometry(1, 1);
+                const material = new THREE.MeshBasicMaterial({ 
+                    color: cartaInfo.colorHex,
+                    transparent: true, 
+                    opacity: 0.4,
+                    side: THREE.DoubleSide
+                });
+                const plane = new THREE.Mesh(geometry, material);
+                anchor.group.add(plane);
 
-            // Agregar un borde visible
-            const edgesGeometry = new THREE.EdgesGeometry(geometry);
-            const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 2 });
-            const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
-            anchor.group.add(edges);
+                // Borde
+                const edgesGeometry = new THREE.EdgesGeometry(geometry);
+                const edgesMaterial = new THREE.LineBasicMaterial({ 
+                    color: cartaInfo.colorHex,
+                    linewidth: 3
+                });
+                const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+                anchor.group.add(edges);
 
-            // EVENTOS DE DETECCIÓN
-            anchor.onTargetFound = () => {
-                console.log("✅ ¡CARTA DETECTADA!");
-                isDetected = true;
-                
-                mensaje.innerText = "✓ DETECTADA";
-                mensaje.style.color = "#0f0";
-                mensaje.style.fontSize = "64px";
-                
-                guiaMarco.classList.add('detectado');
-                infoPanel.classList.add('visible');
-                hintText.style.display = 'none';
-            };
+                // EVENTOS DE DETECCIÓN
+                anchor.onTargetFound = () => {
+                    console.log(`✅ Carta ${i} detectada: ${cartaInfo.nombre}`);
+                    mostrarInfoCarta(cartaInfo);
+                };
 
-            anchor.onTargetLost = () => {
-                console.log("❌ Carta perdida");
-                isDetected = false;
-                
-                mensaje.innerText = "Buscando carta...";
-                mensaje.style.color = "#ffff00";
-                mensaje.style.fontSize = "48px";
-                
-                guiaMarco.classList.remove('detectado');
-                infoPanel.classList.remove('visible');
-                hintText.style.display = 'block';
-            };
+                anchor.onTargetLost = () => {
+                    console.log(`❌ Carta ${i} perdida: ${cartaInfo.nombre}`);
+                    ocultarInfoCarta();
+                };
+            }
 
             return { renderer, scene, camera };
         };
+
+        // MOSTRAR INFO DE LA CARTA
+        function mostrarInfoCarta(carta) {
+            mensaje.innerText = "✓ DETECTADA";
+            mensaje.style.color = "#0f0";
+            mensaje.style.fontSize = "64px";
+            
+            guiaMarco.classList.add('detectado');
+            infoPanel.classList.add('visible');
+            hintText.style.display = 'none';
+
+            // Actualizar datos
+            cartaTitulo.innerText = carta.nombre;
+            cartaTitulo.className = carta.color;
+            
+            infoCasa.innerText = carta.casa;
+            infoCasa.className = `info-value ${carta.color}`;
+            
+            infoArma.innerText = carta.arma;
+            infoArma.style.color = "#ffff00";
+            
+            infoNivel.innerText = carta.nivel;
+            infoNivel.style.color = "#ffffff";
+        }
+
+        // OCULTAR INFO
+        function ocultarInfoCarta() {
+            mensaje.innerText = "Buscando carta...";
+            mensaje.style.color = "#ffff00";
+            mensaje.style.fontSize = "48px";
+            
+            guiaMarco.classList.remove('detectado');
+            infoPanel.classList.remove('visible');
+            hintText.style.display = 'block';
+        }
 
         // BOTÓN INICIAR
         startButton.addEventListener('click', async () => {
@@ -382,7 +462,7 @@
                 console.log("📹 Solicitando permiso de cámara...");
                 await mindarThree.start();
                 
-                console.log("✅ Sistema AR activo");
+                console.log("✅ Sistema AR activo con 4 targets");
                 isRunning = true;
 
                 // Loop de renderizado
@@ -398,7 +478,7 @@
                 startButton.style.display = 'none';
                 stopButton.style.display = 'block';
                 
-                console.log("🎉 ¡Todo listo! Apunta a tu carta.");
+                console.log("🎉 ¡Todo listo! Apunta a cualquiera de las 4 cartas.");
 
             } catch (error) {
                 console.error("❌ Error al iniciar AR:", error);
@@ -410,7 +490,7 @@
                 startButton.innerText = "Reintentar";
                 startButton.disabled = false;
                 
-                alert("Error: " + error.message + "\n\nAsegúrate de:\n1. Permitir acceso a la cámara\n2. Tener el archivo targets.mind en la carpeta");
+                alert("Error: " + error.message + "\n\nAsegúrate de:\n1. Permitir acceso a la cámara\n2. Tener el archivo targets.mind con las 4 cartas");
             }
         });
 
@@ -424,7 +504,6 @@
             }
             
             isRunning = false;
-            isDetected = false;
             
             mensaje.innerText = "Sistema detenido";
             mensaje.style.color = "#fff";
@@ -444,7 +523,7 @@
 
         // Log inicial
         console.log("📱 Aplicación cargada");
-        console.log("🎯 Datos de carta:", cartaData);
+        console.log("🎯 4 Cartas configuradas:", cartasData);
     </script>
 </body>
 </html>
