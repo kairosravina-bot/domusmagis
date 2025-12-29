@@ -1,273 +1,212 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: REVELATIONS</title>
-    
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DOMUS MAGI: REVELATIONS</title>
 
-    <style>
-        /* --- ESTÉTICA QUE TE GUSTA (INTACTA) --- */
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #000; /* Negro sólido */
-            overflow: hidden; font-family: sans-serif;
-        }
+<script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
-        /* UI FLOTANTE */
-        #ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 999; display: flex; flex-direction: column;
-            pointer-events: none;
-        }
-
-        /* 1. VISOR SUPERIOR */
-        #top-visor {
-            height: 35%; width: 100%; background: #000;
-            border-bottom: 2px solid #555; pointer-events: auto;
-            position: relative; display: flex; align-items: center; justify-content: center;
-        }
-        /* IMPORTANTE: Quitamos 'muted' para que suene */
-        #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
-        #msg-visor { color: white; text-align: center; }
-
-        /* 2. ZONA CENTRAL */
-        #middle-cam {
-            flex-grow: 1; position: relative;
-            display: flex; align-items: center; justify-content: center;
-        }
-        #guia-box {
-            width: 250px; height: 350px;
-            border: 4px solid red; border-radius: 10px;
-            box-shadow: 0 0 20px rgba(255,0,0,0.5);
-            transition: 0.3s;
-        }
-        #guia-box.ok { border-color: #0f0; box-shadow: 0 0 50px #0f0; }
-
-        /* 3. PANEL INFERIOR */
-        #bottom-panel {
-            height: auto; background: #111;
-            border-top: 2px solid #fff; pointer-events: auto;
-            display: flex; flex-direction: column; gap: 10px; padding: 10px;
-            padding-bottom: 30px;
-        }
-
-        /* BOTÓN DE ARRANQUE (AMARILLO) */
-        #btn-scan-container { width: 100%; display: flex; justify-content: center; }
-        #btn-scan {
-            background: #ffcc00; color: #000;
-            border: none; padding: 15px 0; width: 90%;
-            font-size: 18px; font-weight: bold; border-radius: 8px;
-            cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
-        }
-        #btn-scan:active { transform: scale(0.95); background: #fff; }
-
-        /* GRID DE DATOS */
-        #info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
-        .info-box { background: #222; border: 1px solid #444; text-align: center; padding: 5px; }
-        .lbl { font-size: 10px; color: #aaa; display: block; }
-        .val { font-size: 12px; color: #fff; font-weight: bold; }
-
-        /* BOTONES DE PODER */
-        #powers-grid { display: flex; justify-content: center; gap: 15px; margin-top: 5px; }
-        .pwr-btn {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: #333; border: 2px solid #555; color: #777;
-            font-size: 20px; font-weight: bold;
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0.5; transition: 0.2s;
-        }
-        .pwr-btn.active { opacity: 1; color: #fff; border-color: #fff; cursor: pointer; transform: scale(1.05); }
-        
-        #btn-i.active { background: #800; box-shadow: 0 0 10px red; }
-        #btn-a.active { background: #080; box-shadow: 0 0 10px lime; }
-        #btn-t.active { background: #555; box-shadow: 0 0 10px gray; }
-        #btn-m.active { background: #508; box-shadow: 0 0 10px purple; }
-
-    </style>
+<style>
+body,html{
+    margin:0;padding:0;width:100%;height:100%;
+    background:#000;overflow:hidden;font-family:sans-serif
+}
+#ui-layer{
+    position:absolute;top:0;left:0;width:100%;height:100%;
+    z-index:999;display:flex;flex-direction:column;pointer-events:none
+}
+#top-visor{
+    height:35%;background:#000;border-bottom:2px solid #555;
+    display:flex;align-items:center;justify-content:center;
+    pointer-events:auto;position:relative
+}
+#video-player{
+    width:100%;height:100%;object-fit:contain;display:none
+}
+#msg-visor{color:#fff;text-align:center}
+#middle-cam{
+    flex-grow:1;display:flex;align-items:center;justify-content:center
+}
+#guia-box{
+    width:250px;height:350px;border:4px solid red;border-radius:10px;
+    box-shadow:0 0 20px rgba(255,0,0,.5);transition:.3s
+}
+#guia-box.ok{
+    border-color:#0f0;box-shadow:0 0 50px #0f0
+}
+#bottom-panel{
+    background:#111;border-top:2px solid #fff;
+    pointer-events:auto;display:flex;flex-direction:column;
+    gap:10px;padding:10px 10px 30px
+}
+#btn-scan-container{display:flex;justify-content:center}
+#btn-scan{
+    background:#ffcc00;color:#000;border:none;
+    padding:15px 0;width:90%;font-size:18px;
+    font-weight:bold;border-radius:8px;
+    box-shadow:0 0 15px rgba(255,204,0,.4)
+}
+#info-grid{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px
+}
+.info-box{
+    background:#222;border:1px solid #444;
+    text-align:center;padding:5px
+}
+.lbl{font-size:10px;color:#aaa}
+.val{font-size:12px;color:#fff;font-weight:bold}
+#powers-grid{
+    display:flex;justify-content:center;gap:15px
+}
+.pwr-btn{
+    width:60px;height:60px;border-radius:50%;
+    background:#333;border:2px solid #555;
+    display:flex;align-items:center;justify-content:center;
+    opacity:.5;color:#777;font-size:20px;font-weight:bold
+}
+.pwr-btn.active{
+    opacity:1;color:#fff;border-color:#fff;
+    transform:scale(1.05)
+}
+#btn-i.active{background:#800;box-shadow:0 0 10px red}
+#btn-a.active{background:#080;box-shadow:0 0 10px lime}
+#btn-t.active{background:#555;box-shadow:0 0 10px gray}
+#btn-m.active{background:#508;box-shadow:0 0 10px purple}
+</style>
 </head>
+
 <body>
 
-    <div id="ui-layer">
-        <!-- VISOR -->
-        <div id="top-visor">
-            <div id="msg-visor">SISTEMA APAGADO<br><span style="font-size:10px; color:#f90">Dale al botón amarillo</span></div>
-            <!-- playsinline es clave para móviles, quitamos muted para audio -->
-            <video id="video-player" playsinline webkit-playsinline></video>
-        </div>
-
-        <!-- GUÍA -->
-        <div id="middle-cam">
-            <div id="guia-box"></div>
-        </div>
-
-        <!-- CONTROLES -->
-        <div id="bottom-panel">
-            <div id="btn-scan-container">
-                <button id="btn-scan">ACTIVAR CÁMARA</button>
-            </div>
-
-            <div id="info-grid">
-                <div class="info-box"><span class="lbl">CASA</span><span id="txt-casa" class="val">---</span></div>
-                <div class="info-box"><span class="lbl">ARMA</span><span id="txt-arma" class="val">---</span></div>
-                <div class="info-box"><span class="lbl">ACCIÓN</span><span id="txt-accion" class="val" style="color:yellow">---</span></div>
-            </div>
-
-            <div id="powers-grid">
-                <div id="btn-i" class="pwr-btn" data-id="IMPETUS">I</div>
-                <div id="btn-a" class="pwr-btn" data-id="AUXILIUM">A</div>
-                <div id="btn-t" class="pwr-btn" data-id="TUTELA">T</div>
-                <div id="btn-m" class="pwr-btn" data-id="MYSTERIUM">M</div>
-            </div>
-        </div>
+<div id="ui-layer">
+    <div id="top-visor">
+        <div id="msg-visor">SISTEMA APAGADO<br><span style="font-size:10px;color:#f90">Dale al botón amarillo</span></div>
+        <video id="video-player" playsinline webkit-playsinline></video>
     </div>
 
-    <!-- ESCENA MINDAR (OCULTA) -->
-    <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF:0.001; filterBeta: 0.01;" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false"
-        renderer="colorManagement: true; alpha: true">
-        
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-entity id="target-carta" mindar-image-target="targetIndex: 0"></a-entity>
-    </a-scene>
+    <div id="middle-cam">
+        <div id="guia-box"></div>
+    </div>
 
-    <script>
-        // DATOS
-        const DB = {
-            casa: "DOMUS DRACO", arma: "SICA",
-            movs: {
-                IMPETUS: { v: 6, mp4: "ataque.mp4" },
-                AUXILIUM: { v: 1, mp4: "cura.mp4" },
-                TUTELA: { v: 2, mp4: "defensa.mp4" },
-                MYSTERIUM: { v: 1, mp4: "magia.mp4" }
-            }
-        };
+    <div id="bottom-panel">
+        <div id="btn-scan-container">
+            <button id="btn-scan">ACTIVAR CÁMARA</button>
+        </div>
 
-        // REFERENCIAS UI
-        const btnScan = document.getElementById('btn-scan');
-        const msgVisor = document.getElementById('msg-visor');
-        const guiaBox = document.getElementById('guia-box');
-        const videoPlayer = document.getElementById('video-player');
-        
-        const txtCasa = document.getElementById('txt-casa');
-        const txtArma = document.getElementById('txt-arma');
-        const txtAccion = document.getElementById('txt-accion');
-        const btns = document.querySelectorAll('.pwr-btn');
+        <div id="info-grid">
+            <div class="info-box"><span class="lbl">CASA</span><span id="txt-casa" class="val">---</span></div>
+            <div class="info-box"><span class="lbl">ARMA</span><span id="txt-arma" class="val">---</span></div>
+            <div class="info-box"><span class="lbl">ACCIÓN</span><span id="txt-accion" class="val">---</span></div>
+        </div>
 
-        // --- ARREGLO 1: FUNCIÓN DE INICIO SEGURA ---
-        btnScan.addEventListener('click', () => {
-            btnScan.innerText = "CARGANDO MOTOR...";
-            btnScan.disabled = true;
+        <div id="powers-grid">
+            <div id="btn-i" class="pwr-btn" data-id="IMPETUS">I</div>
+            <div id="btn-a" class="pwr-btn" data-id="AUXILIUM">A</div>
+            <div id="btn-t" class="pwr-btn" data-id="TUTELA">T</div>
+            <div id="btn-m" class="pwr-btn" data-id="MYSTERIUM">M</div>
+        </div>
+    </div>
+</div>
 
-            // TRUCO DE SONIDO: Desbloquear audio del navegador
-            // Reproducimos y pausamos inmediatamente para ganar "permiso de audio"
-            videoPlayer.volume = 1.0; // Volumen al máximo
-            videoPlayer.play().then(() => {
-                videoPlayer.pause();
-                videoPlayer.currentTime = 0;
-            }).catch((e) => { console.log("Audio unlock intentado"); });
+<a-scene
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart:false; uiLoading:no; uiScanning:no"
+    vr-mode-ui="enabled:false"
+    device-orientation-permission-ui="enabled:false"
+    renderer="colorManagement:true; alpha:true">
 
-            const scene = document.querySelector('a-scene');
+    <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
+    <a-entity id="target-carta" mindar-image-target="targetIndex:0"></a-entity>
+</a-scene>
 
-            // Función interna para arrancar
-            const runSystem = async () => {
-                try {
-                    msgVisor.innerText = "ACCEDIENDO A CÁMARA...";
-                    await scene.systems['mindar-image-system'].start();
-                    
-                    // ÉXITO
-                    btnScan.style.display = 'none'; // Ocultar botón
-                    msgVisor.innerHTML = "ESCANEA LA CARTA<br><span style='font-size:10px; color:#0f0'>Sistema Listo</span>";
-                } catch (err) {
-                    console.error(err);
-                    alert("Error cámara: " + err.message);
-                    btnScan.innerText = "REINTENTAR";
-                    btnScan.disabled = false;
-                }
-            };
+<script>
+const DB={
+    casa:"DOMUS DRACO",
+    arma:"SICA",
+    movs:{
+        IMPETUS:{v:6,mp4:"ataque.mp4"},
+        AUXILIUM:{v:1,mp4:"cura.mp4"},
+        TUTELA:{v:2,mp4:"defensa.mp4"},
+        MYSTERIUM:{v:1,mp4:"magia.mp4"}
+    }
+};
 
-            // VERIFICAMOS SI A-FRAME ESTÁ LISTO
-            if (scene.hasLoaded) {
-                runSystem();
-            } else {
-                scene.addEventListener('loaded', runSystem);
-            }
-        });
+const btnScan=document.getElementById("btn-scan");
+const msgVisor=document.getElementById("msg-visor");
+const guiaBox=document.getElementById("guia-box");
+const videoPlayer=document.getElementById("video-player");
+const txtCasa=document.getElementById("txt-casa");
+const txtArma=document.getElementById("txt-arma");
+const txtAccion=document.getElementById("txt-accion");
+const btns=document.querySelectorAll(".pwr-btn");
+const scene=document.querySelector("a-scene");
+const target=document.getElementById("target-carta");
 
-        // --- ARREGLO 2: DETECCIÓN ---
-        const target = document.getElementById('target-carta');
+let started=false;
 
-        target.addEventListener('targetFound', () => {
-            guiaBox.classList.add('ok'); // Verde
-            msgVisor.innerText = "ENFOCADO - SELECCIONA ACCIÓN";
-            msgVisor.style.color = "#0f0";
+videoPlayer.preload="auto";
+videoPlayer.muted=false;
+videoPlayer.volume=1;
 
-            txtCasa.innerText = DB.casa;
-            txtArma.innerText = DB.arma;
+btnScan.addEventListener("click",async()=>{
+    if(started)return;
+    btnScan.innerText="INICIALIZANDO...";
+    btnScan.disabled=true;
 
-            // Activar botones
-            btns.forEach(b => b.classList.add('active'));
-        });
+    try{await videoPlayer.play();videoPlayer.pause();}catch(e){}
 
-        target.addEventListener('targetLost', () => {
-            guiaBox.classList.remove('ok'); // Rojo
-            msgVisor.innerText = "BUSCANDO...";
-            msgVisor.style.color = "#fff";
+    const start=async()=>{
+        try{
+            await scene.systems["mindar-image-system"].start();
+            started=true;
+            btnScan.style.display="none";
+            msgVisor.innerHTML="ESCANEA LA CARTA<br><span style='font-size:10px;color:#0f0'>Sistema listo</span>";
+        }catch(e){
+            alert("Error cámara");
+            btnScan.disabled=false;
+            btnScan.innerText="REINTENTAR";
+        }
+    };
 
-            // Pausar video si se pierde la carta
-            videoPlayer.pause();
-            videoPlayer.style.display = 'none';
-            msgVisor.style.display = 'block';
+    scene.hasLoaded?start():scene.addEventListener("loaded",start);
+});
 
-            // Desactivar botones
-            btns.forEach(b => b.classList.remove('active'));
-        });
+target.addEventListener("targetFound",()=>{
+    guiaBox.classList.add("ok");
+    msgVisor.innerText="ENFOCADO - SELECCIONÁ ACCIÓN";
+    txtCasa.innerText=DB.casa;
+    txtArma.innerText=DB.arma;
+    btns.forEach(b=>b.classList.add("active"));
+});
 
-        // --- ARREGLO 3: REPRODUCCIÓN ---
-        btns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                if(!btn.classList.contains('active')) return;
+target.addEventListener("targetLost",()=>{
+    guiaBox.classList.remove("ok");
+    msgVisor.innerText="BUSCANDO...";
+    videoPlayer.pause();
+    videoPlayer.style.display="none";
+    msgVisor.style.display="block";
+    btns.forEach(b=>b.classList.remove("active"));
+});
 
-                const id = btn.getAttribute('data-id');
-                const data = DB.movs[id];
+btns.forEach(btn=>{
+    btn.addEventListener("click",async()=>{
+        if(!btn.classList.contains("active"))return;
+        const d=DB.movs[btn.dataset.id];
+        txtAccion.innerText=`${btn.dataset.id} [${d.v}]`;
+        msgVisor.style.display="none";
+        videoPlayer.style.display="block";
+        videoPlayer.src=d.mp4;
+        videoPlayer.currentTime=0;
+        try{await videoPlayer.play();}catch(e){alert("Tocá la pantalla")}
+    });
+});
 
-                // Actualizar UI
-                txtAccion.innerText = `${id} [${data.v}]`;
-                if(id == 'IMPETUS') txtAccion.style.color = 'red';
-                else if(id == 'AUXILIUM') txtAccion.style.color = 'lime';
-                else if(id == 'MYSTERIUM') txtAccion.style.color = 'magenta';
-                else txtAccion.style.color = 'white';
+videoPlayer.addEventListener("ended",()=>{
+    videoPlayer.style.display="none";
+    msgVisor.style.display="block";
+    msgVisor.innerText="TURNO FINALIZADO";
+});
+</script>
 
-                // Reproducir Video CON SONIDO
-                msgVisor.style.display = 'none';
-                videoPlayer.style.display = 'block';
-                videoPlayer.src = data.mp4;
-                videoPlayer.currentTime = 0;
-                videoPlayer.muted = false; // Asegurar que no está muteado
-                videoPlayer.volume = 1.0;  // Volumen al 100%
-                
-                const playPromise = videoPlayer.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.error("Error reproducción:", error);
-                        alert("Toca la pantalla para activar sonido");
-                    });
-                }
-            });
-        });
-
-        // Al terminar video
-        videoPlayer.addEventListener('ended', () => {
-            videoPlayer.style.display = 'none';
-            msgVisor.style.display = 'block';
-            msgVisor.innerText = "TURNO FINALIZADO";
-        });
-
-    </script>
 </body>
 </html>
