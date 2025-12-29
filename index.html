@@ -2,96 +2,77 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DEBUGGER DE DETECCION</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEST DE CAMARA</title>
     
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; font-family: monospace; }
-        
-        #info-panel {
-            position: fixed; top: 10px; left: 10px;
-            background: rgba(0,0,0,0.8); color: lime;
-            padding: 10px; border: 1px solid lime;
-            z-index: 9999; pointer-events: none;
-            font-size: 14px; max-width: 80%;
+        /* FONDO NEGRO FORZADO PARA QUE NO TE QUEME LA VISTA */
+        body, html { 
+            background-color: black !important; 
+            margin: 0; height: 100%; overflow: hidden; color: white; 
+            font-family: monospace;
         }
 
-        #cuadro-guia {
-            position: fixed; top: 50%; left: 50%;
-            width: 60vw; height: 60vw;
-            transform: translate(-50%, -50%);
-            border: 2px dashed yellow;
-            z-index: 500; pointer-events: none;
+        #error-log {
+            position: absolute; top: 0; left: 0; width: 100%;
+            padding: 20px; color: red; font-size: 18px; 
+            background: rgba(0,0,0,0.8); z-index: 9999;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
 
-    <!-- PANEL DE INFORMACIÓN EN TIEMPO REAL -->
-    <div id="info-panel">
-        ESTADO: <span id="status">INICIANDO...</span><br>
-        <br>
-        1. Si ves la cámara, el código está bien.<br>
-        2. Si no detecta la carta, el archivo .mind está mal.<br>
-        3. Acerca y aleja la carta lentamente.
+    <div id="error-log">
+        1. INICIANDO SISTEMA...<br>
+        2. SI ESTO SIGUE NEGRO, LEE ABAJO:<br>
     </div>
 
-    <div id="cuadro-guia"></div>
-
-    <!-- 
-        CONFIGURACIÓN "AGRESIVA" PARA DETECCIÓN 
-        missTolerance: 0 (No perdona fallos, busca rápido)
-        warmupTolerance: 0 (Arranca ya)
-        showStats: true (Muestra datos técnicos en pantalla)
-    -->
     <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind?v=9999; showStats: true; uiLoading: no; uiScanning: yes; missTolerance: 0; warmupTolerance: 0;" 
-        embedded color-space="sRGB" 
+        mindar-image="imageTargetSrc: ./targets.mind; uiLoading: no; uiScanning: no;" 
+        color-space="sRGB" 
         renderer="colorManagement: true, physicallyCorrectLights" 
         vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false">
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- CUADRO ROJO QUE SE PEGA A LA CARTA -->
-        <a-entity id="target" mindar-image-target="targetIndex: 0">
-            <a-plane color="red" opaciy="0.6" width="1" height="1"></a-plane>
-            <a-text value="DETECTADO" color="white" align="center" width="2"></a-text>
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-plane color="blue" opacity="0.5" width="1" height="1"></a-plane>
         </a-entity>
     </a-scene>
 
     <script>
-        const status = document.getElementById('status');
-        const target = document.getElementById('target');
+        const log = document.getElementById('error-log');
         const scene = document.querySelector('a-scene');
 
-        // Monitorear carga
+        function printError(msg) {
+            log.innerHTML += "<br>❌ " + msg;
+        }
+
+        // 1. CHEQUEO DE SEGURIDAD (HTTPS)
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+            printError("ERROR FATAL: NO ES HTTPS.");
+            printError("Tu celular bloqueó la cámara por seguridad.");
+            printError("Usa Ngrok, Vercel o GitHub Pages.");
+        }
+
+        // 2. ESCUCHAR ERRORES DE MINDAR
+        scene.addEventListener('arError', (event) => {
+            printError("ERROR MINDAR: " + event.detail.error);
+            if(event.detail.error === 'ConstraintNotSatisfiedError') {
+                printError("SOLUCIÓN: Tu celular no soporta la resolución pedida.");
+            } else if (event.detail.error === 'NotAllowedError') {
+                printError("SOLUCIÓN: Has denegado el permiso de cámara.");
+            }
+        });
+
         scene.addEventListener('arReady', () => {
-            status.innerText = "CÁMARA LISTA - BUSCANDO...";
-            status.style.color = "yellow";
-        });
-
-        scene.addEventListener('arError', (e) => {
-            status.innerText = "ERROR CRÍTICO: " + e.detail.error;
-            status.style.color = "red";
-        });
-
-        // Eventos de detección
-        target.addEventListener('targetFound', () => {
-            status.innerText = "¡¡¡ DETECTADO !!!";
-            status.style.color = "white";
-            status.style.backgroundColor = "green";
-            document.getElementById('cuadro-guia').style.borderColor = "green";
-        });
-
-        target.addEventListener('targetLost', () => {
-            status.innerText = "OBJETIVO PERDIDO - BUSCANDO...";
-            status.style.color = "orange";
-            status.style.backgroundColor = "rgba(0,0,0,0.8)";
-            document.getElementById('cuadro-guia').style.borderColor = "yellow";
+            log.innerHTML = "✅ CÁMARA FUNCIONANDO.<br>Si ves esto, enfoca la carta.";
+            log.style.color = "lime";
         });
     </script>
 </body>
