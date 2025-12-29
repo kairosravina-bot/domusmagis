@@ -3,145 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DIAGNÓSTICO DOMUS MAGI</title>
+    <title>DOMUS MAGI: REVELATIONS</title>
     
-    <!-- LIBRERÍAS -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        body { background: #000; color: #fff; font-family: monospace; padding: 20px; }
-        
-        #console-log {
-            background: #111; border: 1px solid #444; 
-            padding: 10px; margin-top: 20px; 
-            height: 200px; overflow-y: scroll; font-size: 12px;
-        }
-        
-        button {
-            background: #00f; color: white; padding: 20px; 
-            font-size: 20px; border: none; width: 100%; margin-top: 10px;
+        /* --- ESTÉTICA QUE TE GUSTA (INTACTA) --- */
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #000; /* Negro sólido */
+            overflow: hidden; font-family: sans-serif;
         }
 
-        .error { color: #f55; font-weight: bold; }
-        .success { color: #0f0; }
-        .info { color: #aaa; }
+        /* UI FLOTANTE */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 999; display: flex; flex-direction: column;
+            pointer-events: none;
+        }
+
+        /* 1. VISOR SUPERIOR */
+        #top-visor {
+            height: 35%; width: 100%; background: #000;
+            border-bottom: 2px solid #555; pointer-events: auto;
+            position: relative; display: flex; align-items: center; justify-content: center;
+        }
+        /* IMPORTANTE: Quitamos 'muted' para que suene */
+        #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
+        #msg-visor { color: white; text-align: center; }
+
+        /* 2. ZONA CENTRAL */
+        #middle-cam {
+            flex-grow: 1; position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #guia-box {
+            width: 250px; height: 350px;
+            border: 4px solid red; border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255,0,0,0.5);
+            transition: 0.3s;
+        }
+        #guia-box.ok { border-color: #0f0; box-shadow: 0 0 50px #0f0; }
+
+        /* 3. PANEL INFERIOR */
+        #bottom-panel {
+            height: auto; background: #111;
+            border-top: 2px solid #fff; pointer-events: auto;
+            display: flex; flex-direction: column; gap: 10px; padding: 10px;
+            padding-bottom: 30px;
+        }
+
+        /* BOTÓN DE ARRANQUE (AMARILLO) */
+        #btn-scan-container { width: 100%; display: flex; justify-content: center; }
+        #btn-scan {
+            background: #ffcc00; color: #000;
+            border: none; padding: 15px 0; width: 90%;
+            font-size: 18px; font-weight: bold; border-radius: 8px;
+            cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+        }
+        #btn-scan:active { transform: scale(0.95); background: #fff; }
+
+        /* GRID DE DATOS */
+        #info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+        .info-box { background: #222; border: 1px solid #444; text-align: center; padding: 5px; }
+        .lbl { font-size: 10px; color: #aaa; display: block; }
+        .val { font-size: 12px; color: #fff; font-weight: bold; }
+
+        /* BOTONES DE PODER */
+        #powers-grid { display: flex; justify-content: center; gap: 15px; margin-top: 5px; }
+        .pwr-btn {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: #333; border: 2px solid #555; color: #777;
+            font-size: 20px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0.5; transition: 0.2s;
+        }
+        .pwr-btn.active { opacity: 1; color: #fff; border-color: #fff; cursor: pointer; transform: scale(1.05); }
+        
+        #btn-i.active { background: #800; box-shadow: 0 0 10px red; }
+        #btn-a.active { background: #080; box-shadow: 0 0 10px lime; }
+        #btn-t.active { background: #555; box-shadow: 0 0 10px gray; }
+        #btn-m.active { background: #508; box-shadow: 0 0 10px purple; }
+
     </style>
 </head>
 <body>
 
-    <h1>MODO DIAGNÓSTICO</h1>
-    <p>Si se traba, lee el registro abajo:</p>
-    
-    <button id="btn-start" onclick="iniciarDiagnostico()">INICIAR CÁMARA</button>
+    <div id="ui-layer">
+        <!-- VISOR -->
+        <div id="top-visor">
+            <div id="msg-visor">SISTEMA APAGADO<br><span style="font-size:10px; color:#f90">Dale al botón amarillo</span></div>
+            <!-- playsinline es clave para móviles, quitamos muted para audio -->
+            <video id="video-player" playsinline webkit-playsinline></video>
+        </div>
 
-    <div id="console-log">Esperando usuario...</div>
+        <!-- GUÍA -->
+        <div id="middle-cam">
+            <div id="guia-box"></div>
+        </div>
 
-    <!-- ESCENA MÍNIMA PARA PROBAR -->
+        <!-- CONTROLES -->
+        <div id="bottom-panel">
+            <div id="btn-scan-container">
+                <button id="btn-scan">ACTIVAR CÁMARA</button>
+            </div>
+
+            <div id="info-grid">
+                <div class="info-box"><span class="lbl">CASA</span><span id="txt-casa" class="val">---</span></div>
+                <div class="info-box"><span class="lbl">ARMA</span><span id="txt-arma" class="val">---</span></div>
+                <div class="info-box"><span class="lbl">ACCIÓN</span><span id="txt-accion" class="val" style="color:yellow">---</span></div>
+            </div>
+
+            <div id="powers-grid">
+                <div id="btn-i" class="pwr-btn" data-id="IMPETUS">I</div>
+                <div id="btn-a" class="pwr-btn" data-id="AUXILIUM">A</div>
+                <div id="btn-t" class="pwr-btn" data-id="TUTELA">T</div>
+                <div id="btn-m" class="pwr-btn" data-id="MYSTERIUM">M</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ESCENA MINDAR (OCULTA) -->
     <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
-        embedded
-        renderer="colorManagement: true, alpha: true"
-        vr-mode-ui="enabled: false"
-        device-orientation-permission-ui="enabled: false">
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF:0.001; filterBeta: 0.01;" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false"
+        renderer="colorManagement: true; alpha: true">
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-entity mindar-image-target="targetIndex: 0">
-            <a-plane color="blue" opacity="0.5"></a-plane>
-        </a-entity>
+        <a-entity id="target-carta" mindar-image-target="targetIndex: 0"></a-entity>
     </a-scene>
 
     <script>
-        const logger = document.getElementById('console-log');
+        // DATOS
+        const DB = {
+            casa: "DOMUS DRACO", arma: "SICA",
+            movs: {
+                IMPETUS: { v: 6, mp4: "ataque.mp4" },
+                AUXILIUM: { v: 1, mp4: "cura.mp4" },
+                TUTELA: { v: 2, mp4: "defensa.mp4" },
+                MYSTERIUM: { v: 1, mp4: "magia.mp4" }
+            }
+        };
+
+        // REFERENCIAS UI
+        const btnScan = document.getElementById('btn-scan');
+        const msgVisor = document.getElementById('msg-visor');
+        const guiaBox = document.getElementById('guia-box');
+        const videoPlayer = document.getElementById('video-player');
         
-        // Función para escribir en pantalla
-        function log(msg, type='info') {
-            const div = document.createElement('div');
-            div.innerText = `> ${msg}`;
-            div.className = type;
-            logger.appendChild(div);
-            logger.scrollTop = logger.scrollHeight;
-            console.log(msg);
-        }
+        const txtCasa = document.getElementById('txt-casa');
+        const txtArma = document.getElementById('txt-arma');
+        const txtAccion = document.getElementById('txt-accion');
+        const btns = document.querySelectorAll('.pwr-btn');
 
-        // 1. VERIFICAR SI EXISTE EL ARCHIVO targets.mind
-        async function checkFile() {
-            log("Verificando archivo 'targets.mind'...", 'info');
-            try {
-                const response = await fetch('./targets.mind');
-                if (response.ok) {
-                    log("Archivo encontrado (OK)", 'success');
-                    return true;
-                } else {
-                    log("ERROR: No se encuentra 'targets.mind'", 'error');
-                    return false;
-                }
-            } catch (e) {
-                log("ERROR DE RED: " + e.message, 'error');
-                return false;
-            }
-        }
+        // --- ARREGLO 1: FUNCIÓN DE INICIO SEGURA ---
+        btnScan.addEventListener('click', () => {
+            btnScan.innerText = "CARGANDO MOTOR...";
+            btnScan.disabled = true;
 
-        // 2. VERIFICAR PERMISOS DE CÁMARA
-        async function checkCamera() {
-            log("Verificando permisos de cámara...", 'info');
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                log("ERROR CRÍTICO: Tu navegador no soporta acceso a cámara o NO ES SEGURO (HTTPS).", 'error');
-                log("Si estás en móvil, usa HTTPS o conecta por USB debugging.", 'error');
-                return false;
-            }
-            return true;
-        }
-
-        // 3. INICIAR AR
-        async function iniciarDiagnostico() {
-            const btn = document.getElementById('btn-start');
-            btn.disabled = true;
-            btn.style.background = "#555";
-            btn.innerText = "PROCESANDO...";
-
-            log("--- INICIO DE DIAGNÓSTICO ---", 'info');
-
-            // Chequeos previos
-            if (!await checkCamera()) return;
-            if (!await checkFile()) return;
-
-            log("Intentando acceder al sistema MindAR...", 'info');
+            // TRUCO DE SONIDO: Desbloquear audio del navegador
+            // Reproducimos y pausamos inmediatamente para ganar "permiso de audio"
+            videoPlayer.volume = 1.0; // Volumen al máximo
+            videoPlayer.play().then(() => {
+                videoPlayer.pause();
+                videoPlayer.currentTime = 0;
+            }).catch((e) => { console.log("Audio unlock intentado"); });
 
             const scene = document.querySelector('a-scene');
-            
-            // Esperar a que la escena cargue
-            if (!scene.hasLoaded) {
-                log("Esperando carga de A-Frame...", 'info');
-                await new Promise(r => scene.addEventListener('loaded', r));
-            }
 
-            const arSystem = scene.systems['mindar-image-system'];
-            
-            if (!arSystem) {
-                log("ERROR: El sistema MindAR no se cargó. Revisa tu internet o las librerías.", 'error');
-                return;
-            }
-
-            log("Iniciando motor de video...", 'info');
-
-            try {
-                await arSystem.start();
-                log("¡ÉXITO! La cámara debería verse ahora.", 'success');
-                btn.style.background = "green";
-                btn.innerText = "FUNCIONANDO";
-            } catch (error) {
-                log("ERROR FATAL AL INICIAR: " + error, 'error');
-                
-                if (error.name === 'NotAllowedError') {
-                    log("CAUSA: Permiso denegado por el usuario.", 'error');
-                } else if (error.name === 'NotFoundError') {
-                    log("CAUSA: No se encontró ninguna cámara.", 'error');
-                } else {
-                    log("CAUSA POSIBLE: El navegador bloqueó el acceso o la memoria está llena.", 'error');
+            // Función interna para arrancar
+            const runSystem = async () => {
+                try {
+                    msgVisor.innerText = "ACCEDIENDO A CÁMARA...";
+                    await scene.systems['mindar-image-system'].start();
+                    
+                    // ÉXITO
+                    btnScan.style.display = 'none'; // Ocultar botón
+                    msgVisor.innerHTML = "ESCANEA LA CARTA<br><span style='font-size:10px; color:#0f0'>Sistema Listo</span>";
+                } catch (err) {
+                    console.error(err);
+                    alert("Error cámara: " + err.message);
+                    btnScan.innerText = "REINTENTAR";
+                    btnScan.disabled = false;
                 }
+            };
+
+            // VERIFICAMOS SI A-FRAME ESTÁ LISTO
+            if (scene.hasLoaded) {
+                runSystem();
+            } else {
+                scene.addEventListener('loaded', runSystem);
             }
-        }
+        });
+
+        // --- ARREGLO 2: DETECCIÓN ---
+        const target = document.getElementById('target-carta');
+
+        target.addEventListener('targetFound', () => {
+            guiaBox.classList.add('ok'); // Verde
+            msgVisor.innerText = "ENFOCADO - SELECCIONA ACCIÓN";
+            msgVisor.style.color = "#0f0";
+
+            txtCasa.innerText = DB.casa;
+            txtArma.innerText = DB.arma;
+
+            // Activar botones
+            btns.forEach(b => b.classList.add('active'));
+        });
+
+        target.addEventListener('targetLost', () => {
+            guiaBox.classList.remove('ok'); // Rojo
+            msgVisor.innerText = "BUSCANDO...";
+            msgVisor.style.color = "#fff";
+
+            // Pausar video si se pierde la carta
+            videoPlayer.pause();
+            videoPlayer.style.display = 'none';
+            msgVisor.style.display = 'block';
+
+            // Desactivar botones
+            btns.forEach(b => b.classList.remove('active'));
+        });
+
+        // --- ARREGLO 3: REPRODUCCIÓN ---
+        btns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if(!btn.classList.contains('active')) return;
+
+                const id = btn.getAttribute('data-id');
+                const data = DB.movs[id];
+
+                // Actualizar UI
+                txtAccion.innerText = `${id} [${data.v}]`;
+                if(id == 'IMPETUS') txtAccion.style.color = 'red';
+                else if(id == 'AUXILIUM') txtAccion.style.color = 'lime';
+                else if(id == 'MYSTERIUM') txtAccion.style.color = 'magenta';
+                else txtAccion.style.color = 'white';
+
+                // Reproducir Video CON SONIDO
+                msgVisor.style.display = 'none';
+                videoPlayer.style.display = 'block';
+                videoPlayer.src = data.mp4;
+                videoPlayer.currentTime = 0;
+                videoPlayer.muted = false; // Asegurar que no está muteado
+                videoPlayer.volume = 1.0;  // Volumen al 100%
+                
+                const playPromise = videoPlayer.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.error("Error reproducción:", error);
+                        alert("Toca la pantalla para activar sonido");
+                    });
+                }
+            });
+        });
+
+        // Al terminar video
+        videoPlayer.addEventListener('ended', () => {
+            videoPlayer.style.display = 'none';
+            msgVisor.style.display = 'block';
+            msgVisor.innerText = "TURNO FINALIZADO";
+        });
+
     </script>
 </body>
 </html>
