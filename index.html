@@ -5,168 +5,177 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOMUS MAGI: REVELATIONS</title>
     
-    <!-- LIBRERÍAS ESTABLES -->
+    <!-- LIBRERÍAS (Versiones estables) -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        /* IMPORTANTE: Fondo transparente para no tapar la cámara */
-        html, body { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            overflow: hidden; background: transparent; 
-            font-family: 'Segoe UI', sans-serif; 
+        /* ESTILO GENERAL */
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
+
+        /* --- NUEVO: RECUADRO GUÍA DE ESCANEO --- */
+        #scanner-guide {
+            position: absolute; 
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -20%); /* Ajustado para que quede en el centro de la zona libre */
+            width: 70vw; height: 90vw;        /* Tamaño proporcional a una carta */
+            max-width: 260px; max-height: 380px;
+            
+            border: 4px solid rgba(255, 0, 0, 0.6); /* ROJO POR DEFECTO */
+            background: rgba(255, 0, 0, 0.05);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+            
+            z-index: 5; pointer-events: none; /* Deja pasar los clicks */
+            transition: all 0.3s ease;
         }
 
-        /* CAPA DE CARGA (Fondo Negro inicial) */
-        #pantalla-inicio {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999;
-            display: flex; flex-direction: column; 
-            align-items: center; justify-content: center;
-        }
-
-        /* BOTÓN DE ACTIVACIÓN MANUAL */
-        #btn-activar {
-            margin-top: 30px;
-            padding: 20px 40px;
-            font-size: 20px; font-weight: bold; color: #fff;
-            background: linear-gradient(45deg, #0066ff, #00ccff);
-            border: 2px solid #fff; border-radius: 50px;
-            cursor: pointer; box-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
-            text-transform: uppercase; letter-spacing: 2px;
-        }
-        #btn-activar:active { transform: scale(0.95); }
-
-        #mensaje-debug {
-            color: #ff3333; margin-top: 20px; font-family: monospace; font-size: 12px; text-align: center; padding: 0 20px;
-        }
-
-        /* GUÍA DE ESCANEO (VERDE/ROJO) */
-        #guia-scan {
-            position: absolute; top: 50%; left: 50%;
-            width: 70vw; height: 95vw; max-width: 280px; max-height: 400px;
-            transform: translate(-50%, -20%); /* Centrado ajustado */
-            border: 4px solid rgba(255, 0, 0, 0.5);
-            border-radius: 15px; pointer-events: none; z-index: 5;
-            transition: all 0.3s;
-        }
-        #guia-scan.detectado {
-            border-color: #00ff00;
-            box-shadow: 0 0 50px rgba(0, 255, 0, 0.5);
+        /* CLASE ACTIVADA (VERDE) */
+        #scanner-guide.active {
+            border-color: #0f0;
             background: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.8);
+            transform: translate(-50%, -20%) scale(1.05);
         }
 
-        /* INTERFAZ DE JUEGO */
-        #ui-juego {
+        /* CAPAS DE INTERFAZ */
+        #ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 10; pointer-events: none;
-            display: none; /* Se oculta hasta que arranca la cámara */
-            flex-direction: column;
+            display: flex; flex-direction: column;
         }
 
-        /* VISOR VIDEO */
-        #zona-video {
-            width: 100%; height: 35%; background: rgba(0,0,0,0.8);
-            border-bottom: 2px solid #555; pointer-events: auto;
-            display: flex; align-items: center; justify-content: center; position: relative;
+        /* 1. VISOR SUPERIOR (Video) */
+        #video-container {
+            width: 100%; height: 35%; 
+            background: rgba(0,0,0,0.95); border-bottom: 2px solid #444;
+            pointer-events: auto; position: relative;
+            display: flex; align-items: center; justify-content: center;
         }
-        #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
-        #txt-estado { color: #fff; text-align: center; }
+        #main-video { width: 100%; height: 100%; object-fit: contain; display: none; }
+        
+        #system-msg {
+            color: #fff; text-align: center; font-size: 16px; 
+            text-transform: uppercase; letter-spacing: 2px;
+        }
 
-        /* ZONA CENTRAL VACÍA */
-        #zona-ar { flex-grow: 1; }
+        /* 2. ZONA AR (Transparente) */
+        #ar-zone { flex-grow: 1; position: relative; }
+        
+        #scan-hint {
+            position: absolute; bottom: 20px; width: 100%; text-align: center;
+            color: rgba(255,255,255,0.6); font-size: 11px; text-transform: uppercase;
+        }
 
-        /* PANEL INFERIOR */
-        #panel-control {
-            background: #111; border-top: 2px solid #fff;
+        /* 3. PANEL INFERIOR */
+        #control-panel {
+            background: linear-gradient(0deg, #050505 0%, #1a1a25 100%);
+            border-top: 2px solid #fff;
             padding-bottom: env(safe-area-inset-bottom); pointer-events: auto;
         }
 
-        /* TABLA DE DATOS */
-        #tabla-datos {
-            padding: 10px; display: flex; flex-direction: column; gap: 5px;
-            border-bottom: 1px solid #333;
+        #scoreboard {
+            padding: 10px; border-bottom: 1px solid #333;
+            display: flex; flex-direction: column; gap: 8px;
         }
-        .fila { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
-        .fila-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-        
-        .dato { background: #222; padding: 5px; border-radius: 5px; text-align: center; border: 1px solid #444; }
-        .titulo { font-size: 9px; color: #888; display: block; }
-        .valor { font-size: 14px; color: #fff; font-weight: bold; }
+        .row-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+        .row-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+
+        .score-box { 
+            background: rgba(255,255,255,0.08); padding: 6px; 
+            border-radius: 6px; text-align: center; border: 1px solid #333;
+        }
+        .label { color: #888; font-size: 9px; display: block; text-transform: uppercase; }
+        .val { color: #fff; font-size: 14px; font-weight: bold; font-family: monospace; white-space: nowrap; }
 
         /* BOTONES */
-        #botonera { display: flex; justify-content: center; gap: 15px; padding: 15px; }
-        .btn-poder {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: #333; border: 2px solid #555; color: #777;
-            font-size: 20px; font-weight: bold; display: flex; 
-            flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0.5; transition: 0.2s;
-        }
-        .btn-poder.activo {
-            opacity: 1; cursor: pointer; color: #fff; border-color: #fff; transform: scale(1.1);
-        }
+        #actions { display: flex; justify-content: center; gap: 15px; padding: 15px 10px; }
         
-        /* Colores activos */
-        #btn-i.activo { background: #900; box-shadow: 0 0 15px #f00; }
-        #btn-a.activo { background: #090; box-shadow: 0 0 15px #0f0; }
-        #btn-t.activo { background: #555; box-shadow: 0 0 15px #aaa; }
-        #btn-m.activo { background: #609; box-shadow: 0 0 15px #d0f; }
+        .btn-action {
+            width: 65px; height: 65px; border-radius: 50%; 
+            border: 2px solid #444; background: #222; color: #555;
+            font-size: 22px; font-weight: bold; cursor: not-allowed;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: all 0.2s ease; opacity: 0.5;
+        }
+        .btn-sub { font-size: 11px; font-weight: normal; margin-top: -2px; }
 
+        .btn-action.unlocked {
+            opacity: 1; cursor: pointer; color: white; border-color: white;
+            box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1);
+        }
+        .btn-action.unlocked:active { transform: scale(0.95); }
+
+        /* Colores Botones */
+        #btn-i.unlocked { background: radial-gradient(#900, #300); border-color: #f55; }
+        #btn-a.unlocked { background: radial-gradient(#090, #030); border-color: #5f5; }
+        #btn-t.unlocked { background: radial-gradient(#777, #333); border-color: #ddd; }
+        #btn-m.unlocked { background: radial-gradient(#709, #304); border-color: #d8f; }
+
+        /* PANTALLA INICIO */
+        #start-screen {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        #btn-init {
+            padding: 15px 40px; font-size: 18px; border-radius: 30px;
+            background: white; border: none; font-weight: bold; cursor: pointer;
+            box-shadow: 0 0 20px #fff; margin-top: 20px;
+        }
+        #status-msg { color: #0f0; margin-top: 15px; font-family: monospace; }
     </style>
 </head>
 <body>
 
-    <!-- 1. PANTALLA DE INICIO (ESTO SOLUCIONA LA PANTALLA NEGRA) -->
-    <div id="pantalla-inicio">
-        <h1 style="color:white; letter-spacing: 5px;">DOMUS MAGI</h1>
-        <p style="color:#aaa;">SISTEMA DE REALIDAD AUMENTADA</p>
-        
-        <!-- EL BOTÓN MÁGICO -->
-        <button id="btn-activar">ACTIVAR CÁMARA</button>
-        
-        <div id="mensaje-debug">Esperando confirmación de usuario...</div>
+    <!-- PANTALLA DE CARGA -->
+    <div id="start-screen">
+        <h1 style="color:white; letter-spacing: 5px; text-shadow: 0 0 10px cyan;">DOMUS MAGI</h1>
+        <p style="color:#aaa;">SISTEMA DE ESCANEO</p>
+        <button id="btn-init">INICIAR CÁMARA</button>
+        <div id="status-msg"></div>
     </div>
 
-    <!-- 2. GUÍA VISUAL -->
-    <div id="guia-scan"></div>
+    <!-- GUÍA DE ESCANEO (ROJA / VERDE) -->
+    <div id="scanner-guide"></div>
 
-    <!-- 3. INTERFAZ DE JUEGO (Se muestra al activar) -->
-    <div id="ui-juego">
-        <div id="zona-video">
-            <div id="txt-estado">
-                SISTEMA LISTO<br>
-                <span style="font-size:12px; color:#f55" id="lbl-tracking">BUSCANDO CARTA...</span>
+    <div id="ui-layer">
+        <div id="video-container">
+            <div id="system-msg">
+                ESPERANDO SEÑAL
+                <span id="text-estado" style="display:block; font-size:12px; color:#f55; margin-top:5px;">NO DETECTADO</span>
             </div>
-            <video id="video-player" playsinline webkit-playsinline></video>
+            <video id="main-video" playsinline webkit-playsinline></video>
         </div>
 
-        <div id="zona-ar"></div>
+        <div id="ar-zone">
+            <div id="scan-hint">Ubica la carta en el marco rojo</div>
+        </div>
 
-        <div id="panel-control">
-            <div id="tabla-datos">
-                <div class="fila">
-                    <div class="dato"><span class="titulo">CASA</span><span id="d-casa" class="valor">---</span></div>
-                    <div class="dato"><span class="titulo">ESCUDO</span><span id="d-escudo" class="valor">---</span></div>
-                    <div class="dato"><span class="titulo">ARMA</span><span id="d-arma" class="valor">---</span></div>
+        <div id="control-panel">
+            <div id="scoreboard">
+                <div class="row-top">
+                    <div class="score-box"><span class="label">CASA</span><span id="v-casa" class="val">---</span></div>
+                    <div class="score-box"><span class="label">ESCUDO</span><span id="v-escudo" class="val">---</span></div>
+                    <div class="score-box"><span class="label">ARMA</span><span id="v-arma" class="val">---</span></div>
                 </div>
-                <div class="fila-2">
-                    <div class="dato"><span class="titulo">POSICIÓN</span><span id="d-pos" class="valor" style="color:#ff0">---</span></div>
-                    <div class="dato"><span class="titulo">VALOR</span><span id="d-val" class="valor" style="color:#0f0">0</span></div>
+                <div class="row-bottom">
+                    <div class="score-box"><span class="label">POSICIÓN</span><span id="v-posicion" class="val" style="color:#ff0">---</span></div>
+                    <div class="score-box"><span class="label">VALOR</span><span id="v-valor" class="val" style="color:#0f0">0</span></div>
                 </div>
             </div>
 
-            <div id="botonera">
-                <button id="btn-i" class="btn-poder" data-tipo="IMPETUS">I <span style="font-size:10px">0</span></button>
-                <button id="btn-a" class="btn-poder" data-tipo="AUXILIUM">A <span style="font-size:10px">0</span></button>
-                <button id="btn-t" class="btn-poder" data-tipo="TUTELA">T <span style="font-size:10px">0</span></button>
-                <button id="btn-m" class="btn-poder" data-tipo="MYSTERIUM">M <span style="font-size:10px">0</span></button>
+            <div id="actions">
+                <button id="btn-i" class="btn-action" data-type="IMPETUS">I <span class="btn-sub">0</span></button>
+                <button id="btn-a" class="btn-action" data-type="AUXILIUM">A <span class="btn-sub">0</span></button>
+                <button id="btn-t" class="btn-action" data-type="TUTELA">T <span class="btn-sub">0</span></button>
+                <button id="btn-m" class="btn-action" data-type="MYSTERIUM">M <span class="btn-sub">0</span></button>
             </div>
         </div>
     </div>
 
-    <!-- 4. ESCENA AR -->
-    <!-- Nota: autoStart: false es clave. Nosotros lo iniciamos manualmente. -->
+    <!-- ESCENA A-FRAME / MINDAR -->
+    <!-- Configuración estándar para evitar pantalla negra -->
     <a-scene 
         mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF:0.0001; filterBeta: 0.001;" 
         vr-mode-ui="enabled: false" 
@@ -175,135 +184,134 @@
         embedded>
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-entity id="target-carta" mindar-image-target="targetIndex: 0"></a-entity>
+        <a-entity id="carta-target" mindar-image-target="targetIndex: 0"></a-entity>
     </a-scene>
 
     <script>
-        // DATOS
-        const INFO = {
+        // DATOS DE LA CARTA
+        const DATA = {
             casa: "DOMUS DRACO", escudo: "DRAGÓN", arma: "SICA",
-            valores: {
-                IMPETUS:   { v: 6, mp4: "ataque.mp4" },
-                AUXILIUM:  { v: 1, mp4: "cura.mp4" },
-                TUTELA:    { v: 2, mp4: "defensa.mp4" },
-                MYSTERIUM: { v: 1, mp4: "magia.mp4" }
+            stats: {
+                IMPETUS:   { val: 6, vid: "ataque.mp4" },
+                AUXILIUM:  { val: 1, vid: "cura.mp4" },
+                TUTELA:    { val: 2, vid: "defensa.mp4" },
+                MYSTERIUM: { val: 1, vid: "magia.mp4" }
             }
         };
 
-        // REFERENCIAS DOM
-        const btnActivar = document.getElementById('btn-activar');
-        const pantallaInicio = document.getElementById('pantalla-inicio');
-        const debugMsg = document.getElementById('mensaje-debug');
-        const uiJuego = document.getElementById('ui-juego');
+        // REFERENCIAS
+        const btnInit = document.getElementById('btn-init');
+        const startScreen = document.getElementById('start-screen');
+        const statusMsg = document.getElementById('status-msg');
         
-        const guia = document.getElementById('guia-scan');
-        const lblTracking = document.getElementById('lbl-tracking');
-        const video = document.getElementById('video-player');
-        const txtEstado = document.getElementById('txt-estado');
+        const guide = document.getElementById('scanner-guide');
+        const txtEstado = document.getElementById('text-estado');
+        const video = document.getElementById('main-video');
+        const sysMsg = document.getElementById('system-msg');
+        
+        const uiCasa = document.getElementById('v-casa');
+        const uiEscudo = document.getElementById('v-escudo');
+        const uiArma = document.getElementById('v-arma');
+        const uiPos = document.getElementById('v-posicion');
+        const uiVal = document.getElementById('v-valor');
+        const botones = document.querySelectorAll('.btn-action');
 
-        // BOTÓN: INICIAR TODO
-        btnActivar.addEventListener('click', async () => {
-            btnActivar.disabled = true;
-            btnActivar.innerText = "INICIANDO...";
-            debugMsg.innerText = "Solicitando cámara al navegador...";
+        // 1. INICIALIZACIÓN ROBUSTA
+        btnInit.addEventListener('click', () => {
+            statusMsg.innerText = "Accediendo a cámara...";
+            btnInit.style.display = 'none';
 
-            const sceneEl = document.querySelector('a-scene');
-            const arSystem = sceneEl.systems['mindar-image-system'];
+            const scene = document.querySelector('a-scene');
+            const arSystem = scene.systems['mindar-image-system'];
 
-            try {
-                // Paso 1: Intentar arrancar
-                await arSystem.start(); 
-                
-                // Si pasa de aquí, es éxito
-                debugMsg.innerText = "¡Cámara activa!";
-                pantallaInicio.style.display = 'none'; // Quitar pantalla negra
-                uiJuego.style.display = 'flex';        // Mostrar juego
-                
-            } catch (error) {
-                console.error(error);
-                debugMsg.innerText = "ERROR FATAL: " + error;
-                btnActivar.disabled = false;
-                btnActivar.innerText = "REINTENTAR";
-                alert("No se pudo acceder a la cámara. Revisa permisos o HTTPS.");
-            }
+            // Evento para asegurar que AR está listo
+            scene.addEventListener('arReady', () => {
+                statusMsg.innerText = "¡Listo!";
+                setTimeout(() => { startScreen.style.display = 'none'; }, 500);
+            });
+
+            scene.addEventListener('arError', (event) => {
+                statusMsg.innerText = "Error: " + event.detail.error;
+                statusMsg.style.color = "red";
+                btnInit.style.display = 'block';
+            });
+
+            // Arrancar sistema
+            arSystem.start();
         });
 
-        // LÓGICA DE DETECCIÓN
-        const target = document.getElementById('target-carta');
-        const botones = document.querySelectorAll('.btn-poder');
-
-        // VALORES UI
-        const uCasa = document.getElementById('d-casa');
-        const uEscudo = document.getElementById('d-escudo');
-        const uArma = document.getElementById('d-arma');
-        const uPos = document.getElementById('d-pos');
-        const uVal = document.getElementById('d-val');
+        // 2. DETECCIÓN (LOGICA DEL RECUADRO ROJO/VERDE)
+        const target = document.getElementById('carta-target');
 
         target.addEventListener('targetFound', () => {
-            guia.classList.add('detectado');
-            lblTracking.innerText = "ENFOCADA";
-            lblTracking.style.color = "#0f0";
+            // Visual: Cambiar guía a VERDE
+            guide.classList.add('active');
+            txtEstado.innerText = "ENFOCADA";
+            txtEstado.style.color = "#0f0";
 
-            // Llenar datos
-            uCasa.innerText = INFO.casa;
-            uEscudo.innerText = INFO.escudo;
-            uArma.innerText = INFO.arma;
+            // Datos
+            uiCasa.innerText = DATA.casa;
+            uiEscudo.innerText = DATA.escudo;
+            uiArma.innerText = DATA.arma;
 
-            // Activar botones
+            // Desbloquear botones
             botones.forEach(btn => {
-                const tipo = btn.getAttribute('data-tipo');
-                btn.querySelector('span').innerText = INFO.valores[tipo].v;
-                btn.classList.add('activo');
+                const tipo = btn.getAttribute('data-type');
+                btn.querySelector('.btn-sub').innerText = DATA.stats[tipo].val;
+                btn.classList.add('unlocked');
             });
         });
 
         target.addEventListener('targetLost', () => {
-            guia.classList.remove('detectado');
-            lblTracking.innerText = "BUSCANDO...";
-            lblTracking.style.color = "#f55";
+            // Visual: Cambiar guía a ROJA
+            guide.classList.remove('active');
+            txtEstado.innerText = "BUSCANDO...";
+            txtEstado.style.color = "#f55";
 
-            // Limpiar
-            uCasa.innerText = "---";
-            uEscudo.innerText = "---";
-            uArma.innerText = "---";
-            uPos.innerText = "---";
-            uVal.innerText = "0";
-            
+            // Limpiar datos
+            uiCasa.innerText = "---";
+            uiEscudo.innerText = "---";
+            uiArma.innerText = "---";
+            uiPos.innerText = "---";
+            uiVal.innerText = "0";
+
+            // Resetear Video
             video.pause();
             video.style.display = 'none';
-            txtEstado.style.display = 'block';
+            sysMsg.style.display = 'block';
 
-            // Desactivar botones
-            botones.forEach(btn => btn.classList.remove('activo'));
+            // Bloquear botones
+            botones.forEach(btn => btn.classList.remove('unlocked'));
         });
 
-        // CLIC EN BOTONES
+        // 3. JUGABILIDAD (VIDEOS)
         botones.forEach(btn => {
             btn.addEventListener('click', () => {
-                if(!btn.classList.contains('activo')) return;
+                if (!btn.classList.contains('unlocked')) return;
 
-                const tipo = btn.getAttribute('data-tipo');
-                const datos = INFO.valores[tipo];
+                const tipo = btn.getAttribute('data-type');
+                const d = DATA.stats[tipo];
 
-                // Mostrar en pantalla
-                uPos.innerText = tipo;
-                uVal.innerText = datos.v;
-
-                if(tipo === 'IMPETUS') uPos.style.color = "#f55";
-                if(tipo === 'AUXILIUM') uPos.style.color = "#5f5";
-                if(tipo === 'MYSTERIUM') uPos.style.color = "#d5f";
+                // Mostrar Info
+                uiPos.innerText = tipo;
+                uiVal.innerText = d.val;
+                
+                // Color Info
+                if(tipo === 'IMPETUS') uiPos.style.color = "#f55";
+                if(tipo === 'AUXILIUM') uiPos.style.color = "#5f5";
+                if(tipo === 'MYSTERIUM') uiPos.style.color = "#d5f";
 
                 // Play Video
-                txtEstado.style.display = 'none';
+                sysMsg.style.display = 'none';
                 video.style.display = 'block';
-                video.src = datos.mp4;
+                video.src = d.vid;
                 video.play();
             });
         });
 
         video.addEventListener('ended', () => {
             video.style.display = 'none';
-            txtEstado.style.display = 'block';
+            sysMsg.style.display = 'block';
         });
 
     </script>
