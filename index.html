@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        /* --- CORRECCIÓN PANTALLA BLANCA --- */
+        /* --- ESTILOS BASE --- */
         html, body {
             background-color: transparent !important;
             background: none !important;
@@ -18,26 +18,25 @@
             font-family: 'Segoe UI', sans-serif;
         }
         
-        /* Asegura que el video de la cámara se vea detrás de todo */
         video { z-index: -10 !important; }
 
-        /* --- UI GENERAL --- */
+        /* --- UI LAYER --- */
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; z-index: 100;
-            pointer-events: none; /* Deja pasar clicks a lo que no sea botón */
+            pointer-events: none;
         }
 
         /* 1. VISOR SUPERIOR */
         #video-visor {
-            width: 100%; height: 35%; background: rgba(0,0,0,0.8);
+            width: 100%; height: 35%; background: rgba(0,0,0,0.85);
             border-bottom: 2px solid #555; pointer-events: auto;
             display: flex; align-items: center; justify-content: center;
         }
         #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
         #msg-visor { color: white; text-align: center; font-weight: bold; letter-spacing: 1px; }
 
-        /* 2. ZONA CENTRAL (GUÍA ROJA) */
+        /* 2. ZONA CENTRAL */
         #zona-ar { 
             flex-grow: 1; position: relative; 
             display: flex; align-items: center; justify-content: center;
@@ -53,35 +52,34 @@
             border-color: #0f0; box-shadow: 0 0 50px #0f0; background: rgba(0,255,0,0.1);
         }
 
-        /* 3. PANEL INFERIOR (CONTROLES) */
+        /* 3. PANEL INFERIOR (Modificado para 2 renglones) */
         #panel-inferior {
             background: #111; border-top: 2px solid white;
             padding-bottom: env(safe-area-inset-bottom);
             pointer-events: auto;
-            display: flex; flex-direction: column; gap: 10px; padding: 10px;
+            display: flex; flex-direction: column; gap: 8px; padding: 10px;
         }
 
-        /* BOTÓN DE ESCANEO (EL QUE PEDISTE) */
-        #btn-scan-row {
-            display: flex; justify-content: center;
-        }
+        #btn-scan-row { display: flex; justify-content: center; margin-bottom: 5px; }
         #btn-iniciar-scan {
             background: #0066cc; color: white; border: 2px solid #4da6ff;
-            padding: 10px 30px; border-radius: 20px; font-weight: bold; font-size: 16px;
+            padding: 12px 30px; border-radius: 20px; font-weight: bold; font-size: 16px;
             cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
             box-shadow: 0 0 10px #0066cc; width: 100%;
         }
         #btn-iniciar-scan:active { transform: scale(0.95); }
         
-        /* DATOS */
-        #datos-grid {
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px;
-            text-align: center;
+        /* ESTRUCTURA DE DATOS (2 FILAS) */
+        .fila-datos {
+            display: flex; gap: 5px; width: 100%;
         }
-        .dato-box { background: #222; border: 1px solid #444; border-radius: 5px; padding: 5px; }
-        .lbl { font-size: 9px; color: #888; display: block; }
-        .val { font-size: 12px; color: #fff; font-weight: bold; }
-        .val-big { font-size: 14px; color: #ff0; font-weight: bold; }
+        .dato-box { 
+            background: #222; border: 1px solid #444; border-radius: 5px; padding: 5px; 
+            flex: 1; text-align: center; display: flex; flex-direction: column; justify-content: center;
+        }
+        .lbl { font-size: 9px; color: #888; display: block; text-transform: uppercase; }
+        .val { font-size: 13px; color: #fff; font-weight: bold; }
+        .val-big { font-size: 15px; font-weight: bold; }
 
         /* BOTONES DE PODER */
         #botonera-poderes {
@@ -108,36 +106,39 @@
 </head>
 <body>
 
-    <!-- INTERFAZ (UI LAYER) -->
     <div id="ui-layer">
         
-        <!-- PARTE SUPERIOR: VIDEO -->
+        <!-- VISOR -->
         <div id="video-visor">
-            <div id="msg-visor">SISTEMA APAGADO<br><span style="font-size:10px; color:#aaa">Pulsa ESCANEAR abajo</span></div>
+            <div id="msg-visor">SISTEMA APAGADO<br><span style="font-size:10px; color:#aaa">Pulsa el botón Azul</span></div>
             <video id="video-player" playsinline webkit-playsinline></video>
         </div>
 
-        <!-- CENTRO: GUÍA ROJA -->
+        <!-- GUÍA -->
         <div id="zona-ar">
             <div id="guia-roja"></div>
         </div>
 
-        <!-- PARTE INFERIOR: BOTONES Y DATOS -->
+        <!-- PANEL INFERIOR -->
         <div id="panel-inferior">
             
-            <!-- FILA 1: BOTÓN DE INICIO DE ESCANEO -->
             <div id="btn-scan-row">
                 <button id="btn-iniciar-scan">INICIAR CÁMARA</button>
             </div>
 
-            <!-- FILA 2: DATOS -->
-            <div id="datos-grid">
+            <!-- RENGLÓN 1: DATOS FIJOS -->
+            <div class="fila-datos">
                 <div class="dato-box"><span class="lbl">CASA</span><span id="d-casa" class="val">---</span></div>
                 <div class="dato-box"><span class="lbl">ARMA</span><span id="d-arma" class="val">---</span></div>
-                <div class="dato-box"><span class="lbl">ACCIÓN</span><span id="d-accion" class="val-big">---</span></div>
             </div>
 
-            <!-- FILA 3: BOTONES DE PODER (I A T M) -->
+            <!-- RENGLÓN 2: DATOS VARIABLES -->
+            <div class="fila-datos">
+                <div class="dato-box"><span class="lbl">POSICIÓN / LADO</span><span id="d-lado" class="val-big" style="color:#ff0">---</span></div>
+                <div class="dato-box"><span class="lbl">VALOR</span><span id="d-valor" class="val-big" style="color:#0f0">0</span></div>
+            </div>
+
+            <!-- BOTONERA -->
             <div id="botonera-poderes">
                 <button id="btn-i" class="btn-poder" data-tipo="IMPETUS">I <span style="font-size:10px">0</span></button>
                 <button id="btn-a" class="btn-poder" data-tipo="AUXILIUM">A <span style="font-size:10px">0</span></button>
@@ -147,9 +148,10 @@
         </div>
     </div>
 
-    <!-- ESCENA A-FRAME (FONDO) -->
+    <!-- ESCENA A-FRAME OPTIMIZADA PARA DETECCIÓN -->
+    <!-- Se agregaron missTolerance y warmupTolerance para mejorar el enganche -->
     <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; missTolerance: 5; warmupTolerance: 5; filterMinCF: 0.0001; filterBeta: 0.001;" 
         vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false"
         renderer="colorManagement: true; alpha: true"
@@ -160,7 +162,7 @@
     </a-scene>
 
     <script>
-        // CONFIGURACIÓN CARTA
+        // DATOS
         const DATA = {
             casa: "DOMUS DRACO", arma: "SICA",
             stats: {
@@ -171,7 +173,7 @@
             }
         };
 
-        // REFERENCIAS
+        // REFERENCIAS UI
         const btnScan = document.getElementById('btn-iniciar-scan');
         const msgVisor = document.getElementById('msg-visor');
         const guiaRoja = document.getElementById('guia-roja');
@@ -179,10 +181,12 @@
         
         const uiCasa = document.getElementById('d-casa');
         const uiArma = document.getElementById('d-arma');
-        const uiAccion = document.getElementById('d-accion');
+        const uiLado = document.getElementById('d-lado');
+        const uiValor = document.getElementById('d-valor');
+        
         const botones = document.querySelectorAll('.btn-poder');
 
-        // 1. BOTÓN DE INICIO / REINICIO (LA CLAVE)
+        // 1. INICIAR CÁMARA
         btnScan.addEventListener('click', async () => {
             btnScan.disabled = true;
             btnScan.innerText = "CARGANDO...";
@@ -192,8 +196,8 @@
             const arSystem = scene.systems['mindar-image-system'];
 
             try {
-                await arSystem.start(); // Forzamos inicio
-                btnScan.style.display = 'none'; // Se oculta al tener éxito
+                await arSystem.start(); 
+                btnScan.style.display = 'none'; 
                 msgVisor.innerHTML = "ESCANEA LA CARTA<br><span style='font-size:10px'>Centra el rombo</span>";
             } catch (e) {
                 alert("Error de cámara: " + e);
@@ -206,15 +210,20 @@
         const target = document.getElementById('target-carta');
 
         target.addEventListener('targetFound', () => {
-            guiaRoja.classList.add('verde'); // Se pone verde
+            guiaRoja.classList.add('verde'); 
             msgVisor.innerText = "¡CARTA DETECTADA!";
             msgVisor.style.color = "#0f0";
 
-            // Datos
+            // Llenar Fila 1 (Datos Fijos)
             uiCasa.innerText = DATA.casa;
             uiArma.innerText = DATA.arma;
 
-            // Desbloquear botones
+            // Resetear Fila 2
+            uiLado.innerText = "SELECCIONE";
+            uiLado.style.color = "#fff";
+            uiValor.innerText = "-";
+
+            // Activar Botones
             botones.forEach(btn => {
                 const tipo = btn.getAttribute('data-tipo');
                 btn.querySelector('span').innerText = DATA.stats[tipo].v;
@@ -223,22 +232,22 @@
         });
 
         target.addEventListener('targetLost', () => {
-            guiaRoja.classList.remove('verde'); // Vuelve a rojo
+            guiaRoja.classList.remove('verde'); 
             msgVisor.innerText = "BUSCANDO...";
             msgVisor.style.color = "#fff";
             
-            // RESETEAR UI
+            // Limpiar UI
             videoPlayer.style.display = 'none';
             videoPlayer.pause();
             msgVisor.style.display = 'block';
             
-            uiAccion.innerText = "---";
-            uiAccion.style.color = "#ff0";
+            uiLado.innerText = "---";
+            uiValor.innerText = "0";
 
             botones.forEach(btn => btn.classList.remove('activo'));
         });
 
-        // 3. BOTONES DE ACCIÓN
+        // 3. CLIC EN BOTONES (ACTUALIZA RENGLÓN 2)
         botones.forEach(btn => {
             btn.addEventListener('click', () => {
                 if (!btn.classList.contains('activo')) return;
@@ -246,16 +255,17 @@
                 const tipo = btn.getAttribute('data-tipo');
                 const info = DATA.stats[tipo];
 
-                // Mostrar Acción
-                uiAccion.innerText = `${tipo} [${info.v}]`;
+                // Actualizar Renglón 2 (LADO y VALOR)
+                uiLado.innerText = tipo;
+                uiValor.innerText = info.v;
                 
-                // Color Acción
-                if(tipo === 'IMPETUS') uiAccion.style.color = "#f55";
-                else if(tipo === 'AUXILIUM') uiAccion.style.color = "#5f5";
-                else if(tipo === 'MYSTERIUM') uiAccion.style.color = "#d5f";
-                else uiAccion.style.color = "#fff";
+                // Color según tipo
+                if(tipo === 'IMPETUS') uiLado.style.color = "#f55";
+                else if(tipo === 'AUXILIUM') uiLado.style.color = "#5f5";
+                else if(tipo === 'MYSTERIUM') uiLado.style.color = "#d5f";
+                else uiLado.style.color = "#fff";
 
-                // Video
+                // Reproducir Video
                 msgVisor.style.display = 'none';
                 videoPlayer.style.display = 'block';
                 videoPlayer.src = info.vid;
