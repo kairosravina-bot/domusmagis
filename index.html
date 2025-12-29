@@ -2,95 +2,65 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TEST CARTA NEGRA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIAGNÓSTICO FINAL</title>
     
+    <!-- USAMOS UN FONDO GRIS PARA SABER SI EL HTML CARGÓ -->
+    <style>
+        body { background-color: #333; color: white; font-family: sans-serif; }
+        #mensaje { padding: 20px; font-size: 20px; text-align: center; }
+    </style>
+
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
-
-    <style>
-        body { margin: 0; overflow: hidden; font-family: sans-serif; background: black; }
-        
-        /* CARTEL DE ESTADO */
-        #estado {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: yellow; border: 4px solid yellow;
-            padding: 30px; font-size: 24px; font-weight: bold;
-            text-align: center; pointer-events: none; z-index: 999;
-            background: rgba(0,0,0,0.5);
-        }
-
-        /* BOTÓN DE INICIO */
-        #btn-start {
-            position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
-            padding: 20px 60px; font-size: 20px; font-weight: bold;
-            background: #0066ff; color: white; border: none; border-radius: 50px;
-            z-index: 1000; cursor: pointer; box-shadow: 0 0 20px #0066ff;
-        }
-    </style>
 </head>
 <body>
 
-    <div id="estado">SISTEMA EN PAUSA</div>
-    <button id="btn-start">ENCENDER CÁMARA</button>
+    <div id="mensaje">
+        <h1>MODO DIAGNÓSTICO</h1>
+        <p>Si no te ha salido ninguna ventana emergente, tu navegador está bloqueado.</p>
+        <button onclick="window.location.reload()" style="padding:20px; font-size:20px;">RECARGAR PÁGINA</button>
+    </div>
 
-    <!-- 
-        AQUÍ ESTÁ LA VERSIÓN NUEVA PUESTA AUTOMÁTICAMENTE:
-        Fíjate que dice: targets.mind?v=3000
-    -->
+    <script>
+        // 1. PRIMERA PRUEBA: ¿Es seguro el sitio?
+        // Si esto falla, la cámara NUNCA abrirá.
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            alert("⛔ ERROR FATAL DE SEGURIDAD ⛔\n\nEstás entrando por HTTP inseguro (" + window.location.hostname + ").\n\nLos celulares BLOQUEAN la cámara aquí.\n\nSOLUCIÓN: Usa Ngrok, Vercel o GitHub Pages (HTTPS).");
+        } 
+        else {
+            // 2. SEGUNDA PRUEBA: ¿Existe la cámara?
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("⛔ ERROR DE HARDWARE ⛔\n\nEl navegador dice que no tienes cámara o permiso denegado.");
+            } else {
+                alert("✅ SEGURIDAD OK.\nIntentando iniciar cámara ahora...");
+            }
+        }
+    </script>
+
+    <!-- ESCENA MINDAR CON ALERTAS DE ERROR -->
     <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind?v=3000; autoStart: false; uiLoading: no; uiScanning: no;" 
-        vr-mode-ui="enabled: false"
+        mindar-image="imageTargetSrc: ./targets.mind?v=9999; autoStart: true; uiLoading: no; uiScanning: no;" 
+        vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false">
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-        <!-- CUADRO VERDE AL DETECTAR -->
-        <a-entity id="target" mindar-image-target="targetIndex: 0">
-            <a-plane color="#00ff00" opacity="0.5" height="1" width="1"></a-plane>
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-plane color="red" opacity="0.5"></a-plane>
         </a-entity>
-        
     </a-scene>
 
     <script>
-        const btn = document.getElementById('btn-start');
-        const txt = document.getElementById('estado');
         const scene = document.querySelector('a-scene');
-        const target = document.getElementById('target');
 
-        // 1. ARRANCAR
-        btn.addEventListener('click', async () => {
-            btn.innerText = "CARGANDO...";
-            btn.disabled = true;
-            
-            try {
-                await scene.systems['mindar-image-system'].start();
-                btn.style.display = 'none'; // Se oculta el botón
-                txt.innerText = "BUSCANDO CARTA...";
-                txt.style.color = "white";
-                txt.style.borderColor = "white";
-            } catch (e) {
-                alert("Error: " + e);
-                btn.innerText = "REINTENTAR";
-                btn.disabled = false;
-            }
+        // ESCUCHAMOS ERRORES INTERNOS DE LA LIBRERÍA
+        scene.addEventListener('arError', (event) => {
+            alert("❌ ERROR MINDAR: " + event.detail.error);
         });
 
-        // 2. IDENTIFICADO
-        target.addEventListener('targetFound', () => {
-            txt.innerText = "¡¡ IDENTIFICADO !!";
-            txt.style.color = "#0f0"; // Verde neón
-            txt.style.borderColor = "#0f0";
-            txt.style.background = "rgba(0,0,0,0.8)";
-        });
-
-        // 3. PERDIDO
-        target.addEventListener('targetLost', () => {
-            txt.innerText = "BUSCANDO...";
-            txt.style.color = "white";
-            txt.style.borderColor = "white";
-            txt.style.background = "rgba(0,0,0,0.5)";
+        scene.addEventListener('arReady', () => {
+            alert("🎉 ¡CÁMARA INICIADA CON ÉXITO!\n\nAhora debería verse el video.");
+            document.body.style.backgroundColor = "transparent"; // Hacer transparente para ver video
         });
     </script>
 </body>
