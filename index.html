@@ -3,104 +3,448 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detector AR Simple</title>
+    <title>DOMUS MAGI - Detector AR</title>
     
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
+      }
+    }
+    </script>
 
     <style>
-        body {
+        * {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #000;
+            padding: 0;
+            box-sizing: border-box;
         }
 
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* OVERLAY UI */
+        #ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* MENSAJE CENTRAL */
         #mensaje {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 20px #000, 0 0 40px #000;
+            text-align: center;
+            padding: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* MARCO GUÍA */
+        #guia-marco {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 48px;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 0 0 20px #000;
-            z-index: 999;
-            text-align: center;
-            padding: 20px;
-            background: rgba(0,0,0,0.7);
+            width: 60vw;
+            height: 80vw;
+            max-width: 280px;
+            max-height: 380px;
+            border: 4px solid rgba(255, 0, 0, 0.7);
             border-radius: 15px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+            pointer-events: none;
+            z-index: 5;
+            transition: all 0.3s ease;
+            background: rgba(255, 0, 0, 0.05);
         }
 
-        #boton {
+        #guia-marco.detectado {
+            border-color: #0f0;
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.8), 0 0 100px rgba(0, 255, 0, 0.5);
+            background: rgba(0, 255, 0, 0.1);
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        /* PANEL INFO SUPERIOR */
+        #info-panel {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: 2px solid #fff;
+            z-index: 15;
+            display: none;
+            min-width: 300px;
+        }
+
+        #info-panel.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .info-item {
+            color: #fff;
+            font-size: 18px;
+            margin: 8px 0;
+            text-align: center;
+        }
+
+        .info-label {
+            color: #888;
+            font-size: 12px;
+            text-transform: uppercase;
+            display: inline-block;
+            width: 80px;
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        .info-value {
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* CONTROLES */
+        #controles {
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 20px 50px;
-            font-size: 24px;
+            z-index: 20;
+            pointer-events: auto;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 18px 45px;
+            font-size: 20px;
             font-weight: bold;
-            background: #ff0;
-            color: #000;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
-            z-index: 999;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s ease;
+            letter-spacing: 1px;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        #startButton {
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+            color: #000;
+        }
+
+        #startButton:hover:not(:disabled) {
+            background: linear-gradient(135deg, #00cc00, #009900);
+            box-shadow: 0 6px 20px rgba(0, 255, 0, 0.4);
+        }
+
+        #stopButton {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: #fff;
+            display: none;
+        }
+
+        #stopButton:hover {
+            background: linear-gradient(135deg, #cc0000, #990000);
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4);
+        }
+
+        #startButton:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* HINT TEXT */
+        #hint-text {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            text-align: center;
+            z-index: 15;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            #mensaje {
+                font-size: 32px;
+            }
+            
+            button {
+                padding: 15px 35px;
+                font-size: 18px;
+            }
+            
+            #info-panel {
+                min-width: 250px;
+                padding: 12px 20px;
+            }
+            
+            .info-item {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div id="mensaje">PRESIONA EL BOTÓN</div>
-    <button id="boton">INICIAR</button>
+    <!-- CONTENEDOR AR -->
+    <div id="container"></div>
 
-    <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false"
-        renderer="alpha: true"
-        embedded>
-        
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-entity id="target" mindar-image-target="targetIndex: 0"></a-entity>
-    </a-scene>
+    <!-- OVERLAY UI -->
+    <div id="ui-overlay">
+        <div id="mensaje">Presiona Iniciar</div>
+    </div>
 
-    <script>
+    <!-- MARCO GUÍA -->
+    <div id="guia-marco"></div>
+
+    <!-- PANEL INFORMACIÓN -->
+    <div id="info-panel">
+        <div class="info-item">
+            <span class="info-label">Casa:</span> 
+            <span class="info-value" style="color:#00ffff;">DOMUS DRACO</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Escudo:</span> 
+            <span class="info-value" style="color:#ffaa00;">DRAGÓN</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Arma:</span> 
+            <span class="info-value" style="color:#ff0;">SICA</span>
+        </div>
+    </div>
+
+    <!-- TEXTO AYUDA -->
+    <div id="hint-text">Ubica la carta en el marco rojo</div>
+
+    <!-- CONTROLES -->
+    <div id="controles">
+        <button id="startButton">Iniciar Escaneo</button>
+        <button id="stopButton">Detener</button>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { MindARThree } from 'mindar-image-three';
+
+        // REFERENCIAS DOM
         const mensaje = document.getElementById('mensaje');
-        const boton = document.getElementById('boton');
-        const target = document.getElementById('target');
+        const guiaMarco = document.getElementById('guia-marco');
+        const infoPanel = document.getElementById('info-panel');
+        const hintText = document.getElementById('hint-text');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
 
-        // INICIAR
-        boton.addEventListener('click', async () => {
-            boton.innerText = "CARGANDO...";
-            boton.disabled = true;
+        // VARIABLES
+        let mindarThree;
+        let isDetected = false;
+        let isRunning = false;
+
+        // DATOS DE LA CARTA
+        const cartaData = {
+            casa: "DOMUS DRACO",
+            escudo: "DRAGÓN",
+            arma: "SICA",
+            stats: {
+                IMPETUS: 6,
+                AUXILIUM: 1,
+                TUTELA: 2,
+                MYSTERIUM: 1
+            }
+        };
+
+        // INICIALIZAR AR
+        const initAR = async () => {
+            console.log("🚀 Inicializando MindAR...");
+
+            mindarThree = new MindARThree({
+                container: document.querySelector("#container"),
+                imageTargetSrc: "./targets.mind" // CAMBIA ESTA RUTA SI ES NECESARIO
+            });
+
+            const { renderer, scene, camera } = mindarThree;
+
+            // Crear ancla (punto de detección)
+            const anchor = mindarThree.addAnchor(0);
+
+            // Crear objeto 3D visible sobre la carta
+            const geometry = new THREE.PlaneGeometry(1, 1.4); // Proporción de carta
+            const material = new THREE.MeshBasicMaterial({ 
+                color: 0x00ff00, 
+                transparent: true, 
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            });
+            const plane = new THREE.Mesh(geometry, material);
+            anchor.group.add(plane);
+
+            // Agregar un borde visible
+            const edgesGeometry = new THREE.EdgesGeometry(geometry);
+            const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 2 });
+            const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+            anchor.group.add(edges);
+
+            // EVENTOS DE DETECCIÓN
+            anchor.onTargetFound = () => {
+                console.log("✅ ¡CARTA DETECTADA!");
+                isDetected = true;
+                
+                mensaje.innerText = "✓ DETECTADA";
+                mensaje.style.color = "#0f0";
+                mensaje.style.fontSize = "64px";
+                
+                guiaMarco.classList.add('detectado');
+                infoPanel.classList.add('visible');
+                hintText.style.display = 'none';
+            };
+
+            anchor.onTargetLost = () => {
+                console.log("❌ Carta perdida");
+                isDetected = false;
+                
+                mensaje.innerText = "Buscando carta...";
+                mensaje.style.color = "#ffff00";
+                mensaje.style.fontSize = "48px";
+                
+                guiaMarco.classList.remove('detectado');
+                infoPanel.classList.remove('visible');
+                hintText.style.display = 'block';
+            };
+
+            return { renderer, scene, camera };
+        };
+
+        // BOTÓN INICIAR
+        startButton.addEventListener('click', async () => {
+            if (isRunning) return;
+
+            startButton.innerText = "Cargando...";
+            startButton.disabled = true;
 
             try {
-                const scene = document.querySelector('a-scene');
-                await scene.systems['mindar-image-system'].start();
+                console.log("🎬 Iniciando sistema AR...");
                 
-                boton.style.display = 'none';
-                mensaje.innerText = "BUSCANDO CARTA...";
-                mensaje.style.color = "#ff0";
-            } catch(e) {
-                mensaje.innerText = "ERROR";
-                mensaje.style.color = "#f00";
-                boton.innerText = "REINTENTAR";
-                boton.disabled = false;
+                const { renderer, scene, camera } = await initAR();
+                
+                console.log("📹 Solicitando permiso de cámara...");
+                await mindarThree.start();
+                
+                console.log("✅ Sistema AR activo");
+                isRunning = true;
+
+                // Loop de renderizado
+                renderer.setAnimationLoop(() => {
+                    renderer.render(scene, camera);
+                });
+
+                // Actualizar UI
+                mensaje.innerText = "Buscando carta...";
+                mensaje.style.color = "#ffff00";
+                mensaje.style.fontSize = "48px";
+                
+                startButton.style.display = 'none';
+                stopButton.style.display = 'block';
+                
+                console.log("🎉 ¡Todo listo! Apunta a tu carta.");
+
+            } catch (error) {
+                console.error("❌ Error al iniciar AR:", error);
+                
+                mensaje.innerText = "Error al iniciar";
+                mensaje.style.color = "#ff0000";
+                mensaje.style.fontSize = "36px";
+                
+                startButton.innerText = "Reintentar";
+                startButton.disabled = false;
+                
+                alert("Error: " + error.message + "\n\nAsegúrate de:\n1. Permitir acceso a la cámara\n2. Tener el archivo targets.mind en la carpeta");
             }
         });
 
-        // DETECTAR
-        target.addEventListener('targetFound', () => {
-            mensaje.innerText = "✓ DETECTÉ";
-            mensaje.style.color = "#0f0";
-            mensaje.style.fontSize = "72px";
+        // BOTÓN DETENER
+        stopButton.addEventListener('click', () => {
+            console.log("⏹️ Deteniendo sistema...");
+            
+            if (mindarThree) {
+                mindarThree.stop();
+                mindarThree.renderer.setAnimationLoop(null);
+            }
+            
+            isRunning = false;
+            isDetected = false;
+            
+            mensaje.innerText = "Sistema detenido";
+            mensaje.style.color = "#fff";
+            mensaje.style.fontSize = "48px";
+            
+            guiaMarco.classList.remove('detectado');
+            infoPanel.classList.remove('visible');
+            hintText.style.display = 'block';
+            
+            startButton.style.display = 'block';
+            startButton.innerText = "Iniciar Escaneo";
+            startButton.disabled = false;
+            stopButton.style.display = 'none';
+            
+            console.log("✅ Sistema detenido correctamente");
         });
 
-        target.addEventListener('targetLost', () => {
-            mensaje.innerText = "BUSCANDO...";
-            mensaje.style.color = "#ff0";
-            mensaje.style.fontSize = "48px";
-        });
+        // Log inicial
+        console.log("📱 Aplicación cargada");
+        console.log("🎯 Datos de carta:", cartaData);
     </script>
 </body>
 </html>
