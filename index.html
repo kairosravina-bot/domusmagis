@@ -2,305 +2,87 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: REVELATIONS</title>
-
-    <!-- 1. IMPORT MAP: Carga moderna de librerías (ThreeJS + MindAR) -->
-    <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-        "mindar-image-three":"https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
-      }
-    }
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEST DE DETECCIÓN</title>
+    
+    <!-- LIBRERÍAS MINDAR + AFRAME -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        /* --- ESTÉTICA UI (TU DISEÑO EXACTO) --- */
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
-
-        /* Contenedor donde MindAR pondrá el video de la cámara (Fondo) */
-        #container {
-            width: 100vw; height: 100vh;
-            position: absolute; top: 0; left: 0; z-index: 0;
-            overflow: hidden;
-        }
-
-        /* Capa de Interfaz (Por encima de la cámara) */
-        #ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 100; pointer-events: none;
-            display: flex; flex-direction: column;
-        }
-
-        /* 1. VISOR VIDEO (Arriba) */
-        #video-visor {
-            height: 35%; width: 100%; background: rgba(0,0,0,0.9);
-            border-bottom: 2px solid #555; pointer-events: auto;
-            display: flex; align-items: center; justify-content: center;
-        }
-        #video-player { width: 100%; height: 100%; object-fit: contain; display: none; }
-        #msg-visor { color: white; text-align: center; font-weight: bold; letter-spacing: 1px; }
-
-        /* 2. ZONA CENTRAL (Guía Roja/Verde) */
-        #zona-ar { flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: center; }
+        body { margin: 0; overflow: hidden; font-family: sans-serif; }
         
-        #guia-roja {
-            width: 65vw; height: 65vw; /* Cuadrada/Rombo para tu imagen */
-            max-width: 300px; max-height: 300px;
-            border: 4px solid red; border-radius: 15px;
-            box-shadow: 0 0 20px rgba(255,0,0,0.5);
-            transition: 0.3s;
-        }
-        #guia-roja.verde { border-color: #0f0; box-shadow: 0 0 50px #0f0; background: rgba(0,255,0,0.1); }
-
-        /* 3. PANEL INFERIOR */
-        #panel-inferior {
-            background: #111; border-top: 2px solid #fff;
-            padding-bottom: env(safe-area-inset-bottom);
-            pointer-events: auto; display: flex; flex-direction: column; gap: 8px; padding: 10px;
+        /* TEXTO DE ESTADO GIGANTE */
+        #estado {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: red; font-size: 24px; font-weight: bold;
+            background: rgba(0,0,0,0.7); padding: 20px;
+            border: 2px solid white; z-index: 999;
+            text-align: center; pointer-events: none;
         }
 
-        /* Botón de Scan (Amarillo) */
-        #btn-scan-row { display: flex; justify-content: center; margin-bottom: 5px; }
-        #btn-iniciar-scan {
-            background: #ffcc00; color: #000; border: none;
-            padding: 15px 30px; border-radius: 8px; font-weight: bold; font-size: 18px;
-            cursor: pointer; text-transform: uppercase; width: 100%;
-            box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+        /* BOTÓN SIMPLE PARA INICIAR (Para evitar bloqueos de navegador) */
+        #btn-start {
+            position: absolute; bottom: 50px; left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 40px; font-size: 20px;
+            background: blue; color: white; border: none;
+            z-index: 1000; cursor: pointer;
         }
-        #btn-iniciar-scan:active { transform: scale(0.98); }
-
-        /* Datos (2 Renglones) */
-        .fila-datos { display: flex; gap: 5px; width: 100%; }
-        .dato-box { 
-            background: #222; border: 1px solid #444; border-radius: 5px; padding: 5px; 
-            flex: 1; text-align: center; display: flex; flex-direction: column; justify-content: center;
-        }
-        .lbl { font-size: 9px; color: #888; display: block; text-transform: uppercase; }
-        .val { font-size: 13px; color: #fff; font-weight: bold; }
-        .val-big { font-size: 15px; font-weight: bold; }
-
-        /* Botonera */
-        #botonera-poderes { display: flex; justify-content: center; gap: 15px; padding-top: 5px; }
-        .btn-poder {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: #222; border: 2px solid #555; color: #555;
-            font-size: 20px; font-weight: bold; display: flex; 
-            align-items: center; justify-content: center; opacity: 0.4; transition: 0.2s;
-        }
-        .btn-poder.activo { opacity: 1; cursor: pointer; color: white; border-color: white; transform: scale(1.1); }
-        
-        #btn-i.activo { background: #900; box-shadow: 0 0 15px #f00; }
-        #btn-a.activo { background: #090; box-shadow: 0 0 15px #0f0; }
-        #btn-t.activo { background: #555; box-shadow: 0 0 15px #aaa; }
-        #btn-m.activo { background: #609; box-shadow: 0 0 15px #d0f; }
     </style>
 </head>
 <body>
 
-    <!-- 1. CONTENEDOR AR (Aquí se renderiza la cámara ThreeJS) -->
-    <div id="container"></div>
+    <!-- MENSAJE DE ESTADO -->
+    <div id="estado">ESPERANDO CÁMARA...</div>
 
-    <!-- 2. UI LAYER (Interfaz) -->
-    <div id="ui-layer">
+    <!-- BOTÓN DE INICIO -->
+    <button id="btn-start">ENCENDER CÁMARA</button>
+
+    <!-- ESCENA AR (Mínima configuración posible) -->
+    <a-scene 
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
+        vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false">
         
-        <!-- VISOR -->
-        <div id="video-visor">
-            <div id="msg-visor">SISTEMA APAGADO<br><span style="font-size:10px; color:#aaa">Pulsa el botón Amarillo</span></div>
-            <video id="video-player" playsinline webkit-playsinline></video>
-        </div>
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- GUÍA -->
-        <div id="zona-ar">
-            <div id="guia-roja"></div>
-        </div>
-
-        <!-- PANEL INFERIOR -->
-        <div id="panel-inferior">
-            
-            <div id="btn-scan-row">
-                <button id="btn-iniciar-scan">ACTIVAR ESCÁNER</button>
-            </div>
-
-            <!-- Renglón 1: Fijos -->
-            <div class="fila-datos">
-                <div class="dato-box"><span class="lbl">CASA</span><span id="d-casa" class="val">---</span></div>
-                <div class="dato-box"><span class="lbl">ARMA</span><span id="d-arma" class="val">---</span></div>
-            </div>
-
-            <!-- Renglón 2: Variables -->
-            <div class="fila-datos">
-                <div class="dato-box"><span class="lbl">LADO / ACCIÓN</span><span id="d-lado" class="val-big" style="color:#ff0">---</span></div>
-                <div class="dato-box"><span class="lbl">VALOR</span><span id="d-valor" class="val-big" style="color:#0f0">0</span></div>
-            </div>
-
-            <div id="botonera-poderes">
-                <button id="btn-i" class="btn-poder" data-tipo="IMPETUS">I</button>
-                <button id="btn-a" class="btn-poder" data-tipo="AUXILIUM">A</button>
-                <button id="btn-t" class="btn-poder" data-tipo="TUTELA">T</button>
-                <button id="btn-m" class="btn-poder" data-tipo="MYSTERIUM">M</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. LÓGICA JAVASCRIPT (MODULO THREE.JS) -->
-    <script type="module">
-        import * as THREE from 'three';
-        import { MindARThree } from 'mindar-image-three';
-
-        // --- DATOS DEL JUEGO (CARTA DRACO SICA) ---
-        const DATA = {
-            casa: "DOMUS DRACO", arma: "SICA",
-            stats: {
-                IMPETUS:   { v: 6, vid: "ataque.mp4" },
-                AUXILIUM:  { v: 1, vid: "cura.mp4" },
-                TUTELA:    { v: 2, vid: "defensa.mp4" },
-                MYSTERIUM: { v: 1, vid: "magia.mp4" }
-            }
-        };
-
-        // --- REFERENCIAS UI ---
-        const btnScan = document.querySelector("#btn-iniciar-scan");
-        const msgVisor = document.querySelector("#msg-visor");
-        const guiaRoja = document.querySelector("#guia-roja");
-        const videoPlayer = document.querySelector("#video-player");
+        <!-- TARGET -->
+        <a-entity id="target">
+            <!-- CUADRO VISUAL (Para saber si se pega a la imagen) -->
+            <!-- Si ves este cuadro rojo flotando sobre tu carta, FUNCIONA -->
+            <a-plane color="red" opacity="0.5" width="1" height="1"></a-plane>
+        </a-entity>
         
-        const uiCasa = document.querySelector("#d-casa");
-        const uiArma = document.querySelector("#d-arma");
-        const uiLado = document.querySelector("#d-lado");
-        const uiValor = document.querySelector("#d-valor");
-        const botones = document.querySelectorAll(".btn-poder");
+    </a-scene>
 
-        // --- CONFIGURACIÓN DE LA CARTA NEGRA ---
-        // IMPORTANTE: Asegúrate de que targets.mind fue creado con la imagen negra
-        const mindarThree = new MindARThree({
-            container: document.querySelector("#container"),
-            imageTargetSrc: "./targets.mind", 
-            filterMinCF: 0.0001, // Filtro suave para reducir temblor
-            filterBeta: 0.001
+    <script>
+        const btn = document.getElementById('btn-start');
+        const txt = document.getElementById('estado');
+        const scene = document.querySelector('a-scene');
+        const target = document.getElementById('target');
+
+        // 1. INICIAR
+        btn.addEventListener('click', () => {
+            txt.innerText = "CARGANDO...";
+            btn.style.display = 'none'; // Ocultar botón
+            scene.systems['mindar-image-system'].start();
         });
 
-        const {renderer, scene, camera} = mindarThree;
-        
-        // ANCHOR (DETECTAR CARTA 0)
-        const anchor = mindarThree.addAnchor(0);
-
-        // Agregamos un plano invisible para ayudar a la lógica interna (opcional)
-        const geometry = new THREE.PlaneGeometry(1, 1);
-        const material = new THREE.MeshBasicMaterial({transparent: true, opacity: 0});
-        const plane = new THREE.Mesh(geometry, material);
-        anchor.group.add(plane);
-
-        // --- EVENTO: CARTA ENCONTRADA ---
-        anchor.onTargetFound = () => {
-            console.log("CARTA NEGRA DETECTADA");
-            guiaRoja.classList.add('verde');
-            msgVisor.innerText = "¡ENLACE ESTABLECIDO!";
-            msgVisor.style.color = "#0f0";
-
-            // Llenar Datos Fijos (Renglón 1)
-            uiCasa.innerText = DATA.casa;
-            uiArma.innerText = DATA.arma;
-
-            // Resetear Datos Variables (Renglón 2)
-            uiLado.innerText = "ESPERANDO...";
-            uiLado.style.color = "#fff";
-            uiValor.innerText = "-";
-
-            // Activar Botones
-            botones.forEach(btn => btn.classList.add('activo'));
-        }
-
-        // --- EVENTO: CARTA PERDIDA ---
-        anchor.onTargetLost = () => {
-            console.log("BUSCANDO...");
-            guiaRoja.classList.remove('verde');
-            msgVisor.innerText = "BUSCANDO CARTA...";
-            msgVisor.style.color = "#fff";
-
-            // Pausar video y ocultar
-            videoPlayer.pause();
-            videoPlayer.style.display = 'none';
-            msgVisor.style.display = 'block';
-            
-            // Limpiar Renglón 2
-            uiLado.innerText = "---";
-            uiValor.innerText = "0";
-
-            // Desactivar Botones
-            botones.forEach(btn => btn.classList.remove('activo'));
-        }
-
-        // --- BOTÓN DE INICIO (START) ---
-        const start = async () => {
-            btnScan.innerText = "CARGANDO MOTOR...";
-            btnScan.disabled = true;
-
-            // TRUCO PARA AUDIO: Desbloquear el sonido del navegador al hacer click
-            videoPlayer.muted = false;
-            videoPlayer.play().then(() => {
-                videoPlayer.pause();
-                videoPlayer.currentTime = 0;
-            }).catch((e) => console.log("Audio unlock:", e));
-
-            try {
-                await mindarThree.start();
-                
-                // Bucle de renderizado de ThreeJS
-                renderer.setAnimationLoop(() => {
-                    renderer.render(scene, camera);
-                });
-
-                btnScan.style.display = 'none'; // Ocultar botón al éxito
-                msgVisor.innerHTML = "ESCANEA LA CARTA<br><span style='font-size:10px'>Centra el rombo blanco</span>";
-            
-            } catch(e) {
-                alert("Error: " + e);
-                btnScan.innerText = "REINTENTAR";
-                btnScan.disabled = false;
-            }
-        }
-
-        btnScan.addEventListener("click", () => {
-            start();
+        // 2. DETECTADO
+        target.addEventListener('targetFound', () => {
+            txt.innerText = "¡¡ IDENTIFICADO !!";
+            txt.style.color = "#0f0"; // Verde
+            txt.style.borderColor = "#0f0";
         });
 
-        // --- LÓGICA DE BOTONES DE PODER ---
-        botones.forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (!btn.classList.contains('activo')) return;
-
-                const tipo = btn.getAttribute('data-tipo');
-                const info = DATA.stats[tipo];
-
-                // Actualizar Renglón 2
-                uiLado.innerText = tipo;
-                uiValor.innerText = info.v;
-
-                // Colores según tipo
-                if(tipo === 'IMPETUS') uiLado.style.color = "#f55";
-                else if(tipo === 'AUXILIUM') uiLado.style.color = "#5f5";
-                else if(tipo === 'MYSTERIUM') uiLado.style.color = "#d5f";
-                else uiLado.style.color = "#fff";
-
-                // Reproducir Video
-                msgVisor.style.display = 'none';
-                videoPlayer.style.display = 'block';
-                videoPlayer.src = info.vid;
-                videoPlayer.volume = 1.0;
-                videoPlayer.play();
-            });
+        // 3. PERDIDO
+        target.addEventListener('targetLost', () => {
+            txt.innerText = "BUSCANDO...";
+            txt.style.color = "red";
+            txt.style.borderColor = "red";
         });
-
-        // Al terminar video
-        videoPlayer.addEventListener('ended', () => {
-            videoPlayer.style.display = 'none';
-            msgVisor.style.display = 'block';
-            msgVisor.innerText = "FIN DE TURNO";
-        });
-
     </script>
 </body>
 </html>
