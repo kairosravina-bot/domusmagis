@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOMUS MAGI: REVELATIONS</title>
     
-    <!-- LIBRERÍAS (Versiones estables) -->
+    <!-- LIBRERÍAS ESTABLES -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
@@ -13,39 +13,36 @@
         /* ESTILO GENERAL */
         body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
 
-        /* --- NUEVO: RECUADRO GUÍA DE ESCANEO --- */
-        #scanner-guide {
-            position: absolute; 
-            top: 50%; left: 50%; 
-            transform: translate(-50%, -20%);
-            width: 70vw; height: 90vw;
-            max-width: 260px; max-height: 380px;
-            
-            border: 4px solid rgba(255, 0, 0, 0.6);
-            background: rgba(255, 0, 0, 0.05);
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
-            
-            z-index: 5; pointer-events: none;
-            transition: all 0.3s ease;
+        /* PANTALLA DE CARGA (Con animación para ver que no está trabado) */
+        #start-screen {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s;
         }
+        .loader {
+            border: 4px solid #333; border-top: 4px solid #0f0; border-radius: 50%;
+            width: 40px; height: 40px; animation: spin 1s linear infinite;
+            margin-bottom: 20px; display: none; /* Oculto al principio */
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* CLASE ACTIVADA (VERDE) */
-        #scanner-guide.active {
-            border-color: #0f0;
-            background: rgba(0, 255, 0, 0.1);
-            box-shadow: 0 0 50px rgba(0, 255, 0, 0.8);
-            transform: translate(-50%, -20%) scale(1.05);
+        #btn-init {
+            padding: 15px 40px; font-size: 18px; border-radius: 30px;
+            background: white; border: none; font-weight: bold; cursor: pointer;
+            box-shadow: 0 0 20px #fff;
         }
+        #status-msg { color: #888; margin-top: 15px; font-family: monospace; font-size: 12px; }
 
         /* CAPAS DE INTERFAZ */
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 10; pointer-events: none;
-            display: flex; flex-direction: column;
+            display: none; /* Se oculta hasta que arranque */
+            flex-direction: column;
         }
 
-        /* 1. VISOR SUPERIOR (Video) */
+        /* 1. VISOR SUPERIOR */
         #video-container {
             width: 100%; height: 35%; 
             background: rgba(0,0,0,0.95); border-bottom: 2px solid #444;
@@ -53,18 +50,29 @@
             display: flex; align-items: center; justify-content: center;
         }
         #main-video { width: 100%; height: 100%; object-fit: contain; display: none; }
-        
         #system-msg {
             color: #fff; text-align: center; font-size: 16px; 
             text-transform: uppercase; letter-spacing: 2px;
         }
+        #text-estado { display:block; font-size:12px; color:#f55; margin-top:5px; }
 
-        /* 2. ZONA AR (Transparente) */
+        /* 2. ZONA AR (Guía Visual) */
         #ar-zone { flex-grow: 1; position: relative; }
         
-        #scan-hint {
-            position: absolute; bottom: 20px; width: 100%; text-align: center;
-            color: rgba(255,255,255,0.6); font-size: 11px; text-transform: uppercase;
+        #scanner-guide {
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -20%);
+            width: 65vw; height: 85vw; max-width: 260px; max-height: 380px;
+            border: 4px solid rgba(255, 0, 0, 0.6);
+            background: rgba(255, 0, 0, 0.05);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        #scanner-guide.active {
+            border-color: #0f0; background: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.8);
+            transform: translate(-50%, -20%) scale(1.05);
         }
 
         /* 3. PANEL INFERIOR */
@@ -92,77 +100,59 @@
         #actions { display: flex; justify-content: center; gap: 15px; padding: 15px 10px; }
         
         .btn-action {
-            width: 65px; height: 65px; border-radius: 50%; 
+            width: 60px; height: 60px; border-radius: 50%; 
             border: 2px solid #444; background: #222; color: #555;
-            font-size: 22px; font-weight: bold; cursor: not-allowed;
+            font-size: 20px; font-weight: bold; cursor: not-allowed;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: all 0.2s ease; opacity: 0.5;
         }
-        .btn-sub { font-size: 11px; font-weight: normal; margin-top: -2px; }
-
-        /* BOTÓN FORZAR ESCANEO */
-        #btn-force-scan {
-            position: absolute; top: 10px; right: 10px; z-index: 20;
-            padding: 8px 16px; background: #f90; border: 2px solid #fff;
-            color: #000; font-weight: bold; border-radius: 20px;
-            cursor: pointer; font-size: 12px; text-transform: uppercase;
-            box-shadow: 0 0 10px rgba(255,153,0,0.5);
-        }
-        #btn-force-scan:active { transform: scale(0.95); }
+        .btn-sub { font-size: 10px; font-weight: normal; margin-top: -2px; }
 
         .btn-action.unlocked {
             opacity: 1; cursor: pointer; color: white; border-color: white;
-            box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1);
+            box-shadow: 0 0 15px rgba(255,255,255,0.3); transform: scale(1.05);
         }
-        .btn-action.unlocked:active { transform: scale(0.95); }
-
-        /* Colores Botones */
+        
         #btn-i.unlocked { background: radial-gradient(#900, #300); border-color: #f55; }
         #btn-a.unlocked { background: radial-gradient(#090, #030); border-color: #5f5; }
         #btn-t.unlocked { background: radial-gradient(#777, #333); border-color: #ddd; }
         #btn-m.unlocked { background: radial-gradient(#709, #304); border-color: #d8f; }
 
-        /* PANTALLA INICIO */
-        #start-screen {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: #000; z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        /* BOTÓN DE DEBUG / FORZADO */
+        #btn-force-scan {
+            position: absolute; top: 10px; right: 10px; z-index: 9999;
+            background: rgba(255, 165, 0, 0.8); border: 1px solid #fff; 
+            color: black; font-weight: bold; padding: 5px 10px; font-size: 10px;
+            border-radius: 15px; cursor: pointer;
         }
-        #btn-init {
-            padding: 15px 40px; font-size: 18px; border-radius: 30px;
-            background: white; border: none; font-weight: bold; cursor: pointer;
-            box-shadow: 0 0 20px #fff; margin-top: 20px;
-        }
-        #status-msg { color: #0f0; margin-top: 15px; font-family: monospace; }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA DE CARGA -->
+    <!-- PANTALLA DE INICIO / CARGA -->
     <div id="start-screen">
         <h1 style="color:white; letter-spacing: 5px; text-shadow: 0 0 10px cyan;">DOMUS MAGI</h1>
-        <p style="color:#aaa;">SISTEMA DE ESCANEO</p>
+        <div class="loader" id="loader"></div>
         <button id="btn-init">INICIAR CÁMARA</button>
-        <div id="status-msg"></div>
+        <div id="status-msg">Sistema listo para iniciar</div>
     </div>
 
-    <!-- GUÍA DE ESCANEO (ROJA / VERDE) -->
-    <div id="scanner-guide"></div>
+    <!-- BOTÓN DEBUG -->
+    <button id="btn-force-scan" style="display:none;">SIMULAR SCAN</button>
 
-    <!-- BOTÓN FORZAR ESCANEO -->
-    <button id="btn-force-scan" style="display: none;">FORZAR ESCANEO</button>
-
+    <!-- UI PRINCIPAL -->
     <div id="ui-layer">
         <div id="video-container">
             <div id="system-msg">
                 ESPERANDO SEÑAL
-                <span id="text-estado" style="display:block; font-size:12px; color:#f55; margin-top:5px;">NO DETECTADO</span>
+                <span id="text-estado">NO DETECTADO</span>
             </div>
-            <video id="main-video" playsinline webkit-playsinline></video>
+            <!-- Video con atributos de seguridad -->
+            <video id="main-video" playsinline webkit-playsinline muted></video>
         </div>
 
         <div id="ar-zone">
-            <div id="scan-hint">Ubica la carta en el marco rojo</div>
+            <div id="scanner-guide"></div>
         </div>
 
         <div id="control-panel">
@@ -187,27 +177,23 @@
         </div>
     </div>
 
-    <!-- ESCENA A-FRAME / MINDAR -->
+    <!-- ESCENA MINDAR -->
     <a-scene 
         mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF:0.001; filterBeta: 0.01;" 
         vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false"
-        renderer="colorManagement: true; physicallyCorrectLights: true; alpha: true;"
+        renderer="colorManagement: true; alpha: true;"
         embedded
         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
         
-        <a-camera position="0 0 0" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
-        <a-entity id="carta-target" mindar-image-target="targetIndex: 0">
-            <a-box position="0 0 0" scale="0.1 0.1 0.1" color="#0f0" opacity="0.5"></a-box>
-        </a-entity>
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-entity id="carta-target" mindar-image-target="targetIndex: 0"></a-entity>
     </a-scene>
 
     <script>
-        // DATOS DE LA CARTA
+        // DATOS
         const DATA = {
-            casa: "DOMUS DRACO", 
-            escudo: "DRAGÓN", 
-            arma: "SICA",
+            casa: "DOMUS DRACO", escudo: "DRAGÓN", arma: "SICA",
             stats: {
                 IMPETUS:   { val: 6, vid: "ataque.mp4" },
                 AUXILIUM:  { val: 1, vid: "cura.mp4" },
@@ -216,16 +202,18 @@
             }
         };
 
-        // REFERENCIAS
+        // REFERENCIAS UI
         const btnInit = document.getElementById('btn-init');
-        const btnForceScan = document.getElementById('btn-force-scan');
         const startScreen = document.getElementById('start-screen');
         const statusMsg = document.getElementById('status-msg');
+        const loader = document.getElementById('loader');
+        const uiLayer = document.getElementById('ui-layer');
+        const btnForce = document.getElementById('btn-force-scan');
         
         const guide = document.getElementById('scanner-guide');
         const txtEstado = document.getElementById('text-estado');
-        const video = document.getElementById('main-video');
         const sysMsg = document.getElementById('system-msg');
+        const video = document.getElementById('main-video');
         
         const uiCasa = document.getElementById('v-casa');
         const uiEscudo = document.getElementById('v-escudo');
@@ -234,74 +222,57 @@
         const uiVal = document.getElementById('v-valor');
         const botones = document.querySelectorAll('.btn-action');
 
-        let arSystemReady = false;
-        let isCardDetected = false;
+        let isDetected = false;
 
-        // 1. INICIALIZACIÓN ROBUSTA
-        btnInit.addEventListener('click', async () => {
-            statusMsg.innerText = "Inicializando sistema AR...";
-            btnInit.disabled = true;
-            btnInit.style.opacity = "0.5";
+        // --- 1. INICIALIZACIÓN OPTIMIZADA ---
+        btnInit.addEventListener('click', () => {
+            // UI Feedback INMEDIATO para que no parezca trabado
+            btnInit.style.display = 'none';
+            loader.style.display = 'block';
+            statusMsg.innerText = "Cargando motor de realidad aumentada...";
+            
+            // Usamos setTimeout para "romper" el hilo de ejecución y dejar que el navegador actualice la UI
+            setTimeout(async () => {
+                try {
+                    const scene = document.querySelector('a-scene');
+                    
+                    // Esperar a que A-Frame esté listo
+                    if (!scene.hasLoaded) {
+                        await new Promise(resolve => scene.addEventListener('loaded', resolve));
+                    }
+                    
+                    const arSystem = scene.systems['mindar-image-system'];
+                    
+                    statusMsg.innerText = "Accediendo a cámara...";
+                    
+                    // Iniciar AR
+                    await arSystem.start();
+                    
+                    // Si llegamos aquí, todo está bien
+                    startScreen.style.opacity = "0";
+                    setTimeout(() => {
+                        startScreen.style.display = 'none';
+                        uiLayer.style.display = 'flex';
+                        btnForce.style.display = 'block';
+                    }, 500);
 
-            try {
-                const scene = document.querySelector('a-scene');
-                
-                if (scene.hasLoaded) {
-                    initAR();
-                } else {
-                    scene.addEventListener('loaded', initAR);
+                } catch (error) {
+                    console.error(error);
+                    loader.style.display = 'none';
+                    btnInit.style.display = 'block';
+                    btnInit.innerText = "REINTENTAR";
+                    statusMsg.innerText = "Error: " + error.message;
+                    statusMsg.style.color = "red";
+                    alert("No se pudo iniciar la cámara. Verifica permisos y que uses HTTPS.");
                 }
-                
-            } catch(err) {
-                statusMsg.innerText = "Error: " + err.message;
-                statusMsg.style.color = "red";
-                btnInit.disabled = false;
-                btnInit.style.opacity = "1";
-            }
+            }, 100); // 100ms de respiro para el navegador
         });
 
-        function initAR() {
-            const scene = document.querySelector('a-scene');
-            const arSystem = scene.systems['mindar-image-system'];
-            
-            statusMsg.innerText = "Solicitando acceso a cámara...";
+        // --- 2. LOGICA DE CARTA ---
+        function onCardFound() {
+            if(isDetected) return;
+            isDetected = true;
 
-            const onArReady = () => {
-                arSystemReady = true;
-                statusMsg.innerText = "✓ Sistema AR activo";
-                statusMsg.style.color = "#0f0";
-                setTimeout(() => { 
-                    startScreen.style.display = 'none'; 
-                    btnForceScan.style.display = 'block';
-                }, 800);
-            };
-
-            const onArError = (event) => {
-                console.error('AR Error:', event.detail);
-                statusMsg.innerText = "Error AR: " + (event.detail.error || "Desconocido");
-                statusMsg.style.color = "red";
-                btnInit.disabled = false;
-                btnInit.style.opacity = "1";
-            };
-
-            scene.addEventListener('arReady', onArReady, { once: true });
-            scene.addEventListener('arError', onArError, { once: true });
-
-            arSystem.start().catch(err => {
-                console.error('Error starting AR:', err);
-                statusMsg.innerText = "No se pudo iniciar AR: " + err.message;
-                statusMsg.style.color = "red";
-                btnInit.disabled = false;
-                btnInit.style.opacity = "1";
-            });
-        }
-
-        // 2. FUNCIÓN PARA ACTIVAR CARTA (Manual o Automático)
-        function activateCard() {
-            if (isCardDetected) return;
-            
-            isCardDetected = true;
-            
             guide.classList.add('active');
             txtEstado.innerText = "ENFOCADA";
             txtEstado.style.color = "#0f0";
@@ -309,121 +280,75 @@
             uiCasa.innerText = DATA.casa;
             uiEscudo.innerText = DATA.escudo;
             uiArma.innerText = DATA.arma;
-            uiPos.innerText = "LISTA";
-            uiPos.style.color = "#0ff";
-            uiVal.innerText = "SCAN OK";
-            uiVal.style.color = "#0f0";
 
             botones.forEach(btn => {
-                const tipo = btn.getAttribute('data-type');
-                const valor = DATA.stats[tipo].val;
-                btn.querySelector('.btn-sub').innerText = valor;
+                const type = btn.getAttribute('data-type');
+                btn.querySelector('.btn-sub').innerText = DATA.stats[type].val;
                 btn.classList.add('unlocked');
             });
-
-            console.log("Carta activada - Datos cargados:", DATA);
         }
 
-        function deactivateCard() {
-            if (!isCardDetected) return;
-            
-            isCardDetected = false;
-            
+        function onCardLost() {
+            if(!isDetected) return;
+            isDetected = false;
+
             guide.classList.remove('active');
             txtEstado.innerText = "BUSCANDO...";
             txtEstado.style.color = "#f55";
 
+            // Limpiar datos
             uiCasa.innerText = "---";
             uiEscudo.innerText = "---";
             uiArma.innerText = "---";
             uiPos.innerText = "---";
             uiVal.innerText = "0";
 
+            // Detener video
             video.pause();
-            video.src = "";
             video.style.display = 'none';
             sysMsg.style.display = 'block';
 
-            botones.forEach(btn => {
-                btn.classList.remove('unlocked');
-                btn.querySelector('.btn-sub').innerText = "0";
-            });
-
-            console.log("Carta desactivada");
+            botones.forEach(btn => btn.classList.remove('unlocked'));
         }
 
-        // 3. DETECCIÓN AUTOMÁTICA
+        // Eventos MindAR
         const target = document.getElementById('carta-target');
+        target.addEventListener('targetFound', onCardFound);
+        target.addEventListener('targetLost', onCardLost);
 
-        target.addEventListener('targetFound', () => {
-            console.log("Target Found Event");
-            activateCard();
+        // --- 3. BOTÓN FORZAR (DEBUG) ---
+        btnForce.addEventListener('click', () => {
+            if(isDetected) onCardLost();
+            else onCardFound();
         });
 
-        target.addEventListener('targetLost', () => {
-            console.log("Target Lost Event");
-            deactivateCard();
-        });
-
-        // 4. BOTÓN FORZAR ESCANEO
-        btnForceScan.addEventListener('click', () => {
-            if (!arSystemReady) {
-                alert("El sistema AR aún no está listo. Espera unos segundos.");
-                return;
-            }
-            
-            if (isCardDetected) {
-                deactivateCard();
-                btnForceScan.innerText = "FORZAR ESCANEO";
-                btnForceScan.style.background = "#f90";
-            } else {
-                activateCard();
-                btnForceScan.innerText = "DESACTIVAR";
-                btnForceScan.style.background = "#f55";
-            }
-        });
-
-        // 5. JUGABILIDAD (VIDEOS)
+        // --- 4. VIDEO Y BOTONES ---
         botones.forEach(btn => {
             btn.addEventListener('click', () => {
-                if (!btn.classList.contains('unlocked')) {
-                    console.log("Botón bloqueado");
-                    return;
-                }
+                if(!btn.classList.contains('unlocked')) return;
 
-                const tipo = btn.getAttribute('data-type');
-                const d = DATA.stats[tipo];
+                const type = btn.getAttribute('data-type');
+                const d = DATA.stats[type];
 
-                console.log("Activando:", tipo, d);
-
-                uiPos.innerText = tipo;
+                uiPos.innerText = type;
                 uiVal.innerText = d.val;
                 
-                if(tipo === 'IMPETUS') uiPos.style.color = "#f55";
-                else if(tipo === 'AUXILIUM') uiPos.style.color = "#5f5";
-                else if(tipo === 'TUTELA') uiPos.style.color = "#ddd";
-                else if(tipo === 'MYSTERIUM') uiPos.style.color = "#d5f";
+                let col = "#fff";
+                if(type === 'IMPETUS') col = "#f55";
+                if(type === 'AUXILIUM') col = "#5f5";
+                if(type === 'MYSTERIUM') col = "#d5f";
+                uiPos.style.color = col;
 
                 sysMsg.style.display = 'none';
                 video.style.display = 'block';
                 video.src = d.vid;
-                
-                video.play().catch(err => {
-                    console.error("Error reproduciendo video:", err);
-                    alert("No se pudo reproducir el video: " + d.vid);
-                    video.style.display = 'none';
-                    sysMsg.style.display = 'block';
-                });
+                video.play().catch(e => console.log("Error play:", e));
             });
         });
 
         video.addEventListener('ended', () => {
             video.style.display = 'none';
             sysMsg.style.display = 'block';
-            uiPos.innerText = "LISTA";
-            uiPos.style.color = "#0ff";
-            uiVal.innerText = "SCAN OK";
-            uiVal.style.color = "#0f0";
         });
 
     </script>
