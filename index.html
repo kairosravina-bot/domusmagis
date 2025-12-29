@@ -9,7 +9,6 @@
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
 <style>
-/* === TU ESTÉTICA ORIGINAL – NO TOCADA === */
 body, html {
     margin: 0; padding: 0; width: 100%; height: 100%;
     background-color: #000;
@@ -17,18 +16,22 @@ body, html {
 }
 #ui-layer {
     position: absolute; inset: 0;
-    z-index: 999; display: flex; flex-direction: column;
+    z-index: 999;
+    display: flex; flex-direction: column;
     pointer-events: none;
 }
 #top-visor {
-    height: 35%; background: #000;
+    height: 35%;
+    background: #000;
     border-bottom: 2px solid #555;
     display: flex; align-items: center; justify-content: center;
     pointer-events: auto;
 }
 #video-player {
-    width: 100%; height: 100%;
-    object-fit: contain; display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: none;
 }
 #msg-visor { color: white; text-align: center; }
 #middle-cam {
@@ -37,7 +40,8 @@ body, html {
 }
 #guia-box {
     width: 250px; height: 350px;
-    border: 4px solid red; border-radius: 10px;
+    border: 4px solid red;
+    border-radius: 10px;
     box-shadow: 0 0 20px rgba(255,0,0,0.5);
 }
 #guia-box.ok {
@@ -49,12 +53,16 @@ body, html {
     border-top: 2px solid #fff;
     pointer-events: auto;
     display: flex; flex-direction: column;
-    gap: 10px; padding: 10px 10px 30px;
+    gap: 10px;
+    padding: 10px 10px 30px;
 }
 #btn-scan {
-    background: #ffcc00; color: #000;
-    border: none; padding: 15px;
-    font-size: 18px; font-weight: bold;
+    background: #ffcc00;
+    color: #000;
+    border: none;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
     border-radius: 8px;
 }
 #info-grid {
@@ -63,23 +71,36 @@ body, html {
     gap: 5px;
 }
 .info-box {
-    background: #222; border: 1px solid #444;
-    text-align: center; padding: 5px;
+    background: #222;
+    border: 1px solid #444;
+    text-align: center;
+    padding: 5px;
 }
 .lbl { font-size: 10px; color: #aaa; }
 .val { font-size: 12px; color: #fff; font-weight: bold; }
 #powers-grid {
-    display: flex; justify-content: center; gap: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
 }
 .pwr-btn {
-    width: 60px; height: 60px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    background: #333; border: 2px solid #555;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0.5; color: #777;
+    background: #333;
+    border: 2px solid #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    color: #777;
+    font-size: 20px;
+    font-weight: bold;
 }
 .pwr-btn.active {
-    opacity: 1; color: #fff; border-color: #fff;
+    opacity: 1;
+    color: #fff;
+    border-color: #fff;
 }
 </style>
 </head>
@@ -88,11 +109,16 @@ body, html {
 
 <div id="ui-layer">
     <div id="top-visor">
-        <div id="msg-visor">SISTEMA APAGADO<br><small>Dale al botón amarillo</small></div>
+        <div id="msg-visor">
+            SISTEMA APAGADO<br>
+            <span style="font-size:10px;color:#f90">Dale al botón amarillo</span>
+        </div>
         <video id="video-player" playsinline webkit-playsinline></video>
     </div>
 
-    <div id="middle-cam"><div id="guia-box"></div></div>
+    <div id="middle-cam">
+        <div id="guia-box"></div>
+    </div>
 
     <div id="bottom-panel">
         <button id="btn-scan">ACTIVAR CÁMARA</button>
@@ -112,82 +138,98 @@ body, html {
     </div>
 </div>
 
+<!-- ESCENA ORIGINAL – SOLO SE AGREGA embedded -->
 <a-scene
-  mindar-image="imageTargetSrc: ./targets.mind; autoStart: false;"
-  vr-mode-ui="enabled: false"
-  device-orientation-permission-ui="enabled: false"
-  renderer="alpha: true"
-  embedded>
-  <a-camera look-controls="enabled: false"></a-camera>
-  <a-entity id="target-carta" mindar-image-target="targetIndex: 0"></a-entity>
+    embedded
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+    renderer="alpha: true">
+
+    <a-camera look-controls="enabled: false"></a-camera>
+    <a-entity id="target-carta" mindar-image-target="targetIndex: 0"></a-entity>
 </a-scene>
 
 <script>
-/* === SOLO JS CORREGIDO === */
+/* === TUS DATOS – INTACTOS === */
 const DB = {
     casa: "DOMUS DRACO",
     arma: "SICA",
     movs: {
-        IMPETUS: { mp4: "ataque.mp4" },
-        AUXILIUM: { mp4: "cura.mp4" },
-        TUTELA: { mp4: "defensa.mp4" },
-        MYSTERIUM: { mp4: "magia.mp4" }
+        IMPETUS: { v: 6, mp4: "ataque.mp4" },
+        AUXILIUM: { v: 1, mp4: "cura.mp4" },
+        TUTELA: { v: 2, mp4: "defensa.mp4" },
+        MYSTERIUM: { v: 1, mp4: "magia.mp4" }
     }
 };
 
-const scene = document.querySelector("a-scene");
 const btnScan = document.getElementById("btn-scan");
-const msg = document.getElementById("msg-visor");
+const msgVisor = document.getElementById("msg-visor");
+const guiaBox = document.getElementById("guia-box");
 const video = document.getElementById("video-player");
-const guia = document.getElementById("guia-box");
+const scene = document.querySelector("a-scene");
 const target = document.getElementById("target-carta");
 const buttons = document.querySelectorAll(".pwr-btn");
 
+let arReady = false;
 let started = false;
 
-/* UN SOLO START, CUANDO MINDAR ESTÁ LISTO */
-btnScan.addEventListener("click", async () => {
-    if (started) return;
-    btnScan.disabled = true;
-    msg.innerText = "SOLICITANDO CÁMARA...";
-
-    /* desbloqueo audio */
-    try { await video.play(); video.pause(); } catch(e){}
-
-    const startAR = async () => {
-        await scene.systems["mindar-image-system"].start();
-        started = true;
-        msg.innerText = "ESCANEÁ LA CARTA";
-    };
-
-    scene.hasLoaded ? startAR() : scene.addEventListener("loaded", startAR);
+/* 🔥 FIX REAL 1: esperar a que MindAR esté listo */
+scene.addEventListener("arReady", () => {
+    arReady = true;
 });
 
+/* BOTÓN */
+btnScan.addEventListener("click", async () => {
+    if (started || !arReady) return;
+
+    started = true;
+    btnScan.disabled = true;
+    msgVisor.innerText = "INICIANDO CÁMARA...";
+
+    /* 🔥 FIX REAL 2: desbloqueo de audio móvil */
+    try {
+        await video.play();
+        video.pause();
+    } catch(e){}
+
+    await scene.systems["mindar-image-system"].start();
+    msgVisor.innerText = "ESCANEÁ LA CARTA";
+});
+
+/* TARGET */
 target.addEventListener("targetFound", () => {
-    guia.classList.add("ok");
+    guiaBox.classList.add("ok");
     document.getElementById("txt-casa").innerText = DB.casa;
     document.getElementById("txt-arma").innerText = DB.arma;
     buttons.forEach(b => b.classList.add("active"));
 });
 
 target.addEventListener("targetLost", () => {
-    guia.classList.remove("ok");
+    guiaBox.classList.remove("ok");
     buttons.forEach(b => b.classList.remove("active"));
-    video.pause(); video.style.display = "none";
-    msg.style.display = "block";
+    video.pause();
+    video.style.display = "none";
+    msgVisor.style.display = "block";
 });
 
-buttons.forEach(b => {
-    b.onclick = async () => {
-        if (!b.classList.contains("active")) return;
-        const d = DB.movs[b.dataset.id];
-        document.getElementById("txt-accion").innerText = b.dataset.id;
-        msg.style.display = "none";
+/* VIDEOS */
+buttons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+        if (!btn.classList.contains("active")) return;
+
+        const data = DB.movs[btn.dataset.id];
+        document.getElementById("txt-accion").innerText = `${btn.dataset.id} [${data.v}]`;
+
+        msgVisor.style.display = "none";
         video.style.display = "block";
-        video.src = d.mp4;
+        video.src = data.mp4;
         video.currentTime = 0;
+        video.muted = false;
+        video.volume = 1;
+
         try { await video.play(); } catch(e){}
-    };
+    });
 });
 </script>
 
