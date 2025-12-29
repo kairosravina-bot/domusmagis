@@ -2,86 +2,96 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEST DE DETECCIÓN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DEBUGGER DE DETECCION</title>
     
-    <!-- LIBRERÍAS MINDAR + AFRAME -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; font-family: sans-serif; }
+        body { margin: 0; overflow: hidden; font-family: monospace; }
         
-        /* TEXTO DE ESTADO GIGANTE */
-        #estado {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: red; font-size: 24px; font-weight: bold;
-            background: rgba(0,0,0,0.7); padding: 20px;
-            border: 2px solid white; z-index: 999;
-            text-align: center; pointer-events: none;
+        #info-panel {
+            position: fixed; top: 10px; left: 10px;
+            background: rgba(0,0,0,0.8); color: lime;
+            padding: 10px; border: 1px solid lime;
+            z-index: 9999; pointer-events: none;
+            font-size: 14px; max-width: 80%;
         }
 
-        /* BOTÓN SIMPLE PARA INICIAR (Para evitar bloqueos de navegador) */
-        #btn-start {
-            position: absolute; bottom: 50px; left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 40px; font-size: 20px;
-            background: blue; color: white; border: none;
-            z-index: 1000; cursor: pointer;
+        #cuadro-guia {
+            position: fixed; top: 50%; left: 50%;
+            width: 60vw; height: 60vw;
+            transform: translate(-50%, -50%);
+            border: 2px dashed yellow;
+            z-index: 500; pointer-events: none;
         }
     </style>
 </head>
 <body>
 
-    <!-- MENSAJE DE ESTADO -->
-    <div id="estado">ESPERANDO CÁMARA...</div>
+    <!-- PANEL DE INFORMACIÓN EN TIEMPO REAL -->
+    <div id="info-panel">
+        ESTADO: <span id="status">INICIANDO...</span><br>
+        <br>
+        1. Si ves la cámara, el código está bien.<br>
+        2. Si no detecta la carta, el archivo .mind está mal.<br>
+        3. Acerca y aleja la carta lentamente.
+    </div>
 
-    <!-- BOTÓN DE INICIO -->
-    <button id="btn-start">ENCENDER CÁMARA</button>
+    <div id="cuadro-guia"></div>
 
-    <!-- ESCENA AR (Mínima configuración posible) -->
+    <!-- 
+        CONFIGURACIÓN "AGRESIVA" PARA DETECCIÓN 
+        missTolerance: 0 (No perdona fallos, busca rápido)
+        warmupTolerance: 0 (Arranca ya)
+        showStats: true (Muestra datos técnicos en pantalla)
+    -->
     <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
-        vr-mode-ui="enabled: false"
+        mindar-image="imageTargetSrc: ./targets.mind?v=9999; showStats: true; uiLoading: no; uiScanning: yes; missTolerance: 0; warmupTolerance: 0;" 
+        embedded color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false">
-        
+
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- TARGET -->
-        <a-entity id="target">
-            <!-- CUADRO VISUAL (Para saber si se pega a la imagen) -->
-            <!-- Si ves este cuadro rojo flotando sobre tu carta, FUNCIONA -->
-            <a-plane color="red" opacity="0.5" width="1" height="1"></a-plane>
+        <!-- CUADRO ROJO QUE SE PEGA A LA CARTA -->
+        <a-entity id="target" mindar-image-target="targetIndex: 0">
+            <a-plane color="red" opaciy="0.6" width="1" height="1"></a-plane>
+            <a-text value="DETECTADO" color="white" align="center" width="2"></a-text>
         </a-entity>
-        
     </a-scene>
 
     <script>
-        const btn = document.getElementById('btn-start');
-        const txt = document.getElementById('estado');
-        const scene = document.querySelector('a-scene');
+        const status = document.getElementById('status');
         const target = document.getElementById('target');
+        const scene = document.querySelector('a-scene');
 
-        // 1. INICIAR
-        btn.addEventListener('click', () => {
-            txt.innerText = "CARGANDO...";
-            btn.style.display = 'none'; // Ocultar botón
-            scene.systems['mindar-image-system'].start();
+        // Monitorear carga
+        scene.addEventListener('arReady', () => {
+            status.innerText = "CÁMARA LISTA - BUSCANDO...";
+            status.style.color = "yellow";
         });
 
-        // 2. DETECTADO
+        scene.addEventListener('arError', (e) => {
+            status.innerText = "ERROR CRÍTICO: " + e.detail.error;
+            status.style.color = "red";
+        });
+
+        // Eventos de detección
         target.addEventListener('targetFound', () => {
-            txt.innerText = "¡¡ IDENTIFICADO !!";
-            txt.style.color = "#0f0"; // Verde
-            txt.style.borderColor = "#0f0";
+            status.innerText = "¡¡¡ DETECTADO !!!";
+            status.style.color = "white";
+            status.style.backgroundColor = "green";
+            document.getElementById('cuadro-guia').style.borderColor = "green";
         });
 
-        // 3. PERDIDO
         target.addEventListener('targetLost', () => {
-            txt.innerText = "BUSCANDO...";
-            txt.style.color = "red";
-            txt.style.borderColor = "red";
+            status.innerText = "OBJETIVO PERDIDO - BUSCANDO...";
+            status.style.color = "orange";
+            status.style.backgroundColor = "rgba(0,0,0,0.8)";
+            document.getElementById('cuadro-guia').style.borderColor = "yellow";
         });
     </script>
 </body>
