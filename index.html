@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI - 4 Casas</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>DOMUS MAGI - 4 Casas v2.0</title>
     
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
@@ -14,6 +17,22 @@
             overflow: hidden; 
             font-family: 'Arial Black', Arial, sans-serif; 
             background: #000; 
+        }
+
+        /* VERSION INDICATOR */
+        #version {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 255, 0, 0.8);
+            color: #000;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 9999;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
         }
 
         /* PANEL SUPERIOR - INFO CARTA */
@@ -131,6 +150,7 @@
             text-align: center;
             z-index: 50;
             pointer-events: none;
+            max-width: 80%;
         }
 
         /* BOTÓN INICIAR */
@@ -170,6 +190,9 @@
 </head>
 <body>
 
+    <!-- INDICADOR DE VERSIÓN -->
+    <div id="version">v2.0 ACTIVO</div>
+
     <!-- MENSAJE CENTRAL -->
     <div id="mensaje">Presiona Iniciar</div>
 
@@ -205,9 +228,9 @@
     <!-- BOTÓN INICIAR -->
     <button id="btn-iniciar">INICIAR SISTEMA</button>
 
-    <!-- ESCENA AR -->
+    <!-- ESCENA AR CON CACHE BUSTER -->
     <a-scene
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; filterMinCF: 0.0001; filterBeta: 0.001; warmupTolerance: 5; missTolerance: 5; uiLoading: no; uiScanning: no;"
+        mindar-image="imageTargetSrc: ./targets.mind?v=20250101; autoStart: false; filterMinCF: 0.0001; filterBeta: 0.001; warmupTolerance: 5; missTolerance: 5; uiLoading: no; uiScanning: no;"
         vr-mode-ui="enabled: false"
         device-orientation-permission-ui="enabled: false"
         renderer="colorManagement: true; physicallyCorrectLights: true; logarithmicDepthBuffer: true;">
@@ -236,7 +259,23 @@
     </a-scene>
 
     <script>
+        // ==========================================
+        // VERSIÓN DEL SISTEMA
+        // ==========================================
+        const VERSION = "2.0.0";
+        const BUILD_DATE = "2025-01-01";
+        
+        console.log(`
+╔═══════════════════════════════════════╗
+║   DOMUS MAGI - SISTEMA DE DETECCIÓN   ║
+║   Versión: ${VERSION}                    ║
+║   Build: ${BUILD_DATE}                ║
+╚═══════════════════════════════════════╝
+        `);
+
+        // ==========================================
         // DATOS DE LAS 4 CASAS
+        // ==========================================
         const CASAS = {
             0: { nombre: "DRACO", color: "draco", impetus: 6, auxilium: 1, tutela: 2, mysterium: 1 },
             1: { nombre: "AQUILA", color: "aquila", impetus: 4, auxilium: 1, tutela: 2, mysterium: 3 },
@@ -264,7 +303,10 @@
         let casaActual = null;
         let sistemaIniciado = false;
 
-        // ACTIVAR CASA DETECTADA
+        // ==========================================
+        // FUNCIONES DE DETECCIÓN
+        // ==========================================
+        
         function activarCasa(casa) {
             casaActual = casa;
             
@@ -292,9 +334,9 @@
             btnM.style.cursor = 'pointer';
             
             console.log(`✅ Casa detectada: ${casa.nombre}`);
+            console.log(`📊 Valores: I=${casa.impetus} A=${casa.auxilium} T=${casa.tutela} M=${casa.mysterium}`);
         }
 
-        // DESACTIVAR CASA
         function desactivarCasa() {
             casaActual = null;
             
@@ -315,17 +357,25 @@
             console.log('❌ Carta perdida');
         }
 
-        // BOTÓN INICIAR
+        // ==========================================
+        // BOTÓN INICIAR CON DIAGNÓSTICO
+        // ==========================================
+        
         btnIniciar.addEventListener('click', async () => {
             if (sistemaIniciado) return;
 
             btnIniciar.disabled = true;
             btnIniciar.innerText = 'Cargando...';
             mensaje.innerText = 'Iniciando cámara...';
+            mensaje.style.fontSize = '36px';
 
             try {
-                // Solicitar permisos de cámara primero
-                console.log('📹 Solicitando permisos...');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('🚀 INICIANDO SISTEMA AR');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                
+                // PASO 1: Permisos de cámara
+                console.log('📹 [1/4] Solicitando permisos de cámara...');
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
                         facingMode: 'environment',
@@ -334,81 +384,118 @@
                     } 
                 });
                 stream.getTracks().forEach(track => track.stop());
-                console.log('✅ Permisos concedidos');
+                console.log('✅ [1/4] Permisos concedidos');
                 
-                mensaje.innerText = 'Cargando sistema AR...';
+                // PASO 2: Cargar escena
+                mensaje.innerText = 'Cargando escena AR...';
+                console.log('🎬 [2/4] Cargando escena A-Frame...');
                 await new Promise(resolve => setTimeout(resolve, 500));
                 
                 const sceneEl = document.querySelector('a-scene');
                 
-                // Esperar que cargue
                 await new Promise((resolve) => {
                     if (sceneEl.hasLoaded) {
-                        console.log('✅ Escena cargada');
+                        console.log('✅ [2/4] Escena A-Frame lista');
                         resolve();
                     } else {
                         sceneEl.addEventListener('loaded', () => {
-                            console.log('✅ Escena cargada');
+                            console.log('✅ [2/4] Escena A-Frame lista');
                             resolve();
                         }, { once: true });
                     }
                 });
 
-                mensaje.innerText = 'Iniciando detección...';
-                console.log('🚀 Iniciando MindAR...');
+                // PASO 3: Cargar targets.mind
+                mensaje.innerText = 'Cargando detectores...';
+                console.log('🎯 [3/4] Cargando targets.mind...');
+                console.log('📁 Archivo: ./targets.mind?v=20250101');
 
-                // Iniciar MindAR con timeout
+                // PASO 4: Iniciar MindAR
+                console.log('🚀 [4/4] Iniciando MindAR...');
                 const timeout = setTimeout(() => {
-                    throw new Error('Timeout: MindAR no responde');
+                    throw new Error('Timeout: MindAR no responde después de 15 segundos');
                 }, 15000);
 
                 await sceneEl.systems["mindar-image-system"].start();
                 clearTimeout(timeout);
                 
+                console.log('✅ [4/4] MindAR iniciado correctamente');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('✅ SISTEMA COMPLETAMENTE ACTIVO');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('📍 Apunta a cualquiera de las 4 cartas');
+                console.log('💡 Consejos:');
+                console.log('   • Buena iluminación');
+                console.log('   • Mantén la carta estable');
+                console.log('   • Distancia: 20-40 cm de la cámara');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                
                 sistemaIniciado = true;
                 btnIniciar.style.display = 'none';
                 mensaje.innerText = 'Buscando carta...';
                 mensaje.style.color = '#ff0';
-
-                console.log('✅ Sistema iniciado - 4 casas listas');
-                console.log('📍 Apunta a cualquiera de las 4 cartas');
-                console.log('💡 Asegúrate de tener buena iluminación');
+                mensaje.style.fontSize = '48px';
 
             } catch (error) {
-                console.error('❌ Error:', error);
-                mensaje.innerText = 'ERROR: ' + error.message;
+                console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.error('❌ ERROR AL INICIAR SISTEMA');
+                console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.error('Detalles:', error);
+                console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                
+                mensaje.innerText = error.message;
                 mensaje.style.color = '#f00';
-                mensaje.style.fontSize = '24px';
+                mensaje.style.fontSize = '20px';
                 btnIniciar.disabled = false;
                 btnIniciar.innerText = 'REINTENTAR';
                 
-                alert('⚠️ ERROR AL INICIAR\n\n' + error.message + '\n\nVerifica:\n✓ Permisos de cámara\n✓ Archivo targets.mind existe\n✓ Imágenes generadas correctamente\n✓ Buena iluminación');
+                alert(`⚠️ ERROR AL INICIAR\n\n${error.message}\n\n✓ Verifica permisos de cámara\n✓ Archivo targets.mind existe\n✓ Targets.mind tiene 4 imágenes\n✓ Presiona F12 y revisa la consola`);
             }
         });
 
+        // ==========================================
         // DETECTAR TARGETS
+        // ==========================================
+        
         const sceneEl = document.querySelector('a-scene');
         sceneEl.addEventListener('loaded', () => {
+            console.log('🔧 Configurando listeners de detección...');
+            
             for (let i = 0; i < 4; i++) {
                 const target = document.getElementById(`target${i}`);
                 
                 target.addEventListener('targetFound', () => {
+                    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+                    console.log(`✅ TARGET ${i} ENCONTRADO`);
                     activarCasa(CASAS[i]);
+                    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
                 });
                 
                 target.addEventListener('targetLost', () => {
+                    console.log(`⚠️ Target ${i} perdido (${CASAS[i].nombre})`);
                     if (casaActual === CASAS[i]) {
                         setTimeout(() => desactivarCasa(), 500);
                     }
                 });
             }
-            console.log('✅ 4 Targets configurados');
+            
+            console.log('✅ 4 Targets configurados correctamente');
+            console.log('   • Target 0: DRACO');
+            console.log('   • Target 1: AQUILA');
+            console.log('   • Target 2: LEO');
+            console.log('   • Target 3: APER');
         });
 
+        // ==========================================
         // BOTONES DE ACCIÓN
+        // ==========================================
+        
         document.querySelectorAll('.btn-accion').forEach(btn => {
             btn.addEventListener('click', () => {
-                if (!casaActual) return;
+                if (!casaActual) {
+                    console.log('⚠️ No hay casa detectada');
+                    return;
+                }
 
                 const accion = btn.getAttribute('data-accion');
                 let valor = 0;
@@ -423,11 +510,19 @@
                 valAccion.innerText = accion;
                 valValor.innerText = valor;
 
-                console.log(`🎯 ${accion}: ${valor} puntos`);
+                console.log(`🎯 ACCIÓN EJECUTADA: ${accion} = ${valor} puntos`);
             });
         });
 
-        console.log('📱 Sistema cargado. 4 Casas:', CASAS);
+        // ==========================================
+        // LOG INICIAL
+        // ==========================================
+        
+        console.log('📱 Aplicación cargada correctamente');
+        console.log('📊 Casas configuradas:', CASAS);
+        console.log('');
+        console.log('💡 Para iniciar: Presiona el botón "INICIAR SISTEMA"');
+        console.log('');
     </script>
 </body>
 </html>
