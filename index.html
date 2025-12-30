@@ -2,110 +2,34 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOMUS MAGI - Detector 4 Cartas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOMUS MAGI - 4 Casas</title>
     
-    <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-        "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
-      }
-    }
-    </script>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            font-family: 'Arial Black', Arial, sans-serif; 
+            background: #000; 
         }
 
-        body {
-            font-family: 'Arial', sans-serif;
-            background: #000;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-        }
-
-        #container {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        /* OVERLAY UI */
-        #ui-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* MENSAJE CENTRAL */
-        #mensaje {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 0 0 20px #000, 0 0 40px #000;
-            text-align: center;
-            padding: 20px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        /* MARCO GUÍA */
-        #guia-marco {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60vw;
-            height: 60vw;
-            max-width: 300px;
-            max-height: 300px;
-            border: 4px solid rgba(255, 0, 0, 0.7);
-            border-radius: 20px;
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
-            pointer-events: none;
-            z-index: 5;
-            transition: all 0.3s ease;
-            background: rgba(255, 0, 0, 0.05);
-        }
-
-        #guia-marco.detectado {
-            border-color: #0f0;
-            box-shadow: 0 0 50px rgba(0, 255, 0, 0.8), 0 0 100px rgba(0, 255, 0, 0.5);
-            background: rgba(0, 255, 0, 0.1);
-            transform: translate(-50%, -50%) scale(1.05);
-        }
-
-        /* PANEL INFO SUPERIOR */
+        /* PANEL SUPERIOR - INFO CARTA */
         #info-panel {
             position: fixed;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px 30px;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 20px 40px;
             border-radius: 15px;
             border: 3px solid #fff;
-            z-index: 15;
+            z-index: 100;
             display: none;
-            min-width: 320px;
+            min-width: 350px;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
         }
 
         #info-panel.visible {
@@ -114,416 +38,396 @@
         }
 
         @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
+            from { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
 
-        #carta-titulo {
-            text-align: center;
-            font-size: 24px;
+        #nombre-casa {
+            font-size: 32px;
             font-weight: bold;
+            text-align: center;
             margin-bottom: 15px;
-            letter-spacing: 2px;
-            color: #fff;
-            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 15px currentColor;
         }
 
-        .info-item {
-            color: #fff;
-            font-size: 18px;
-            margin: 10px 0;
-            text-align: center;
+        .stat {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            margin: 10px 0;
+            font-size: 18px;
+            color: #fff;
         }
 
-        .info-label {
+        .stat-label {
             color: #888;
-            font-size: 14px;
             text-transform: uppercase;
-            flex: 1;
-            text-align: left;
+            font-size: 14px;
         }
 
-        .info-value {
+        .stat-value {
             font-weight: bold;
-            letter-spacing: 1px;
             font-size: 20px;
-            flex: 2;
-            text-align: right;
         }
 
-        /* CONTROLES */
-        #controles {
+        /* BOTONES DE ACCIÓN */
+        #botones {
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 20;
-            pointer-events: auto;
-            display: flex;
+            z-index: 100;
+            display: none;
             gap: 15px;
         }
 
-        button {
-            padding: 18px 45px;
-            font-size: 20px;
-            font-weight: bold;
+        #botones.visible {
+            display: flex;
+        }
+
+        .btn-accion {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
             border: none;
-            border-radius: 12px;
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.4;
+            transition: all 0.3s;
+        }
+
+        .btn-accion.activo {
             cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            transition: all 0.2s ease;
-            letter-spacing: 1px;
+            opacity: 1;
+            animation: pulso 1.5s infinite;
         }
 
-        button:active {
-            transform: scale(0.95);
+        .btn-accion.activo:active {
+            transform: scale(0.9);
         }
 
-        #startButton {
+        @keyframes pulso {
+            0%, 100% { box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+            50% { box-shadow: 0 0 30px rgba(255,255,255,0.8); }
+        }
+
+        #btn-i { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+        #btn-a { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        #btn-t { background: linear-gradient(135deg, #555555, #777777); }
+        #btn-m { background: linear-gradient(135deg, #8e44ad, #9b59b6); }
+
+        /* MENSAJE CENTRAL */
+        #mensaje {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff0;
+            text-shadow: 0 0 20px #000;
+            text-align: center;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        /* BOTÓN INICIAR */
+        #btn-iniciar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px 50px;
+            font-size: 24px;
+            font-weight: bold;
             background: linear-gradient(135deg, #00ff00, #00cc00);
             color: #000;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 5px 20px rgba(0, 255, 0, 0.4);
         }
 
-        #startButton:hover:not(:disabled) {
+        #btn-iniciar:hover {
             background: linear-gradient(135deg, #00cc00, #009900);
-            box-shadow: 0 6px 20px rgba(0, 255, 0, 0.4);
         }
 
-        #stopButton {
-            background: linear-gradient(135deg, #ff0000, #cc0000);
-            color: #fff;
-            display: none;
-        }
-
-        #stopButton:hover {
-            background: linear-gradient(135deg, #cc0000, #990000);
-            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4);
-        }
-
-        #startButton:disabled {
+        #btn-iniciar:disabled {
             background: #666;
             cursor: not-allowed;
             opacity: 0.6;
         }
 
-        /* HINT TEXT */
-        #hint-text {
-            position: fixed;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 12px;
-            text-align: center;
-            z-index: 15;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
         /* COLORES POR CASA */
-        .draco { color: #00d4ff; text-shadow: 0 0 10px #00d4ff; }
-        .aquila { color: #5fd4ff; text-shadow: 0 0 10px #5fd4ff; }
-        .leo { color: #ff9900; text-shadow: 0 0 10px #ff9900; }
-        .aper { color: #ff5500; text-shadow: 0 0 10px #ff5500; }
-
-        /* RESPONSIVE */
-        @media (max-width: 600px) {
-            #mensaje {
-                font-size: 32px;
-            }
-            
-            button {
-                padding: 15px 35px;
-                font-size: 18px;
-            }
-            
-            #info-panel {
-                min-width: 280px;
-                padding: 15px 20px;
-            }
-            
-            #carta-titulo {
-                font-size: 20px;
-            }
-            
-            .info-item {
-                font-size: 16px;
-            }
-            
-            .info-value {
-                font-size: 18px;
-            }
-        }
+        .draco { color: #00d4ff !important; }
+        .aquila { color: #5fd4ff !important; }
+        .leo { color: #ff9900 !important; }
+        .aper { color: #ff5500 !important; }
     </style>
 </head>
 <body>
 
-    <!-- CONTENEDOR AR -->
-    <div id="container"></div>
+    <!-- MENSAJE CENTRAL -->
+    <div id="mensaje">Presiona Iniciar</div>
 
-    <!-- OVERLAY UI -->
-    <div id="ui-overlay">
-        <div id="mensaje">Presiona Iniciar</div>
-    </div>
-
-    <!-- MARCO GUÍA -->
-    <div id="guia-marco"></div>
-
-    <!-- PANEL INFORMACIÓN -->
+    <!-- PANEL INFO -->
     <div id="info-panel">
-        <div id="carta-titulo">---</div>
-        <div class="info-item">
-            <span class="info-label">Casa:</span> 
-            <span id="info-casa" class="info-value">---</span>
+        <div id="nombre-casa">---</div>
+        <div class="stat">
+            <span class="stat-label">ESCUDO:</span>
+            <span id="val-escudo" class="stat-value">---</span>
         </div>
-        <div class="info-item">
-            <span class="info-label">Arma:</span> 
-            <span id="info-arma" class="info-value">SICA</span>
+        <div class="stat">
+            <span class="stat-label">ARMA:</span>
+            <span id="val-arma" class="stat-value">SICA</span>
         </div>
-        <div class="info-item">
-            <span class="info-label">Nivel:</span> 
-            <span id="info-nivel" class="info-value">1</span>
+        <div class="stat">
+            <span class="stat-label">ACCION:</span>
+            <span id="val-accion" class="stat-value">---</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">VALOR:</span>
+            <span id="val-valor" class="stat-value">0</span>
         </div>
     </div>
 
-    <!-- TEXTO AYUDA -->
-    <div id="hint-text">Ubica cualquier carta en el marco rojo</div>
-
-    <!-- CONTROLES -->
-    <div id="controles">
-        <button id="startButton">Iniciar Escaneo</button>
-        <button id="stopButton">Detener</button>
+    <!-- BOTONES -->
+    <div id="botones">
+        <button id="btn-i" class="btn-accion" data-accion="IMPETUS">I</button>
+        <button id="btn-a" class="btn-accion" data-accion="AUXILIUM">A</button>
+        <button id="btn-t" class="btn-accion" data-accion="TUTELA">T</button>
+        <button id="btn-m" class="btn-accion" data-accion="MYSTERIUM">M</button>
     </div>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { MindARThree } from 'mindar-image-three';
+    <!-- BOTÓN INICIAR -->
+    <button id="btn-iniciar">INICIAR SISTEMA</button>
 
-        // REFERENCIAS DOM
+    <!-- ESCENA AR -->
+    <a-scene
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; filterMinCF: 0.0001; filterBeta: 0.001; warmupTolerance: 5; missTolerance: 5; uiLoading: no; uiScanning: no;"
+        vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false"
+        renderer="colorManagement: true; physicallyCorrectLights: true; logarithmicDepthBuffer: true;">
+        
+        <a-camera position="0 0 0" look-controls="enabled: false" camera="active: true"></a-camera>
+
+        <!-- TARGET 0: DRACO (Azul claro) -->
+        <a-entity id="target0" mindar-image-target="targetIndex: 0">
+            <a-plane color="#00d4ff" opacity="0.5" width="1" height="1"></a-plane>
+        </a-entity>
+
+        <!-- TARGET 1: AQUILA (Azul más claro) -->
+        <a-entity id="target1" mindar-image-target="targetIndex: 1">
+            <a-plane color="#5fd4ff" opacity="0.5" width="1" height="1"></a-plane>
+        </a-entity>
+
+        <!-- TARGET 2: LEO (Naranja) -->
+        <a-entity id="target2" mindar-image-target="targetIndex: 2">
+            <a-plane color="#ff9900" opacity="0.5" width="1" height="1"></a-plane>
+        </a-entity>
+
+        <!-- TARGET 3: APER (Rojo naranja) -->
+        <a-entity id="target3" mindar-image-target="targetIndex: 3">
+            <a-plane color="#ff5500" opacity="0.5" width="1" height="1"></a-plane>
+        </a-entity>
+    </a-scene>
+
+    <script>
+        // DATOS DE LAS 4 CASAS
+        const CASAS = {
+            0: { nombre: "DRACO", color: "draco", impetus: 6, auxilium: 1, tutela: 2, mysterium: 1 },
+            1: { nombre: "AQUILA", color: "aquila", impetus: 4, auxilium: 1, tutela: 2, mysterium: 3 },
+            2: { nombre: "LEO", color: "leo", impetus: 4, auxilium: 1, tutela: 4, mysterium: 1 },
+            3: { nombre: "APER", color: "aper", impetus: 3, auxilium: 1, tutela: 5, mysterium: 1 }
+        };
+
+        // ELEMENTOS DOM
         const mensaje = document.getElementById('mensaje');
-        const guiaMarco = document.getElementById('guia-marco');
         const infoPanel = document.getElementById('info-panel');
-        const cartaTitulo = document.getElementById('carta-titulo');
-        const infoCasa = document.getElementById('info-casa');
-        const infoArma = document.getElementById('info-arma');
-        const infoNivel = document.getElementById('info-nivel');
-        const hintText = document.getElementById('hint-text');
-        const startButton = document.getElementById('startButton');
-        const stopButton = document.getElementById('stopButton');
+        const nombreCasa = document.getElementById('nombre-casa');
+        const valEscudo = document.getElementById('val-escudo');
+        const valArma = document.getElementById('val-arma');
+        const valAccion = document.getElementById('val-accion');
+        const valValor = document.getElementById('val-valor');
+        const botones = document.getElementById('botones');
+        const btnIniciar = document.getElementById('btn-iniciar');
+
+        const btnI = document.getElementById('btn-i');
+        const btnA = document.getElementById('btn-a');
+        const btnT = document.getElementById('btn-t');
+        const btnM = document.getElementById('btn-m');
 
         // VARIABLES
-        let mindarThree;
-        let isRunning = false;
+        let casaActual = null;
+        let sistemaIniciado = false;
 
-        // DATOS DE LAS 4 CARTAS
-        const cartasData = {
-            0: { // DOMUS DRACO
-                nombre: "DOMUS DRACO",
-                casa: "DRACO",
-                arma: "SICA",
-                nivel: 1,
-                color: "draco",
-                colorHex: 0x00d4ff
-            },
-            1: { // DOMUS AQUILA
-                nombre: "DOMUS AQUILA",
-                casa: "AQUILA",
-                arma: "SICA",
-                nivel: 1,
-                color: "aquila",
-                colorHex: 0x5fd4ff
-            },
-            2: { // DOMUS LEO
-                nombre: "DOMUS LEO",
-                casa: "LEO",
-                arma: "SICA",
-                nivel: 1,
-                color: "leo",
-                colorHex: 0xff9900
-            },
-            3: { // DOMUS APER
-                nombre: "DOMUS APER",
-                casa: "APER",
-                arma: "SICA",
-                nivel: 1,
-                color: "aper",
-                colorHex: 0xff5500
-            }
-        };
-
-        // INICIALIZAR AR CON 4 TARGETS
-        const initAR = async () => {
-            console.log("🚀 Inicializando MindAR con 4 targets...");
-
-            mindarThree = new MindARThree({
-                container: document.querySelector("#container"),
-                imageTargetSrc: "./targets.mind" // Debe contener las 4 cartas
-            });
-
-            const { renderer, scene, camera } = mindarThree;
-
-            // Crear anclas para cada carta (0 a 3)
-            for (let i = 0; i < 4; i++) {
-                const anchor = mindarThree.addAnchor(i);
-                const cartaInfo = cartasData[i];
-
-                // Crear plano 3D con color de la casa
-                const geometry = new THREE.PlaneGeometry(1, 1);
-                const material = new THREE.MeshBasicMaterial({ 
-                    color: cartaInfo.colorHex,
-                    transparent: true, 
-                    opacity: 0.4,
-                    side: THREE.DoubleSide
-                });
-                const plane = new THREE.Mesh(geometry, material);
-                anchor.group.add(plane);
-
-                // Borde
-                const edgesGeometry = new THREE.EdgesGeometry(geometry);
-                const edgesMaterial = new THREE.LineBasicMaterial({ 
-                    color: cartaInfo.colorHex,
-                    linewidth: 3
-                });
-                const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
-                anchor.group.add(edges);
-
-                // EVENTOS DE DETECCIÓN
-                anchor.onTargetFound = () => {
-                    console.log(`✅ Carta ${i} detectada: ${cartaInfo.nombre}`);
-                    mostrarInfoCarta(cartaInfo);
-                };
-
-                anchor.onTargetLost = () => {
-                    console.log(`❌ Carta ${i} perdida: ${cartaInfo.nombre}`);
-                    ocultarInfoCarta();
-                };
-            }
-
-            return { renderer, scene, camera };
-        };
-
-        // MOSTRAR INFO DE LA CARTA
-        function mostrarInfoCarta(carta) {
-            mensaje.innerText = "✓ DETECTADA";
-            mensaje.style.color = "#0f0";
-            mensaje.style.fontSize = "64px";
+        // ACTIVAR CASA DETECTADA
+        function activarCasa(casa) {
+            casaActual = casa;
             
-            guiaMarco.classList.add('detectado');
+            mensaje.innerText = '✓ DETECTADA';
+            mensaje.style.color = '#0f0';
+            
             infoPanel.classList.add('visible');
-            hintText.style.display = 'none';
-
-            // Actualizar datos
-            cartaTitulo.innerText = carta.nombre;
-            cartaTitulo.className = carta.color;
+            botones.classList.add('visible');
             
-            infoCasa.innerText = carta.casa;
-            infoCasa.className = `info-value ${carta.color}`;
+            nombreCasa.innerText = `DOMUS ${casa.nombre}`;
+            nombreCasa.className = casa.color;
             
-            infoArma.innerText = carta.arma;
-            infoArma.style.color = "#ffff00";
+            valEscudo.innerText = casa.nombre;
+            valEscudo.className = `stat-value ${casa.color}`;
             
-            infoNivel.innerText = carta.nivel;
-            infoNivel.style.color = "#ffffff";
+            // Activar botones
+            btnI.classList.add('activo');
+            btnA.classList.add('activo');
+            btnT.classList.add('activo');
+            btnM.classList.add('activo');
+            
+            btnI.style.cursor = 'pointer';
+            btnA.style.cursor = 'pointer';
+            btnT.style.cursor = 'pointer';
+            btnM.style.cursor = 'pointer';
+            
+            console.log(`✅ Casa detectada: ${casa.nombre}`);
         }
 
-        // OCULTAR INFO
-        function ocultarInfoCarta() {
-            mensaje.innerText = "Buscando carta...";
-            mensaje.style.color = "#ffff00";
-            mensaje.style.fontSize = "48px";
+        // DESACTIVAR CASA
+        function desactivarCasa() {
+            casaActual = null;
             
-            guiaMarco.classList.remove('detectado');
+            mensaje.innerText = 'Buscando carta...';
+            mensaje.style.color = '#ff0';
+            
             infoPanel.classList.remove('visible');
-            hintText.style.display = 'block';
+            botones.classList.remove('visible');
+            
+            valAccion.innerText = '---';
+            valValor.innerText = '0';
+            
+            btnI.classList.remove('activo');
+            btnA.classList.remove('activo');
+            btnT.classList.remove('activo');
+            btnM.classList.remove('activo');
+            
+            console.log('❌ Carta perdida');
         }
 
         // BOTÓN INICIAR
-        startButton.addEventListener('click', async () => {
-            if (isRunning) return;
+        btnIniciar.addEventListener('click', async () => {
+            if (sistemaIniciado) return;
 
-            startButton.innerText = "Cargando...";
-            startButton.disabled = true;
+            btnIniciar.disabled = true;
+            btnIniciar.innerText = 'Cargando...';
+            mensaje.innerText = 'Iniciando cámara...';
 
             try {
-                console.log("🎬 Iniciando sistema AR...");
+                // Solicitar permisos de cámara primero
+                console.log('📹 Solicitando permisos...');
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                stream.getTracks().forEach(track => track.stop());
+                console.log('✅ Permisos concedidos');
                 
-                const { renderer, scene, camera } = await initAR();
+                mensaje.innerText = 'Cargando sistema AR...';
+                await new Promise(resolve => setTimeout(resolve, 500));
                 
-                console.log("📹 Solicitando permiso de cámara...");
-                await mindarThree.start();
+                const sceneEl = document.querySelector('a-scene');
                 
-                console.log("✅ Sistema AR activo con 4 targets");
-                isRunning = true;
-
-                // Loop de renderizado
-                renderer.setAnimationLoop(() => {
-                    renderer.render(scene, camera);
+                // Esperar que cargue
+                await new Promise((resolve) => {
+                    if (sceneEl.hasLoaded) {
+                        console.log('✅ Escena cargada');
+                        resolve();
+                    } else {
+                        sceneEl.addEventListener('loaded', () => {
+                            console.log('✅ Escena cargada');
+                            resolve();
+                        }, { once: true });
+                    }
                 });
 
-                // Actualizar UI
-                mensaje.innerText = "Buscando carta...";
-                mensaje.style.color = "#ffff00";
-                mensaje.style.fontSize = "48px";
+                mensaje.innerText = 'Iniciando detección...';
+                console.log('🚀 Iniciando MindAR...');
+
+                // Iniciar MindAR con timeout
+                const timeout = setTimeout(() => {
+                    throw new Error('Timeout: MindAR no responde');
+                }, 15000);
+
+                await sceneEl.systems["mindar-image-system"].start();
+                clearTimeout(timeout);
                 
-                startButton.style.display = 'none';
-                stopButton.style.display = 'block';
-                
-                console.log("🎉 ¡Todo listo! Apunta a cualquiera de las 4 cartas.");
+                sistemaIniciado = true;
+                btnIniciar.style.display = 'none';
+                mensaje.innerText = 'Buscando carta...';
+                mensaje.style.color = '#ff0';
+
+                console.log('✅ Sistema iniciado - 4 casas listas');
+                console.log('📍 Apunta a cualquiera de las 4 cartas');
+                console.log('💡 Asegúrate de tener buena iluminación');
 
             } catch (error) {
-                console.error("❌ Error al iniciar AR:", error);
+                console.error('❌ Error:', error);
+                mensaje.innerText = 'ERROR: ' + error.message;
+                mensaje.style.color = '#f00';
+                mensaje.style.fontSize = '24px';
+                btnIniciar.disabled = false;
+                btnIniciar.innerText = 'REINTENTAR';
                 
-                mensaje.innerText = "Error al iniciar";
-                mensaje.style.color = "#ff0000";
-                mensaje.style.fontSize = "36px";
-                
-                startButton.innerText = "Reintentar";
-                startButton.disabled = false;
-                
-                alert("Error: " + error.message + "\n\nAsegúrate de:\n1. Permitir acceso a la cámara\n2. Tener el archivo targets.mind con las 4 cartas");
+                alert('⚠️ ERROR AL INICIAR\n\n' + error.message + '\n\nVerifica:\n✓ Permisos de cámara\n✓ Archivo targets.mind existe\n✓ Imágenes generadas correctamente\n✓ Buena iluminación');
             }
         });
 
-        // BOTÓN DETENER
-        stopButton.addEventListener('click', () => {
-            console.log("⏹️ Deteniendo sistema...");
-            
-            if (mindarThree) {
-                mindarThree.stop();
-                mindarThree.renderer.setAnimationLoop(null);
+        // DETECTAR TARGETS
+        const sceneEl = document.querySelector('a-scene');
+        sceneEl.addEventListener('loaded', () => {
+            for (let i = 0; i < 4; i++) {
+                const target = document.getElementById(`target${i}`);
+                
+                target.addEventListener('targetFound', () => {
+                    activarCasa(CASAS[i]);
+                });
+                
+                target.addEventListener('targetLost', () => {
+                    if (casaActual === CASAS[i]) {
+                        setTimeout(() => desactivarCasa(), 500);
+                    }
+                });
             }
-            
-            isRunning = false;
-            
-            mensaje.innerText = "Sistema detenido";
-            mensaje.style.color = "#fff";
-            mensaje.style.fontSize = "48px";
-            
-            guiaMarco.classList.remove('detectado');
-            infoPanel.classList.remove('visible');
-            hintText.style.display = 'block';
-            
-            startButton.style.display = 'block';
-            startButton.innerText = "Iniciar Escaneo";
-            startButton.disabled = false;
-            stopButton.style.display = 'none';
-            
-            console.log("✅ Sistema detenido correctamente");
+            console.log('✅ 4 Targets configurados');
         });
 
-        // Log inicial
-        console.log("📱 Aplicación cargada");
-        console.log("🎯 4 Cartas configuradas:", cartasData);
+        // BOTONES DE ACCIÓN
+        document.querySelectorAll('.btn-accion').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!casaActual) return;
+
+                const accion = btn.getAttribute('data-accion');
+                let valor = 0;
+
+                switch(btn.id) {
+                    case 'btn-i': valor = casaActual.impetus; break;
+                    case 'btn-a': valor = casaActual.auxilium; break;
+                    case 'btn-t': valor = casaActual.tutela; break;
+                    case 'btn-m': valor = casaActual.mysterium; break;
+                }
+
+                valAccion.innerText = accion;
+                valValor.innerText = valor;
+
+                console.log(`🎯 ${accion}: ${valor} puntos`);
+            });
+        });
+
+        console.log('📱 Sistema cargado. 4 Casas:', CASAS);
     </script>
 </body>
 </html>
