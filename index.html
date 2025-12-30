@@ -1,99 +1,97 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Cache Buster -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>SISTEMA DE DETECCIÓN DOMUS MAGI</title>
-    
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
-
-    <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: monospace; }
-        
-        /* Indicador de Estado Superior */
-        #scanner-status {
-            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8); color: #0f0;
-            padding: 15px 30px; border: 2px solid #0f0; border-radius: 10px;
-            z-index: 1000; text-align: center; width: 80%; font-size: 18px;
-        }
-
-        /* Versión en esquina */
-        #version {
-            position: fixed; bottom: 10px; left: 10px;
-            color: #555; font-size: 10px; z-index: 1000;
-        }
-
-        /* Mira de escaneo (Visual) */
-        #reticula {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 250px; height: 250px; border: 2px dashed rgba(0, 255, 0, 0.3);
-            pointer-events: none; z-index: 500;
-        }
-    </style>
-</head>
-<body>
-
-    <div id="version">V.4.0.0 - DETECTOR PURO</div>
-    <div id="scanner-status">INICIALIZANDO CÁMARA...</div>
-    <div id="reticula"></div>
-
-    <!-- Escena AR: Apunta a targets1.mind -->
-    <!-- Se añadió ?v=4 al final para forzar la carga del archivo nuevo -->
-    <a-scene 
-        mindar-image="imageTargetSrc: ./targets1.mind?v=4; autoStart: true; uiLoading: no; uiScanning: no;" 
-        color-space="sRGB" 
-        embedded 
-        renderer="colorManagement: true, physicallyCorrectLights" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false">
-        
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-        <!-- Detectores para los 4 Índices de tu compilación -->
-        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-casa="DRACO (AZUL DIAMANTES)"></a-entity>
-        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-casa="AQUILA (AZUL CÍRCULOS)"></a-entity>
-        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-casa="LEO (NARANJA ESTRELLAS)"></a-entity>
-        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-casa="APER (AMARILLO ONDAS)"></a-entity>
-
-    </a-scene>
-
-    <script>
-        const statusDisplay = document.getElementById('scanner-status');
-        
-        // Esperar a que la escena cargue
-        document.querySelector('a-scene').addEventListener('loaded', () => {
-            statusDisplay.innerText = "BUSCANDO CARTA FÍSICA...";
-        });
-
-        // Configurar la detección para cada target
-        const targets = document.querySelectorAll('[mindar-image-target]');
-        
-        targets.forEach(el => {
-            const nombreCasa = el.getAttribute('data-casa');
-
-            el.addEventListener('targetFound', () => {
-                statusDisplay.innerText = "DETECTADO: " + nombreCasa;
-                statusDisplay.style.borderColor = "#0f0";
-                statusDisplay.style.color = "#0f0";
-                console.log("Detección exitosa: " + nombreCasa);
-            });
-
-            el.addEventListener('targetLost', () => {
-                statusDisplay.innerText = "ESCANEANDO... BUSCANDO CARTA";
-                statusDisplay.style.borderColor = "#fff";
-                statusDisplay.style.color = "#fff";
-            });
-        });
-
-        // Error si no encuentra el archivo .mind
-        document.querySelector('a-scene').addEventListener('arError', (event) => {
-            statusDisplay.innerText = "ERROR: NO SE ENCONTRÓ TARGETS1.MIND";
-            statusDisplay.style.color = "red";
-        });
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SISTEMA DETECTOR DOMUS MAGI</title>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "mindar-image-three":"https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
+      }
+    }
     </script>
-</body>
+    <script type="module">
+      import * as THREE from 'three';
+      import { MindARThree } from 'mindar-image-three';
+
+      // 1. Inicialización del motor apuntando a tu archivo targets1.mind
+      const mindarThree = new MindARThree({
+        container: document.querySelector("#container"),
+        imageTargetSrc: "./targets1.mind?v=5" // Cache buster para forzar carga nueva
+      });
+
+      const {renderer, scene, camera} = mindarThree;
+
+      // 2. Configuración de los 4 Marcadores (Anchors)
+      const setupAnchor = (index, colorName, label) => {
+        const anchor = mindarThree.addAnchor(index);
+        const geometry = new THREE.PlaneGeometry(1, 1); // Cuadrada como tus cartas
+        const material = new THREE.MeshBasicMaterial({color: colorName, transparent: true, opacity: 0.5});
+        const plane = new THREE.Mesh(geometry, material);
+        anchor.group.add(plane);
+
+        // Eventos de detección para informar en pantalla
+        anchor.onTargetFound = () => {
+          document.querySelector("#status").innerText = "DETECTADO: " + label;
+          document.querySelector("#status").style.background = colorName;
+        };
+        anchor.onTargetLost = () => {
+          document.querySelector("#status").innerText = "ESCANEANDO...";
+          document.querySelector("#status").style.background = "rgba(0,0,0,0.5)";
+        };
+      }
+
+      // Definimos los 4 objetivos según el orden de tu imagen
+      setupAnchor(0, 0x00ffff, "DRACO (AZUL)");
+      setupAnchor(1, 0x5fd4ff, "AQUILA (AZUL CLARO)");
+      setupAnchor(2, 0xff9900, "LEO (NARANJA)");
+      setupAnchor(3, 0xff5500, "APER (ROJO)");
+
+      const start = async() => {
+        document.querySelector("#status").innerText = "INICIANDO CÁMARA...";
+        await mindarThree.start();
+        renderer.setAnimationLoop(() => {
+          renderer.render(scene, camera);
+        });
+        document.querySelector("#status").innerText = "BUSCANDO CARTA...";
+      }
+
+      document.querySelector("#startButton").addEventListener("click", () => {
+        start();
+        document.querySelector("#control").style.display = "none";
+      });
+    </script>
+    <style>
+      body { margin: 0; background: #000; font-family: sans-serif; }
+      #container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+      
+      /* Botón de inicio gigante para móviles */
+      #control {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        display: flex; justify-content: center; align-items: center;
+        background: #000; z-index: 10;
+      }
+      #startButton {
+        padding: 20px 50px; font-size: 24px; font-weight: bold;
+        background: #0f0; color: #000; border: none; border-radius: 50px; cursor: pointer;
+      }
+      
+      /* Barra de estado superior */
+      #status {
+        position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+        padding: 10px 20px; color: white; background: rgba(0,0,0,0.5);
+        border-radius: 10px; z-index: 5; text-align: center; min-width: 200px;
+        pointer-events: none; border: 1px solid white;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="status">SISTEMA LISTO</div>
+    <div id="control">
+      <button id="startButton">INICIAR ESCÁNER</button>
+    </div>
+    <div id="container"></div>
+  </body>
 </html>
