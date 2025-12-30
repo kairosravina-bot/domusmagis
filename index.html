@@ -16,15 +16,13 @@
       
       const mindarThree = new MindARThree({
         container: document.querySelector("#container"),
-        imageTargetSrc: "targets1.mind"
+        imageTargetSrc: "https://kairosravina-bot.github.io/domusmagis/targets1.mind"
       });
       
       const {renderer, scene, camera} = mindarThree;
       
-      // Colores diferentes para cada marcador
-      const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00]; // Rojo, Verde, Azul, Amarillo
+      const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00];
       
-      // Crear un plano para cada uno de los 4 marcadores
       for (let i = 0; i < 4; i++) {
         const anchor = mindarThree.addAnchor(i);
         const geometry = new THREE.PlaneGeometry(1, 1);
@@ -35,13 +33,25 @@
         });
         const plane = new THREE.Mesh(geometry, material);
         anchor.group.add(plane);
+        
+        anchor.onTargetFound = () => {
+          console.log(`Marcador ${i} detectado!`);
+        };
+        anchor.onTargetLost = () => {
+          console.log(`Marcador ${i} perdido`);
+        };
       }
       
       const start = async() => {
-        await mindarThree.start();
-        renderer.setAnimationLoop(() => {
-          renderer.render(scene, camera);
-        });
+        try {
+          await mindarThree.start();
+          renderer.setAnimationLoop(() => {
+            renderer.render(scene, camera);
+          });
+        } catch(error) {
+          console.error("Error:", error);
+          alert("Error: " + error.message);
+        }
       }
       
       const startButton = document.querySelector("#startButton");
@@ -71,6 +81,8 @@
         top: 0;
         left: 0;
         z-index: 2;
+        background: white;
+        padding: 10px;
       }
     </style>
   </head>
