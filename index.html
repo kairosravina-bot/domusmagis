@@ -3,50 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI - Sistema Pro</title>
+    <title>DOMUS MAGI PRO</title>
     
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; font-family: sans-serif; background: #000; }
-
-        /* PANEL SUPERIOR */
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
         #info-panel {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9); padding: 15px 30px; border-radius: 10px;
+            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px;
             border: 2px solid #fff; z-index: 100; display: none; text-align: center;
-            min-width: 280px; color: white;
+            min-width: 250px; color: white;
         }
-
-        #nombre-casa { font-size: 28px; font-weight: bold; margin-bottom: 10px; letter-spacing: 2px; }
-        .stat { display: flex; justify-content: space-between; margin: 5px 0; font-size: 16px; }
-        .stat-value { font-weight: bold; color: #0f0; }
-
-        /* BOTONES INFERIORES */
         #botones {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             z-index: 100; display: none; gap: 10px;
         }
-
         .btn-accion {
-            width: 65px; height: 65px; border-radius: 12px; border: 2px solid white;
-            font-size: 24px; font-weight: bold; color: white; cursor: pointer;
+            width: 60px; height: 60px; border-radius: 10px; border: 2px solid white;
+            font-size: 20px; font-weight: bold; color: white; cursor: pointer;
         }
-
-        #btn-i { background: #c0392b; } /* Impetus */
-        #btn-a { background: #27ae60; } /* Auxilium */
-        #btn-t { background: #555555; } /* Tutela */
-        #btn-m { background: #8e44ad; } /* Mysterium */
-
-        /* BOTÓN INICIAR */
         #btn-iniciar {
-            position: fixed; bottom: 50%; left: 50%; transform: translate(-50%, 50%);
-            padding: 20px 40px; font-size: 20px; font-weight: bold;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            padding: 20px 40px; font-size: 22px; font-weight: bold;
             background: #0f0; color: #000; border: none; border-radius: 50px; cursor: pointer; z-index: 1000;
         }
-
-        /* COLORES DINÁMICOS */
+        /* Colores de las casas */
         .txt-draco { color: #00d4ff; }
         .txt-aquila { color: #5fd4ff; }
         .txt-leo { color: #ff9900; }
@@ -55,28 +38,24 @@
 </head>
 <body>
 
-    <!-- UI DE INICIO -->
-    <button id="btn-iniciar">INICIAR CÁMARA</button>
+    <button id="btn-iniciar">🎮 INICIAR DUELO</button>
 
-    <!-- PANEL DE INFO -->
     <div id="info-panel">
-        <div id="nombre-casa">DOMUS ---</div>
-        <div class="stat">ACCIÓN: <span id="val-accion" class="stat-value">---</span></div>
-        <div class="stat">VALOR: <span id="val-valor" class="stat-value">0</span></div>
+        <div id="nombre-casa" style="font-size:24px; font-weight:bold;">DOMUS ---</div>
+        <div style="margin-top:10px;">ACCIÓN: <span id="val-accion" style="color:#0f0">---</span></div>
+        <div>VALOR: <span id="val-valor" style="color:#0f0">0</span></div>
     </div>
 
-    <!-- BOTONERA -->
     <div id="botones">
-        <button id="btn-i" class="btn-accion" data-label="IMPETUS">I</button>
-        <button id="btn-a" class="btn-accion" data-label="AUXILIUM">A</button>
-        <button id="btn-t" class="btn-accion" data-label="TUTELA">T</button>
-        <button id="btn-m" class="btn-accion" data-label="MYSTERIUM">M</button>
+        <button id="btn-i" class="btn-accion" style="background:#c0392b" data-label="IMPETUS">I</button>
+        <button id="btn-a" class="btn-accion" style="background:#27ae60" data-label="AUXILIUM">A</button>
+        <button id="btn-t" class="btn-accion" style="background:#555555" data-label="TUTELA">T</button>
+        <button id="btn-m" class="btn-accion" style="background:#8e44ad" data-label="MYSTERIUM">M</button>
     </div>
 
     <!-- ESCENA RA -->
     <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
         <a-entity id="target0" mindar-image-target="targetIndex: 0"></a-entity>
         <a-entity id="target1" mindar-image-target="targetIndex: 1"></a-entity>
         <a-entity id="target2" mindar-image-target="targetIndex: 2"></a-entity>
@@ -84,7 +63,6 @@
     </a-scene>
 
     <script>
-        // DATOS DE LAS CASAS
         const CASAS = [
             { id: 0, nombre: "DRACO", clase: "txt-draco", i: 6, a: 1, t: 2, m: 1 },
             { id: 1, nombre: "AQUILA", clase: "txt-aquila", i: 4, a: 1, t: 2, m: 3 },
@@ -93,56 +71,52 @@
         ];
 
         let casaActual = null;
+        const btnIniciar = document.getElementById('btn-iniciar');
 
-        // BOTÓN INICIAL
-        document.getElementById('btn-iniciar').addEventListener('click', () => {
-            document.getElementById('btn-iniciar').style.display = 'none';
-            document.querySelector('a-scene').systems["mindar-image-system"].start();
+        // FUNCIÓN DE ARRANQUE SEGURO
+        btnIniciar.addEventListener('click', () => {
+            btnIniciar.innerText = "CARGANDO...";
+            const sceneEl = document.querySelector('a-scene');
+            const arSystem = sceneEl.systems["mindar-image-system"];
+            
+            arSystem.start(); // Inicia la cámara
+            
+            // Ocultar botón después de un segundo para asegurar el arranque
+            setTimeout(() => {
+                btnIniciar.style.display = 'none';
+            }, 1000);
         });
 
-        // DETECCIÓN DE CADA TARGET
+        // DETECCIÓN DE CARTA
         CASAS.forEach(casa => {
             const el = document.getElementById(`target${casa.id}`);
-            
             el.addEventListener('targetFound', () => {
                 casaActual = casa;
                 document.getElementById('info-panel').style.display = 'block';
                 document.getElementById('botones').style.display = 'flex';
-                
                 const uiNombre = document.getElementById('nombre-casa');
                 uiNombre.innerText = `DOMUS ${casa.nombre}`;
                 uiNombre.className = casa.clase;
-                console.log("Detectada:", casa.nombre);
             });
-
             el.addEventListener('targetLost', () => {
-                // Pequeño retardo para evitar parpadeos
-                setTimeout(() => {
-                    if (casaActual && casaActual.id === casa.id) {
-                        document.getElementById('info-panel').style.display = 'none';
-                        document.getElementById('botones').style.display = 'none';
-                        casaActual = null;
-                    }
-                }, 300);
+                // No ocultamos nada para poder tocar los botones tranquilo
             });
         });
 
-        // LÓGICA DE BOTONES
+        // BOTONES DE PODER
         document.querySelectorAll('.btn-accion').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (!casaActual) return;
-
                 const accion = btn.getAttribute('data-label');
-                let valor = 0;
-
-                if (accion === "IMPETUS") valor = casaActual.i;
-                if (accion === "AUXILIUM") valor = casaActual.a;
-                if (accion === "TUTELA") valor = casaActual.t;
-                if (accion === "MYSTERIUM") valor = casaActual.m;
-
+                let valor = casaActual[accion.charAt(0).toLowerCase()];
                 document.getElementById('val-accion').innerText = accion;
                 document.getElementById('val-valor').innerText = valor;
             });
+        });
+
+        // DETECTOR DE ERRORES (Si sale pantalla negra, esto avisará)
+        window.addEventListener('error', (e) => {
+            alert("Error detectado: " + e.message);
         });
     </script>
 </body>
