@@ -345,10 +345,10 @@
                 arma: "GLADIUS",
                 valores: { IMPETUS: 7, AUXILIUM: 2, TUTELA: 3, MYSTERIUM: 2 },
                 videos: { 
-                    IMPETUS: "ataque_draco.mp4", 
-                    AUXILIUM: "cura_draco.mp4", 
-                    TUTELA: "defensa_draco.mp4", 
-                    MYSTERIUM: "magia_draco.mp4" 
+                    IMPETUS: "https://kairosravina-bot.github.io/domusmagis/ataque.mp4", 
+                    AUXILIUM: "https://kairosravina-bot.github.io/domusmagis/cura.mp4", 
+                    TUTELA: "https://kairosravina-bot.github.io/domusmagis/defensa.mp4", 
+                    MYSTERIUM: "https://kairosravina-bot.github.io/domusmagis/magia.mp4" 
                 }
             },
             1: { // Águila - círculos azules
@@ -357,10 +357,10 @@
                 arma: "ARCUS",
                 valores: { IMPETUS: 5, AUXILIUM: 4, TUTELA: 2, MYSTERIUM: 3 },
                 videos: { 
-                    IMPETUS: "ataque_aquila.mp4", 
-                    AUXILIUM: "cura_aquila.mp4", 
-                    TUTELA: "defensa_aquila.mp4", 
-                    MYSTERIUM: "magia_aquila.mp4" 
+                    IMPETUS: "https://kairosravina-bot.github.io/domusmagis/ataque.mp4", 
+                    AUXILIUM: "https://kairosravina-bot.github.io/domusmagis/cura.mp4", 
+                    TUTELA: "https://kairosravina-bot.github.io/domusmagis/defensa.mp4", 
+                    MYSTERIUM: "https://kairosravina-bot.github.io/domusmagis/magia.mp4" 
                 }
             },
             2: { // León - círculos naranjas
@@ -369,10 +369,10 @@
                 arma: "CLAVA",
                 valores: { IMPETUS: 8, AUXILIUM: 1, TUTELA: 4, MYSTERIUM: 1 },
                 videos: { 
-                    IMPETUS: "ataque_leo.mp4", 
-                    AUXILIUM: "cura_leo.mp4", 
-                    TUTELA: "defensa_leo.mp4", 
-                    MYSTERIUM: "magia_leo.mp4" 
+                    IMPETUS: "https://kairosravina-bot.github.io/domusmagis/ataque.mp4", 
+                    AUXILIUM: "https://kairosravina-bot.github.io/domusmagis/cura.mp4", 
+                    TUTELA: "https://kairosravina-bot.github.io/domusmagis/defensa.mp4", 
+                    MYSTERIUM: "https://kairosravina-bot.github.io/domusmagis/magia.mp4" 
                 }
             },
             3: { // Lobo - rombos rojos/amarillos
@@ -381,10 +381,10 @@
                 arma: "SICA",
                 valores: { IMPETUS: 6, AUXILIUM: 3, TUTELA: 3, MYSTERIUM: 2 },
                 videos: { 
-                    IMPETUS: "ataque_lupus.mp4", 
-                    AUXILIUM: "cura_lupus.mp4", 
-                    TUTELA: "defensa_lupus.mp4", 
-                    MYSTERIUM: "magia_lupus.mp4" 
+                    IMPETUS: "https://kairosravina-bot.github.io/domusmagis/ataque.mp4", 
+                    AUXILIUM: "https://kairosravina-bot.github.io/domusmagis/cura.mp4", 
+                    TUTELA: "https://kairosravina-bot.github.io/domusmagis/defensa.mp4", 
+                    MYSTERIUM: "https://kairosravina-bot.github.io/domusmagis/magia.mp4" 
                 }
             }
         };
@@ -452,6 +452,15 @@
             });
 
             const {renderer, scene, camera} = mindarThree;
+
+            // Desbloquear audio del navegador
+            videoPlayer.muted = false;
+            videoPlayer.play().then(() => {
+                videoPlayer.pause();
+                videoPlayer.currentTime = 0;
+            }).catch(() => {
+                console.log("Esperando interacción para audio");
+            });
 
             // Crear anchors para las 4 cartas
             for(let i = 0; i < 4; i++) {
