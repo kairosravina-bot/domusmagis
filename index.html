@@ -194,7 +194,17 @@
     <div id="version">v2.0 ACTIVO</div>
 
     <!-- MENSAJE CENTRAL -->
-    <div id="mensaje">Presiona Iniciar</div>
+    <div id="mensaje">
+        <div style="font-size: 72px; margin-bottom: 20px; color: #0f0; text-shadow: 0 0 30px #0f0;">
+            VERSIÓN 2.0
+        </div>
+        <div style="font-size: 32px; color: #fff;">
+            Build: 2025-01-01
+        </div>
+        <div style="font-size: 20px; color: #888; margin-top: 20px;">
+            Presiona Iniciar cuando estés listo
+        </div>
+    </div>
 
     <!-- PANEL INFO -->
     <div id="info-panel">
@@ -310,8 +320,9 @@
         function activarCasa(casa) {
             casaActual = casa;
             
-            mensaje.innerText = '✓ DETECTADA';
+            mensaje.innerHTML = '✓ DETECTADA';
             mensaje.style.color = '#0f0';
+            mensaje.style.fontSize = '64px';
             
             infoPanel.classList.add('visible');
             botones.classList.add('visible');
@@ -340,8 +351,9 @@
         function desactivarCasa() {
             casaActual = null;
             
-            mensaje.innerText = 'Buscando carta...';
+            mensaje.innerHTML = 'Buscando carta...';
             mensaje.style.color = '#ff0';
+            mensaje.style.fontSize = '48px';
             
             infoPanel.classList.remove('visible');
             botones.classList.remove('visible');
@@ -376,6 +388,7 @@
                 
                 // PASO 1: Permisos de cámara
                 console.log('📹 [1/4] Solicitando permisos de cámara...');
+                mensaje.innerHTML = '<div style="font-size: 36px;">Solicitando cámara...</div>';
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
                         facingMode: 'environment',
@@ -387,7 +400,7 @@
                 console.log('✅ [1/4] Permisos concedidos');
                 
                 // PASO 2: Cargar escena
-                mensaje.innerText = 'Cargando escena AR...';
+                mensaje.innerHTML = '<div style="font-size: 36px;">Cargando escena AR...</div>';
                 console.log('🎬 [2/4] Cargando escena A-Frame...');
                 await new Promise(resolve => setTimeout(resolve, 500));
                 
@@ -406,7 +419,7 @@
                 });
 
                 // PASO 3: Cargar targets.mind
-                mensaje.innerText = 'Cargando detectores...';
+                mensaje.innerHTML = '<div style="font-size: 36px;">Cargando detectores...</div>';
                 console.log('🎯 [3/4] Cargando targets.mind...');
                 console.log('📁 Archivo: ./targets.mind?v=20250101');
 
@@ -432,7 +445,7 @@
                 
                 sistemaIniciado = true;
                 btnIniciar.style.display = 'none';
-                mensaje.innerText = 'Buscando carta...';
+                mensaje.innerHTML = 'Buscando carta...';
                 mensaje.style.color = '#ff0';
                 mensaje.style.fontSize = '48px';
 
@@ -443,9 +456,8 @@
                 console.error('Detalles:', error);
                 console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
                 
-                mensaje.innerText = error.message;
+                mensaje.innerHTML = `<div style="font-size: 24px; color: #f00;">${error.message}</div>`;
                 mensaje.style.color = '#f00';
-                mensaje.style.fontSize = '20px';
                 btnIniciar.disabled = false;
                 btnIniciar.innerText = 'REINTENTAR';
                 
