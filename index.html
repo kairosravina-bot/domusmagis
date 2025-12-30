@@ -3,58 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI PRO</title>
+    <title>DOMUS MAGI - Detector Rápido</title>
     
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
         body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
+        
+        /* MIRA DE ESCANEO */
+        #scanner-ui {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            border: 2px solid rgba(0,255,0,0.3); box-sizing: border-box;
+            z-index: 50; pointer-events: none; display: none;
+        }
+        #scanner-line {
+            position: absolute; width: 100%; height: 2px; background: #0f0;
+            top: 0; animation: scan 2s infinite linear; box-shadow: 0 0 10px #0f0;
+        }
+        @keyframes scan { from { top: 0; } to { top: 100%; } }
+
         #info-panel {
             position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px;
+            background: rgba(0,0,0,0.85); padding: 15px; border-radius: 10px;
             border: 2px solid #fff; z-index: 100; display: none; text-align: center;
             min-width: 250px; color: white;
         }
         #botones {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 100; display: none; gap: 10px;
+            z-index: 100; display: none; gap: 15px;
         }
         .btn-accion {
-            width: 60px; height: 60px; border-radius: 10px; border: 2px solid white;
-            font-size: 20px; font-weight: bold; color: white; cursor: pointer;
+            width: 65px; height: 65px; border-radius: 15px; border: 2px solid white;
+            font-size: 24px; font-weight: bold; color: white; cursor: pointer;
         }
         #btn-iniciar {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            padding: 20px 40px; font-size: 22px; font-weight: bold;
+            padding: 25px 50px; font-size: 24px; font-weight: bold;
             background: #0f0; color: #000; border: none; border-radius: 50px; cursor: pointer; z-index: 1000;
         }
-        /* Colores de las casas */
-        .txt-draco { color: #00d4ff; }
-        .txt-aquila { color: #5fd4ff; }
-        .txt-leo { color: #ff9900; }
-        .txt-aper { color: #ff5500; }
+        .txt-draco { color: #00d4ff; } .txt-aquila { color: #5fd4ff; }
+        .txt-leo { color: #ff9900; } .txt-aper { color: #ff5500; }
     </style>
 </head>
 <body>
 
-    <button id="btn-iniciar">🎮 INICIAR DUELO</button>
+    <button id="btn-iniciar">⚡ INICIAR SISTEMA</button>
+
+    <div id="scanner-ui"><div id="scanner-line"></div></div>
 
     <div id="info-panel">
-        <div id="nombre-casa" style="font-size:24px; font-weight:bold;">DOMUS ---</div>
-        <div style="margin-top:10px;">ACCIÓN: <span id="val-accion" style="color:#0f0">---</span></div>
-        <div>VALOR: <span id="val-valor" style="color:#0f0">0</span></div>
+        <div id="nombre-casa" style="font-size:26px;">CARTA DETECTADA</div>
+        <div style="margin-top:5px; font-size:18px;">VALOR: <span id="val-valor" style="color:#0f0">0</span></div>
     </div>
 
     <div id="botones">
-        <button id="btn-i" class="btn-accion" style="background:#c0392b" data-label="IMPETUS">I</button>
-        <button id="btn-a" class="btn-accion" style="background:#27ae60" data-label="AUXILIUM">A</button>
-        <button id="btn-t" class="btn-accion" style="background:#555555" data-label="TUTELA">T</button>
-        <button id="btn-m" class="btn-accion" style="background:#8e44ad" data-label="MYSTERIUM">M</button>
+        <button id="btn-i" class="btn-accion" style="background:#c0392b">I</button>
+        <button id="btn-a" class="btn-accion" style="background:#27ae60">A</button>
+        <button id="btn-t" class="btn-accion" style="background:#555555">T</button>
+        <button id="btn-m" class="btn-accion" style="background:#8e44ad">M</button>
     </div>
 
-    <!-- ESCENA RA -->
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <!-- ESCENA RA OPTIMIZADA -->
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF:0.0001; filterBeta: 0.001;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
         <a-entity id="target0" mindar-image-target="targetIndex: 0"></a-entity>
         <a-entity id="target1" mindar-image-target="targetIndex: 1"></a-entity>
@@ -71,52 +82,41 @@
         ];
 
         let casaActual = null;
-        const btnIniciar = document.getElementById('btn-iniciar');
 
-        // FUNCIÓN DE ARRANQUE SEGURO
-        btnIniciar.addEventListener('click', () => {
-            btnIniciar.innerText = "CARGANDO...";
+        document.getElementById('btn-iniciar').addEventListener('click', () => {
+            document.getElementById('btn-iniciar').innerText = "CONECTANDO...";
+            document.getElementById('scanner-ui').style.display = 'block';
             const sceneEl = document.querySelector('a-scene');
             const arSystem = sceneEl.systems["mindar-image-system"];
             
-            arSystem.start(); // Inicia la cámara
+            arSystem.start(); 
             
-            // Ocultar botón después de un segundo para asegurar el arranque
             setTimeout(() => {
-                btnIniciar.style.display = 'none';
-            }, 1000);
+                document.getElementById('btn-iniciar').style.display = 'none';
+            }, 1500);
         });
 
-        // DETECCIÓN DE CARTA
         CASAS.forEach(casa => {
             const el = document.getElementById(`target${casa.id}`);
             el.addEventListener('targetFound', () => {
                 casaActual = casa;
+                document.getElementById('scanner-ui').style.display = 'none';
                 document.getElementById('info-panel').style.display = 'block';
                 document.getElementById('botones').style.display = 'flex';
-                const uiNombre = document.getElementById('nombre-casa');
-                uiNombre.innerText = `DOMUS ${casa.nombre}`;
-                uiNombre.className = casa.clase;
+                document.getElementById('nombre-casa').innerText = "DOMUS " + casa.nombre;
+                document.getElementById('nombre-casa').className = casa.clase;
             });
             el.addEventListener('targetLost', () => {
-                // No ocultamos nada para poder tocar los botones tranquilo
+                // Mantenemos la info visible para jugar cómodo
             });
         });
 
-        // BOTONES DE PODER
         document.querySelectorAll('.btn-accion').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (!casaActual) return;
-                const accion = btn.getAttribute('data-label');
-                let valor = casaActual[accion.charAt(0).toLowerCase()];
-                document.getElementById('val-accion').innerText = accion;
-                document.getElementById('val-valor').innerText = valor;
+                const id = btn.id.split('-')[1];
+                document.getElementById('val-valor').innerText = casaActual[id];
             });
-        });
-
-        // DETECTOR DE ERRORES (Si sale pantalla negra, esto avisará)
-        window.addEventListener('error', (e) => {
-            alert("Error detectado: " + e.message);
         });
     </script>
 </body>
