@@ -3,81 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Meta tags para evitar el caché -->
+    <!-- Cache Buster -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <title>SISTEMA DE DETECCIÓN DOMUS MAGI</title>
     
-    <title>DOMUS MAGI: REVELATIONS</title>
-    
-    <!-- LIBRERÍAS AR -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
-    
-    <!-- CSS con forzado de versión -->
-    <link rel="stylesheet" href="style.css?v=320">
 
     <style>
-        /* Etiqueta de versión para control visual */
-        #version-indicator {
-            position: fixed;
-            top: 5px;
-            left: 5px;
-            background: rgba(0, 255, 0, 0.7);
-            color: #000;
-            padding: 3px 8px;
-            font-family: monospace;
-            font-size: 10px;
-            font-weight: bold;
-            z-index: 10000;
-            border-radius: 3px;
-            pointer-events: none;
+        body { margin: 0; overflow: hidden; background: #000; font-family: monospace; }
+        
+        /* Indicador de Estado Superior */
+        #scanner-status {
+            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8); color: #0f0;
+            padding: 15px 30px; border: 2px solid #0f0; border-radius: 10px;
+            z-index: 1000; text-align: center; width: 80%; font-size: 18px;
+        }
+
+        /* Versión en esquina */
+        #version {
+            position: fixed; bottom: 10px; left: 10px;
+            color: #555; font-size: 10px; z-index: 1000;
+        }
+
+        /* Mira de escaneo (Visual) */
+        #reticula {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 250px; height: 250px; border: 2px dashed rgba(0, 255, 0, 0.3);
+            pointer-events: none; z-index: 500;
         }
     </style>
 </head>
 <body>
 
-    <!-- ETIQUETA DE VERSIÓN (Si ves esto, el código cargó bien) -->
-    <div id="version-indicator">DOMUS MAGI V.3.2.0 - TARGETS1</div>
+    <div id="version">V.4.0.0 - DETECTOR PURO</div>
+    <div id="scanner-status">INICIALIZANDO CÁMARA...</div>
+    <div id="reticula"></div>
 
-    <!-- 1. VISOR SUPERIOR FIJO (33%) -->
-    <div id="visor-superior">
-        <canvas id="canvas-chroma" style="width:100%; height:100%;"></canvas>
-        <video id="video-source" style="display:none;" playsinline loop crossorigin="anonymous"></video>
-    </div>
-
-    <!-- 2. HUD DE DATOS (HP Y PODER) -->
-    <div id="hud">
-        VITALITAS: <span id="hp-user">20</span> | RIVAL: <span id="rival-hp">20</span> | PODER MESA: <span id="pwr-total">0</span>
-    </div>
-
-    <!-- 3. ESCENA DE CÁMARA (CENTRO) -->
-    <!-- Se añade ?v=320 al final de targets1.mind para forzar la descarga del nuevo archivo -->
-    <a-scene id="escena-ar" 
-        mindar-image="imageTargetSrc: ./targets1.mind?v=320; autoStart: true; uiLoading: no; maxTrack: 2;" 
+    <!-- Escena AR: Apunta a targets1.mind -->
+    <!-- Se añadió ?v=4 al final para forzar la carga del archivo nuevo -->
+    <a-scene 
+        mindar-image="imageTargetSrc: ./targets1.mind?v=4; autoStart: true; uiLoading: no; uiScanning: no;" 
+        color-space="sRGB" 
+        embedded 
+        renderer="colorManagement: true, physicallyCorrectLights" 
         vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false">
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        
-        <!-- DETECTORES PARA LAS 4 CASAS (Solapas) -->
-        <a-entity id="target0" class="target-card" mindar-image-target="targetIndex: 0"></a-entity>
-        <a-entity id="target1" class="target-card" mindar-image-target="targetIndex: 1"></a-entity>
-        <a-entity id="target2" class="target-card" mindar-image-target="targetIndex: 2"></a-entity>
-        <a-entity id="target3" class="target-card" mindar-image-target="targetIndex: 3"></a-entity>
+
+        <!-- Detectores para los 4 Índices de tu compilación -->
+        <a-entity id="target0" mindar-image-target="targetIndex: 0" data-casa="DRACO (AZUL DIAMANTES)"></a-entity>
+        <a-entity id="target1" mindar-image-target="targetIndex: 1" data-casa="AQUILA (AZUL CÍRCULOS)"></a-entity>
+        <a-entity id="target2" mindar-image-target="targetIndex: 2" data-casa="LEO (NARANJA ESTRELLAS)"></a-entity>
+        <a-entity id="target3" mindar-image-target="targetIndex: 3" data-casa="APER (AMARILLO ONDAS)"></a-entity>
+
     </a-scene>
 
-    <!-- 4. MANDO DE CONTROL (BOTONES I, T, A, M) -->
-    <div id="controles">
-        <button id="btn-impetus" class="btn impetus" onclick="ejecutar('ataque')">I</button>
-        <button id="btn-tutela" class="btn tutela" onclick="ejecutar('defensa')">T</button>
-        <button id="btn-auxilium" class="btn auxilium" onclick="ejecutar('cura')">A</button>
-        <button id="btn-mysterium" class="btn mysterium" onclick="ejecutar('magia')">M</button>
-    </div>
+    <script>
+        const statusDisplay = document.getElementById('scanner-status');
+        
+        // Esperar a que la escena cargue
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+            statusDisplay.innerText = "BUSCANDO CARTA FÍSICA...";
+        });
 
-    <!-- TUS ARCHIVOS DE LÓGICA (con forzado de caché) -->
-    <script src="logica_juego.js?v=320"></script>
-    <script src="logica_video.js?v=320"></script>
+        // Configurar la detección para cada target
+        const targets = document.querySelectorAll('[mindar-image-target]');
+        
+        targets.forEach(el => {
+            const nombreCasa = el.getAttribute('data-casa');
 
+            el.addEventListener('targetFound', () => {
+                statusDisplay.innerText = "DETECTADO: " + nombreCasa;
+                statusDisplay.style.borderColor = "#0f0";
+                statusDisplay.style.color = "#0f0";
+                console.log("Detección exitosa: " + nombreCasa);
+            });
+
+            el.addEventListener('targetLost', () => {
+                statusDisplay.innerText = "ESCANEANDO... BUSCANDO CARTA";
+                statusDisplay.style.borderColor = "#fff";
+                statusDisplay.style.color = "#fff";
+            });
+        });
+
+        // Error si no encuentra el archivo .mind
+        document.querySelector('a-scene').addEventListener('arError', (event) => {
+            statusDisplay.innerText = "ERROR: NO SE ENCONTRÓ TARGETS1.MIND";
+            statusDisplay.style.color = "red";
+        });
+    </script>
 </body>
 </html>
