@@ -122,7 +122,7 @@
 
         /* VISOR VIDEO */
         #video-visor {
-            height: 30%; 
+            height: 35%; 
             width: 100%; 
             background: rgba(0,0,0,0.9);
             border-bottom: 2px solid #555; 
@@ -181,54 +181,54 @@
             gap: 10px;
         }
 
-        /* 3 LÍNEAS INFO FIJAS */
-        .fila-info {
+        /* 3 LÍNEAS INFO FIJAS - EN UNA SOLA LÍNEA */
+        .fila-info-unica {
             display: flex;
-            gap: 8px;
+            gap: 5px;
         }
         .info-box {
             background: #222;
             border: 1px solid #555;
-            border-radius: 8px;
-            padding: 8px;
+            border-radius: 5px;
+            padding: 6px;
             flex: 1;
             text-align: center;
         }
         .info-lbl {
-            font-size: 10px;
+            font-size: 9px;
             color: #888;
             text-transform: uppercase;
             display: block;
         }
         .info-val {
-            font-size: 16px;
+            font-size: 14px;
             color: #fff;
             font-weight: bold;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
-        /* 2 LÍNEAS INFO VARIABLES */
+        /* 2 LÍNEAS INFO VARIABLES - MÁS COMPACTAS */
         .fila-var {
             display: flex;
-            gap: 8px;
+            gap: 5px;
         }
         .var-box {
             background: #1a1a1a;
             border: 2px solid #666;
-            border-radius: 8px;
-            padding: 10px;
+            border-radius: 5px;
+            padding: 8px;
             flex: 1;
             text-align: center;
         }
         .var-lbl {
-            font-size: 11px;
+            font-size: 9px;
             color: #aaa;
             text-transform: uppercase;
         }
         .var-val {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
-            margin-top: 4px;
+            margin-top: 3px;
         }
 
         /* 4 BOTONES SELECTORES */
@@ -295,22 +295,16 @@
         <!-- PANEL INFERIOR -->
         <div id="panel-inferior">
             
-            <!-- 3 LÍNEAS FIJAS: Casa, Escudo, Arma -->
-            <div class="fila-info">
+            <!-- 3 CASILLAS EN UNA SOLA LÍNEA: Casa, Escudo, Arma -->
+            <div class="fila-info-unica">
                 <div class="info-box">
                     <span class="info-lbl">CASA</span>
                     <span id="info-casa" class="info-val">---</span>
                 </div>
-            </div>
-            
-            <div class="fila-info">
                 <div class="info-box">
                     <span class="info-lbl">ESCUDO</span>
                     <span id="info-escudo" class="info-val">---</span>
                 </div>
-            </div>
-
-            <div class="fila-info">
                 <div class="info-box">
                     <span class="info-lbl">ARMA</span>
                     <span id="info-arma" class="info-val">---</span>
@@ -349,25 +343,49 @@
                 casa: "DOMUS DRACO",
                 escudo: "AQUA DIAMANTE",
                 arma: "GLADIUS",
-                valores: { IMPETUS: 7, AUXILIUM: 2, TUTELA: 3, MYSTERIUM: 2 }
+                valores: { IMPETUS: 7, AUXILIUM: 2, TUTELA: 3, MYSTERIUM: 2 },
+                videos: { 
+                    IMPETUS: "ataque_draco.mp4", 
+                    AUXILIUM: "cura_draco.mp4", 
+                    TUTELA: "defensa_draco.mp4", 
+                    MYSTERIUM: "magia_draco.mp4" 
+                }
             },
             1: { // Águila - círculos azules
                 casa: "DOMUS AQUILA",
                 escudo: "CAELUM ORBIS",
                 arma: "ARCUS",
-                valores: { IMPETUS: 5, AUXILIUM: 4, TUTELA: 2, MYSTERIUM: 3 }
+                valores: { IMPETUS: 5, AUXILIUM: 4, TUTELA: 2, MYSTERIUM: 3 },
+                videos: { 
+                    IMPETUS: "ataque_aquila.mp4", 
+                    AUXILIUM: "cura_aquila.mp4", 
+                    TUTELA: "defensa_aquila.mp4", 
+                    MYSTERIUM: "magia_aquila.mp4" 
+                }
             },
             2: { // León - círculos naranjas
                 casa: "DOMUS LEO",
                 escudo: "IGNIS ORBIS",
                 arma: "CLAVA",
-                valores: { IMPETUS: 8, AUXILIUM: 1, TUTELA: 4, MYSTERIUM: 1 }
+                valores: { IMPETUS: 8, AUXILIUM: 1, TUTELA: 4, MYSTERIUM: 1 },
+                videos: { 
+                    IMPETUS: "ataque_leo.mp4", 
+                    AUXILIUM: "cura_leo.mp4", 
+                    TUTELA: "defensa_leo.mp4", 
+                    MYSTERIUM: "magia_leo.mp4" 
+                }
             },
             3: { // Lobo - rombos rojos/amarillos
                 casa: "DOMUS LUPUS",
                 escudo: "FLAMMA DIAMANTE",
                 arma: "SICA",
-                valores: { IMPETUS: 6, AUXILIUM: 3, TUTELA: 3, MYSTERIUM: 2 }
+                valores: { IMPETUS: 6, AUXILIUM: 3, TUTELA: 3, MYSTERIUM: 2 },
+                videos: { 
+                    IMPETUS: "ataque_lupus.mp4", 
+                    AUXILIUM: "cura_lupus.mp4", 
+                    TUTELA: "defensa_lupus.mp4", 
+                    MYSTERIUM: "magia_lupus.mp4" 
+                }
             }
         };
 
@@ -520,6 +538,7 @@
                 const lado = btn.getAttribute('data-lado');
                 const carta = CARTAS[cartaActual];
                 const valor = carta.valores[lado];
+                const videoSrc = carta.videos[lado];
 
                 // Actualizar líneas variables
                 varLado.innerText = lado;
@@ -531,8 +550,23 @@
                 else if(lado === 'MYSTERIUM') varLado.style.color = "#d5f";
                 else varLado.style.color = "#fff";
 
-                console.log(`Carta ${cartaActual} - ${lado}: ${valor}`);
+                // Reproducir video
+                msgVisor.style.display = 'none';
+                videoPlayer.style.display = 'block';
+                videoPlayer.src = videoSrc;
+                videoPlayer.volume = 1.0;
+                videoPlayer.play();
+
+                console.log(`Carta ${cartaActual} - ${lado}: ${valor} - Video: ${videoSrc}`);
             });
+        });
+
+        // Al terminar video
+        videoPlayer.addEventListener('ended', () => {
+            videoPlayer.style.display = 'none';
+            msgVisor.style.display = 'block';
+            msgVisor.innerText = "FIN DE ACCIÓN";
+            msgVisor.style.color = "#fff";
         });
 
     </script>
