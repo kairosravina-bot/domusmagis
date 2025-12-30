@@ -560,11 +560,22 @@
                 else varLado.style.color = "#fff";
 
                 // Reproducir video
+                console.log("Intentando reproducir:", videoSrc);
                 msgVisor.style.display = 'none';
                 videoPlayer.style.display = 'block';
                 videoPlayer.src = videoSrc;
+                videoPlayer.load(); // Forzar carga
+                videoPlayer.muted = false;
                 videoPlayer.volume = 1.0;
-                videoPlayer.play();
+                
+                videoPlayer.play().then(() => {
+                    console.log("Video reproduciendo correctamente");
+                }).catch((error) => {
+                    console.error("Error al reproducir:", error);
+                    msgVisor.style.display = 'block';
+                    msgVisor.innerText = "ERROR: No se pudo reproducir el video";
+                    videoPlayer.style.display = 'none';
+                });
 
                 console.log(`Carta ${cartaActual} - ${lado}: ${valor} - Video: ${videoSrc}`);
             });
@@ -572,6 +583,7 @@
 
         // Al terminar video
         videoPlayer.addEventListener('ended', () => {
+            console.log("Video terminado");
             videoPlayer.style.display = 'none';
             msgVisor.style.display = 'block';
             msgVisor.innerText = "FIN DE ACCIÓN";
