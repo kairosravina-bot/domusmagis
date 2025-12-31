@@ -19,7 +19,6 @@
       import { MindARThree } from 'mindar-image-three';
 
       // --- BASE DE DATOS ---
-      // Asegúrate de que los nombres de archivo (img y vid) existan en tu carpeta
       const DB_CARTAS = {
         0: { nombre: "DRACO",  arma: "ALIENTO DE FUEGO", img: "draco.png",  vid: "caelum.mp4", i: 6, t: 2, a: 1, m: 1 },
         1: { nombre: "AQUILA", arma: "GARRA CELESTIAL",  img: "aquila.png", vid: "caelum.mp4", i: 4, t: 2, a: 1, m: 3 },
@@ -28,16 +27,15 @@
       };
 
       let mindarThree = null;
-      let cartaActual = null; // Almacena los datos de la carta detectada
+      let cartaActual = null;
 
       const init = async () => {
-        // El contenedor es el tercio del medio
         const container = document.querySelector("#tercio-scanner");
         
         try {
           mindarThree = new MindARThree({
             container: container,
-            imageTargetSrc: "./targets1.mind", // Tu archivo targets
+            imageTargetSrc: "./targets1.mind",
             filterMinCF: 0.0001, 
             filterBeta: 0.001
           });
@@ -75,9 +73,6 @@
               // 4. Habilitar Botones Visualmente
               document.querySelector("#panel-botones").classList.remove("bloqueado");
             };
-            
-            // Opcional: Si se pierde la carta, mantenemos la info o bloqueamos
-            /* anchor.onTargetLost = () => { ... } */
           }
 
           await mindarThree.start();
@@ -93,7 +88,7 @@
 
       // --- LÓGICA DE BOTONES ---
       window.botonPresionado = (tipo, etiqueta) => {
-        if (!cartaActual) return; // Si no hay carta detectada, no hace nada
+        if (!cartaActual) return;
 
         // 1. Obtener valor
         const valor = cartaActual[tipo];
@@ -119,11 +114,42 @@
 
     <style>
       /* ESTRUCTURA GENERAL */
-      body { margin: 0; padding: 0; background: #000; font-family: 'Segoe UI', sans-serif; height: 100vh; width: 100vw; overflow: hidden; color: white; display: flex; flex-direction: column; }
+      body { 
+        margin: 0; 
+        padding: 0; 
+        background: #000; 
+        font-family: 'Segoe UI', sans-serif; 
+        height: 100vh; 
+        width: 100vw; 
+        overflow: hidden; 
+        color: white; 
+        display: flex; 
+        flex-direction: column; 
+      }
 
       /* PANTALLA DE CARGA */
-      #pantalla-carga { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
-      #btn-iniciar { padding: 15px 30px; font-size: 20px; background: gold; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
+      #pantalla-carga { 
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        width: 100%; 
+        height: 100%; 
+        background: #111; 
+        z-index: 9999; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        flex-direction: column; 
+      }
+      #btn-iniciar { 
+        padding: 15px 30px; 
+        font-size: 20px; 
+        background: gold; 
+        border: none; 
+        font-weight: bold; 
+        cursor: pointer; 
+        border-radius: 5px; 
+      }
 
       /* --- 1. TERCIO SUPERIOR: VISOR MP4 (33.33%) --- */
       #tercio-video {
@@ -133,16 +159,21 @@
         border-bottom: 2px solid #333;
         position: relative;
         overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
       #video-player {
-        width: 100%; height: 100%; object-fit: cover;
+        max-width: 100%; 
+        max-height: 100%; 
+        object-fit: contain;
       }
 
       /* --- 2. TERCIO MEDIO: ESCANER AR (33.33%) --- */
       #tercio-scanner {
         width: 100%;
         height: 33.33vh;
-        background: #222; /* Fondo mientras carga cámara */
+        background: #222;
         position: relative;
         overflow: hidden;
       }
@@ -150,41 +181,64 @@
       /* --- 3. TERCIO INFERIOR: INFO + BOTONES (33.33%) --- */
       #tercio-controles {
         width: 100%;
-        height: 33.34vh; /* Ajuste decimal */
+        height: 33.34vh;
         background: #111;
         border-top: 2px solid #333;
         display: flex;
         flex-direction: column;
       }
 
-      /* PANEL DE INFO (2 LÍNEAS) - Parte superior del tercio bajo */
+      /* PANEL DE INFO (2 LÍNEAS) */
       #info-panel {
-        flex: 1; /* Ocupa el espacio disponible */
+        flex: 0 0 auto;
+        padding: 15px 20px;
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        padding: 0 20px;
-        gap: 10px;
+        gap: 12px;
+        background: rgba(0,0,0,0.3);
       }
 
       /* Línea 1: Escudo + Texto */
-      .fila-datos { display: flex; align-items: center; gap: 15px; }
-      #img-escudo { width: 50px; height: 50px; object-fit: contain; display: none; border: 1px solid #444; border-radius: 5px; background: rgba(0,0,0,0.5); }
-      #info-linea1 { font-size: 16px; line-height: 1.2; text-transform: uppercase; }
+      .fila-datos { 
+        display: flex; 
+        align-items: center; 
+        gap: 12px;
+        min-height: 50px;
+      }
+      #img-escudo { 
+        width: 45px; 
+        height: 45px; 
+        object-fit: contain; 
+        display: none; 
+        border: 2px solid gold; 
+        border-radius: 5px; 
+        background: rgba(0,0,0,0.7);
+        padding: 3px;
+      }
+      #info-linea1 { 
+        font-size: 15px; 
+        line-height: 1.3; 
+        text-transform: uppercase;
+        flex: 1;
+      }
 
       /* Línea 2: Resultado (Lado y Valor) */
       #info-linea2 {
-        background: rgba(255,255,255,0.05);
-        padding: 8px;
+        background: rgba(255,255,255,0.08);
+        padding: 10px;
         text-align: center;
         border-radius: 5px;
         font-family: monospace;
-        font-size: 14px;
-        color: #888;
-        min-height: 24px;
+        font-size: 13px;
+        color: #999;
+        min-height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #333;
       }
 
-      /* PANEL DE BOTONES - Parte inferior del tercio bajo */
+      /* PANEL DE BOTONES */
       #panel-botones {
         height: 80px;
         display: flex;
@@ -194,21 +248,31 @@
         transition: opacity 0.3s;
       }
       
-      /* Estado Bloqueado (Opacidad baja) */
-      .bloqueado { opacity: 0.3; pointer-events: none; }
+      /* Estado Bloqueado */
+      .bloqueado { 
+        opacity: 0.3; 
+        pointer-events: none; 
+      }
 
       .btn {
-        width: 60px; height: 60px;
+        width: 60px; 
+        height: 60px;
         border-radius: 10px;
-        font-size: 24px; font-weight: bold;
+        font-size: 24px; 
+        font-weight: bold;
         color: white;
         background: #222;
         border: 2px solid #555;
-        display: flex; justify-content: center; align-items: center;
+        display: flex; 
+        justify-content: center; 
+        align-items: center;
         cursor: pointer;
         box-shadow: 0 4px 6px rgba(0,0,0,0.5);
       }
-      .btn:active { transform: scale(0.95); border-color: white; }
+      .btn:active { 
+        transform: scale(0.95); 
+        border-color: white; 
+      }
 
       /* Colores Borde Botones */
       .b-i { border-bottom: 4px solid #ff4444; }
@@ -226,15 +290,13 @@
       <button id="btn-iniciar">ACTIVAR SISTEMA</button>
     </div>
 
-    <!-- TERCIO 1: VIDEO (Sin Loop) -->
+    <!-- TERCIO 1: VIDEO -->
     <div id="tercio-video">
       <video id="video-player" playsinline muted></video>
     </div>
 
     <!-- TERCIO 2: ESCÁNER AR -->
-    <div id="tercio-scanner">
-      <!-- MindAR inyectará el video aquí -->
-    </div>
+    <div id="tercio-scanner"></div>
 
     <!-- TERCIO 3: INFO + BOTONES -->
     <div id="tercio-controles">
@@ -243,7 +305,7 @@
       <div id="info-panel">
         <!-- Línea 1 -->
         <div class="fila-datos">
-          <img id="img-escudo" src=""> <!-- src se llena al detectar -->
+          <img id="img-escudo" src="">
           <div id="info-linea1">ESPERANDO CARTA...</div>
         </div>
         <!-- Línea 2 -->
