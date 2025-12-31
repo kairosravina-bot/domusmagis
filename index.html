@@ -22,7 +22,7 @@
             background: #111; border-bottom: 3px solid #fff; z-index: 100;
             overflow: hidden; display: flex; justify-content: center; align-items: center;
         }
-        #video-background { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+        #video-background { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
 
         /* CAPA DE DATOS (LAYER SOBRE MP4) */
         #hud-layer {
@@ -32,7 +32,7 @@
         }
         .hud-escudo { width: 60px; height: 60px; border: 2px solid white; border-radius: 5px; background: rgba(255,255,255,0.1); }
         .hud-stats { text-align: right; font-family: monospace; }
-        .stat-line { font-size: 18px; font-weight: bold; text-shadow: 2px 2px 4px #000; }
+        .stat-line { font-size: 20px; font-weight: bold; text-shadow: 2px 2px 4px #000; }
         #nombre-casa { font-size: 24px; color: #ffd700; letter-spacing: 2px; display: block; margin-bottom: 5px; }
 
         /* 2. VENTANA DE REALIDAD (ZONA MEDIA 40%) */
@@ -71,15 +71,16 @@
         <button id="startButton">INICIAR DOMUS MAGI</button>
     </div>
 
-    <!-- ZONA 1: VISOR CON LAYER MP4 -->
+    <!-- ZONA 1: VISOR CON HUD SOBRE VIDEO -->
     <div id="visor-superior">
-        <video id="video-background" loop playsinline></video>
+        <video id="video-background" loop playsinline muted></video>
         <div id="hud-layer">
             <div id="escudo-contenedor">
+                <!-- Imagen del animal que se cargará dinámicamente -->
                 <img id="hud-img-escudo" src="" class="hud-escudo" style="display:none;">
             </div>
             <div class="hud-stats">
-                <span id="nombre-casa">ESPERANDO...</span>
+                <span id="nombre-casa">ESCANEANDO...</span>
                 <div class="stat-line" style="color:#ff4444">I: <span id="val-i">0</span></div>
                 <div class="stat-line" style="color:#aaa">T: <span id="val-t">0</span></div>
                 <div class="stat-line" style="color:#44ff44">A: <span id="val-a">0</span></div>
@@ -88,10 +89,10 @@
         </div>
     </div>
 
-    <!-- ZONA 2: CÁMARA (MindAR) -->
+    <!-- ZONA 2: CÁMARA MindAR -->
     <div id="container"></div>
 
-    <!-- ZONA 3: MANDO -->
+    <!-- ZONA 3: MANDO TÁCTICO -->
     <div id="panel-mando">
         <div class="btn btn-i">I</div>
         <div class="btn btn-t">T</div>
@@ -104,7 +105,7 @@
         import * as THREE from 'three';
         import { MindARThree } from 'mindar-image-three';
 
-        // DATABASE DE CASAS (Ajustada a tus escudos)
+        // DATABASE OFICIAL (Mapeo de los 4 marcadores)
         const CASAS = {
             0: { nombre: "DRACO",  img: "draco.png",  i: 6, t: 2, a: 1, m: 1, vid: "caelum.mp4" },
             1: { nombre: "AQUILA", img: "aquila.png", i: 4, t: 2, a: 1, m: 3, vid: "caelum.mp4" },
@@ -115,37 +116,33 @@
         const init = async () => {
             const mindarThree = new MindARThree({
                 container: document.querySelector("#container"),
-                imageTargetSrc: "./targets1.mind",
-                filterMinCF: 0.0001, filterBeta: 0.001
+                imageTargetSrc: "./targets1.mind"
             });
 
             const {renderer, scene, camera} = mindarThree;
 
-            // CONFIGURAR CADA ANCHOR
+            // CONFIGURACIÓN DE DETECCIÓN
             for (let i = 0; i < 4; i++) {
                 const anchor = mindarThree.addAnchor(i);
                 
                 anchor.onTargetFound = () => {
                     const datos = CASAS[i];
-                    document.querySelector("#nombre-casa").innerText = datos.nombre;
+                    // Actualizar Capa de Datos (HUD)
+                    document.querySelector("#nombre-casa").innerText = "DOMUS " + datos.nombre;
                     document.querySelector("#val-i").innerText = datos.i;
                     document.querySelector("#val-t").innerText = datos.t;
                     document.querySelector("#val-a").innerText = datos.a;
                     document.querySelector("#val-m").innerText = datos.m;
                     
-                    // Actualizar Imagen Escudo en el Layer
+                    // Actualizar Imagen del animal en el layer
                     const imgEscudo = document.querySelector("#hud-img-escudo");
                     imgEscudo.src = datos.img;
                     imgEscudo.style.display = "block";
 
-                    // Cambiar Video de Fondo según la Casa
+                    // Reproducir Video de fondo en el visor superior
                     const video = document.querySelector("#video-background");
                     video.src = datos.vid;
                     video.play();
-                };
-
-                anchor.onTargetLost = () => {
-                    // Mantenemos los datos fijos según el diseño híbrido
                 };
             }
 
