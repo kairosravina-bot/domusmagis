@@ -130,47 +130,54 @@
             display: flex; 
             align-items: center; 
             justify-content: center;
-            position: relative; /* Necesario para el overlay */
+            position: relative; /* IMPORTANTE PARA QUE EL OVERLAY SE POSICIONE AQUI */
         }
         #video-player { 
             width: 100%; 
             height: 100%; 
             object-fit: contain; 
             display: none; 
+            z-index: 10;
         }
         #msg-visor { 
             color: white; 
             text-align: center; 
             font-weight: bold; 
             letter-spacing: 1px; 
+            z-index: 20;
         }
 
         /* OVERLAY ESCUDO + VALOR */
         #video-overlay {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 15px;     /* Separación superior */
+            right: 15px;   /* Separación derecha */
             display: none; /* Se activa con JS */
             flex-direction: column;
             align-items: center;
-            z-index: 10;
+            z-index: 500;  /* Muy alto para estar siempre encima */
             pointer-events: none;
+            /* Borde temporal para verificar que existe la caja aunque falle la imagen */
+            /* border: 1px dashed rgba(255, 255, 255, 0.3); */
         }
         #overlay-img {
-            width: 60px; /* Tamaño pequeño */
+            width: 50px; /* Pequeño escudo */
             height: auto;
-            filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
+            filter: drop-shadow(0 0 5px rgba(255,255,255,0.8));
             margin-bottom: 2px;
+            display: block;
         }
         #overlay-text {
             color: #fff;
             font-weight: 800;
-            font-size: 16px;
-            background: rgba(0,0,0,0.6);
-            padding: 2px 8px;
-            border-radius: 8px;
-            border: 1px solid #555;
-            text-shadow: 0 0 4px #000;
+            font-size: 14px;
+            background: rgba(0,0,0,0.7);
+            padding: 3px 6px;
+            border-radius: 6px;
+            border: 1px solid #aaa;
+            text-shadow: 0 0 2px #000;
+            text-align: center;
+            min-width: 30px;
         }
 
         /* ZONA SCANNER */
@@ -301,7 +308,8 @@
 
     <!-- PANTALLA DE INICIO -->
     <div id="splash-screen">
-        <button id="btn-inicio">⚡ INICIAR SISTEMA ⚡</button>
+        <!-- AGREGADO "LAYER" PARA VERIFICAR -->
+        <button id="btn-inicio">LAYER - ⚡ INICIAR SISTEMA ⚡</button>
     </div>
 
     <!-- CONTENEDOR AR -->
@@ -315,10 +323,10 @@
             <div id="msg-visor">INICIANDO SISTEMA...<br><span style="font-size:11px; color:#aaa">Espere...</span></div>
             <video id="video-player" playsinline webkit-playsinline></video>
             
-            <!-- NUEVO: LAYER TRANSPARENTE CON ESCUDO -->
+            <!-- LAYER TRANSPARENTE CON ESCUDO -->
             <div id="video-overlay">
                 <img id="overlay-img" src="" alt="Escudo">
-                <div id="overlay-text"></div>
+                <div id="overlay-text">M:3</div>
             </div>
         </div>
 
@@ -372,7 +380,7 @@
         import * as THREE from 'three';
         import { MindARThree } from 'mindar-image-three';
 
-        // --- DATOS DE LAS 4 CARTAS (ACTUALIZADO CON IMAGENES DE ESCUDO) ---
+        // --- DATOS DE LAS 4 CARTAS ---
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         
         const CARTAS = {
@@ -393,7 +401,7 @@
                 casa: "DOMUS AQUILA",
                 escudo: "CAELUM ORBIS",
                 arma: "ARCUS",
-                imgEscudo: "ESCUDO_AGUILA.png", // Asegurate que este sea el nombre correcto
+                imgEscudo: "ESCUDO_AGUILA.png", 
                 valores: { IMPETUS: 5, AUXILIUM: 4, TUTELA: 2, MYSTERIUM: 3 },
                 videos: { 
                     IMPETUS: RUTA_BASE + "ataque.mp4", 
@@ -415,7 +423,7 @@
                     MYSTERIUM: RUTA_BASE + "magia.mp4" 
                 }
             },
-            3: { // Lobo (o Jabalí según imagen)
+            3: { // Lobo/Jabalí
                 casa: "DOMUS LUPUS",
                 escudo: "FLAMMA DIAMANTE",
                 arma: "SICA",
@@ -580,7 +588,7 @@
             varLado.innerText = "---";
             varValor.innerText = "0";
 
-            // Ocultar overlay si estaba activo
+            // Ocultar overlay
             videoOverlay.style.display = 'none';
             videoPlayer.style.display = 'none';
 
@@ -603,46 +611,54 @@
                 varLado.innerText = lado;
                 varValor.innerText = valor;
 
-                // Colores según lado
+                // Colores
                 if(lado === 'IMPETUS') varLado.style.color = "#f55";
                 else if(lado === 'AUXILIUM') varLado.style.color = "#5f5";
                 else if(lado === 'MYSTERIUM') varLado.style.color = "#d5f";
                 else varLado.style.color = "#fff";
 
                 // ACTIVAR OVERLAY (Escudo + Valor)
-                const inicialLado = lado.charAt(0); // I, A, T, M
+                // Usamos charAt(0) para sacar I, A, T, M
+                const inicial = lado.charAt(0);
+                
+                // Nota: RUTA_BASE incluye la carpeta. Si las imagenes están locales, podría fallar si no están subidas.
                 overlayImg.src = RUTA_BASE + carta.imgEscudo;
-                overlayText.innerText = `${inicialLado}:${valor}`;
+                
+                // Fallback si la imagen falla (para que no se vea feo)
+                overlayImg.onerror = function() { 
+                    this.style.display='none'; // Ocultar si falla
+                };
+                overlayImg.onload = function() {
+                    this.style.display='block'; // Mostrar si carga
+                };
+
+                overlayText.innerText = `${inicial}:${valor}`;
                 videoOverlay.style.display = 'flex';
 
                 // Reproducir video
-                console.log("Intentando reproducir:", videoSrc);
                 msgVisor.style.display = 'none';
                 videoPlayer.style.display = 'block';
                 videoPlayer.src = videoSrc;
-                videoPlayer.load(); // Forzar carga
+                videoPlayer.load();
                 videoPlayer.muted = false;
                 videoPlayer.volume = 1.0;
                 
                 videoPlayer.play().then(() => {
-                    console.log("Video reproduciendo correctamente");
+                    console.log("Video OK");
                 }).catch((error) => {
-                    console.error("Error al reproducir:", error);
+                    console.error("Error Video", error);
                     msgVisor.style.display = 'block';
-                    msgVisor.innerText = "ERROR: No se pudo reproducir el video";
+                    msgVisor.innerText = "ERROR VIDEO";
                     videoPlayer.style.display = 'none';
                     videoOverlay.style.display = 'none';
                 });
-
-                console.log(`Carta ${cartaActual} - ${lado}: ${valor} - Video: ${videoSrc}`);
             });
         });
 
         // Al terminar video
         videoPlayer.addEventListener('ended', () => {
-            console.log("Video terminado");
             videoPlayer.style.display = 'none';
-            videoOverlay.style.display = 'none'; // Ocultar overlay
+            videoOverlay.style.display = 'none'; // Ocultar overlay al terminar
             msgVisor.style.display = 'block';
             msgVisor.innerText = "FIN DE ACCIÓN";
             msgVisor.style.color = "#fff";
