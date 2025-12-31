@@ -41,6 +41,26 @@
             pointer-events: none;
         }
 
+        /* CAPA DE VIDEO PRESENTACIÓN */
+        #intro-layer {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: #000;
+            z-index: 10000; /* Encima del splash */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #intro-layer.oculto {
+            display: none;
+        }
+        #intro-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Cubre toda la pantalla */
+        }
+
         #btn-inicio {
             padding: 25px 50px;
             font-size: 24px;
@@ -119,11 +139,11 @@
             flex-direction: column;
         }
 
-        /* VISOR VIDEO - AHORA 1:1 */
+        /* VISOR VIDEO - 1:1 */
         #video-visor {
             width: 100%;
-            height: 100vw; /* ALTURA IGUAL AL ANCHO (Cuadrado) */
-            max-height: 65vh; /* Límite para pantallas muy altas */
+            height: 100vw; 
+            max-height: 65vh; 
             background: rgba(0,0,0,0.9);
             border-bottom: 2px solid #555; 
             pointer-events: auto;
@@ -135,7 +155,7 @@
         #video-player { 
             width: 100%; 
             height: 100%; 
-            object-fit: contain; /* Ajusta el video dentro del cuadrado */
+            object-fit: contain; 
             display: none; 
             z-index: 10;
         }
@@ -147,7 +167,7 @@
             z-index: 20;
         }
 
-        /* OVERLAY ESCUDO + VALOR - 50% MÁS GRANDE */
+        /* OVERLAY ESCUDO + VALOR - GRANDE */
         #video-overlay {
             position: absolute;
             top: 20px;
@@ -159,7 +179,7 @@
             pointer-events: none;
         }
         #overlay-img {
-            width: 75px; /* Aumentado de 50px a 75px (50%) */
+            width: 75px; 
             height: auto;
             filter: drop-shadow(0 0 8px rgba(255,255,255,0.9));
             margin-bottom: 5px;
@@ -168,7 +188,7 @@
         #overlay-text {
             color: #fff;
             font-weight: 800;
-            font-size: 22px; /* Aumentado para acompañar el tamaño */
+            font-size: 22px; 
             background: rgba(0,0,0,0.7);
             padding: 4px 10px;
             border-radius: 8px;
@@ -203,7 +223,7 @@
             background: rgba(0,255,0,0.1); 
         }
 
-        /* PANEL INFERIOR - LIMPIO (SOLO BOTONES) */
+        /* PANEL INFERIOR - SOLO BOTONES */
         #panel-inferior {
             background: #111; 
             border-top: 2px solid #fff;
@@ -255,9 +275,14 @@
 </head>
 <body>
 
+    <!-- CAPA DE VIDEO PRESENTACIÓN (Inicialmente oculta) -->
+    <div id="intro-layer" class="oculto">
+        <video id="intro-video" playsinline webkit-playsinline></video>
+    </div>
+
     <!-- PANTALLA DE INICIO -->
     <div id="splash-screen">
-        <button id="btn-inicio">LAYER - ⚡ INICIAR SISTEMA ⚡</button>
+        <button id="btn-inicio">⚡ INICIAR SISTEMA ⚡</button>
     </div>
 
     <!-- CONTENEDOR AR -->
@@ -266,12 +291,12 @@
     <!-- UI PRINCIPAL -->
     <div id="ui-layer">
         
-        <!-- VISOR (CUADRADO 1:1) -->
+        <!-- VISOR -->
         <div id="video-visor">
             <div id="msg-visor">INICIANDO SISTEMA...<br><span style="font-size:11px; color:#aaa">Espere...</span></div>
             <video id="video-player" playsinline webkit-playsinline></video>
             
-            <!-- LAYER TRANSPARENTE (GRANDE) -->
+            <!-- LAYER TRANSPARENTE -->
             <div id="video-overlay">
                 <img id="overlay-img" src="" alt="Escudo">
                 <div id="overlay-text"></div>
@@ -283,9 +308,8 @@
             <div id="guia-scanner"></div>
         </div>
 
-        <!-- PANEL INFERIOR (SOLO BOTONES) -->
+        <!-- PANEL INFERIOR -->
         <div id="panel-inferior">
-            <!-- BOTONES SELECTORES -->
             <div id="selectores">
                 <button id="btn-i" class="btn-selector" data-lado="IMPETUS">I</button>
                 <button id="btn-a" class="btn-selector" data-lado="AUXILIUM">A</button>
@@ -349,6 +373,8 @@
 
         // --- REFERENCIAS UI ---
         const splash = document.querySelector("#splash-screen");
+        const introLayer = document.querySelector("#intro-layer");
+        const introVideo = document.querySelector("#intro-video");
         const btnInicio = document.querySelector("#btn-inicio");
         const msgVisor = document.querySelector("#msg-visor");
         const guiaScanner = document.querySelector("#guia-scanner");
@@ -389,15 +415,35 @@
             }
         }
 
-        // --- BOTÓN DE INICIO ---
+        // --- LOGICA DE INICIO + VIDEO INTRO ---
         btnInicio.addEventListener('click', async () => {
+            // 1. Animaciones visuales
             crearRayos();
             crearChispas();
             
-            setTimeout(async () => {
-                splash.classList.add('oculto');
-                await iniciarAR();
+            // 2. Esperar animación y lanzar video de presentación
+            setTimeout(() => {
+                splash.classList.add('oculto'); // Ocultar boton/fondo splash
+                introLayer.classList.remove('oculto'); // Mostrar capa video
+                
+                // Cargar y reproducir presentación
+                introVideo.src = RUTA_BASE + "presentacion.mp4";
+                introVideo.muted = false; // Intenta audio
+                introVideo.volume = 1.0;
+                introVideo.play().catch(e => {
+                    console.log("Auto-play bloqueado, iniciando AR directo o muteado", e);
+                    // Si falla el play (raro tras click), saltar a AR
+                    introLayer.classList.add('oculto');
+                    iniciarAR();
+                });
             }, 1200);
+        });
+
+        // 3. Cuando termina la presentación -> INICIAR AR
+        introVideo.addEventListener('ended', async () => {
+            console.log("Presentación terminada");
+            introLayer.classList.add('oculto'); // Ocultar capa video
+            await iniciarAR(); // Arrancar juego
         });
 
         // --- INICIAR AR ---
@@ -409,14 +455,12 @@
 
             const {renderer, scene, camera} = mindarThree;
 
-            // Desbloquear audio del navegador
+            // Desbloquear audio del reproductor principal del juego
             videoPlayer.muted = false;
             videoPlayer.play().then(() => {
                 videoPlayer.pause();
                 videoPlayer.currentTime = 0;
-            }).catch(() => {
-                console.log("Esperando interacción para audio");
-            });
+            }).catch(() => {});
 
             // Crear anchors para las 4 cartas
             for(let i = 0; i < 4; i++) {
@@ -497,13 +541,11 @@
                 
                 overlayImg.src = RUTA_BASE + carta.imgEscudo;
                 
-                // Fallback de imagen
                 overlayImg.onerror = function() { this.style.display='none'; };
                 overlayImg.onload = function() { this.style.display='block'; };
 
                 overlayText.innerText = `${inicial}:${valor}`;
                 
-                // Colores para el borde del texto segun accion
                 if(lado === 'IMPETUS') overlayText.style.borderColor = "#f55";
                 else if(lado === 'AUXILIUM') overlayText.style.borderColor = "#5f5";
                 else if(lado === 'MYSTERIUM') overlayText.style.borderColor = "#d5f";
