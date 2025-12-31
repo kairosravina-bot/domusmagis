@@ -18,19 +18,18 @@
       import * as THREE from 'three';
       import { MindARThree } from 'mindar-image-three';
 
-      // --- BASE DE DATOS ---
       const DB_CARTAS = {
-        0: { nombre: "DRACO",  arma: "ALIENTO DE FUEGO", img: "draco.png",  vid: "caelum.mp4", i: 6, t: 2, a: 1, m: 1 },
-        1: { nombre: "AQUILA", arma: "GARRA CELESTIAL",  img: "aquila.png", vid: "caelum.mp4", i: 4, t: 2, a: 1, m: 3 },
-        2: { nombre: "LEO",    arma: "RUGIDO SONICO",    img: "leo.png",    vid: "terra.mp4",  i: 4, t: 4, a: 1, m: 1 },
-        3: { nombre: "APER",   arma: "COLMILLO VELOZ",   img: "aper.png",   vid: "terra.mp4",  i: 3, t: 5, a: 1, m: 1 }
+        0: { nombre: "DRACO",  arma: "ALIENTO DE FUEGO", vid: "caelum.mp4", i: 6, t: 2, a: 1, m: 1 },
+        1: { nombre: "AQUILA", arma: "GARRA CELESTIAL",  vid: "caelum.mp4", i: 4, t: 2, a: 1, m: 3 },
+        2: { nombre: "LEO",    arma: "RUGIDO SONICO",    vid: "terra.mp4",  i: 4, t: 4, a: 1, m: 1 },
+        3: { nombre: "APER",   arma: "COLMILLO VELOZ",   vid: "terra.mp4",  i: 3, t: 5, a: 1, m: 1 }
       };
 
       let mindarThree = null;
       let cartaActual = null;
 
       const init = async () => {
-        const container = document.querySelector("#tercio-scanner");
+        const container = document.querySelector("#scanner");
         
         try {
           mindarThree = new MindARThree({
@@ -42,36 +41,27 @@
 
           const {renderer, scene, camera} = mindarThree;
 
-          // Configurar Anchors (0 a 3)
           for (let i = 0; i < 4; i++) {
             const anchor = mindarThree.addAnchor(i);
             
-            // EVENTO: CARTA ENCONTRADA
             anchor.onTargetFound = () => {
               cartaActual = DB_CARTAS[i];
               
-              // 1. Preparar Video (Cargar fuente pero NO reproducir aún)
+              // Preparar video (NO reproducir todavía)
               const video = document.querySelector("#video-player");
-              if (video.getAttribute('data-current') !== cartaActual.vid) {
-                  video.src = cartaActual.vid;
-                  video.setAttribute('data-current', cartaActual.vid);
-              }
+              video.src = cartaActual.vid;
               video.pause();
               video.currentTime = 0;
 
-              // 2. Actualizar LÍNEA 1: Info General
-              document.querySelector("#img-escudo").src = cartaActual.img;
-              document.querySelector("#img-escudo").style.display = "block";
-              
-              document.querySelector("#info-linea1").innerHTML = 
-                `<span style="color:gold; font-weight:bold;">${cartaActual.nombre}</span><br>` +
-                `<span style="font-size:12px; color:#ccc;">${cartaActual.arma}</span>`;
+              // LÍNEA 1: Nombre y arma
+              document.querySelector("#linea1").textContent = 
+                `${cartaActual.nombre} - ${cartaActual.arma}`;
 
-              // 3. Resetear LÍNEA 2
-              document.querySelector("#info-linea2").innerHTML = "";
+              // LÍNEA 2: Vacía
+              document.querySelector("#linea2").textContent = "";
 
-              // 4. Habilitar Botones Visualmente
-              document.querySelector("#panel-botones").classList.remove("bloqueado");
+              // Habilitar botones
+              document.querySelector("#botones").classList.remove("bloqueado");
             };
           }
 
@@ -82,111 +72,86 @@
           });
 
         } catch (err) {
-          console.error("Error iniciando AR:", err);
+          console.error("Error:", err);
         }
       }
 
-      // --- LÓGICA DE BOTONES ---
-      window.botonPresionado = (tipo, etiqueta) => {
+      window.elegirLado = (tipo, nombre) => {
         if (!cartaActual) return;
 
-        // 1. Obtener valor
         const valor = cartaActual[tipo];
-
-        // 2. Actualizar LÍNEA 2 (Lado y Valor)
-        const colores = { i: '#ff4444', t: '#aaaaaa', a: '#44ff44', m: '#aa44ff' };
         
-        document.querySelector("#info-linea2").innerHTML = 
-          `<span style="color:${colores[tipo]}; font-size:20px; font-weight:bold; letter-spacing:2px;">${etiqueta}: ${valor}</span>`;
+        // LÍNEA 2: Mostrar lado y valor
+        document.querySelector("#linea2").textContent = `${nombre}: ${valor}`;
 
-        // 3. Ejecutar Video COMPLETO (una vez)
+        // Reproducir video COMPLETO una vez
         const video = document.querySelector("#video-player");
         video.currentTime = 0;
         video.play();
       };
 
-      // Inicio del sistema
       document.querySelector("#btn-iniciar").addEventListener("click", () => {
-        document.querySelector("#pantalla-carga").style.display = "none";
+        document.querySelector("#inicio").style.display = "none";
         init();
       });
     </script>
 
     <style>
-      /* ESTRUCTURA GENERAL */
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      
       body { 
-        margin: 0; 
-        padding: 0; 
-        background: #000; 
-        font-family: 'Segoe UI', sans-serif; 
-        height: 100vh; 
         width: 100vw; 
-        overflow: hidden; 
-        color: white; 
-        display: flex; 
-        flex-direction: column; 
+        height: 100vh; 
+        background: #000; 
+        color: white;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
       }
 
-      /* PANTALLA DE CARGA */
-      #pantalla-carga { 
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        width: 100%; 
-        height: 100%; 
-        background: #111; 
-        z-index: 9999; 
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        flex-direction: column; 
+      /* PANTALLA INICIO */
+      #inicio { 
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #111;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
         gap: 20px;
       }
+      
+      h2 { color: gold; font-size: 28px; }
+      
       #btn-iniciar { 
-        padding: 20px 40px; 
-        font-size: 22px; 
+        padding: 20px 40px;
+        font-size: 22px;
         background: linear-gradient(135deg, #8b44ff, #bb44ff);
-        border: none; 
-        font-weight: bold; 
-        cursor: pointer; 
-        border-radius: 10px;
+        border: none;
         color: white;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 10px;
         box-shadow: 0 0 20px rgba(139, 68, 255, 0.5);
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s;
-      }
-      #btn-iniciar:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 30px rgba(139, 68, 255, 0.8);
-      }
-      #btn-iniciar:active {
-        animation: rayos 0.6s ease-out;
       }
       
-      @keyframes rayos {
-        0% { 
-          box-shadow: 0 0 20px rgba(139, 68, 255, 0.5);
-        }
-        25% { 
-          box-shadow: 0 0 60px rgba(139, 68, 255, 1), 
-                      0 0 100px rgba(187, 68, 255, 0.8),
-                      inset 0 0 40px rgba(255, 255, 255, 0.6);
-          transform: scale(1.1);
-        }
+      #btn-iniciar:active {
+        animation: flash 0.6s;
+      }
+      
+      @keyframes flash {
         50% { 
           box-shadow: 0 0 80px rgba(139, 68, 255, 1), 
-                      0 0 120px rgba(187, 68, 255, 1),
-                      0 0 160px rgba(139, 68, 255, 0.6),
-                      inset 0 0 60px rgba(255, 255, 255, 0.8);
+                      0 0 120px rgba(187, 68, 255, 1);
           filter: brightness(1.5);
         }
-        100% { 
-          box-shadow: 0 0 20px rgba(139, 68, 255, 0.5);
-          transform: scale(1);
-        }
       }
-
+      
       #version {
         font-size: 12px;
         color: #888;
@@ -194,178 +159,137 @@
         letter-spacing: 2px;
       }
 
-      /* --- 1. TERCIO SUPERIOR: VISOR MP4 (33.33%) --- */
-      #tercio-video {
+      /* TERCIO 1: VIDEO (33.33%) */
+      #video-container {
         width: 100%;
         height: 33.33vh;
-        background: black;
-        border-bottom: 2px solid #333;
-        position: relative;
-        overflow: hidden;
+        background: #000;
         display: flex;
         justify-content: center;
         align-items: center;
+        border-bottom: 2px solid #333;
       }
+      
       #video-player {
-        max-width: 100%; 
-        max-height: 100%; 
+        max-width: 100%;
+        max-height: 100%;
         object-fit: contain;
       }
 
-      /* --- 2. TERCIO MEDIO: ESCANER AR (33.33%) --- */
-      #tercio-scanner {
+      /* TERCIO 2: SCANNER (33.33%) */
+      #scanner {
         width: 100%;
         height: 33.33vh;
         background: #222;
         position: relative;
-        overflow: hidden;
       }
 
-      /* --- 3. TERCIO INFERIOR: INFO + BOTONES (33.33%) --- */
-      #tercio-controles {
+      /* TERCIO 3: INFO + BOTONES (33.34%) */
+      #controles {
         width: 100%;
         height: 33.34vh;
         background: #111;
         border-top: 2px solid #333;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
       }
 
-      /* PANEL DE INFO (2 LÍNEAS) */
-      #info-panel {
+      /* INFO: 2 LÍNEAS DE TEXTO */
+      #info {
         flex: 1;
-        padding: 10px 15px;
         display: flex;
         flex-direction: column;
-        gap: 8px;
-        background: rgba(0,0,0,0.3);
         justify-content: center;
-      }
-
-      /* Línea 1: Escudo + Texto */
-      .fila-datos { 
-        display: flex; 
-        align-items: center; 
+        padding: 0 20px;
         gap: 10px;
-        min-height: 45px;
-      }
-      #img-escudo { 
-        width: 40px; 
-        height: 40px; 
-        object-fit: contain; 
-        display: none; 
-        border: 2px solid gold; 
-        border-radius: 5px; 
-        background: rgba(0,0,0,0.7);
-        padding: 2px;
-      }
-      #info-linea1 { 
-        font-size: 14px; 
-        line-height: 1.2; 
-        text-transform: uppercase;
-        flex: 1;
       }
 
-      /* Línea 2: Resultado (Lado y Valor) */
-      #info-linea2 {
-        background: rgba(255,255,255,0.08);
-        padding: 8px;
+      #linea1 {
+        font-size: 16px;
+        color: gold;
+        font-weight: bold;
         text-align: center;
-        border-radius: 5px;
-        font-family: monospace;
-        font-size: 13px;
-        color: #999;
-        min-height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #333;
       }
 
-      /* PANEL DE BOTONES */
-      #panel-botones {
-        flex-shrink: 0;
-        height: 75px;
+      #linea2 {
+        font-size: 18px;
+        color: #0f0;
+        font-weight: bold;
+        text-align: center;
+        min-height: 25px;
+      }
+
+      /* BOTONES */
+      #botones {
+        height: 90px;
         display: flex;
-        justify-content: space-around;
+        justify-content: space-evenly;
         align-items: center;
-        padding: 5px 15px 15px 15px;
-        transition: opacity 0.3s;
+        padding: 0 20px 15px 20px;
         background: rgba(0,0,0,0.5);
       }
-      
-      /* Estado Bloqueado */
-      .bloqueado { 
-        opacity: 0.3; 
-        pointer-events: none; 
+
+      .bloqueado {
+        opacity: 0.3;
+        pointer-events: none;
       }
 
       .btn {
-        width: 65px; 
-        height: 65px;
-        border-radius: 10px;
-        font-size: 26px; 
+        width: 70px;
+        height: 70px;
+        font-size: 28px;
         font-weight: bold;
         color: white;
-        background: #222;
-        border: 2px solid #555;
-        display: flex; 
-        justify-content: center; 
+        background: #333;
+        border: 3px solid #666;
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
         align-items: center;
         cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.6);
-      }
-      .btn:active { 
-        transform: scale(0.95); 
-        border-color: white; 
       }
 
-      /* Colores Borde Botones */
-      .b-i { border-bottom: 4px solid #ff4444; }
-      .b-t { border-bottom: 4px solid #aaaaaa; }
-      .b-a { border-bottom: 4px solid #44ff44; }
-      .b-m { border-bottom: 4px solid #aa44ff; }
+      .btn:active {
+        transform: scale(0.9);
+        border-color: white;
+      }
 
+      .btn-i { border-bottom: 5px solid #f44; }
+      .btn-t { border-bottom: 5px solid #aaa; }
+      .btn-a { border-bottom: 5px solid #4f4; }
+      .btn-m { border-bottom: 5px solid #a4f; }
     </style>
   </head>
   <body>
 
-    <!-- PANTALLA INICIO -->
-    <div id="pantalla-carga">
-      <h2 style="color:gold;">DOMUS MAGI</h2>
+    <!-- INICIO -->
+    <div id="inicio">
+      <h2>DOMUS MAGI</h2>
       <button id="btn-iniciar">ACTIVAR SISTEMA</button>
       <div id="version">v1.0.3 BETA</div>
     </div>
 
     <!-- TERCIO 1: VIDEO -->
-    <div id="tercio-video">
+    <div id="video-container">
       <video id="video-player" playsinline muted></video>
     </div>
 
-    <!-- TERCIO 2: ESCÁNER AR -->
-    <div id="tercio-scanner"></div>
+    <!-- TERCIO 2: SCANNER -->
+    <div id="scanner"></div>
 
     <!-- TERCIO 3: INFO + BOTONES -->
-    <div id="tercio-controles">
+    <div id="controles">
       
-      <!-- Información (2 Líneas) -->
-      <div id="info-panel">
-        <!-- Línea 1 -->
-        <div class="fila-datos">
-          <img id="img-escudo" src="">
-          <div id="info-linea1">ESPERANDO CARTA...</div>
-        </div>
-        <!-- Línea 2 -->
-        <div id="info-linea2"></div>
+      <div id="info">
+        <div id="linea1">ESPERANDO CARTA...</div>
+        <div id="linea2"></div>
       </div>
 
-      <!-- 4 Botones de Elección -->
-      <div id="panel-botones" class="bloqueado">
-        <div class="btn b-i" onclick="botonPresionado('i', 'INT')">I</div>
-        <div class="btn b-t" onclick="botonPresionado('t', 'TEC')">T</div>
-        <div class="btn b-a" onclick="botonPresionado('a', 'AGI')">A</div>
-        <div class="btn b-m" onclick="botonPresionado('m', 'MAG')">M</div>
+      <div id="botones" class="bloqueado">
+        <div class="btn btn-i" onclick="elegirLado('i', 'INT')">I</div>
+        <div class="btn btn-t" onclick="elegirLado('t', 'TEC')">T</div>
+        <div class="btn btn-a" onclick="elegirLado('a', 'AGI')">A</div>
+        <div class="btn btn-m" onclick="elegirLado('m', 'MAG')">M</div>
       </div>
 
     </div>
