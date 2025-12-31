@@ -3,7 +3,6 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOMUS MAGI - BASE MAESTRA</title>
-    <!-- 1. MAPEO DE LIBRERÍAS (Estable) -->
     <script type="importmap">
     {
       "imports": {
@@ -24,7 +23,6 @@
         const status = document.querySelector("#status");
 
         try {
-          // Inicializar motor con tu archivo de 2.7MB
           mindarThree = new MindARThree({
             container: container,
             imageTargetSrc: "./targets1.mind", 
@@ -34,14 +32,12 @@
 
           const {renderer, scene, camera} = mindarThree;
 
-          // CONFIGURACIÓN DE LAS 4 CASAS (0-3)
+          // CONFIGURACIÓN OFICIAL DE LAS 4 CASAS
           const colors = [0x00ffff, 0x5fd4ff, 0xff9900, 0xff5500]; 
-          const names = ["DRACO", "AQUILA", "LEO", "APER"];
+          const names = ["DRACO", "AQUILA", "LEO", "APER"]; // <--- CORREGIDO: APER (Jabalí)
 
           for (let i = 0; i < 4; i++) {
             const anchor = mindarThree.addAnchor(i);
-            
-            // Plano de color semi-transparente sobre la carta
             const geometry = new THREE.PlaneGeometry(1, 1);
             const material = new THREE.MeshBasicMaterial({color: colors[i], transparent: true, opacity: 0.5});
             const plane = new THREE.Mesh(geometry, material);
@@ -68,7 +64,6 @@
         }
       }
 
-      // Manejo del botón de inicio (Obligatorio para cámara)
       document.querySelector("#startButton").addEventListener("click", () => {
         document.querySelector("#ui-inicio").style.display = "none";
         init();
@@ -77,8 +72,6 @@
     <style>
       body { margin: 0; background: #000; font-family: monospace; overflow: hidden; }
       #container { width: 100vw; height: 100vh; }
-      
-      /* Interfaz de bienvenida */
       #ui-inicio {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: #000; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -86,8 +79,6 @@
       #startButton {
         padding: 20px 40px; font-size: 20px; background: #0f0; border: none; border-radius: 50px; cursor: pointer; font-weight: bold;
       }
-
-      /* Barra de estado de detección */
       #status {
         position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
         background: rgba(0,0,0,0.8); color: white; padding: 15px;
