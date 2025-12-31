@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOMUS MAGI - SISTEMA ESTABLE</title>
+    <title>DOMUS MAGI - VISOR TÁCTICO</title>
     
     <script type="importmap">
     {
@@ -18,18 +18,20 @@
       import * as THREE from 'three';
       import { MindARThree } from 'mindar-image-three';
 
-      // Base de datos para el HUD
+      // Base de datos actualizada con campo 'arma'
       const CASAS_DB = {
-        0: { nombre: "DRACO",  i: 6, t: 2, a: 1, m: 1, vid: "caelum.mp4", img: "draco.png" },
-        1: { nombre: "AQUILA", i: 4, t: 2, a: 1, m: 3, vid: "caelum.mp4", img: "aquila.png" },
-        2: { nombre: "LEO",    i: 4, t: 4, a: 1, m: 1, vid: "terra.mp4",  img: "leo.png" },
-        3: { nombre: "APER",   i: 3, t: 5, a: 1, m: 1, vid: "terra.mp4",  img: "aper.png" }
+        0: { nombre: "DRACO",  arma: "ALIENTO DE FUEGO", i: 6, t: 2, a: 1, m: 1, vid: "caelum.mp4", img: "draco.png" },
+        1: { nombre: "AQUILA", arma: "GARRA CELESTIAL",  i: 4, t: 2, a: 1, m: 3, vid: "caelum.mp4", img: "aquila.png" },
+        2: { nombre: "LEO",    arma: "RUGIDO SONICO",    i: 4, t: 4, a: 1, m: 1, vid: "terra.mp4",  img: "leo.png" },
+        3: { nombre: "APER",   arma: "COLMILLO VELOZ",   i: 3, t: 5, a: 1, m: 1, vid: "terra.mp4",  img: "aper.png" }
       };
 
       let mindarThree = null;
+      let currentData = null; // Almacena la carta detectada actualmente
 
       const init = async () => {
-        const container = document.querySelector("#container");
+        // El contenedor del scanner es la mitad inferior
+        const container = document.querySelector("#scanner-container");
         
         try {
           mindarThree = new MindARThree({
@@ -41,31 +43,39 @@
 
           const {renderer, scene, camera} = mindarThree;
 
-          // Configurar los 4 Anchors como en la versión que te funcionó
+          // Configurar Anchors
           for (let i = 0; i < 4; i++) {
             const anchor = mindarThree.addAnchor(i);
             
-            // Lógica del Layer (HUD) al encontrar carta
+            // CARTA DETECTADA
             anchor.onTargetFound = () => {
-              const data = CASAS_DB[i];
-              document.querySelector("#nombre-casa").innerText = "DOMUS " + data.nombre;
-              document.querySelector("#val-i").innerText = data.i;
-              document.querySelector("#val-t").innerText = data.t;
-              document.querySelector("#val-a").innerText = data.a;
-              document.querySelector("#val-m").innerText = data.m;
+              currentData = CASAS_DB[i]; // Guardamos datos en memoria
               
-              // Actualizar imagen y video del Visor Superior
-              const video = document.querySelector("#video-background");
-              video.src = data.vid;
-              video.play();
+              // 1. Preparar Video (pero no reproducir hasta apretar botón, o pausa inicial)
+              const video = document.querySelector("#video-visor");
+              video.src = currentData.vid;
+              video.pause(); // Espera la orden del botón
               
-              const img = document.querySelector("#hud-img-escudo");
-              img.src = data.img;
-              img.style.display = "block";
+              // 2. Actualizar LÍNEA 1 (Casa / Escudo / Arma)
+              document.querySelector("#hud-escudo").src = currentData.img;
+              document.querySelector("#hud-escudo").style.display = "block";
+              
+              const textoL1 = `<span style="font-size:12px; color:#aaa;">DETECTADO:</span> <br> 
+                               <span style="color:gold;">DOMUS ${currentData.nombre}</span> - ${currentData.arma}`;
+              document.querySelector("#info-linea-1").innerHTML = textoL1;
+
+              // 3. Resetear LÍNEA 2
+              document.querySelector("#info-linea-2").innerHTML = "SELECCIONE ATRIBUTO PARA ACTIVAR";
+              
+              // 4. Habilitar botones visualmente
+              document.querySelector("#botones-container").style.opacity = "1";
+              document.querySelector("#botones-container").style.pointerEvents = "auto";
             };
 
             anchor.onTargetLost = () => {
-              // Mantenemos los datos visibles para el modo táctico
+              // Opcional: Bloquear botones si se pierde la carta
+              // currentData = null; 
+              // document.querySelector("#botones-container").style.opacity = "0.5";
             };
           }
 
@@ -76,10 +86,32 @@
           });
 
         } catch (err) {
-          console.error("Error inicializando AR:", err);
+          console.error("Error AR:", err);
         }
       }
 
+      // LÓGICA DE BOTONES (Fuera del loop de AR)
+      // Función para manejar el clic en los botones de atributos
+      window.handleStatClick = (type, label) => {
+        if (!currentData) return; // Si no hay carta, no hace nada
+
+        const valor = currentData[type]; // Obtiene valor (ej: data.i)
+        
+        // 1. Ejecuta el MP4
+        const video = document.querySelector("#video-visor");
+        video.currentTime = 0;
+        video.play();
+
+        // 2. Actualiza LÍNEA 2 con info del lado y valor
+        const color = type === 'i' ? '#ff4444' : 
+                      type === 't' ? '#cccccc' : 
+                      type === 'a' ? '#44ff44' : '#bb44ff';
+        
+        const textoL2 = `<span style="color:${color}; font-weight:bold; font-size:24px;">${label}: ${valor}</span>`;
+        document.querySelector("#info-linea-2").innerHTML = textoL2;
+      };
+
+      // Iniciar
       document.querySelector("#startButton").addEventListener("click", () => {
         document.querySelector("#ui-inicio").style.display = "none";
         init();
@@ -87,86 +119,135 @@
     </script>
 
     <style>
-      body { margin: 0; background: #000; font-family: 'Segoe UI', sans-serif; overflow: hidden; color: white; }
+      body { margin: 0; background: #000; font-family: 'Segoe UI', sans-serif; overflow: hidden; color: white; height: 100vh; display: flex; flex-direction: column; }
 
-      /* PANTALLA DE INICIO (ESTÉTICA VIOLETA SOLICITADA) */
+      /* PANTALLA DE INICIO */
       #ui-inicio {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: #1a0033; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        background: #1a0033; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;
       }
       #startButton {
-        padding: 25px 50px; font-size: 24px; background: #6a0dad; color: white;
-        border: 4px solid #fff; border-radius: 50px; cursor: pointer; font-weight: bold;
-        box-shadow: 0 0 30px #6a0dad;
+        padding: 20px 40px; font-size: 20px; background: #6a0dad; color: white;
+        border: 2px solid #fff; border-radius: 30px; cursor: pointer;
       }
 
-      /* 1. VISOR MÍSTICO (ZONA ALTA 33%) */
-      #visor-superior {
-        position: absolute; top: 0; width: 100%; height: 33vh;
-        background: #000; border-bottom: 2px solid gold; z-index: 100; overflow: hidden;
+      /* --- MITAD SUPERIOR: VISOR MP4 + INFO --- */
+      #zona-superior {
+        position: relative;
+        width: 100%;
+        height: 50%; /* Mitad de la pantalla */
+        background: #000;
+        border-bottom: 2px solid gold;
+        overflow: hidden;
       }
-      #video-background { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
 
-      /* LAYER DE DATOS SOBRE EL VIDEO */
-      #hud-layer {
+      #video-visor {
+        width: 100%; height: 100%; object-fit: cover; opacity: 0.6;
+      }
+
+      /* CAJA DE INFORMACIÓN (2 LÍNEAS) */
+      #hud-info-box {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        display: flex; justify-content: space-between; padding: 10px; box-sizing: border-box; pointer-events: none;
+        display: flex; flex-direction: column; justify-content: space-between;
+        padding: 15px; box-sizing: border-box; pointer-events: none;
       }
-      .hud-escudo { width: 60px; height: 60px; border: 2px solid white; border-radius: 5px; }
-      .hud-stats { text-align: right; font-family: monospace; }
-      .stat-line { font-size: 18px; font-weight: bold; text-shadow: 1px 1px 2px #000; }
 
-      /* 2. VENTANA DE REALIDAD (ZONA MEDIA 40%) */
-      #container { position: absolute; top: 33vh; width: 100%; height: 40vh; z-index: 1; }
+      /* LÍNEA 1: CABECERA (ARRIBA) */
+      .fila-info-1 {
+        display: flex; align-items: center; gap: 15px;
+        background: linear-gradient(90deg, rgba(0,0,0,0.8), transparent);
+        padding: 10px; border-radius: 10px;
+      }
+      #hud-escudo { width: 50px; height: 50px; display: none; border: 1px solid gold; border-radius: 5px; background: rgba(0,0,0,0.5); }
+      #info-linea-1 { font-size: 16px; font-weight: bold; text-transform: uppercase; line-height: 1.2; }
 
-      /* 3. PANEL DE MANDO (ZONA BAJA 27%) */
-      #panel-mando {
-        position: absolute; bottom: 0; width: 100%; height: 27vh;
-        background: #0a0a0a; z-index: 100; display: flex; justify-content: center; align-items: center; gap: 15px; border-top: 2px solid #333;
+      /* LÍNEA 2: RESULTADO DE BOTÓN (CENTRO/ABAJO DEL VISOR) */
+      .fila-info-2 {
+        text-align: center; margin-bottom: 20px;
+        text-shadow: 0 0 10px #000;
       }
-      .btn {
-        width: 55px; height: 55px; border-radius: 10px; border: 2px solid white;
-        font-size: 22px; font-weight: bold; display: flex; justify-content: center; align-items: center;
+      #info-linea-2 { font-size: 18px; color: white; font-family: monospace; letter-spacing: 2px; }
+
+      /* --- MITAD INFERIOR: ESCANER + BOTONES --- */
+      #zona-inferior {
+        position: relative;
+        width: 100%;
+        height: 50%; /* Mitad de la pantalla */
+        background: #111;
       }
-      .btn-i { background: #b00; } .btn-t { background: #555; }
-      .btn-a { background: #080; } .btn-m { background: #60a; }
-      #btn-combate { width: 80px; height: 80px; border-radius: 50%; background: gold; color: black; border: 4px solid #fff; font-weight: bold; font-size: 12px; }
+      
+      /* Contenedor MindAR */
+      #scanner-container {
+        width: 100%; height: 100%; overflow: hidden; position: absolute; top: 0; left: 0;
+      }
+
+      /* BOTONES DE SELECCIÓN (ABAJO) */
+      #botones-container {
+        position: absolute; bottom: 20px; left: 0; width: 100%;
+        display: flex; justify-content: center; gap: 15px; z-index: 1000;
+        opacity: 0.3; /* Deshabilitado visualmente hasta detectar */
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+
+      .btn-select {
+        width: 60px; height: 60px; border-radius: 12px;
+        border: 2px solid rgba(255,255,255,0.8);
+        font-size: 24px; font-weight: bold; color: white;
+        display: flex; justify-content: center; align-items: center;
+        cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        background: rgba(0,0,0,0.6);
+      }
+      .btn-select:active { transform: scale(0.95); border-color: gold; }
+
+      /* Colores específicos de botones */
+      .bg-i { border-bottom: 4px solid #b00; text-shadow: 0 0 5px #f00; }
+      .bg-t { border-bottom: 4px solid #777; text-shadow: 0 0 5px #fff; }
+      .bg-a { border-bottom: 4px solid #080; text-shadow: 0 0 5px #0f0; }
+      .bg-m { border-bottom: 4px solid #60a; text-shadow: 0 0 5px #a0f; }
+
     </style>
   </head>
   <body>
 
     <!-- INICIO -->
     <div id="ui-inicio">
-      <div style="font-size: 60px; margin-bottom: 10px;">⚡⚡</div>
-      <button id="startButton">INICIAR ESCANEO</button>
-      <div style="color: #6a0dad; margin-top: 20px; font-weight: bold;">DOMUS MAGI v.4.1</div>
+      <h1 style="color:gold;">DOMUS MAGI</h1>
+      <button id="startButton">INICIAR SISTEMA</button>
     </div>
 
-    <!-- ZONA 1: VISOR (CON EL LAYER) -->
-    <div id="visor-superior">
-      <video id="video-background" loop playsinline muted></video>
-      <div id="hud-layer">
-        <img id="hud-img-escudo" src="" class="hud-escudo" style="display:none;">
-        <div class="hud-stats">
-          <div id="nombre-casa" style="font-size: 20px; color: gold; margin-bottom: 5px;">BUSCANDO...</div>
-          <div class="stat-line" style="color:#ff4444">I: <span id="val-i">0</span></div>
-          <div class="stat-line" style="color:#ccc">T: <span id="val-t">0</span></div>
-          <div class="stat-line" style="color:#44ff44">A: <span id="val-a">0</span></div>
-          <div class="stat-line" style="color:#bb44ff">M: <span id="val-m">0</span></div>
+    <!-- ZONA SUPERIOR: VISOR (50%) -->
+    <div id="zona-superior">
+      <video id="video-visor" loop playsinline muted></video>
+      
+      <!-- CAPA DE INFORMACIÓN (2 LINEAS) -->
+      <div id="hud-info-box">
+        <!-- LÍNEA 1: DETECCIÓN -->
+        <div class="fila-info-1">
+          <img id="hud-escudo" src="">
+          <div id="info-linea-1">ESCANEE UNA CARTA<br><span style="font-size:10px; font-weight:normal;">Esperando objetivo...</span></div>
+        </div>
+
+        <!-- LÍNEA 2: RESULTADO DE BOTÓN -->
+        <div class="fila-info-2">
+          <div id="info-linea-2"></div>
         </div>
       </div>
     </div>
 
-    <!-- ZONA 2: CÁMARA (ESTABLE) -->
-    <div id="container"></div>
+    <!-- ZONA INFERIOR: ESCÁNER (50%) -->
+    <div id="zona-inferior">
+      <!-- CÁMARA AR -->
+      <div id="scanner-container"></div>
 
-    <!-- ZONA 3: MANDO -->
-    <div id="panel-mando">
-      <div class="btn btn-i">I</div>
-      <div class="btn btn-t">T</div>
-      <button id="btn-combate">COMBATE</button>
-      <div class="btn btn-a">A</div>
-      <div class="btn btn-m">M</div>
+      <!-- 4 BOTONES DE ELECCIÓN -->
+      <div id="botones-container">
+        <!-- Al hacer clic ejecuta handleStatClick(clave, nombre) -->
+        <div class="btn-select bg-i" onclick="handleStatClick('i', 'INTELIGENCIA')">I</div>
+        <div class="btn-select bg-t" onclick="handleStatClick('t', 'TECNICA')">T</div>
+        <div class="btn-select bg-a" onclick="handleStatClick('a', 'AGILIDAD')">A</div>
+        <div class="btn-select bg-m" onclick="handleStatClick('m', 'MAGIA')">M</div>
+      </div>
     </div>
 
   </body>
