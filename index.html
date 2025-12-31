@@ -45,7 +45,7 @@
         #intro-layer {
             position: fixed;
             top: 0; left: 0;
-            width: 50vw; height: 50vh;
+            width: 100vw; height: 100vh;
             background: #000;
             z-index: 10000; /* Encima del splash */
             display: flex;
@@ -55,10 +55,12 @@
         #intro-layer.oculto {
             display: none;
         }
+        
+        /* CORRECCIÓN AQUI: object-fit: contain para que no corte el texto */
         #intro-video {
-            width: 50%;
-            height: 50%;
-            object-fit: cover; /* Cubre toda la pantalla */
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Muestra el video ENTERO sin recortar bordes */
         }
 
         #btn-inicio {
