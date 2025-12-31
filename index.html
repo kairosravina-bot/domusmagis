@@ -130,6 +130,7 @@
             display: flex; 
             align-items: center; 
             justify-content: center;
+            position: relative; /* Necesario para el overlay */
         }
         #video-player { 
             width: 100%; 
@@ -142,6 +143,34 @@
             text-align: center; 
             font-weight: bold; 
             letter-spacing: 1px; 
+        }
+
+        /* OVERLAY ESCUDO + VALOR */
+        #video-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none; /* Se activa con JS */
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+        #overlay-img {
+            width: 60px; /* Tamaño pequeño */
+            height: auto;
+            filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
+            margin-bottom: 2px;
+        }
+        #overlay-text {
+            color: #fff;
+            font-weight: 800;
+            font-size: 16px;
+            background: rgba(0,0,0,0.6);
+            padding: 2px 8px;
+            border-radius: 8px;
+            border: 1px solid #555;
+            text-shadow: 0 0 4px #000;
         }
 
         /* ZONA SCANNER */
@@ -285,6 +314,12 @@
         <div id="video-visor">
             <div id="msg-visor">INICIANDO SISTEMA...<br><span style="font-size:11px; color:#aaa">Espere...</span></div>
             <video id="video-player" playsinline webkit-playsinline></video>
+            
+            <!-- NUEVO: LAYER TRANSPARENTE CON ESCUDO -->
+            <div id="video-overlay">
+                <img id="overlay-img" src="" alt="Escudo">
+                <div id="overlay-text"></div>
+            </div>
         </div>
 
         <!-- SCANNER -->
@@ -337,54 +372,60 @@
         import * as THREE from 'three';
         import { MindARThree } from 'mindar-image-three';
 
-        // --- DATOS DE LAS 4 CARTAS ---
+        // --- DATOS DE LAS 4 CARTAS (ACTUALIZADO CON IMAGENES DE ESCUDO) ---
+        const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
+        
         const CARTAS = {
-            0: { // Dragón azul - rombos azules
+            0: { // Dragón
                 casa: "DOMUS DRACO",
                 escudo: "AQUA DIAMANTE",
                 arma: "GLADIUS",
+                imgEscudo: "ESCUDO_DRAGON.png",
                 valores: { IMPETUS: 7, AUXILIUM: 2, TUTELA: 3, MYSTERIUM: 2 },
                 videos: { 
-                    IMPETUS: "https://kairosravina-bot.github.io/domusmagis/ataque.mp4", 
-                    AUXILIUM: "https://kairosravina-bot.github.io/domusmagis/cura.mp4", 
-                    TUTELA: "https://kairosravina-bot.github.io/domusmagis/defensa.mp4", 
-                    MYSTERIUM: "https://kairosravina-bot.github.io/domusmagis/magia.mp4" 
+                    IMPETUS: RUTA_BASE + "ataque.mp4", 
+                    AUXILIUM: RUTA_BASE + "cura.mp4", 
+                    TUTELA: RUTA_BASE + "defensa.mp4", 
+                    MYSTERIUM: RUTA_BASE + "magia.mp4" 
                 }
             },
-            1: { // Águila - círculos azules
+            1: { // Águila
                 casa: "DOMUS AQUILA",
                 escudo: "CAELUM ORBIS",
                 arma: "ARCUS",
+                imgEscudo: "ESCUDO_AGUILA.png", // Asegurate que este sea el nombre correcto
                 valores: { IMPETUS: 5, AUXILIUM: 4, TUTELA: 2, MYSTERIUM: 3 },
                 videos: { 
-                    IMPETUS: "https://kairosravina-bot.github.io/domusmagis/ataque.mp4", 
-                    AUXILIUM: "https://kairosravina-bot.github.io/domusmagis/cura.mp4", 
-                    TUTELA: "https://kairosravina-bot.github.io/domusmagis/defensa.mp4", 
-                    MYSTERIUM: "https://kairosravina-bot.github.io/domusmagis/magia.mp4" 
+                    IMPETUS: RUTA_BASE + "ataque.mp4", 
+                    AUXILIUM: RUTA_BASE + "cura.mp4", 
+                    TUTELA: RUTA_BASE + "defensa.mp4", 
+                    MYSTERIUM: RUTA_BASE + "magia.mp4" 
                 }
             },
-            2: { // León - círculos naranjas
+            2: { // León
                 casa: "DOMUS LEO",
                 escudo: "IGNIS ORBIS",
                 arma: "CLAVA",
+                imgEscudo: "ESCUDO_LEON.png",
                 valores: { IMPETUS: 8, AUXILIUM: 1, TUTELA: 4, MYSTERIUM: 1 },
                 videos: { 
-                    IMPETUS: "https://kairosravina-bot.github.io/domusmagis/ataque.mp4", 
-                    AUXILIUM: "https://kairosravina-bot.github.io/domusmagis/cura.mp4", 
-                    TUTELA: "https://kairosravina-bot.github.io/domusmagis/defensa.mp4", 
-                    MYSTERIUM: "https://kairosravina-bot.github.io/domusmagis/magia.mp4" 
+                    IMPETUS: RUTA_BASE + "ataque.mp4", 
+                    AUXILIUM: RUTA_BASE + "cura.mp4", 
+                    TUTELA: RUTA_BASE + "defensa.mp4", 
+                    MYSTERIUM: RUTA_BASE + "magia.mp4" 
                 }
             },
-            3: { // Lobo - rombos rojos/amarillos
+            3: { // Lobo (o Jabalí según imagen)
                 casa: "DOMUS LUPUS",
                 escudo: "FLAMMA DIAMANTE",
                 arma: "SICA",
+                imgEscudo: "ESCUDO_JABALI.png",
                 valores: { IMPETUS: 6, AUXILIUM: 3, TUTELA: 3, MYSTERIUM: 2 },
                 videos: { 
-                    IMPETUS: "https://kairosravina-bot.github.io/domusmagis/ataque.mp4", 
-                    AUXILIUM: "https://kairosravina-bot.github.io/domusmagis/cura.mp4", 
-                    TUTELA: "https://kairosravina-bot.github.io/domusmagis/defensa.mp4", 
-                    MYSTERIUM: "https://kairosravina-bot.github.io/domusmagis/magia.mp4" 
+                    IMPETUS: RUTA_BASE + "ataque.mp4", 
+                    AUXILIUM: RUTA_BASE + "cura.mp4", 
+                    TUTELA: RUTA_BASE + "defensa.mp4", 
+                    MYSTERIUM: RUTA_BASE + "magia.mp4" 
                 }
             }
         };
@@ -397,6 +438,11 @@
         const msgVisor = document.querySelector("#msg-visor");
         const guiaScanner = document.querySelector("#guia-scanner");
         const videoPlayer = document.querySelector("#video-player");
+        
+        // Referencias Overlay
+        const videoOverlay = document.querySelector("#video-overlay");
+        const overlayImg = document.querySelector("#overlay-img");
+        const overlayText = document.querySelector("#overlay-text");
         
         const infoCasa = document.querySelector("#info-casa");
         const infoEscudo = document.querySelector("#info-escudo");
@@ -448,7 +494,7 @@
         async function iniciarAR() {
             const mindarThree = new MindARThree({
                 container: document.querySelector("#container"),
-                imageTargetSrc: "https://kairosravina-bot.github.io/domusmagis/targets1.mind"
+                imageTargetSrc: RUTA_BASE + "targets1.mind"
             });
 
             const {renderer, scene, camera} = mindarThree;
@@ -534,6 +580,10 @@
             varLado.innerText = "---";
             varValor.innerText = "0";
 
+            // Ocultar overlay si estaba activo
+            videoOverlay.style.display = 'none';
+            videoPlayer.style.display = 'none';
+
             selectores.forEach(btn => {
                 btn.classList.remove('activo');
             });
@@ -559,6 +609,12 @@
                 else if(lado === 'MYSTERIUM') varLado.style.color = "#d5f";
                 else varLado.style.color = "#fff";
 
+                // ACTIVAR OVERLAY (Escudo + Valor)
+                const inicialLado = lado.charAt(0); // I, A, T, M
+                overlayImg.src = RUTA_BASE + carta.imgEscudo;
+                overlayText.innerText = `${inicialLado}:${valor}`;
+                videoOverlay.style.display = 'flex';
+
                 // Reproducir video
                 console.log("Intentando reproducir:", videoSrc);
                 msgVisor.style.display = 'none';
@@ -575,6 +631,7 @@
                     msgVisor.style.display = 'block';
                     msgVisor.innerText = "ERROR: No se pudo reproducir el video";
                     videoPlayer.style.display = 'none';
+                    videoOverlay.style.display = 'none';
                 });
 
                 console.log(`Carta ${cartaActual} - ${lado}: ${valor} - Video: ${videoSrc}`);
@@ -585,6 +642,7 @@
         videoPlayer.addEventListener('ended', () => {
             console.log("Video terminado");
             videoPlayer.style.display = 'none';
+            videoOverlay.style.display = 'none'; // Ocultar overlay
             msgVisor.style.display = 'block';
             msgVisor.innerText = "FIN DE ACCIÓN";
             msgVisor.style.color = "#fff";
