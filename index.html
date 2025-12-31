@@ -68,7 +68,7 @@
                 `<span style="font-size:12px; color:#ccc;">${cartaActual.arma}</span>`;
 
               // 3. Resetear LÍNEA 2
-              document.querySelector("#info-linea2").innerHTML = "SELECCIONE BOTÓN";
+              document.querySelector("#info-linea2").innerHTML = "";
 
               // 4. Habilitar Botones Visualmente
               document.querySelector("#panel-botones").classList.remove("bloqueado");
@@ -234,34 +234,35 @@
 
       /* PANEL DE INFO (2 LÍNEAS) */
       #info-panel {
-        flex: 0 0 auto;
-        padding: 15px 20px;
+        flex: 1;
+        padding: 10px 15px;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 8px;
         background: rgba(0,0,0,0.3);
+        justify-content: center;
       }
 
       /* Línea 1: Escudo + Texto */
       .fila-datos { 
         display: flex; 
         align-items: center; 
-        gap: 12px;
-        min-height: 50px;
+        gap: 10px;
+        min-height: 45px;
       }
       #img-escudo { 
-        width: 45px; 
-        height: 45px; 
+        width: 40px; 
+        height: 40px; 
         object-fit: contain; 
         display: none; 
         border: 2px solid gold; 
         border-radius: 5px; 
         background: rgba(0,0,0,0.7);
-        padding: 3px;
+        padding: 2px;
       }
       #info-linea1 { 
-        font-size: 15px; 
-        line-height: 1.3; 
+        font-size: 14px; 
+        line-height: 1.2; 
         text-transform: uppercase;
         flex: 1;
       }
@@ -269,13 +270,13 @@
       /* Línea 2: Resultado (Lado y Valor) */
       #info-linea2 {
         background: rgba(255,255,255,0.08);
-        padding: 10px;
+        padding: 8px;
         text-align: center;
         border-radius: 5px;
         font-family: monospace;
         font-size: 13px;
         color: #999;
-        min-height: 30px;
+        min-height: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -285,13 +286,13 @@
       /* PANEL DE BOTONES */
       #panel-botones {
         flex-shrink: 0;
-        height: 70px;
+        height: 75px;
         display: flex;
         justify-content: space-around;
         align-items: center;
-        padding: 0 20px 10px 20px;
+        padding: 5px 15px 15px 15px;
         transition: opacity 0.3s;
-        margin-top: auto;
+        background: rgba(0,0,0,0.5);
       }
       
       /* Estado Bloqueado */
@@ -301,10 +302,10 @@
       }
 
       .btn {
-        width: 60px; 
-        height: 60px;
+        width: 65px; 
+        height: 65px;
         border-radius: 10px;
-        font-size: 24px; 
+        font-size: 26px; 
         font-weight: bold;
         color: white;
         background: #222;
@@ -313,7 +314,7 @@
         justify-content: center; 
         align-items: center;
         cursor: pointer;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.6);
       }
       .btn:active { 
         transform: scale(0.95); 
