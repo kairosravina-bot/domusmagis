@@ -66,7 +66,6 @@
             transform: scale(0.95);
         }
 
-        /* Efecto de rayos y chispas */
         .rayo {
             position: absolute;
             width: 3px;
@@ -120,22 +119,23 @@
             flex-direction: column;
         }
 
-        /* VISOR VIDEO */
+        /* VISOR VIDEO - AHORA 1:1 */
         #video-visor {
-            height: 35%; 
-            width: 100%; 
+            width: 100%;
+            height: 100vw; /* ALTURA IGUAL AL ANCHO (Cuadrado) */
+            max-height: 65vh; /* Límite para pantallas muy altas */
             background: rgba(0,0,0,0.9);
             border-bottom: 2px solid #555; 
             pointer-events: auto;
             display: flex; 
             align-items: center; 
             justify-content: center;
-            position: relative; /* IMPORTANTE PARA QUE EL OVERLAY SE POSICIONE AQUI */
+            position: relative;
         }
         #video-player { 
             width: 100%; 
             height: 100%; 
-            object-fit: contain; 
+            object-fit: contain; /* Ajusta el video dentro del cuadrado */
             display: none; 
             z-index: 10;
         }
@@ -147,37 +147,35 @@
             z-index: 20;
         }
 
-        /* OVERLAY ESCUDO + VALOR */
+        /* OVERLAY ESCUDO + VALOR - 50% MÁS GRANDE */
         #video-overlay {
             position: absolute;
-            top: 15px;     /* Separación superior */
-            right: 15px;   /* Separación derecha */
-            display: none; /* Se activa con JS */
+            top: 20px;
+            right: 20px;
+            display: none;
             flex-direction: column;
             align-items: center;
-            z-index: 500;  /* Muy alto para estar siempre encima */
+            z-index: 500;
             pointer-events: none;
-            /* Borde temporal para verificar que existe la caja aunque falle la imagen */
-            /* border: 1px dashed rgba(255, 255, 255, 0.3); */
         }
         #overlay-img {
-            width: 50px; /* Pequeño escudo */
+            width: 75px; /* Aumentado de 50px a 75px (50%) */
             height: auto;
-            filter: drop-shadow(0 0 5px rgba(255,255,255,0.8));
-            margin-bottom: 2px;
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.9));
+            margin-bottom: 5px;
             display: block;
         }
         #overlay-text {
             color: #fff;
             font-weight: 800;
-            font-size: 14px;
+            font-size: 22px; /* Aumentado para acompañar el tamaño */
             background: rgba(0,0,0,0.7);
-            padding: 3px 6px;
-            border-radius: 6px;
-            border: 1px solid #aaa;
-            text-shadow: 0 0 2px #000;
+            padding: 4px 10px;
+            border-radius: 8px;
+            border: 2px solid #aaa;
+            text-shadow: 0 0 4px #000;
             text-align: center;
-            min-width: 30px;
+            min-width: 45px;
         }
 
         /* ZONA SCANNER */
@@ -190,10 +188,10 @@
         }
         
         #guia-scanner {
-            width: 70vw; 
-            height: 70vw;
-            max-width: 320px; 
-            max-height: 320px;
+            width: 60vw; 
+            height: 60vw;
+            max-width: 250px; 
+            max-height: 250px;
             border: 4px solid red; 
             border-radius: 15px;
             box-shadow: 0 0 20px rgba(255,0,0,0.5);
@@ -205,66 +203,17 @@
             background: rgba(0,255,0,0.1); 
         }
 
-        /* PANEL INFERIOR */
+        /* PANEL INFERIOR - LIMPIO (SOLO BOTONES) */
         #panel-inferior {
             background: #111; 
             border-top: 2px solid #fff;
-            padding: 15px;
-            padding-bottom: calc(15px + env(safe-area-inset-bottom));
+            padding: 20px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
             pointer-events: auto; 
             display: flex; 
             flex-direction: column; 
+            justify-content: center;
             gap: 10px;
-        }
-
-        /* 3 LÍNEAS INFO FIJAS - EN UNA SOLA LÍNEA */
-        .fila-info-unica {
-            display: flex;
-            gap: 5px;
-        }
-        .info-box {
-            background: #222;
-            border: 1px solid #555;
-            border-radius: 5px;
-            padding: 6px;
-            flex: 1;
-            text-align: center;
-        }
-        .info-lbl {
-            font-size: 9px;
-            color: #888;
-            text-transform: uppercase;
-            display: block;
-        }
-        .info-val {
-            font-size: 14px;
-            color: #fff;
-            font-weight: bold;
-            margin-top: 2px;
-        }
-
-        /* 2 LÍNEAS INFO VARIABLES - MÁS COMPACTAS */
-        .fila-var {
-            display: flex;
-            gap: 5px;
-        }
-        .var-box {
-            background: #1a1a1a;
-            border: 2px solid #666;
-            border-radius: 5px;
-            padding: 8px;
-            flex: 1;
-            text-align: center;
-        }
-        .var-lbl {
-            font-size: 9px;
-            color: #aaa;
-            text-transform: uppercase;
-        }
-        .var-val {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 3px;
         }
 
         /* 4 BOTONES SELECTORES */
@@ -272,16 +221,16 @@
             display: flex;
             justify-content: space-around;
             padding-top: 5px;
-            gap: 10px;
+            gap: 15px;
         }
         .btn-selector {
-            width: 70px;
-            height: 70px;
+            width: 75px;
+            height: 75px;
             border-radius: 50%;
             background: #222;
             border: 3px solid #555;
             color: #555;
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
             display: flex;
             align-items: center;
@@ -295,20 +244,19 @@
             cursor: pointer;
             color: white;
             border-color: white;
-            transform: scale(1.05);
+            transform: scale(1.1);
         }
         
-        #btn-i.activo { background: #900; box-shadow: 0 0 20px #f00; }
-        #btn-a.activo { background: #090; box-shadow: 0 0 20px #0f0; }
-        #btn-t.activo { background: #555; box-shadow: 0 0 20px #aaa; }
-        #btn-m.activo { background: #609; box-shadow: 0 0 20px #d0f; }
+        #btn-i.activo { background: #900; box-shadow: 0 0 25px #f00; }
+        #btn-a.activo { background: #090; box-shadow: 0 0 25px #0f0; }
+        #btn-t.activo { background: #555; box-shadow: 0 0 25px #aaa; }
+        #btn-m.activo { background: #609; box-shadow: 0 0 25px #d0f; }
     </style>
 </head>
 <body>
 
     <!-- PANTALLA DE INICIO -->
     <div id="splash-screen">
-        <!-- AGREGADO "LAYER" PARA VERIFICAR -->
         <button id="btn-inicio">LAYER - ⚡ INICIAR SISTEMA ⚡</button>
     </div>
 
@@ -318,15 +266,15 @@
     <!-- UI PRINCIPAL -->
     <div id="ui-layer">
         
-        <!-- VISOR -->
+        <!-- VISOR (CUADRADO 1:1) -->
         <div id="video-visor">
             <div id="msg-visor">INICIANDO SISTEMA...<br><span style="font-size:11px; color:#aaa">Espere...</span></div>
             <video id="video-player" playsinline webkit-playsinline></video>
             
-            <!-- LAYER TRANSPARENTE CON ESCUDO -->
+            <!-- LAYER TRANSPARENTE (GRANDE) -->
             <div id="video-overlay">
                 <img id="overlay-img" src="" alt="Escudo">
-                <div id="overlay-text">M:3</div>
+                <div id="overlay-text"></div>
             </div>
         </div>
 
@@ -335,38 +283,9 @@
             <div id="guia-scanner"></div>
         </div>
 
-        <!-- PANEL INFERIOR -->
+        <!-- PANEL INFERIOR (SOLO BOTONES) -->
         <div id="panel-inferior">
-            
-            <!-- 3 CASILLAS EN UNA SOLA LÍNEA: Casa, Escudo, Arma -->
-            <div class="fila-info-unica">
-                <div class="info-box">
-                    <span class="info-lbl">CASA</span>
-                    <span id="info-casa" class="info-val">---</span>
-                </div>
-                <div class="info-box">
-                    <span class="info-lbl">ESCUDO</span>
-                    <span id="info-escudo" class="info-val">---</span>
-                </div>
-                <div class="info-box">
-                    <span class="info-lbl">ARMA</span>
-                    <span id="info-arma" class="info-val">---</span>
-                </div>
-            </div>
-
-            <!-- 2 LÍNEAS VARIABLES: Lado y Valor -->
-            <div class="fila-var">
-                <div class="var-box">
-                    <span class="var-lbl">LADO/ACCIÓN</span>
-                    <div id="var-lado" class="var-val" style="color:#ff0">---</div>
-                </div>
-                <div class="var-box">
-                    <span class="var-lbl">VALOR</span>
-                    <div id="var-valor" class="var-val" style="color:#0f0">0</div>
-                </div>
-            </div>
-
-            <!-- 4 BOTONES SELECTORES -->
+            <!-- BOTONES SELECTORES -->
             <div id="selectores">
                 <button id="btn-i" class="btn-selector" data-lado="IMPETUS">I</button>
                 <button id="btn-a" class="btn-selector" data-lado="AUXILIUM">A</button>
@@ -385,9 +304,6 @@
         
         const CARTAS = {
             0: { // Dragón
-                casa: "DOMUS DRACO",
-                escudo: "AQUA DIAMANTE",
-                arma: "GLADIUS",
                 imgEscudo: "ESCUDO_DRAGON.png",
                 valores: { IMPETUS: 7, AUXILIUM: 2, TUTELA: 3, MYSTERIUM: 2 },
                 videos: { 
@@ -398,9 +314,6 @@
                 }
             },
             1: { // Águila
-                casa: "DOMUS AQUILA",
-                escudo: "CAELUM ORBIS",
-                arma: "ARCUS",
                 imgEscudo: "ESCUDO_AGUILA.png", 
                 valores: { IMPETUS: 5, AUXILIUM: 4, TUTELA: 2, MYSTERIUM: 3 },
                 videos: { 
@@ -411,9 +324,6 @@
                 }
             },
             2: { // León
-                casa: "DOMUS LEO",
-                escudo: "IGNIS ORBIS",
-                arma: "CLAVA",
                 imgEscudo: "ESCUDO_LEON.png",
                 valores: { IMPETUS: 8, AUXILIUM: 1, TUTELA: 4, MYSTERIUM: 1 },
                 videos: { 
@@ -424,9 +334,6 @@
                 }
             },
             3: { // Lobo/Jabalí
-                casa: "DOMUS LUPUS",
-                escudo: "FLAMMA DIAMANTE",
-                arma: "SICA",
                 imgEscudo: "ESCUDO_JABALI.png",
                 valores: { IMPETUS: 6, AUXILIUM: 3, TUTELA: 3, MYSTERIUM: 2 },
                 videos: { 
@@ -452,11 +359,6 @@
         const overlayImg = document.querySelector("#overlay-img");
         const overlayText = document.querySelector("#overlay-text");
         
-        const infoCasa = document.querySelector("#info-casa");
-        const infoEscudo = document.querySelector("#info-escudo");
-        const infoArma = document.querySelector("#info-arma");
-        const varLado = document.querySelector("#var-lado");
-        const varValor = document.querySelector("#var-valor");
         const selectores = document.querySelectorAll(".btn-selector");
 
         // --- EFECTO RAYOS Y CHISPAS ---
@@ -555,20 +457,9 @@
 
         // --- MOSTRAR DATOS DE CARTA ---
         function mostrarDatosCarta(index) {
-            const carta = CARTAS[index];
-            
             guiaScanner.classList.add('verde');
             msgVisor.innerText = "¡CARTA ENLAZADA!";
             msgVisor.style.color = "#0f0";
-
-            // Rellenar las 3 líneas fijas
-            infoCasa.innerText = carta.casa;
-            infoEscudo.innerText = carta.escudo;
-            infoArma.innerText = carta.arma;
-
-            // Resetear líneas variables
-            varLado.innerText = "ESPERANDO...";
-            varValor.innerText = "-";
 
             // Activar selectores
             selectores.forEach(btn => {
@@ -581,12 +472,6 @@
             guiaScanner.classList.remove('verde');
             msgVisor.innerText = "BUSCANDO CARTA...";
             msgVisor.style.color = "#fff";
-
-            infoCasa.innerText = "---";
-            infoEscudo.innerText = "---";
-            infoArma.innerText = "---";
-            varLado.innerText = "---";
-            varValor.innerText = "0";
 
             // Ocultar overlay
             videoOverlay.style.display = 'none';
@@ -607,32 +492,23 @@
                 const valor = carta.valores[lado];
                 const videoSrc = carta.videos[lado];
 
-                // Actualizar líneas variables
-                varLado.innerText = lado;
-                varValor.innerText = valor;
-
-                // Colores
-                if(lado === 'IMPETUS') varLado.style.color = "#f55";
-                else if(lado === 'AUXILIUM') varLado.style.color = "#5f5";
-                else if(lado === 'MYSTERIUM') varLado.style.color = "#d5f";
-                else varLado.style.color = "#fff";
-
                 // ACTIVAR OVERLAY (Escudo + Valor)
-                // Usamos charAt(0) para sacar I, A, T, M
                 const inicial = lado.charAt(0);
                 
-                // Nota: RUTA_BASE incluye la carpeta. Si las imagenes están locales, podría fallar si no están subidas.
                 overlayImg.src = RUTA_BASE + carta.imgEscudo;
                 
-                // Fallback si la imagen falla (para que no se vea feo)
-                overlayImg.onerror = function() { 
-                    this.style.display='none'; // Ocultar si falla
-                };
-                overlayImg.onload = function() {
-                    this.style.display='block'; // Mostrar si carga
-                };
+                // Fallback de imagen
+                overlayImg.onerror = function() { this.style.display='none'; };
+                overlayImg.onload = function() { this.style.display='block'; };
 
                 overlayText.innerText = `${inicial}:${valor}`;
+                
+                // Colores para el borde del texto segun accion
+                if(lado === 'IMPETUS') overlayText.style.borderColor = "#f55";
+                else if(lado === 'AUXILIUM') overlayText.style.borderColor = "#5f5";
+                else if(lado === 'MYSTERIUM') overlayText.style.borderColor = "#d5f";
+                else overlayText.style.borderColor = "#aaa";
+
                 videoOverlay.style.display = 'flex';
 
                 // Reproducir video
@@ -658,7 +534,7 @@
         // Al terminar video
         videoPlayer.addEventListener('ended', () => {
             videoPlayer.style.display = 'none';
-            videoOverlay.style.display = 'none'; // Ocultar overlay al terminar
+            videoOverlay.style.display = 'none'; 
             msgVisor.style.display = 'block';
             msgVisor.innerText = "FIN DE ACCIÓN";
             msgVisor.style.color = "#fff";
