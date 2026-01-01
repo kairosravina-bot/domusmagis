@@ -1,9 +1,16 @@
+<!-- 
+╔════════════════════════════════════════════════════════════╗
+║  DOMUS MAGI: REVELATIONS                                   ║
+║  VERSIÓN 7.0 - BÚHO TOTALMENTE FUNCIONAL                   ║
+║  Sistema modular con cambio dinámico de botones            ║
+╚════════════════════════════════════════════════════════════╝
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: REVELATIONS - VERSIÓN 6.0</title>
+    <title>DOMUS MAGI: REVELATIONS - VERSIÓN 7.0</title>
 
     <script type="importmap">
     {
@@ -18,7 +25,6 @@
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
 
-        /* SPLASH SCREEN */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: radial-gradient(circle, #1a001a, #000);
@@ -27,7 +33,6 @@
         }
         #splash-screen.oculto { opacity: 0; pointer-events: none; }
 
-        /* BOTÓN INICIO */
         #btn-inicio {
             padding: 25px 50px; font-size: 24px; font-weight: bold; color: #000;
             background: #bf00ff; border: none; border-radius: 15px; cursor: pointer;
@@ -36,7 +41,6 @@
         }
         @keyframes pulso { 50% { box-shadow: 0 0 60px #bf00ff; } }
         
-        /* TEXTO DE VERSIÓN (BAJO EL BOTÓN) */
         #version-display {
             margin-top: 20px;
             color: #00ff00;
@@ -46,7 +50,6 @@
             z-index: 11;
         }
 
-        /* CAPA VIDEO INTRO */
         #intro-layer {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center;
@@ -54,11 +57,9 @@
         #intro-layer.oculto { display: none; }
         #intro-video { width: 100%; height: 100%; object-fit: contain; }
 
-        /* LAYOUT PRINCIPAL */
         #container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 0; }
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; pointer-events: none; display: flex; flex-direction: column; }
 
-        /* VISOR */
         #video-visor {
             width: 100%; height: 100vw; max-height: 65vh; background: rgba(0,0,0,0.9);
             border-bottom: 2px solid #555; pointer-events: auto; display: flex;
@@ -67,7 +68,6 @@
         #video-player { width: 100%; height: 100%; object-fit: contain; display: none; z-index: 10; }
         #msg-visor { color: white; text-align: center; font-weight: bold; letter-spacing: 1px; z-index: 20; }
 
-        /* OVERLAY DATOS */
         #video-overlay {
             position: absolute; top: 20px; right: 20px; display: none;
             flex-direction: column; align-items: center; z-index: 500; pointer-events: none;
@@ -78,7 +78,6 @@
             padding: 4px 10px; border-radius: 8px; border: 2px solid #aaa; text-align: center; min-width: 45px;
         }
 
-        /* SCANNER & BOTONES */
         #zona-ar { flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: center; }
         #guia-scanner {
             width: 60vw; height: 60vw; max-width: 250px; max-height: 250px;
@@ -96,25 +95,23 @@
         .btn-selector {
             width: 75px; height: 75px; border-radius: 50%; background: #222; border: 3px solid #555;
             color: #555; font-size: 26px; font-weight: bold; display: flex; align-items: center; justify-content: center;
-            opacity: 0.4; transition: 0.3s; cursor: not-allowed;
+            opacity: 0.4; transition: all 0.3s; cursor: not-allowed;
         }
         .btn-selector.activo { opacity: 1; cursor: pointer; color: white; border-color: white; transform: scale(1.1); }
         
-        #btn-i.activo { background: #900; box-shadow: 0 0 25px #f00; }
-        #btn-a.activo { background: #090; box-shadow: 0 0 25px #0f0; }
-        #btn-t.activo { background: #555; box-shadow: 0 0 25px #aaa; }
-        #btn-m.activo { background: #609; box-shadow: 0 0 25px #d0f; }
+        #btn-i.activo { box-shadow: 0 0 25px #f00; }
+        #btn-a.activo { box-shadow: 0 0 25px #0f0; }
+        #btn-t.activo { box-shadow: 0 0 25px #aaa; }
+        #btn-m.activo { box-shadow: 0 0 25px #d0f; }
     </style>
 </head>
 <body>
 
-    <!-- CAPAS -->
     <div id="intro-layer" class="oculto"><video id="intro-video" playsinline webkit-playsinline></video></div>
     
     <div id="splash-screen">
         <button id="btn-inicio">⚡ INICIAR SISTEMA ⚡</button>
-        <!-- VERSIÓN SINCRONIZADA -->
-        <div id="version-display">Cargando versión...</div>
+        <div id="version-display">VERSIÓN 7.0 - BÚHO TOTALMENTE FUNCIONAL</div>
     </div>
 
     <div id="container"></div>
@@ -144,100 +141,68 @@
         import { MindARThree } from 'mindar-image-three';
 
         // ==========================================
-        // 1. CONTROL DE VERSIÓN (Sincronizado)
+        // VERSIÓN 7.0 - BÚHO TOTALMENTE FUNCIONAL
         // ==========================================
-        const VERSION_CODIGO = "VERSIÓN 6.0 - BÚHO FUNCIONAL + SISTEMA MODULAR";
-        
-        // Imprimir en consola
-        console.log("╔════════════════════════════════════════╗");
-        console.log("║  DOMUS MAGI: REVELATIONS               ║");
-        console.log("║  " + VERSION_CODIGO.padEnd(37) + "║");
-        console.log("╚════════════════════════════════════════╝");
-        
-        // Imprimir bajo el botón
-        const displayVersion = document.getElementById('version-display');
-        if(displayVersion) {
-            displayVersion.innerText = VERSION_CODIGO;
-        }
+        const VERSION = "VERSIÓN 7.0 - BÚHO TOTALMENTE FUNCIONAL";
+        console.log("%c" + VERSION, "color: #0f0; font-size: 20px; font-weight: bold;");
 
-        // ==========================================
-        // 2. CONFIGURACIÓN Y DATOS
-        // ==========================================
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         
         const CARTAS = {
-            0: { // Dragón
-                tipo: 'ESTANDAR',
+            0: {
+                nombre: "DRAGÓN",
                 imgEscudo: "ESCUDO_DRAGON.png",
-                valores: { IMPETUS: 7, AUXILIUM: 2, TUTELA: 3, MYSTERIUM: 2 },
-                videos: { 
-                    IMPETUS: RUTA_BASE+"ataque.mp4", 
-                    AUXILIUM: RUTA_BASE+"cura.mp4", 
-                    TUTELA: RUTA_BASE+"defensa.mp4", 
-                    MYSTERIUM: RUTA_BASE+"magia.mp4" 
-                },
-                letras: { IMPETUS: "I", AUXILIUM: "A", TUTELA: "T", MYSTERIUM: "M" }
+                botones: {
+                    "btn-i": { texto: "I", valor: 7, video: "ataque.mp4", color: "#900" },
+                    "btn-a": { texto: "A", valor: 2, video: "cura.mp4", color: "#090" },
+                    "btn-t": { texto: "T", valor: 3, video: "defensa.mp4", color: "#555" },
+                    "btn-m": { texto: "M", valor: 2, video: "magia.mp4", color: "#609" }
+                }
             },
-            1: { // Águila
-                tipo: 'ESTANDAR',
-                imgEscudo: "ESCUDO_AGUILA.png", 
-                valores: { IMPETUS: 5, AUXILIUM: 4, TUTELA: 2, MYSTERIUM: 3 },
-                videos: { 
-                    IMPETUS: RUTA_BASE+"ataque.mp4", 
-                    AUXILIUM: RUTA_BASE+"cura.mp4", 
-                    TUTELA: RUTA_BASE+"defensa.mp4", 
-                    MYSTERIUM: RUTA_BASE+"magia.mp4" 
-                },
-                letras: { IMPETUS: "I", AUXILIUM: "A", TUTELA: "T", MYSTERIUM: "M" }
+            1: {
+                nombre: "ÁGUILA",
+                imgEscudo: "ESCUDO_AGUILA.png",
+                botones: {
+                    "btn-i": { texto: "I", valor: 5, video: "ataque.mp4", color: "#900" },
+                    "btn-a": { texto: "A", valor: 4, video: "cura.mp4", color: "#090" },
+                    "btn-t": { texto: "T", valor: 2, video: "defensa.mp4", color: "#555" },
+                    "btn-m": { texto: "M", valor: 3, video: "magia.mp4", color: "#609" }
+                }
             },
-            2: { // León
-                tipo: 'ESTANDAR',
+            2: {
+                nombre: "LEÓN",
                 imgEscudo: "ESCUDO_LEON.png",
-                valores: { IMPETUS: 8, AUXILIUM: 1, TUTELA: 4, MYSTERIUM: 1 },
-                videos: { 
-                    IMPETUS: RUTA_BASE+"ataque.mp4", 
-                    AUXILIUM: RUTA_BASE+"cura.mp4", 
-                    TUTELA: RUTA_BASE+"defensa.mp4", 
-                    MYSTERIUM: RUTA_BASE+"magia.mp4" 
-                },
-                letras: { IMPETUS: "I", AUXILIUM: "A", TUTELA: "T", MYSTERIUM: "M" }
+                botones: {
+                    "btn-i": { texto: "I", valor: 8, video: "ataque.mp4", color: "#900" },
+                    "btn-a": { texto: "A", valor: 1, video: "cura.mp4", color: "#090" },
+                    "btn-t": { texto: "T", valor: 4, video: "defensa.mp4", color: "#555" },
+                    "btn-m": { texto: "M", valor: 1, video: "magia.mp4", color: "#609" }
+                }
             },
-            3: { // Jabalí
-                tipo: 'ESTANDAR',
+            3: {
+                nombre: "JABALÍ",
                 imgEscudo: "ESCUDO_JABALI.png",
-                valores: { IMPETUS: 6, AUXILIUM: 3, TUTELA: 3, MYSTERIUM: 2 },
-                videos: { 
-                    IMPETUS: RUTA_BASE+"ataque.mp4", 
-                    AUXILIUM: RUTA_BASE+"cura.mp4", 
-                    TUTELA: RUTA_BASE+"defensa.mp4", 
-                    MYSTERIUM: RUTA_BASE+"magia.mp4" 
-                },
-                letras: { IMPETUS: "I", AUXILIUM: "A", TUTELA: "T", MYSTERIUM: "M" }
+                botones: {
+                    "btn-i": { texto: "I", valor: 6, video: "ataque.mp4", color: "#900" },
+                    "btn-a": { texto: "A", valor: 3, video: "cura.mp4", color: "#090" },
+                    "btn-t": { texto: "T", valor: 3, video: "defensa.mp4", color: "#555" },
+                    "btn-m": { texto: "M", valor: 2, video: "magia.mp4", color: "#609" }
+                }
             },
-            4: { // BÚHO (CARTA ESPECIAL)
-                tipo: 'ESPECIAL',
+            4: {
+                nombre: "BÚHO",
                 imgEscudo: "ESCUDO_BUHO.png",
-                valores: { 
-                    IMPETUS: "MANDATUM", 
-                    AUXILIUM: "PRAESAGIUM", 
-                    TUTELA: "CONSILIUM", 
-                    MYSTERIUM: "ARCANUM" 
-                },
-                videos: { 
-                    IMPETUS: RUTA_BASE + "owl_mandatum.mp4",
-                    AUXILIUM: RUTA_BASE + "owl_praesagium.mp4",
-                    TUTELA: RUTA_BASE + "owl_consilium.mp4",
-                    MYSTERIUM: RUTA_BASE + "owl_arcanum.mp4"
-                },
-                letras: { IMPETUS: "M", AUXILIUM: "P", TUTELA: "C", MYSTERIUM: "S" }
+                botones: {
+                    "btn-i": { texto: "M", valor: "MANDATUM", video: "owl_mandatum.mp4", color: "#4a148c" },
+                    "btn-a": { texto: "P", valor: "PRAESAGIUM", video: "owl_praesagium.mp4", color: "#6a1b9a" },
+                    "btn-t": { texto: "C", valor: "CONSILIUM", video: "owl_consilium.mp4", color: "#7b1fa2" },
+                    "btn-m": { texto: "S", valor: "ARCANUM", video: "owl_arcanum.mp4", color: "#8e24aa" }
+                }
             }
         };
 
-        // Variables Globales
-        let cartaActualIndex = null;
-        let modoActual = 'ESTANDAR'; // Controla el modo de los botones
-        
-        // Elementos UI
+        let cartaActual = null;
+
         const ui = {
             btnI: document.getElementById('btn-i'),
             btnA: document.getElementById('btn-a'),
@@ -248,13 +213,40 @@
             overlay: document.getElementById('video-overlay'),
             ovImg: document.getElementById('overlay-img'),
             ovTxt: document.getElementById('overlay-text'),
-            videoPlayer: document.getElementById('video-player'),
-            botones: document.querySelectorAll('.btn-selector')
+            videoPlayer: document.getElementById('video-player')
         };
 
-        // ==========================================
-        // 3. INICIO DE APP
-        // ==========================================
+        function actualizarBotones(carta) {
+            console.log(`🔄 ACTUALIZANDO BOTONES PARA: ${carta.nombre}`);
+            
+            const botones = [
+                { elem: ui.btnI, id: "btn-i" },
+                { elem: ui.btnA, id: "btn-a" },
+                { elem: ui.btnT, id: "btn-t" },
+                { elem: ui.btnM, id: "btn-m" }
+            ];
+
+            botones.forEach(({elem, id}) => {
+                const config = carta.botones[id];
+                elem.innerText = config.texto;
+                elem.style.backgroundColor = config.color;
+                elem.classList.add('activo');
+                console.log(`  ${id}: "${config.texto}" (${config.color})`);
+            });
+        }
+
+        function resetearBotones() {
+            const botones = [ui.btnI, ui.btnA, ui.btnT, ui.btnM];
+            botones.forEach(btn => {
+                btn.classList.remove('activo');
+                btn.style.backgroundColor = '#222';
+            });
+            ui.btnI.innerText = "I";
+            ui.btnA.innerText = "A";
+            ui.btnT.innerText = "T";
+            ui.btnM.innerText = "M";
+        }
+
         document.getElementById('btn-inicio').addEventListener('click', () => {
             const splash = document.getElementById('splash-screen');
             const intro = document.getElementById('intro-layer');
@@ -275,9 +267,6 @@
             });
         });
 
-        // ==========================================
-        // 4. MOTOR AR (MindAR)
-        // ==========================================
         async function iniciarAR() {
             const mindarThree = new MindARThree({
                 container: document.querySelector("#container"),
@@ -286,81 +275,34 @@
 
             const {renderer, scene, camera} = mindarThree;
 
-            // Loop para detectar 5 cartas (0 al 4)
             for(let i = 0; i < 5; i++) {
                 const anchor = mindarThree.addAnchor(i);
-                
-                // Objeto invisible para tracking
                 const geometry = new THREE.PlaneGeometry(1, 1);
                 const material = new THREE.MeshBasicMaterial({transparent: true, opacity: 0});
                 const plane = new THREE.Mesh(geometry, material);
                 anchor.group.add(plane);
 
-                // --- AL ENCONTRAR CARTA ---
                 anchor.onTargetFound = () => {
-                    console.log(`╔════════════════════════════════════════╗`);
-                    console.log(`║ CARTA DETECTADA: ${i} (${CARTAS[i].tipo})             ║`);
-                    console.log(`╚════════════════════════════════════════╝`);
+                    console.log(`%c🎯 CARTA DETECTADA: ${i} - ${CARTAS[i].nombre}`, "color: #0f0; font-size: 16px; font-weight: bold;");
+                    cartaActual = CARTAS[i];
                     
-                    cartaActualIndex = i;
-                    const cartaInfo = CARTAS[i];
-                    modoActual = cartaInfo.tipo; // GUARDA EL TIPO
+                    actualizarBotones(cartaActual);
                     
-                    // ACTUALIZAR TEXTO Y COLORES DE BOTONES
-                    ui.btnI.innerText = cartaInfo.letras.IMPETUS;
-                    ui.btnA.innerText = cartaInfo.letras.AUXILIUM;
-                    ui.btnT.innerText = cartaInfo.letras.TUTELA;
-                    ui.btnM.innerText = cartaInfo.letras.MYSTERIUM;
-                    
-                    // CAMBIAR COLORES SEGÚN TIPO
-                    if(cartaInfo.tipo === 'ESPECIAL') {
-                        // BÚHO - Colores morados/místicos
-                        ui.btnI.style.background = '#4a148c';
-                        ui.btnA.style.background = '#6a1b9a';
-                        ui.btnT.style.background = '#7b1fa2';
-                        ui.btnM.style.background = '#8e24aa';
-                    } else {
-                        // CARTAS NORMALES - Colores originales
-                        ui.btnI.style.background = '';
-                        ui.btnA.style.background = '';
-                        ui.btnT.style.background = '';
-                        ui.btnM.style.background = '';
-                    }
-                    
-                    console.log(`→ Modo: ${modoActual}`);
-                    console.log(`→ Botones: I="${ui.btnI.innerText}" A="${ui.btnA.innerText}" T="${ui.btnT.innerText}" M="${ui.btnM.innerText}"`);
-
-                    // UI Feedback
                     ui.scanner.classList.add('verde');
                     ui.msg.innerText = "CONECTADO";
                     ui.msg.style.color = "#0f0";
-                    
-                    ui.botones.forEach(b => b.classList.add('activo'));
                 };
 
-                // --- AL PERDER CARTA ---
                 anchor.onTargetLost = () => {
-                    console.log(`⚠ CARTA PERDIDA: ${i}`);
-                    if(cartaActualIndex === i) {
-                        cartaActualIndex = null;
-                        modoActual = 'ESTANDAR';
-                        
-                        // RESTAURAR BOTONES A VALORES POR DEFECTO
-                        ui.btnI.innerText = "I";
-                        ui.btnA.innerText = "A";
-                        ui.btnT.innerText = "T";
-                        ui.btnM.innerText = "M";
-                        ui.btnI.style.background = '';
-                        ui.btnA.style.background = '';
-                        ui.btnT.style.background = '';
-                        ui.btnM.style.background = '';
-                        
+                    console.log(`❌ Carta ${i} perdida`);
+                    if(cartaActual === CARTAS[i]) {
+                        cartaActual = null;
+                        resetearBotones();
                         ui.scanner.classList.remove('verde');
                         ui.msg.innerText = "ESCANEAR...";
                         ui.msg.style.color = "#fff";
                         ui.overlay.style.display = 'none';
                         ui.videoPlayer.style.display = 'none';
-                        ui.botones.forEach(b => b.classList.remove('activo'));
                     }
                 };
             }
@@ -371,75 +313,40 @@
             });
         }
 
-        // ==========================================
-        // 5. INTERACCIÓN (CLICS)
-        // ==========================================
-        ui.botones.forEach(btn => {
+        [ui.btnI, ui.btnA, ui.btnT, ui.btnM].forEach(btn => {
             btn.addEventListener('click', () => {
-                if(!btn.classList.contains('activo') || cartaActualIndex === null) {
-                    console.warn("⚠ Click ignorado: Botón inactivo o sin carta");
+                if(!btn.classList.contains('activo') || !cartaActual) {
+                    console.warn("⚠️ Click ignorado");
                     return;
                 }
 
-                const lado = btn.getAttribute('data-lado'); // IMPETUS, AUXILIUM, TUTELA, MYSTERIUM
-                const info = CARTAS[cartaActualIndex];
-
-                console.log(`╔════════════════════════════════════════╗`);
-                console.log(`║ CLIC DETECTADO                         ║`);
-                console.log(`║ Botón presionado: ${btn.id.padEnd(24)}║`);
-                console.log(`║ Data-lado: ${lado.padEnd(28)}║`);
-                console.log(`║ Carta: ${cartaActualIndex} (${info.tipo.padEnd(25)})║`);
-                console.log(`╚════════════════════════════════════════╝`);
-
-                // OBTENER VIDEO Y VALOR CORRECTO
-                const vidSrc = info.videos[lado];
-                const valor = info.valores[lado];
+                const config = cartaActual.botones[btn.id];
                 
-                console.log(`→ Video seleccionado: ${vidSrc}`);
-                console.log(`→ Valor a mostrar: ${valor}`);
-                
-                // VERIFICAR QUE EL VIDEO EXISTE
-                if(!vidSrc) {
-                    console.error(`❌ ERROR: No se encontró video para ${lado} en carta ${cartaActualIndex}`);
-                    return;
-                }
-                
-                // CONFIGURAR OVERLAY
-                ui.ovImg.src = RUTA_BASE + info.imgEscudo;
-                ui.ovTxt.innerText = valor;
+                console.log(`%c▶️ REPRODUCIENDO`, "color: #ff0; font-size: 14px;");
+                console.log(`   Carta: ${cartaActual.nombre}`);
+                console.log(`   Botón: ${btn.id} (${config.texto})`);
+                console.log(`   Video: ${config.video}`);
+                console.log(`   Valor: ${config.valor}`);
 
-                // COLORES OVERLAY SEGÚN LADO
-                if(lado === 'IMPETUS') ui.ovTxt.style.borderColor = "#f55";
-                else if(lado === 'AUXILIUM') ui.ovTxt.style.borderColor = "#5f5";
-                else if(lado === 'MYSTERIUM') ui.ovTxt.style.borderColor = "#d5f";
-                else ui.ovTxt.style.borderColor = "#aaa";
-
+                ui.ovImg.src = RUTA_BASE + cartaActual.imgEscudo;
+                ui.ovTxt.innerText = config.valor;
+                ui.ovTxt.style.borderColor = config.color;
                 ui.overlay.style.display = 'flex';
 
-                // REPRODUCIR VIDEO
                 ui.msg.style.display = 'none';
                 ui.videoPlayer.style.display = 'block';
-                ui.videoPlayer.src = vidSrc;
+                ui.videoPlayer.src = RUTA_BASE + config.video;
                 ui.videoPlayer.muted = false;
                 ui.videoPlayer.volume = 1.0;
-                
-                console.log(`→ Iniciando reproducción...`);
-                
-                ui.videoPlayer.play().then(() => {
-                    console.log("✓ Video reproduciendo correctamente");
-                }).catch(err => {
-                    console.error("❌ Error al reproducir video:", err);
-                });
+                ui.videoPlayer.play();
             });
         });
 
-        // Evento de fin de video
         ui.videoPlayer.addEventListener('ended', () => {
             ui.videoPlayer.style.display = 'none';
             ui.overlay.style.display = 'none';
             ui.msg.style.display = 'block';
             ui.msg.innerText = "LISTO";
-            console.log("✓ Video finalizado");
         });
 
     </script>
