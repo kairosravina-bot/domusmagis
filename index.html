@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: REVELATIONS</title>
+    <title>DOMUS MAGI: REVELATIONS - VERSIÓN 6.0</title>
 
     <script type="importmap">
     {
@@ -113,7 +113,7 @@
     
     <div id="splash-screen">
         <button id="btn-inicio">⚡ INICIAR SISTEMA ⚡</button>
-        <!-- AQUI SE MUESTRA LA VERSION -->
+        <!-- VERSIÓN SINCRONIZADA -->
         <div id="version-display">Cargando versión...</div>
     </div>
 
@@ -131,7 +131,6 @@
         <div id="zona-ar"><div id="guia-scanner"></div></div>
         <div id="panel-inferior">
             <div id="selectores">
-                <!-- Botones con IDs fijos, texto cambiante -->
                 <button id="btn-i" class="btn-selector" data-lado="IMPETUS">I</button>
                 <button id="btn-a" class="btn-selector" data-lado="AUXILIUM">A</button>
                 <button id="btn-t" class="btn-selector" data-lado="TUTELA">T</button>
@@ -147,12 +146,15 @@
         // ==========================================
         // 1. CONTROL DE VERSIÓN (Sincronizado)
         // ==========================================
-        const VERSION_CODIGO = "VERSIÓN FINAL 5.0 - BUHO INTEGRADO";
+        const VERSION_CODIGO = "VERSIÓN 6.0 - BÚHO FUNCIONAL + SISTEMA MODULAR";
         
         // Imprimir en consola
-        console.log("SISTEMA INICIADO: " + VERSION_CODIGO);
+        console.log("╔════════════════════════════════════════╗");
+        console.log("║  DOMUS MAGI: REVELATIONS               ║");
+        console.log("║  " + VERSION_CODIGO.padEnd(37) + "║");
+        console.log("╚════════════════════════════════════════╝");
         
-        // Imprimir bajo el botón (se ejecuta al cargar el script)
+        // Imprimir bajo el botón
         const displayVersion = document.getElementById('version-display');
         if(displayVersion) {
             displayVersion.innerText = VERSION_CODIGO;
@@ -168,36 +170,66 @@
                 tipo: 'ESTANDAR',
                 imgEscudo: "ESCUDO_DRAGON.png",
                 valores: { IMPETUS: 7, AUXILIUM: 2, TUTELA: 3, MYSTERIUM: 2 },
-                videos: { IMPETUS: RUTA_BASE+"ataque.mp4", AUXILIUM: RUTA_BASE+"cura.mp4", TUTELA: RUTA_BASE+"defensa.mp4", MYSTERIUM: RUTA_BASE+"magia.mp4" }
+                videos: { 
+                    IMPETUS: RUTA_BASE+"ataque.mp4", 
+                    AUXILIUM: RUTA_BASE+"cura.mp4", 
+                    TUTELA: RUTA_BASE+"defensa.mp4", 
+                    MYSTERIUM: RUTA_BASE+"magia.mp4" 
+                },
+                letras: { IMPETUS: "I", AUXILIUM: "A", TUTELA: "T", MYSTERIUM: "M" }
             },
             1: { // Águila
                 tipo: 'ESTANDAR',
                 imgEscudo: "ESCUDO_AGUILA.png", 
                 valores: { IMPETUS: 5, AUXILIUM: 4, TUTELA: 2, MYSTERIUM: 3 },
-                videos: { IMPETUS: RUTA_BASE+"ataque.mp4", AUXILIUM: RUTA_BASE+"cura.mp4", TUTELA: RUTA_BASE+"defensa.mp4", MYSTERIUM: RUTA_BASE+"magia.mp4" }
+                videos: { 
+                    IMPETUS: RUTA_BASE+"ataque.mp4", 
+                    AUXILIUM: RUTA_BASE+"cura.mp4", 
+                    TUTELA: RUTA_BASE+"defensa.mp4", 
+                    MYSTERIUM: RUTA_BASE+"magia.mp4" 
+                },
+                letras: { IMPETUS: "I", AUXILIUM: "A", TUTELA: "T", MYSTERIUM: "M" }
             },
             2: { // León
                 tipo: 'ESTANDAR',
                 imgEscudo: "ESCUDO_LEON.png",
                 valores: { IMPETUS: 8, AUXILIUM: 1, TUTELA: 4, MYSTERIUM: 1 },
-                videos: { IMPETUS: RUTA_BASE+"ataque.mp4", AUXILIUM: RUTA_BASE+"cura.mp4", TUTELA: RUTA_BASE+"defensa.mp4", MYSTERIUM: RUTA_BASE+"magia.mp4" }
+                videos: { 
+                    IMPETUS: RUTA_BASE+"ataque.mp4", 
+                    AUXILIUM: RUTA_BASE+"cura.mp4", 
+                    TUTELA: RUTA_BASE+"defensa.mp4", 
+                    MYSTERIUM: RUTA_BASE+"magia.mp4" 
+                },
+                letras: { IMPETUS: "I", AUXILIUM: "A", TUTELA: "T", MYSTERIUM: "M" }
             },
             3: { // Jabalí
                 tipo: 'ESTANDAR',
                 imgEscudo: "ESCUDO_JABALI.png",
                 valores: { IMPETUS: 6, AUXILIUM: 3, TUTELA: 3, MYSTERIUM: 2 },
-                videos: { IMPETUS: RUTA_BASE+"ataque.mp4", AUXILIUM: RUTA_BASE+"cura.mp4", TUTELA: RUTA_BASE+"defensa.mp4", MYSTERIUM: RUTA_BASE+"magia.mp4" }
+                videos: { 
+                    IMPETUS: RUTA_BASE+"ataque.mp4", 
+                    AUXILIUM: RUTA_BASE+"cura.mp4", 
+                    TUTELA: RUTA_BASE+"defensa.mp4", 
+                    MYSTERIUM: RUTA_BASE+"magia.mp4" 
+                },
+                letras: { IMPETUS: "I", AUXILIUM: "A", TUTELA: "T", MYSTERIUM: "M" }
             },
-            4: { // BÚHO (CARTA 4)
-                tipo: 'ESPECIAL', // ESTO DETONA EL CAMBIO DE BOTONES
+            4: { // BÚHO (CARTA ESPECIAL)
+                tipo: 'ESPECIAL',
                 imgEscudo: "ESCUDO_BUHO.png",
-                valores: { IMPETUS: "MANDATUM", AUXILIUM: "PRAESAGIUM", TUTELA: "CONSILIUM", MYSTERIUM: "ARCANUM" },
+                valores: { 
+                    IMPETUS: "MANDATUM", 
+                    AUXILIUM: "PRAESAGIUM", 
+                    TUTELA: "CONSILIUM", 
+                    MYSTERIUM: "ARCANUM" 
+                },
                 videos: { 
                     IMPETUS: RUTA_BASE + "owl_mandatum.mp4",
                     AUXILIUM: RUTA_BASE + "owl_praesagium.mp4",
                     TUTELA: RUTA_BASE + "owl_consilium.mp4",
                     MYSTERIUM: RUTA_BASE + "owl_arcanum.mp4"
-                }
+                },
+                letras: { IMPETUS: "M", AUXILIUM: "P", TUTELA: "C", MYSTERIUM: "S" }
             }
         };
 
@@ -248,7 +280,7 @@
         async function iniciarAR() {
             const mindarThree = new MindARThree({
                 container: document.querySelector("#container"),
-                imageTargetSrc: RUTA_BASE + "targets1.mind" // Archivo correcto
+                imageTargetSrc: RUTA_BASE + "targets1.mind"
             });
 
             const {renderer, scene, camera} = mindarThree;
@@ -265,25 +297,21 @@
 
                 // --- AL ENCONTRAR CARTA ---
                 anchor.onTargetFound = () => {
-                    console.log(`CARTA DETECTADA: ${i}`);
-                    cartaActualIndex = i;
+                    console.log(`╔════════════════════════════════════════╗`);
+                    console.log(`║ CARTA DETECTADA: ${i} (${CARTAS[i].tipo})             ║`);
+                    console.log(`╚════════════════════════════════════════╝`);
                     
-                    // LÓGICA DE CAMBIO DE BOTONES
+                    cartaActualIndex = i;
                     const cartaInfo = CARTAS[i];
                     
-                    if(cartaInfo.tipo === 'ESPECIAL') {
-                        // ES EL BÚHO -> CAMBIAR TEXTO BOTONES
-                        ui.btnI.innerText = "M";
-                        ui.btnA.innerText = "P";
-                        ui.btnT.innerText = "C";
-                        ui.btnM.innerText = "S";
-                    } else {
-                        // ES CARTA NORMAL -> RESTAURAR TEXTO
-                        ui.btnI.innerText = "I";
-                        ui.btnA.innerText = "A";
-                        ui.btnT.innerText = "T";
-                        ui.btnM.innerText = "M";
-                    }
+                    // ACTUALIZAR BOTONES SEGÚN TIPO (SISTEMA MODULAR)
+                    ui.btnI.innerText = cartaInfo.letras.IMPETUS;
+                    ui.btnA.innerText = cartaInfo.letras.AUXILIUM;
+                    ui.btnT.innerText = cartaInfo.letras.TUTELA;
+                    ui.btnM.innerText = cartaInfo.letras.MYSTERIUM;
+                    
+                    console.log(`→ Botones actualizados:`);
+                    console.log(`  I="${ui.btnI.innerText}" A="${ui.btnA.innerText}" T="${ui.btnT.innerText}" M="${ui.btnM.innerText}"`);
 
                     // UI Feedback
                     ui.scanner.classList.add('verde');
@@ -295,9 +323,8 @@
 
                 // --- AL PERDER CARTA ---
                 anchor.onTargetLost = () => {
-                    console.log(`CARTA PERDIDA: ${i}`);
+                    console.log(`⚠ CARTA PERDIDA: ${i}`);
                     if(cartaActualIndex === i) {
-                        // Solo desactivamos interacción, NO cambiamos texto para evitar parpadeo
                         cartaActualIndex = null;
                         ui.scanner.classList.remove('verde');
                         ui.msg.innerText = "ESCANEAR...";
@@ -320,29 +347,31 @@
         // ==========================================
         ui.botones.forEach(btn => {
             btn.addEventListener('click', () => {
-                if(!btn.classList.contains('activo') || cartaActualIndex === null) return;
+                if(!btn.classList.contains('activo') || cartaActualIndex === null) {
+                    console.warn("⚠ Click ignorado: Botón inactivo o sin carta");
+                    return;
+                }
 
-                const lado = btn.getAttribute('data-lado'); // Siempre es IMPETUS, AUXILIUM...
+                const lado = btn.getAttribute('data-lado');
                 const info = CARTAS[cartaActualIndex];
+
+                console.log(`╔════════════════════════════════════════╗`);
+                console.log(`║ CLIC EN: ${lado.padEnd(30)}║`);
+                console.log(`║ Carta: ${cartaActualIndex} (${info.tipo.padEnd(25)})║`);
+                console.log(`╚════════════════════════════════════════╝`);
 
                 // 1. Obtener Video y Valor
                 const vidSrc = info.videos[lado];
                 const valor = info.valores[lado];
                 
+                console.log(`→ Video: ${vidSrc}`);
+                console.log(`→ Valor: ${valor}`);
+                
                 // 2. Configurar Overlay
                 ui.ovImg.src = RUTA_BASE + info.imgEscudo;
-                
-                // Si es Búho, el valor es texto (MANDATUM). Si es Normal, es número (7).
-                // Para mostrar en overlay combinamos con la letra actual del botón.
-                const letraBoton = btn.innerText; 
-                
-                if (info.tipo === 'ESPECIAL') {
-                     ui.ovTxt.innerText = valor; // Muestra "MANDATUM" completo
-                } else {
-                     ui.ovTxt.innerText = `${letraBoton}:${valor}`; // Muestra "I:7"
-                }
+                ui.ovTxt.innerText = valor;
 
-                // 3. Colores Overlay
+                // 3. Colores Overlay según lado
                 if(lado === 'IMPETUS') ui.ovTxt.style.borderColor = "#f55";
                 else if(lado === 'AUXILIUM') ui.ovTxt.style.borderColor = "#5f5";
                 else if(lado === 'MYSTERIUM') ui.ovTxt.style.borderColor = "#d5f";
@@ -350,21 +379,25 @@
 
                 ui.overlay.style.display = 'flex';
 
-                // 4. Reproducir
+                // 4. Reproducir Video
                 ui.msg.style.display = 'none';
                 ui.videoPlayer.style.display = 'block';
                 ui.videoPlayer.src = vidSrc;
                 ui.videoPlayer.muted = false;
                 ui.videoPlayer.volume = 1.0;
                 ui.videoPlayer.play();
+                
+                console.log("✓ Video iniciado correctamente");
             });
         });
 
+        // Evento de fin de video
         ui.videoPlayer.addEventListener('ended', () => {
             ui.videoPlayer.style.display = 'none';
             ui.overlay.style.display = 'none';
             ui.msg.style.display = 'block';
             ui.msg.innerText = "LISTO";
+            console.log("✓ Video finalizado");
         });
 
     </script>
