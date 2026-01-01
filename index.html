@@ -1,8 +1,8 @@
 <!-- 
 ╔════════════════════════════════════════════════════════════╗
 ║  DOMUS MAGI: REVELATIONS                                   ║
-║  VERSIÓN 7.0 - BÚHO TOTALMENTE FUNCIONAL                   ║
-║  Sistema modular con cambio dinámico de botones            ║
+║  VERSIÓN 7.1 - CORRECCIÓN DETECCIÓN BÚHO Y VIDEOS         ║
+║  Fix: Detección búho + estabilidad reproducción            ║
 ╚════════════════════════════════════════════════════════════╝
 -->
 <!DOCTYPE html>
@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: REVELATIONS - VERSIÓN 7.0</title>
+    <title>DOMUS MAGI: REVELATIONS - VERSIÓN 7.1</title>
 
     <script type="importmap">
     {
@@ -111,7 +111,7 @@
     
     <div id="splash-screen">
         <button id="btn-inicio">⚡ INICIAR SISTEMA ⚡</button>
-        <div id="version-display">VERSIÓN 7.0 - BÚHO TOTALMENTE FUNCIONAL</div>
+        <div id="version-display">VERSIÓN 7.1 - CORRECCIÓN DETECCIÓN BÚHO Y VIDEOS</div>
     </div>
 
     <div id="container"></div>
@@ -141,9 +141,9 @@
         import { MindARThree } from 'mindar-image-three';
 
         // ==========================================
-        // VERSIÓN 7.0 - BÚHO TOTALMENTE FUNCIONAL
+        // VERSIÓN 7.1 - CORRECCIÓN DETECCIÓN BÚHO Y VIDEOS
         // ==========================================
-        const VERSION = "VERSIÓN 7.0 - BÚHO TOTALMENTE FUNCIONAL";
+        const VERSION = "VERSIÓN 7.1 - CORRECCIÓN DETECCIÓN BÚHO Y VIDEOS";
         console.log("%c" + VERSION, "color: #0f0; font-size: 20px; font-weight: bold;");
 
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
@@ -202,6 +202,7 @@
         };
 
         let cartaActual = null;
+        let reproduciendo = false; // Evita clicks múltiples durante reproducción
 
         const ui = {
             btnI: document.getElementById('btn-i'),
@@ -289,6 +290,10 @@
                 container: document.querySelector("#container"),
                 imageTargetSrc: RUTA_BASE + "targets1.mind",
                 maxTrack: 1,
+                filterMinCF: 0.0001,
+                filterBeta: 0.001,
+                warmupTolerance: 5,
+                missTolerance: 5,
                 uiLoading: "no",
                 uiScanning: "no",
                 uiError: "no"
@@ -312,12 +317,21 @@
                     console.log(`%c🎯 CARTA DETECTADA: ${i} - ${CARTAS[i].nombre}`, "color: #0f0; font-size: 18px; font-weight: bold; background: #002200; padding: 5px;");
                     console.log(`%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, "color: #0f0;");
                     
+                    // Detener video si está reproduciendo al cambiar de carta
+                    if(reproduciendo) {
+                        ui.videoPlayer.pause();
+                        ui.videoPlayer.style.display = 'none';
+                        ui.overlay.style.display = 'none';
+                        reproduciendo = false;
+                    }
+                    
                     cartaActual = CARTAS[i];
                     
                     console.log(`🔧 Ejecutando actualizarBotones()...`);
                     actualizarBotones(cartaActual);
                     
                     ui.scanner.classList.add('verde');
+                    ui.msg.style.display = 'block';
                     ui.msg.innerText = "CONECTADO - " + CARTAS[i].nombre;
                     ui.msg.style.color = "#0f0";
                     
@@ -328,6 +342,15 @@
                     console.log(`%c❌ CARTA ${i} PERDIDA`, "color: #f00; font-size: 14px;");
                     if(cartaActual === CARTAS[i]) {
                         cartaActual = null;
+                        
+                        // Detener video si se pierde la carta
+                        if(reproduciendo) {
+                            ui.videoPlayer.pause();
+                            ui.videoPlayer.style.display = 'none';
+                            ui.overlay.style.display = 'none';
+                            reproduciendo = false;
+                        }
+                        
                         resetearBotones();
                         ui.scanner.classList.remove('verde');
                         ui.msg.innerText = "ESCANEAR...";
@@ -342,6 +365,7 @@
             await mindarThree.start();
             console.log("✅ MindAR iniciado correctamente");
             console.log("📷 Cámara lista - Enfoca una carta");
+            console.log("💡 NOTA BÚHO: Si detecta mal, intenta enfocar desde más lejos o centrar mejor la imagen");
             
             renderer.setAnimationLoop(() => {
                 renderer.render(scene, camera);
@@ -350,30 +374,55 @@
 
         [ui.btnI, ui.btnA, ui.btnT, ui.btnM].forEach(btn => {
             btn.addEventListener('click', () => {
-                if(!btn.classList.contains('activo') || !cartaActual) {
-                    console.warn("⚠️ Click ignorado");
+                if(!btn.classList.contains('activo') || !cartaActual || reproduciendo) {
+                    if(reproduciendo) console.warn("⚠️ Video en reproducción - click ignorado");
+                    else console.warn("⚠️ Click ignorado - botón inactivo o sin carta");
                     return;
                 }
 
+                reproduciendo = true; // Bloquea nuevos clicks
+                
                 const config = cartaActual.botones[btn.id];
                 
-                console.log(`%c▶️ REPRODUCIENDO`, "color: #ff0; font-size: 14px;");
+                console.log(`%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, "color: #0ff;");
+                console.log(`%c▶️ REPRODUCIENDO VIDEO`, "color: #0ff; font-size: 16px; font-weight: bold; background: #002222; padding: 5px;");
                 console.log(`   Carta: ${cartaActual.nombre}`);
                 console.log(`   Botón: ${btn.id} (${config.texto})`);
                 console.log(`   Video: ${config.video}`);
                 console.log(`   Valor: ${config.valor}`);
+                console.log(`   URL completa: ${RUTA_BASE + config.video}`);
 
+                // Detener y limpiar cualquier reproducción previa
+                ui.videoPlayer.pause();
+                ui.videoPlayer.currentTime = 0;
+                ui.videoPlayer.src = '';
+                
+                // Configurar overlay
                 ui.ovImg.src = RUTA_BASE + cartaActual.imgEscudo;
                 ui.ovTxt.innerText = config.valor;
                 ui.ovTxt.style.borderColor = config.color;
                 ui.overlay.style.display = 'flex';
 
+                // Configurar y reproducir video
                 ui.msg.style.display = 'none';
                 ui.videoPlayer.style.display = 'block';
-                ui.videoPlayer.src = RUTA_BASE + config.video;
-                ui.videoPlayer.muted = false;
-                ui.videoPlayer.volume = 1.0;
-                ui.videoPlayer.play();
+                
+                // Pequeño delay para asegurar que el DOM se actualizó
+                setTimeout(() => {
+                    ui.videoPlayer.src = RUTA_BASE + config.video;
+                    ui.videoPlayer.muted = false;
+                    ui.videoPlayer.volume = 1.0;
+                    ui.videoPlayer.load(); // Forzar carga del video
+                    
+                    ui.videoPlayer.play()
+                        .then(() => {
+                            console.log("✅ Video iniciado correctamente");
+                        })
+                        .catch(err => {
+                            console.error("❌ Error al reproducir:", err);
+                            reproduciendo = false;
+                        });
+                }, 100);
             });
         });
 
