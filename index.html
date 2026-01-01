@@ -276,14 +276,14 @@
 </head>
 <body>
 
-    <!-- CAPA DE VIDEO PRESENTACIÓN (Inicialmente oculta) -->
+    <!-- CAPA DE VIDEO PRESENTACIÓN -->
     <div id="intro-layer" class="oculto">
         <video id="intro-video" playsinline webkit-playsinline></video>
     </div>
 
     <!-- PANTALLA DE INICIO -->
     <div id="splash-screen">
-        <button id="btn-inicio">⚡ INICIAR SISTEMA BÚHO ⚡</button>
+        <button id="btn-inicio">⚡ INICIAR SISTEMA ⚡</button>
     </div>
 
     <!-- CONTENEDOR AR -->
@@ -312,7 +312,7 @@
         <!-- PANEL INFERIOR -->
         <div id="panel-inferior">
             <div id="selectores">
-                <!-- ID originales, el texto cambiará dinámicamente -->
+                <!-- Botones con ID fijos, pero el texto cambia -->
                 <button id="btn-i" class="btn-selector" data-lado="IMPETUS">I</button>
                 <button id="btn-a" class="btn-selector" data-lado="AUXILIUM">A</button>
                 <button id="btn-t" class="btn-selector" data-lado="TUTELA">T</button>
@@ -369,9 +369,8 @@
                     MYSTERIUM: RUTA_BASE + "magia.mp4" 
                 }
             },
-            4: { // BÚHO (Carta Especial)
+            4: { // BÚHO (Carta 4)
                 imgEscudo: "ESCUDO_BUHO.png",
-                // Valores numéricos para el overlay, pero funcionalidad especial
                 valores: { IMPETUS: 4, AUXILIUM: 3, TUTELA: 2, MYSTERIUM: 5 },
                 videos: { 
                     IMPETUS: RUTA_BASE + "owl_mandatum.mp4",
@@ -400,13 +399,12 @@
         
         const selectores = document.querySelectorAll(".btn-selector");
         
-        // Referencias individuales a botones para cambiar texto
         const btnI = document.querySelector("#btn-i");
         const btnA = document.querySelector("#btn-a");
         const btnT = document.querySelector("#btn-t");
         const btnM = document.querySelector("#btn-m");
 
-        // --- EFECTO RAYOS Y CHISPAS ---
+        // --- EFECTO INICIAL ---
         function crearRayos() {
             for(let i = 0; i < 20; i++) {
                 setTimeout(() => {
@@ -434,7 +432,7 @@
             }
         }
 
-        // --- LOGICA DE INICIO ---
+        // --- INICIO ---
         btnInicio.addEventListener('click', async () => {
             crearRayos();
             crearChispas();
@@ -456,7 +454,7 @@
             await iniciarAR();
         });
 
-        // --- INICIAR AR ---
+        // --- AR ENGINE ---
         async function iniciarAR() {
             const mindarThree = new MindARThree({
                 container: document.querySelector("#container"),
@@ -471,9 +469,11 @@
                 videoPlayer.currentTime = 0;
             }).catch(() => {});
 
-            // Bucle para 5 cartas (0, 1, 2, 3, 4)
+            // Crear anchors para las 5 cartas
             for(let i = 0; i < 5; i++) {
                 const anchor = mindarThree.addAnchor(i);
+                
+                // Plano invisible para detección
                 const geometry = new THREE.PlaneGeometry(1, 1);
                 const material = new THREE.MeshBasicMaterial({transparent: true, opacity: 0});
                 const plane = new THREE.Mesh(geometry, material);
@@ -501,25 +501,25 @@
                 });
                 msgVisor.innerHTML = "ESCANEA UNA CARTA<br><span style='font-size:10px'>Centra la imagen</span>";
             } catch(e) {
-                alert("Error: " + e);
+                alert("Error al iniciar: " + e);
             }
         }
 
-        // --- MOSTRAR DATOS (AQUÍ ESTÁ EL CAMBIO DE TEXTO) ---
+        // --- FUNCIÓN CLAVE: CAMBIAR INTERFAZ ---
         function mostrarDatosCarta(index) {
             guiaScanner.classList.add('verde');
             msgVisor.innerText = "¡CARTA ENLAZADA!";
             msgVisor.style.color = "#0f0";
 
-            // Lógica para cambiar letras de botones
-            if (index === 4) { 
-                // ES EL BÚHO: Cambiar a iniciales especiales
-                btnI.innerText = "M"; // Rojo -> Mandatum
-                btnA.innerText = "P"; // Verde -> Praesagium
-                btnT.innerText = "C"; // Gris -> Consilium
-                btnM.innerText = "S"; // Violeta -> Secreto/Arcanum
-            } else {
-                // ES CARTA NORMAL: Letras estándar
+            // SI ES EL BÚHO (INDEX 4)
+            if (index === 4) {
+                btnI.innerText = "M"; // Rojo
+                btnA.innerText = "P"; // Verde
+                btnT.innerText = "C"; // Gris
+                btnM.innerText = "S"; // Violeta
+            } 
+            // SI ES CUALQUIER OTRA (0, 1, 2, 3)
+            else {
                 btnI.innerText = "I";
                 btnA.innerText = "A";
                 btnT.innerText = "T";
@@ -531,7 +531,7 @@
             });
         }
 
-        // --- RESETEAR UI ---
+        // --- FUNCIÓN CLAVE: RESETEAR (MODIFICADA) ---
         function resetearUI() {
             guiaScanner.classList.remove('verde');
             msgVisor.innerText = "BUSCANDO CARTA...";
@@ -540,15 +540,13 @@
             videoOverlay.style.display = 'none';
             videoPlayer.style.display = 'none';
 
-            // Volver a texto por defecto al perder carta
-            btnI.innerText = "I";
-            btnA.innerText = "A";
-            btnT.innerText = "T";
-            btnM.innerText = "M";
-
             selectores.forEach(btn => {
                 btn.classList.remove('activo');
             });
+            
+            // NOTA: YA NO RESETEAMOS EL TEXTO AQUÍ (btnI.innerText = "I").
+            // Mantenemos el último texto detectado hasta que una NUEVA carta cambie el estado.
+            // Esto evita que el Búho parpadee a "I/A/T/M" si se pierde el foco un segundo.
         }
 
         // --- CLICK EN BOTONES ---
@@ -558,8 +556,6 @@
 
                 const lado = btn.getAttribute('data-lado'); // IMPETUS, AUXILIUM, etc.
                 const carta = CARTAS[cartaActual];
-                
-                // Extraer valor y video
                 const valor = carta.valores[lado];
                 const videoSrc = carta.videos[lado];
 
@@ -568,12 +564,11 @@
                 overlayImg.onload = function() { this.style.display='block'; };
                 overlayImg.onerror = function() { this.style.display='none'; };
 
-                // Texto del Overlay (Inicial : Valor)
-                // Para el Búho, usamos la letra visible del botón actual
-                const letraActual = btn.innerText; 
-                overlayText.innerText = `${letraActual}:${valor}`;
+                // Texto del Overlay: Usamos la letra que tenga el botón ACTUALMENTE
+                const letraVisible = btn.innerText; 
+                overlayText.innerText = `${letraVisible}:${valor}`;
                 
-                // Color del borde según el tipo de botón original
+                // Colores
                 if(lado === 'IMPETUS') overlayText.style.borderColor = "#f55";
                 else if(lado === 'AUXILIUM') overlayText.style.borderColor = "#5f5";
                 else if(lado === 'MYSTERIUM') overlayText.style.borderColor = "#d5f";
@@ -581,7 +576,7 @@
 
                 videoOverlay.style.display = 'flex';
 
-                // Reproducir Video
+                // Video
                 msgVisor.style.display = 'none';
                 videoPlayer.style.display = 'block';
                 videoPlayer.src = videoSrc;
