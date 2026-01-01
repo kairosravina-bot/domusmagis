@@ -235,6 +235,7 @@
 
         // Variables Globales
         let cartaActualIndex = null;
+        let modoActual = 'ESTANDAR'; // Controla el modo de los botones
         
         // Elementos UI
         const ui = {
@@ -303,15 +304,31 @@
                     
                     cartaActualIndex = i;
                     const cartaInfo = CARTAS[i];
+                    modoActual = cartaInfo.tipo; // GUARDA EL TIPO
                     
-                    // ACTUALIZAR BOTONES SEGÚN TIPO (SISTEMA MODULAR)
+                    // ACTUALIZAR TEXTO Y COLORES DE BOTONES
                     ui.btnI.innerText = cartaInfo.letras.IMPETUS;
                     ui.btnA.innerText = cartaInfo.letras.AUXILIUM;
                     ui.btnT.innerText = cartaInfo.letras.TUTELA;
                     ui.btnM.innerText = cartaInfo.letras.MYSTERIUM;
                     
-                    console.log(`→ Botones actualizados:`);
-                    console.log(`  I="${ui.btnI.innerText}" A="${ui.btnA.innerText}" T="${ui.btnT.innerText}" M="${ui.btnM.innerText}"`);
+                    // CAMBIAR COLORES SEGÚN TIPO
+                    if(cartaInfo.tipo === 'ESPECIAL') {
+                        // BÚHO - Colores morados/místicos
+                        ui.btnI.style.background = '#4a148c';
+                        ui.btnA.style.background = '#6a1b9a';
+                        ui.btnT.style.background = '#7b1fa2';
+                        ui.btnM.style.background = '#8e24aa';
+                    } else {
+                        // CARTAS NORMALES - Colores originales
+                        ui.btnI.style.background = '';
+                        ui.btnA.style.background = '';
+                        ui.btnT.style.background = '';
+                        ui.btnM.style.background = '';
+                    }
+                    
+                    console.log(`→ Modo: ${modoActual}`);
+                    console.log(`→ Botones: I="${ui.btnI.innerText}" A="${ui.btnA.innerText}" T="${ui.btnT.innerText}" M="${ui.btnM.innerText}"`);
 
                     // UI Feedback
                     ui.scanner.classList.add('verde');
@@ -326,6 +343,18 @@
                     console.log(`⚠ CARTA PERDIDA: ${i}`);
                     if(cartaActualIndex === i) {
                         cartaActualIndex = null;
+                        modoActual = 'ESTANDAR';
+                        
+                        // RESTAURAR BOTONES A VALORES POR DEFECTO
+                        ui.btnI.innerText = "I";
+                        ui.btnA.innerText = "A";
+                        ui.btnT.innerText = "T";
+                        ui.btnM.innerText = "M";
+                        ui.btnI.style.background = '';
+                        ui.btnA.style.background = '';
+                        ui.btnT.style.background = '';
+                        ui.btnM.style.background = '';
+                        
                         ui.scanner.classList.remove('verde');
                         ui.msg.innerText = "ESCANEAR...";
                         ui.msg.style.color = "#fff";
@@ -352,26 +381,34 @@
                     return;
                 }
 
-                const lado = btn.getAttribute('data-lado');
+                const lado = btn.getAttribute('data-lado'); // IMPETUS, AUXILIUM, TUTELA, MYSTERIUM
                 const info = CARTAS[cartaActualIndex];
 
                 console.log(`╔════════════════════════════════════════╗`);
-                console.log(`║ CLIC EN: ${lado.padEnd(30)}║`);
+                console.log(`║ CLIC DETECTADO                         ║`);
+                console.log(`║ Botón presionado: ${btn.id.padEnd(24)}║`);
+                console.log(`║ Data-lado: ${lado.padEnd(28)}║`);
                 console.log(`║ Carta: ${cartaActualIndex} (${info.tipo.padEnd(25)})║`);
                 console.log(`╚════════════════════════════════════════╝`);
 
-                // 1. Obtener Video y Valor
+                // OBTENER VIDEO Y VALOR CORRECTO
                 const vidSrc = info.videos[lado];
                 const valor = info.valores[lado];
                 
-                console.log(`→ Video: ${vidSrc}`);
-                console.log(`→ Valor: ${valor}`);
+                console.log(`→ Video seleccionado: ${vidSrc}`);
+                console.log(`→ Valor a mostrar: ${valor}`);
                 
-                // 2. Configurar Overlay
+                // VERIFICAR QUE EL VIDEO EXISTE
+                if(!vidSrc) {
+                    console.error(`❌ ERROR: No se encontró video para ${lado} en carta ${cartaActualIndex}`);
+                    return;
+                }
+                
+                // CONFIGURAR OVERLAY
                 ui.ovImg.src = RUTA_BASE + info.imgEscudo;
                 ui.ovTxt.innerText = valor;
 
-                // 3. Colores Overlay según lado
+                // COLORES OVERLAY SEGÚN LADO
                 if(lado === 'IMPETUS') ui.ovTxt.style.borderColor = "#f55";
                 else if(lado === 'AUXILIUM') ui.ovTxt.style.borderColor = "#5f5";
                 else if(lado === 'MYSTERIUM') ui.ovTxt.style.borderColor = "#d5f";
@@ -379,15 +416,20 @@
 
                 ui.overlay.style.display = 'flex';
 
-                // 4. Reproducir Video
+                // REPRODUCIR VIDEO
                 ui.msg.style.display = 'none';
                 ui.videoPlayer.style.display = 'block';
                 ui.videoPlayer.src = vidSrc;
                 ui.videoPlayer.muted = false;
                 ui.videoPlayer.volume = 1.0;
-                ui.videoPlayer.play();
                 
-                console.log("✓ Video iniciado correctamente");
+                console.log(`→ Iniciando reproducción...`);
+                
+                ui.videoPlayer.play().then(() => {
+                    console.log("✓ Video reproduciendo correctamente");
+                }).catch(err => {
+                    console.error("❌ Error al reproducir video:", err);
+                });
             });
         });
 
