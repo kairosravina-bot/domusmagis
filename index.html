@@ -312,6 +312,7 @@
         <!-- PANEL INFERIOR -->
         <div id="panel-inferior">
             <div id="selectores">
+                <!-- ID originales, el texto cambiará dinámicamente -->
                 <button id="btn-i" class="btn-selector" data-lado="IMPETUS">I</button>
                 <button id="btn-a" class="btn-selector" data-lado="AUXILIUM">A</button>
                 <button id="btn-t" class="btn-selector" data-lado="TUTELA">T</button>
@@ -324,7 +325,7 @@
         import * as THREE from 'three';
         import { MindARThree } from 'mindar-image-three';
 
-        // --- DATOS DE LAS 5 CARTAS (4 originales + BÚHO) ---
+        // --- DATOS DE LAS 5 CARTAS ---
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         
         const CARTAS = {
@@ -368,14 +369,15 @@
                     MYSTERIUM: RUTA_BASE + "magia.mp4" 
                 }
             },
-            4: { // BÚHO (Nueva carta habilitada)
+            4: { // BÚHO (Carta Especial)
                 imgEscudo: "ESCUDO_BUHO.png",
+                // Valores numéricos para el overlay, pero funcionalidad especial
                 valores: { IMPETUS: 4, AUXILIUM: 3, TUTELA: 2, MYSTERIUM: 5 },
                 videos: { 
-                    IMPETUS: RUTA_BASE + "owl_mandatum.mp4",     // Botón Rojo
-                    AUXILIUM: RUTA_BASE + "owl_praesagium.mp4", // Botón Verde
-                    TUTELA: RUTA_BASE + "owl_consilium.mp4",    // Botón Gris
-                    MYSTERIUM: RUTA_BASE + "owl_arcanum.mp4"    // Botón Violeta
+                    IMPETUS: RUTA_BASE + "owl_mandatum.mp4",
+                    AUXILIUM: RUTA_BASE + "owl_praesagium.mp4",
+                    TUTELA: RUTA_BASE + "owl_consilium.mp4",
+                    MYSTERIUM: RUTA_BASE + "owl_arcanum.mp4"
                 }
             }
         };
@@ -397,6 +399,12 @@
         const overlayText = document.querySelector("#overlay-text");
         
         const selectores = document.querySelectorAll(".btn-selector");
+        
+        // Referencias individuales a botones para cambiar texto
+        const btnI = document.querySelector("#btn-i");
+        const btnA = document.querySelector("#btn-a");
+        const btnT = document.querySelector("#btn-t");
+        const btnM = document.querySelector("#btn-m");
 
         // --- EFECTO RAYOS Y CHISPAS ---
         function crearRayos() {
@@ -426,32 +434,24 @@
             }
         }
 
-        // --- LOGICA DE INICIO + VIDEO INTRO ---
+        // --- LOGICA DE INICIO ---
         btnInicio.addEventListener('click', async () => {
-            // 1. Animaciones visuales
             crearRayos();
             crearChispas();
-            
-            // 2. Esperar animación y lanzar video de presentación
             setTimeout(() => {
                 splash.classList.add('oculto');
                 introLayer.classList.remove('oculto');
-                
-                // Cargar y reproducir presentación
                 introVideo.src = RUTA_BASE + "presentacion.mp4";
                 introVideo.muted = false;
                 introVideo.volume = 1.0;
                 introVideo.play().catch(e => {
-                    console.log("Auto-play bloqueado, iniciando AR directo o muteado", e);
                     introLayer.classList.add('oculto');
                     iniciarAR();
                 });
             }, 1200);
         });
 
-        // 3. Cuando termina la presentación -> INICIAR AR
         introVideo.addEventListener('ended', async () => {
-            console.log("Presentación terminada");
             introLayer.classList.add('oculto');
             await iniciarAR();
         });
@@ -460,29 +460,25 @@
         async function iniciarAR() {
             const mindarThree = new MindARThree({
                 container: document.querySelector("#container"),
-                imageTargetSrc: RUTA_BASE + "targets1.mind" /* ASEGURADO: targets1.mind */
+                imageTargetSrc: RUTA_BASE + "targets1.mind"
             });
 
             const {renderer, scene, camera} = mindarThree;
 
-            // Desbloquear audio del reproductor principal del juego
             videoPlayer.muted = false;
             videoPlayer.play().then(() => {
                 videoPlayer.pause();
                 videoPlayer.currentTime = 0;
             }).catch(() => {});
 
-            // Crear anchors para las 5 cartas (0 al 4)
+            // Bucle para 5 cartas (0, 1, 2, 3, 4)
             for(let i = 0; i < 5; i++) {
                 const anchor = mindarThree.addAnchor(i);
-                
-                // Plano invisible
                 const geometry = new THREE.PlaneGeometry(1, 1);
                 const material = new THREE.MeshBasicMaterial({transparent: true, opacity: 0});
                 const plane = new THREE.Mesh(geometry, material);
                 anchor.group.add(plane);
 
-                // DETECCIÓN
                 anchor.onTargetFound = () => {
                     console.log(`Carta ${i} detectada`);
                     cartaActual = i;
@@ -505,17 +501,31 @@
                 });
                 msgVisor.innerHTML = "ESCANEA UNA CARTA<br><span style='font-size:10px'>Centra la imagen</span>";
             } catch(e) {
-                alert("Error al iniciar: " + e);
+                alert("Error: " + e);
             }
         }
 
-        // --- MOSTRAR DATOS DE CARTA ---
+        // --- MOSTRAR DATOS (AQUÍ ESTÁ EL CAMBIO DE TEXTO) ---
         function mostrarDatosCarta(index) {
             guiaScanner.classList.add('verde');
             msgVisor.innerText = "¡CARTA ENLAZADA!";
             msgVisor.style.color = "#0f0";
 
-            // Activar selectores
+            // Lógica para cambiar letras de botones
+            if (index === 4) { 
+                // ES EL BÚHO: Cambiar a iniciales especiales
+                btnI.innerText = "M"; // Rojo -> Mandatum
+                btnA.innerText = "P"; // Verde -> Praesagium
+                btnT.innerText = "C"; // Gris -> Consilium
+                btnM.innerText = "S"; // Violeta -> Secreto/Arcanum
+            } else {
+                // ES CARTA NORMAL: Letras estándar
+                btnI.innerText = "I";
+                btnA.innerText = "A";
+                btnT.innerText = "T";
+                btnM.innerText = "M";
+            }
+
             selectores.forEach(btn => {
                 btn.classList.add('activo');
             });
@@ -527,35 +537,43 @@
             msgVisor.innerText = "BUSCANDO CARTA...";
             msgVisor.style.color = "#fff";
 
-            // Ocultar overlay
             videoOverlay.style.display = 'none';
             videoPlayer.style.display = 'none';
+
+            // Volver a texto por defecto al perder carta
+            btnI.innerText = "I";
+            btnA.innerText = "A";
+            btnT.innerText = "T";
+            btnM.innerText = "M";
 
             selectores.forEach(btn => {
                 btn.classList.remove('activo');
             });
         }
 
-        // --- SELECTORES DE LADO ---
+        // --- CLICK EN BOTONES ---
         selectores.forEach(btn => {
             btn.addEventListener('click', () => {
                 if(!btn.classList.contains('activo') || cartaActual === null) return;
 
-                const lado = btn.getAttribute('data-lado');
+                const lado = btn.getAttribute('data-lado'); // IMPETUS, AUXILIUM, etc.
                 const carta = CARTAS[cartaActual];
+                
+                // Extraer valor y video
                 const valor = carta.valores[lado];
                 const videoSrc = carta.videos[lado];
 
-                // ACTIVAR OVERLAY (Escudo + Valor)
-                const inicial = lado.charAt(0);
-                
+                // Preparar Overlay
                 overlayImg.src = RUTA_BASE + carta.imgEscudo;
-                
-                overlayImg.onerror = function() { this.style.display='none'; };
                 overlayImg.onload = function() { this.style.display='block'; };
+                overlayImg.onerror = function() { this.style.display='none'; };
 
-                overlayText.innerText = `${inicial}:${valor}`;
+                // Texto del Overlay (Inicial : Valor)
+                // Para el Búho, usamos la letra visible del botón actual
+                const letraActual = btn.innerText; 
+                overlayText.innerText = `${letraActual}:${valor}`;
                 
+                // Color del borde según el tipo de botón original
                 if(lado === 'IMPETUS') overlayText.style.borderColor = "#f55";
                 else if(lado === 'AUXILIUM') overlayText.style.borderColor = "#5f5";
                 else if(lado === 'MYSTERIUM') overlayText.style.borderColor = "#d5f";
@@ -563,7 +581,7 @@
 
                 videoOverlay.style.display = 'flex';
 
-                // Reproducir video
+                // Reproducir Video
                 msgVisor.style.display = 'none';
                 videoPlayer.style.display = 'block';
                 videoPlayer.src = videoSrc;
@@ -571,19 +589,12 @@
                 videoPlayer.muted = false;
                 videoPlayer.volume = 1.0;
                 
-                videoPlayer.play().then(() => {
-                    console.log("Video OK");
-                }).catch((error) => {
+                videoPlayer.play().catch((error) => {
                     console.error("Error Video", error);
-                    msgVisor.style.display = 'block';
-                    msgVisor.innerText = "ERROR VIDEO";
-                    videoPlayer.style.display = 'none';
-                    videoOverlay.style.display = 'none';
                 });
             });
         });
 
-        // Al terminar video
         videoPlayer.addEventListener('ended', () => {
             videoPlayer.style.display = 'none';
             videoOverlay.style.display = 'none'; 
