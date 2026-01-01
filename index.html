@@ -217,7 +217,9 @@
         };
 
         function actualizarBotones(carta) {
-            console.log(`🔄 ACTUALIZANDO BOTONES PARA: ${carta.nombre}`);
+            console.log(`%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, "color: #ff0;");
+            console.log(`%c🔄 ACTUALIZANDO BOTONES PARA: ${carta.nombre}`, "color: #ff0; font-size: 16px; font-weight: bold; background: #222200; padding: 5px;");
+            console.log(`%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, "color: #ff0;");
             
             const botones = [
                 { elem: ui.btnI, id: "btn-i" },
@@ -228,14 +230,26 @@
 
             botones.forEach(({elem, id}) => {
                 const config = carta.botones[id];
+                
+                console.log(`  🔘 ${id}:`);
+                console.log(`     Texto anterior: "${elem.innerText}"`);
+                console.log(`     Texto nuevo: "${config.texto}"`);
+                console.log(`     Color: ${config.color}`);
+                console.log(`     Valor: ${config.valor}`);
+                console.log(`     Video: ${config.video}`);
+                
                 elem.innerText = config.texto;
                 elem.style.backgroundColor = config.color;
                 elem.classList.add('activo');
-                console.log(`  ${id}: "${config.texto}" (${config.color})`);
+                
+                console.log(`     ✓ Actualizado`);
             });
+            
+            console.log(`%c✅ TODOS LOS BOTONES ACTUALIZADOS`, "color: #0f0; font-size: 14px; font-weight: bold;");
         }
 
         function resetearBotones() {
+            console.log(`🔄 Reseteando botones a valores por defecto`);
             const botones = [ui.btnI, ui.btnA, ui.btnT, ui.btnM];
             botones.forEach(btn => {
                 btn.classList.remove('activo');
@@ -245,6 +259,7 @@
             ui.btnA.innerText = "A";
             ui.btnT.innerText = "T";
             ui.btnM.innerText = "M";
+            console.log(`  ✓ Botones: I, A, T, M (color #222)`);
         }
 
         document.getElementById('btn-inicio').addEventListener('click', () => {
@@ -268,33 +283,49 @@
         });
 
         async function iniciarAR() {
+            console.log("🚀 Iniciando sistema AR...");
+            
             const mindarThree = new MindARThree({
                 container: document.querySelector("#container"),
-                imageTargetSrc: RUTA_BASE + "targets1.mind"
+                imageTargetSrc: RUTA_BASE + "targets1.mind",
+                maxTrack: 1,
+                uiLoading: "no",
+                uiScanning: "no",
+                uiError: "no"
             });
 
             const {renderer, scene, camera} = mindarThree;
 
+            console.log("📦 Creando anchors para 5 cartas (0-4)...");
+
             for(let i = 0; i < 5; i++) {
                 const anchor = mindarThree.addAnchor(i);
+                console.log(`  ✓ Anchor ${i} creado`);
+                
                 const geometry = new THREE.PlaneGeometry(1, 1);
                 const material = new THREE.MeshBasicMaterial({transparent: true, opacity: 0});
                 const plane = new THREE.Mesh(geometry, material);
                 anchor.group.add(plane);
 
                 anchor.onTargetFound = () => {
-                    console.log(`%c🎯 CARTA DETECTADA: ${i} - ${CARTAS[i].nombre}`, "color: #0f0; font-size: 16px; font-weight: bold;");
+                    console.log(`%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, "color: #0f0;");
+                    console.log(`%c🎯 CARTA DETECTADA: ${i} - ${CARTAS[i].nombre}`, "color: #0f0; font-size: 18px; font-weight: bold; background: #002200; padding: 5px;");
+                    console.log(`%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, "color: #0f0;");
+                    
                     cartaActual = CARTAS[i];
                     
+                    console.log(`🔧 Ejecutando actualizarBotones()...`);
                     actualizarBotones(cartaActual);
                     
                     ui.scanner.classList.add('verde');
-                    ui.msg.innerText = "CONECTADO";
+                    ui.msg.innerText = "CONECTADO - " + CARTAS[i].nombre;
                     ui.msg.style.color = "#0f0";
+                    
+                    console.log(`✅ UI actualizada correctamente`);
                 };
 
                 anchor.onTargetLost = () => {
-                    console.log(`❌ Carta ${i} perdida`);
+                    console.log(`%c❌ CARTA ${i} PERDIDA`, "color: #f00; font-size: 14px;");
                     if(cartaActual === CARTAS[i]) {
                         cartaActual = null;
                         resetearBotones();
@@ -307,7 +338,11 @@
                 };
             }
 
+            console.log("⏳ Iniciando MindAR...");
             await mindarThree.start();
+            console.log("✅ MindAR iniciado correctamente");
+            console.log("📷 Cámara lista - Enfoca una carta");
+            
             renderer.setAnimationLoop(() => {
                 renderer.render(scene, camera);
             });
