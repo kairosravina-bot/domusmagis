@@ -283,7 +283,7 @@
 
     <!-- PANTALLA DE INICIO -->
     <div id="splash-screen">
-        <button id="btn-inicio">⚡ INICIAR SISTEMA ⚡</button>
+        <button id="btn-inicio">⚡ INICIAR SISTEMA BÚHO ⚡</button>
     </div>
 
     <!-- CONTENEDOR AR -->
@@ -368,7 +368,7 @@
                     MYSTERIUM: RUTA_BASE + "magia.mp4" 
                 }
             },
-            4: { // BÚHO (Nueva carta agregada)
+            4: { // BÚHO (Nueva carta habilitada)
                 imgEscudo: "ESCUDO_BUHO.png",
                 valores: { IMPETUS: 4, AUXILIUM: 3, TUTELA: 2, MYSTERIUM: 5 },
                 videos: { 
@@ -460,7 +460,7 @@
         async function iniciarAR() {
             const mindarThree = new MindARThree({
                 container: document.querySelector("#container"),
-                imageTargetSrc: RUTA_BASE + "targets1.mind" /* CAMBIO AQUI: targets1.mind */
+                imageTargetSrc: RUTA_BASE + "targets1.mind" /* ASEGURADO: targets1.mind */
             });
 
             const {renderer, scene, camera} = mindarThree;
@@ -472,7 +472,7 @@
                 videoPlayer.currentTime = 0;
             }).catch(() => {});
 
-            // Crear anchors para las 5 cartas (0-4)
+            // Crear anchors para las 5 cartas (0 al 4)
             for(let i = 0; i < 5; i++) {
                 const anchor = mindarThree.addAnchor(i);
                 
