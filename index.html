@@ -368,14 +368,14 @@
                     MYSTERIUM: RUTA_BASE + "magia.mp4" 
                 }
             },
-            4: { // BÚHO (Nueva carta)
+            4: { // BÚHO (Nueva carta agregada)
                 imgEscudo: "ESCUDO_BUHO.png",
                 valores: { IMPETUS: 4, AUXILIUM: 3, TUTELA: 2, MYSTERIUM: 5 },
                 videos: { 
-                    IMPETUS: RUTA_BASE + "owl_mandatum.mp4", 
-                    AUXILIUM: RUTA_BASE + "owl_praesagium.mp4", 
-                    TUTELA: RUTA_BASE + "owl_consilium.mp4", 
-                    MYSTERIUM: RUTA_BASE + "owl_arcanum.mp4" 
+                    IMPETUS: RUTA_BASE + "owl_mandatum.mp4",     // Botón Rojo
+                    AUXILIUM: RUTA_BASE + "owl_praesagium.mp4", // Botón Verde
+                    TUTELA: RUTA_BASE + "owl_consilium.mp4",    // Botón Gris
+                    MYSTERIUM: RUTA_BASE + "owl_arcanum.mp4"    // Botón Violeta
                 }
             }
         };
@@ -460,7 +460,7 @@
         async function iniciarAR() {
             const mindarThree = new MindARThree({
                 container: document.querySelector("#container"),
-                imageTargetSrc: RUTA_BASE + "targets.mind"
+                imageTargetSrc: RUTA_BASE + "targets1.mind" /* CAMBIO AQUI: targets1.mind */
             });
 
             const {renderer, scene, camera} = mindarThree;
