@@ -339,14 +339,14 @@
                     MYSTERIUM: RUTA_BASE + "magia.mp4" 
                 }
             },
-            1: { // BÚHO (Carta 1) - Modificada según especificaciones
-                imgEscudo: "ESCUDO_BUHO.png", 
-                valores: { IMPETUS: "MANDATUM", AUXILIUM: "PRAESAGIUM", TUTELA: "CONSILIUM", MYSTERIUM: "ARCANUM" },
+            1: { // Águila
+                imgEscudo: "ESCUDO_AGUILA.png", 
+                valores: { IMPETUS: 5, AUXILIUM: 4, TUTELA: 2, MYSTERIUM: 3 },
                 videos: { 
-                    IMPETUS: RUTA_BASE + "owl_mandatum.mp4", 
-                    AUXILIUM: RUTA_BASE + "owl_praesagium.mp4", 
-                    TUTELA: RUTA_BASE + "owl_consilium.mp4", 
-                    MYSTERIUM: RUTA_BASE + "owl_arcanum.mp4" 
+                    IMPETUS: RUTA_BASE + "ataque.mp4", 
+                    AUXILIUM: RUTA_BASE + "cura.mp4", 
+                    TUTELA: RUTA_BASE + "defensa.mp4", 
+                    MYSTERIUM: RUTA_BASE + "magia.mp4" 
                 }
             },
             2: { // León
@@ -388,12 +388,6 @@
         const overlayText = document.querySelector("#overlay-text");
         
         const selectores = document.querySelectorAll(".btn-selector");
-        
-        // Referencias Botones individuales
-        const btnI = document.querySelector("#btn-i");
-        const btnA = document.querySelector("#btn-a");
-        const btnT = document.querySelector("#btn-t");
-        const btnM = document.querySelector("#btn-m");
 
         // --- EFECTO RAYOS Y CHISPAS ---
         function crearRayos() {
@@ -458,7 +452,7 @@
         async function iniciarAR() {
             const mindarThree = new MindARThree({
                 container: document.querySelector("#container"),
-                imageTargetSrc: RUTA_BASE + "target.mind" // Cambiado de targets1.mind a target.mind
+                imageTargetSrc: RUTA_BASE + "targets1.mind"
             });
 
             const {renderer, scene, camera} = mindarThree;
@@ -513,19 +507,6 @@
             msgVisor.innerText = "¡CARTA ENLAZADA!";
             msgVisor.style.color = "#0f0";
 
-            // Lógica Búho vs Normal
-            if (index === 1) { // Carta Búho
-                btnI.innerText = "M"; // MANDATUM
-                btnA.innerText = "P"; // PRAESAGIUM
-                btnT.innerText = "C"; // CONSILIUM
-                btnM.innerText = "S"; // ARCANUM / SECRETO
-            } else { // Normal
-                btnI.innerText = "I";
-                btnA.innerText = "A";
-                btnT.innerText = "T";
-                btnM.innerText = "M";
-            }
-
             // Activar selectores
             selectores.forEach(btn => {
                 btn.classList.add('activo');
@@ -541,12 +522,6 @@
             // Ocultar overlay
             videoOverlay.style.display = 'none';
             videoPlayer.style.display = 'none';
-
-            // Restaurar Texto Botones
-            btnI.innerText = "I";
-            btnA.innerText = "A";
-            btnT.innerText = "T";
-            btnM.innerText = "M";
 
             selectores.forEach(btn => {
                 btn.classList.remove('activo');
@@ -571,14 +546,7 @@
                 overlayImg.onerror = function() { this.style.display='none'; };
                 overlayImg.onload = function() { this.style.display='block'; };
 
-                // Logica de Texto Overlay
-                if (cartaActual === 1) {
-                    // Si es Búho, muestra el nombre completo del efecto
-                    overlayText.innerText = valor; 
-                } else {
-                    // Normal: Inicial + Valor numérico
-                    overlayText.innerText = `${inicial}:${valor}`;
-                }
+                overlayText.innerText = `${inicial}:${valor}`;
                 
                 if(lado === 'IMPETUS') overlayText.style.borderColor = "#f55";
                 else if(lado === 'AUXILIUM') overlayText.style.borderColor = "#5f5";
