@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V9.3</title>
+    <title>DOMUS MAGI V9.4</title>
     
     <script type="importmap">
     {
@@ -18,32 +18,35 @@
         body { margin: 0; overflow: hidden; font-family: 'Courier New', serif; background: #000; color: white; }
         .pantalla { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; background: radial-gradient(circle, #1a0033, #000); }
         .oculto { display: none !important; }
-        .btn-mystic { padding: 20px 30px; font-size: 16px; background: #bf00ff; border: 2px solid #fff; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px #bf00ff; margin: 5px; text-transform: uppercase; }
         
-        /* HUD 33/40/27 */
-        #ui-juego { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; pointer-events: none; z-index: 100; }
-        #visor-mistico { height: 33vh; background: rgba(0,0,0,0.7); border-bottom: 2px solid #bf00ff; pointer-events: auto; position: relative; display: flex; flex-direction: center; align-items: center; justify-content: center; }
-        #zona-ar { height: 40vh; position: relative; }
-        #panel-mando { height: 27vh; background: #111; border-top: 2px solid #fff; pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; }
+        .btn-mystic { padding: 20px 30px; font-size: 16px; background: #bf00ff; border: 2px solid #fff; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px #bf00ff; margin: 5px; text-transform: uppercase; }
+        .btn-mystic:active { transform: scale(0.95); background: #9900cc; }
 
-        #guia-scanner { width: 200px; height: 200px; border: 3px solid rgba(255,0,0,0.6); border-radius: 20px; }
+        /* HUD LAYOUT */
+        #ui-juego { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; pointer-events: none; z-index: 500; }
+        #visor-mistico { height: 33vh; background: rgba(0,0,0,0.7); border-bottom: 2px solid #bf00ff; pointer-events: auto; display: flex; align-items: center; justify-content: center; position: relative; }
+        #zona-ar { height: 40vh; position: relative; display: flex; align-items: center; justify-content: center; }
+        #panel-mando { height: 27vh; background: #111; border-top: 2px solid #fff; pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding-bottom: 10px; }
+
+        #guia-scanner { width: 200px; height: 200px; border: 3px solid rgba(255,0,0,0.6); border-radius: 20px; box-shadow: 0 0 15px red; }
         #guia-scanner.detectado { border-color: #0f0; box-shadow: 0 0 40px #0f0; background: rgba(0,255,0,0.1); }
         
-        .btn-gema { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #444; background: #222; color: #444; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
+        .btn-gema { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #444; background: #222; color: #444; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn-gema.activo { border-color: #fff; color: #fff; transform: scale(1.1); box-shadow: 0 0 15px currentColor; }
         
-        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .dado { width: 60px; height: 60px; background: white; color: black; display: flex; align-items: center; justify-content: center; font-size: 30px; border-radius: 10px; margin: 10px; font-weight: bold; }
-        
+        /* CONTENEDOR AR AL FONDO */
         #container-ar { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background: #000; }
+
+        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .dado { width: 60px; height: 60px; background: white; color: black; display: flex; align-items: center; justify-content: center; font-size: 30px; border-radius: 10px; margin: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="p-inicio" class="pantalla">
         <h1>DOMUS MAGI</h1>
-        <p style="color: #0f0;">V9.3 STABLE</p>
-        <button class="btn-mystic" onclick="irA('p-inicio', 'p-setup')">⚡ INICIAR ⚡</button>
+        <p style="color: #0f0;">V9.4 STABLE RECOVERY</p>
+        <button class="btn-mystic" onclick="cambiarP('p-inicio', 'p-setup')">⚡ ENTRAR ⚡</button>
     </div>
 
     <div id="p-setup" class="pantalla oculto">
@@ -53,47 +56,48 @@
             <button onclick="setModo(4)" class="btn-mystic">DUELO [ IIII ]</button>
         </div>
         <div id="registro" class="oculto">
-            <input type="text" id="nom-mago" placeholder="NOMBRE DEL MAGO" style="padding:15px; width:200px; text-align:center;">
-            <div style="margin-top:10px;">
-                <button onclick="reg('TERRA','#ff3333','🛡️')" class="btn-mystic" style="background:#800">🛡️ TERRA</button>
-                <button onclick="reg('CAELUM','#33aaff','⚔️')" class="btn-mystic" style="background:#005">⚔️ CAELUM</button>
-                <button onclick="reg('AQUA','#33ff77','💧')" class="btn-mystic" style="background:#040">💧 AQUA</button>
-                <button onclick="reg('DIMENSIO','#aa33ff','✨')" class="btn-mystic" style="background:#404">✨ DIMENSIO</button>
+            <input type="text" id="nom-mago" placeholder="NOMBRE DEL MAGO" style="padding:15px; width:200px; text-align:center; border-radius:10px; border:none; margin-bottom:10px;">
+            <div id="escudos" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                <button onclick="regMago('TERRA','#ff3333','🛡️')" class="btn-mystic" style="background:#800">🛡️ TERRA</button>
+                <button onclick="regMago('CAELUM','#33aaff','⚔️')" class="btn-mystic" style="background:#005">⚔️ CAELUM</button>
+                <button onclick="regMago('AQUA','#33ff77','💧')" class="btn-mystic" style="background:#040">💧 AQUA</button>
+                <button onclick="regMago('DIMENSIO','#aa33ff','✨')" class="btn-mystic" style="background:#404">✨ DIMENSIO</button>
             </div>
-            <p id="contador" style="color:gold; margin-top:10px;"></p>
+            <p id="contador" style="color:gold; margin-top:15px; font-weight:bold;"></p>
         </div>
     </div>
 
     <div id="p-resumen" class="pantalla oculto">
-        <h2 style="color:gold">EQUIPOS Y ESCUDOS</h2>
-        <div id="lista" style="text-align:left; margin-bottom:20px;"></div>
-        <button id="btn-start-ar" class="btn-mystic" style="background:gold; color:black;">🔮 DESPERTAR VISOR AR</button>
+        <h2 style="color:gold">ALIANZA FORMADA</h2>
+        <div id="lista" style="text-align:left; margin-bottom:20px; line-height: 1.6;"></div>
+        <button id="btn-forzar-ar" class="btn-mystic" style="background:gold; color:black; border:2px solid #fff;">🔮 DESPERTAR VISOR AR</button>
+        <p id="cargando-txt" class="oculto" style="color:cyan; margin-top:10px;">VINCULANDO CÁMARA...</p>
     </div>
 
     <div id="ui-juego" class="oculto">
         <div id="visor-mistico">
-            <div id="txt-turno" style="position:absolute; top:10px; left:10px; font-weight:bold;">TURNO</div>
-            <div id="txt-ronda" style="position:absolute; top:10px; right:10px; color:gold;">R-1</div>
-            <div id="status-ar" style="font-size:12px; border:1px solid #fff; padding:5px; background:rgba(0,0,0,0.5);">ESCANEA CARTA</div>
+            <div id="txt-turno" style="position:absolute; top:15px; left:15px; font-weight:bold; font-size:18px;">TURNO</div>
+            <div id="txt-ronda" style="position:absolute; top:15px; right:15px; color:gold;">RONDA 1</div>
+            <div id="status-ar" style="font-size:12px; border:1px solid #fff; padding:5px 15px; background:rgba(0,0,0,0.8); border-radius:15px;">ESCANEA CARTA</div>
         </div>
         <div id="zona-ar">
-            <center style="margin-top:15vh;"><div id="guia-scanner"></div></center>
+            <div id="guia-scanner"></div>
         </div>
         <div id="panel-mando">
-            <div style="display:flex; gap:15px;">
+            <div style="display:flex; gap:20px;">
                 <div id="g-I" class="btn-gema">I</div>
                 <div id="g-A" class="btn-gema">A</div>
                 <div id="g-T" class="btn-gema">T</div>
                 <div id="g-M" class="btn-gema">M</div>
             </div>
-            <p id="hint" style="font-size:10px; color:#555;">DETECTA CARTA PARA ACTIVAR GEMAS</p>
+            <p id="hint" style="font-size:11px; color:#777;">DETECTA CARTA PARA REVELAR GEMAS</p>
         </div>
     </div>
 
     <div id="modal-dados" class="modal oculto">
-        <h2 style="color:gold">DESTINO</h2>
+        <h2 style="color:gold">DADOS DEL DESTINO</h2>
         <div style="display:flex;"><div id="d1" class="dado">?</div><div id="d2" class="dado">?</div></div>
-        <h3 id="res-d">Calculando...</h3>
+        <h3 id="res-d" style="color:#0f0;">Calculando...</h3>
     </div>
 
     <div id="container-ar"></div>
@@ -102,29 +106,29 @@
         let magos = [];
         let limit = 0;
 
-        function irA(ocultar, mostrar) {
-            document.getElementById(ocultar).classList.add('oculto');
-            document.getElementById(mostrar).classList.remove('oculto');
+        function cambiarP(oc, mo) {
+            document.getElementById(oc).classList.add('oculto');
+            document.getElementById(mo).classList.remove('oculto');
         }
 
         function setModo(n) {
             limit = n;
             document.getElementById('modos').classList.add('oculto');
             document.getElementById('registro').classList.remove('oculto');
-            document.getElementById('contador').innerText = `Mago 1 de ${n}`;
+            document.getElementById('contador').innerText = `Registrando Mago 1 de ${n}`;
         }
 
-        function reg(casa, col, esc) {
+        function regMago(casa, col, esc) {
             let n = document.getElementById('nom-mago').value || "Mago " + (magos.length + 1);
             magos.push({n, casa, col, esc, el: null});
             document.getElementById('nom-mago').value = "";
             if(magos.length < limit) {
-                document.getElementById('contador').innerText = `Mago ${magos.length + 1} de ${limit}`;
+                document.getElementById('contador').innerText = `Registrando Mago ${magos.length + 1} de ${limit}`;
             } else {
-                irA('p-setup', 'p-resumen');
+                cambiarP('p-setup', 'p-resumen');
                 let l = document.getElementById('lista');
                 magos.forEach(m => {
-                    l.innerHTML += `<div style="color:${m.col}; font-size:18px;">${m.esc} ${m.n} - ${m.casa}</div>`;
+                    l.innerHTML += `<div style="color:${m.col}; font-size:20px;">${m.esc} ${m.n} <small>(${m.casa})</small></div>`;
                 });
             }
         }
@@ -137,54 +141,73 @@
         let idx = 0;
         let ronda = 1;
 
-        document.getElementById('btn-start-ar').addEventListener('click', async () => {
-            document.getElementById('p-resumen').classList.add('oculto');
-            document.getElementById('ui-juego').classList.remove('oculto');
-            document.getElementById('container-ar').style.background = "transparent";
+        document.getElementById('btn-forzar-ar').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-forzar-ar');
+            const txt = document.getElementById('cargando-txt');
             
-            const mindarThree = new MindARThree({
-                container: document.querySelector("#container-ar"),
-                imageTargetSrc: "https://kairosravina-bot.github.io/domusmagis/targets1.mind",
-                maxTrack: 1, uiLoading: "no", uiScanning: "no", uiError: "no"
-            });
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+            txt.classList.remove('oculto');
 
-            const {renderer, scene, camera} = mindarThree;
+            try {
+                const mindarThree = new MindARThree({
+                    container: document.querySelector("#container-ar"),
+                    imageTargetSrc: "https://kairosravina-bot.github.io/domusmagis/targets1.mind",
+                    maxTrack: 1,
+                    uiLoading: "no", uiScanning: "no", uiError: "no"
+                });
 
-            for(let i=0; i<5; i++) {
-                const anchor = mindarThree.addAnchor(i);
-                anchor.onTargetFound = () => {
-                    document.getElementById('guia-scanner').classList.add('detectado');
-                    document.getElementById('status-ar').innerText = "VÍNCULO ESTABLE";
-                    activar(true);
-                };
-                anchor.onTargetLost = () => {
-                    document.getElementById('guia-scanner').classList.remove('detectado');
-                    document.getElementById('status-ar').innerText = "ESCANEA CARTA";
-                    activar(false);
-                };
+                const {renderer, scene, camera} = mindarThree;
+
+                // Configurar Anchors
+                for(let i=0; i<5; i++) {
+                    const anchor = mindarThree.addAnchor(i);
+                    anchor.onTargetFound = () => {
+                        document.getElementById('guia-scanner').classList.add('detectado');
+                        document.getElementById('status-ar').innerText = (i===4) ? "BÚHO MASTER DETECTADO" : "CARTA DETECTADA";
+                        activarBotones(true);
+                    };
+                    anchor.onTargetLost = () => {
+                        document.getElementById('guia-scanner').classList.remove('detectado');
+                        document.getElementById('status-ar').innerText = "ESCANEA CARTA";
+                        activarBotones(false);
+                    };
+                }
+
+                await mindarThree.start();
+                
+                // Si llegamos aquí, el visor arrancó
+                cambiarP('p-resumen', 'ui-juego');
+                document.getElementById('container-ar').style.background = "transparent";
+                actualizarTurno();
+                
+                renderer.setAnimationLoop(() => renderer.render(scene, camera));
+
+            } catch (error) {
+                console.error("Fallo al iniciar AR:", error);
+                alert("Error al abrir cámara. Por favor, asegúrate de dar permisos.");
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                txt.innerText = "ERROR DE CÁMARA";
             }
-
-            await mindarThree.start();
-            updHUD();
-            renderer.setAnimationLoop(() => renderer.render(scene, camera));
         });
 
-        function updHUD() {
+        function actualizarTurno() {
             const m = magos[idx];
             const t = document.getElementById('txt-turno');
             t.innerText = `${m.esc} ${m.n}`;
             t.style.color = m.col;
-            document.getElementById('txt-ronda').innerText = `R-${ronda}`;
+            document.getElementById('txt-ronda').innerText = `RONDA ${ronda}`;
         }
 
-        function activar(b) {
-            ["I","A","T","M"].forEach(t => {
-                const g = document.getElementById("g-"+t);
+        function activarBotones(b) {
+            ["I","A","T","M"].forEach(tipo => {
+                const g = document.getElementById("g-"+tipo);
                 if(b) {
                     g.classList.add('activo');
                     g.style.color = magos[idx].col;
                     g.style.borderColor = magos[idx].col;
-                    g.onclick = () => select(t);
+                    g.onclick = () => confirmarGema(tipo);
                 } else {
                     g.classList.remove('activo');
                     g.style.color = "#444";
@@ -194,37 +217,39 @@
             });
         }
 
-        function select(t) {
-            if(!confirm(`¿Usar ${t}?`)) return;
+        function confirmarGema(t) {
+            if(!confirm(`${magos[idx].n}, ¿confirmas usar la gema ${t}?`)) return;
+            
             magos[idx].el = t;
             if(idx < magos.length - 1) {
                 idx++;
-                alert(`Pasa el móvil a ${magos[idx].n}`);
-                updHUD();
-                activar(false);
+                alert(`¡Gema Registrada! Pasa el dispositivo a ${magos[idx].n}`);
+                actualizarTurno();
+                activarBotones(false);
             } else {
-                dados();
+                mostrarDados();
             }
         }
 
-        function dados() {
+        function mostrarDados() {
             document.getElementById('modal-dados').classList.remove('oculto');
-            let c = 0;
-            let iv = setInterval(() => {
+            let cuenta = 0;
+            let inter = setInterval(() => {
                 let v1 = Math.floor(Math.random()*6)+1;
                 let v2 = Math.floor(Math.random()*6)+1;
                 document.getElementById('d1').innerText = v1;
                 document.getElementById('d2').innerText = v2;
-                if(c++ > 15) {
-                    clearInterval(iv);
-                    document.getElementById('res-d').innerText = "PODER: " + (v1+v2);
+                if(cuenta++ > 20) {
+                    clearInterval(inter);
+                    let total = v1 + v2;
+                    document.getElementById('res-d').innerText = "PODER MAGNIFICADO: " + total;
                     setTimeout(() => {
                         document.getElementById('modal-dados').classList.add('oculto');
-                        alert("¡FIN DE RONDA!");
+                        alert("⚔️ RONDA COMPLETADA ⚔️\nReiniciando para nueva batalla.");
                         location.reload(); 
-                    }, 3000);
+                    }, 4000);
                 }
-            }, 100);
+            }, 80);
         }
     </script>
 </body>
