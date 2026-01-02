@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V11.0</title>
+    <title>DOMUS MAGI V11.2</title>
     
     <script type="importmap">
     {
@@ -161,7 +161,7 @@
     <!-- PANTALLA INICIAL -->
     <div id="p-inicio" class="pantalla">
         <button class="btn-master" onclick="irMenuPrincipal()">⚡ INICIAR SISTEMA ⚡</button>
-        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V11.0</h2>
+        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V11.2</h2>
         <p style="color:#bf00ff; font-size:14px;">Sistema Completo de Batalla</p>
     </div>
 
@@ -184,13 +184,13 @@
         </button>
         
         <button class="btn-master" onclick="irDados()" style="background: #444; margin-top: 30px;">
-            🎲 TIRAR DADOS FÍSICOS
+            🎲 TIRAR DADOS
         </button>
     </div>
 
     <!-- PANTALLA DADOS -->
     <div id="p-dados" class="pantalla oculto">
-        <h1 style="color:#0f0;">🎲 DADOS FÍSICOS 🎲</h1>
+        <h1 style="color:#0f0;">🎲 DADOS 🎲</h1>
         <div style="display: flex; gap: 50px; align-items: center;">
             <div class="dado-gigante" id="dado1">?</div>
             <div style="font-size: 60px; color: #fff;">+</div>
@@ -200,7 +200,7 @@
         <button class="btn-master" onclick="tirarDados()" style="background: #0a0;">
             🎲 TIRAR DADOS
         </button>
-        <button class="btn-master" onclick="irMenuPrincipal()" style="background: #a00;">
+        <button class="btn-master" onclick="volverAlMenu()" style="background: #a00;">
             ⬅️ VOLVER AL MENÚ
         </button>
     </div>
@@ -308,6 +308,10 @@
             document.getElementById(mo).classList.remove('oculto');
         }
 
+        function volverAlMenu() {
+            navegar('p-dados', 'p-menu-principal');
+        }
+
         function irMenuPrincipal() {
             navegar('p-inicio', 'p-menu-principal');
             
@@ -352,17 +356,17 @@
             if(jugadores.length === cant) {
                 navegar('p-setup', 'p-resumen');
                 const list = document.getElementById('lista-resumen');
+                list.innerHTML = '';
                 jugadores.forEach(j => {
                     list.innerHTML += `<div class="mago-item" style="color:${j.color}">${j.esc} ${j.nombre} [${j.casa}]</div>`;
                 });
             } else {
-                document.getElementById('reg-status').innerText = `Mago ${jugadores.length + 1} de ${n}`;
+                document.getElementById('reg-status').innerText = `Mago ${jugadores.length + 1} de ${cant}`;
             }
         }
 
         function continuarBatalla() {
             numRonda++;
-            // Resetear cartas de jugadores para nueva ronda
             jugadores.forEach(j => j.cartas = []);
             tIdx = 0;
             navegar('p-resultado-ronda', 'ui-juego');
@@ -396,7 +400,6 @@
                 resumenDiv.appendChild(div);
             });
 
-            // Calcular ganador final
             const ranking = [...jugadores].sort((a, b) => b.victorias - a.victorias);
             const ganadorFinal = ranking[0];
             
@@ -409,6 +412,12 @@
                 </div>
             `;
         }
+
+        document.getElementById('btn-despertar').onclick = async () => {
+            navegar('p-resumen', 'ui-juego');
+            await initAR();
+            updHUD();
+        };
     </script>
 
     <script type="module">
@@ -416,7 +425,7 @@
         import { MindARThree } from 'mindar-image-three';
 
         console.log("%c═══════════════════════════════", "color: #bf00ff; font-size: 20px;");
-        console.log("%c  DOMUS MAGI V11.0", "color: #bf00ff; font-size: 20px; font-weight: bold;");
+        console.log("%c  DOMUS MAGI V11.2", "color: #bf00ff; font-size: 20px; font-weight: bold;");
         console.log("%c═══════════════════════════════", "color: #bf00ff; font-size: 20px;");
 
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
@@ -488,6 +497,58 @@
             ui.txtTurno.style.color = j.color;
             ui.msg.innerText = `${j.nombre}, escanea una carta`;
             actualizarListaCartas();
+        }
+
+        window.initAR = async function() {
+            if(mindarThree) return;
+            
+            try {
+                mindarThree = new MindARThree({
+                    container: document.getElementById('container-ar'),
+                    imageTargetSrc: RUTA_BASE + 'targets.mind'
+                });
+
+                const { renderer, scene, camera } = mindarThree;
+
+                for(let i = 0; i < 5; i++) {
+                    const anchor = mindarThree.addAnchor(i);
+                    anchor.onTargetFound = () => {
+                        if(!cartaDetectada && !esperandoVideo) {
+                            cartaDetectada = true;
+                            cartaActual = CARTAS[i];
+                            ui.scanner.classList.add('verde');
+                            activarGemas(true);
+                            ui.hint.innerText = `${cartaActual.nombre} detectado - Elige lado`;
+                            ui.msg.innerText = `Carta detectada: ${cartaActual.nombre}`;
+                        }
+                    };
+                }
+
+                ['I', 'A', 'T', 'M'].forEach(lado => {
+                    ui['btn' + lado].onclick = () => {
+                        if(!cartaDetectada || esperandoVideo || !ui['btn' + lado].classList.contains('activo')) return;
+                        
+                        const valor = cartaActual[lado];
+                        jugadores[tIdx].cartas.push({
+                            carta: cartaActual.nombre,
+                            lado: lado,
+                            valor: valor
+                        });
+                        
+                        actualizarListaCartas();
+                        activarGemas(false);
+                        reproducirVideo(lado);
+                    };
+                });
+
+                await mindarThree.start();
+                renderer.setAnimationLoop(() => {
+                    renderer.render(scene, camera);
+                });
+            } catch(err) {
+                console.error("Error AR:", err);
+                alert("Error al iniciar AR. Verifica la cámara.");
+            }
         }
 
         function reproducirVideo(lado) {
@@ -567,7 +628,6 @@
             const ganador = ranking[0];
             ganador.victorias++;
 
-            // Guardar ronda
             rondas.push({
                 numero: numRonda,
                 ganador: ganador,
@@ -579,4 +639,28 @@
                 div.className = 'resultado-jugador' + (idx === 0 ? ' ganador' : '');
                 div.style.borderLeftColor = j.color;
                 
-                let cartasHTML = j.cartas.map
+                let cartasHTML = j.cartas.map(c => `<span style="color:#aaa;">${c.carta} ${c.lado}:${c.valor}</span>`).join(', ');
+                
+                div.innerHTML = `
+                    <div style="font-size:24px; font-weight:bold; color:${j.color}; margin-bottom:10px;">
+                        ${idx === 0 ? '👑 ' : ''}${j.esc} ${j.nombre}
+                    </div>
+                    <div style="font-size:18px; margin:5px 0;">
+                        <strong>Cartas:</strong> ${cartasHTML || '<em>Ninguna</em>'}
+                    </div>
+                    <div style="font-size:18px; margin:5px 0;">
+                        <strong>Puntos cartas:</strong> ${j.puntosTotales}
+                    </div>
+                    <div style="font-size:18px; margin:5px 0;">
+                        <strong>Dado:</strong> 🎲 ${j.dado}
+                    </div>
+                    <div style="font-size:24px; margin-top:10px; color:gold; font-weight:bold;">
+                        <strong>TOTAL:</strong> ${j.puntajeFinal} puntos
+                    </div>
+                `;
+                contenido.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
