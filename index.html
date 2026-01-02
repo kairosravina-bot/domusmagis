@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V9.8</title>
+    <title>DOMUS MAGI V9.9</title>
     
     <script type="importmap">
     {
       "imports": {
-        "three": "https://unpkg.com/three@0.147.0/build/three.module.js",
-        "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-three.prod.js"
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "mindar-image-three":"https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
       }
     }
     </script>
@@ -31,18 +32,21 @@
         #panel-mando { height: 27vh; background: #111; border-top: 2px solid #fff; pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; }
 
         #guia-scanner { width: 220px; height: 220px; border: 4px solid red; border-radius: 20px; margin: auto; position: absolute; top:0; bottom:0; left:0; right:0; transition: 0.3s; }
-        #guia-scanner.detectado { border-color: #0f0; box-shadow: 0 0 50px #0f0; }
+        #guia-scanner.verde { border-color: #0f0; box-shadow: 0 0 50px #0f0; }
 
         .btn-gema {
-            width: 60px; height: 60px; border-radius: 50%; border: 2px solid #444;
-            background: #222; color: #444; display: flex; align-items: center;
-            justify-content: center; font-size: 20px; font-weight: bold;
+            width: 75px; height: 75px; border-radius: 50%; border: 3px solid #555;
+            background: #222; color: #555; display: flex; align-items: center;
+            justify-content: center; font-size: 26px; font-weight: bold;
             cursor: not-allowed; transition: all 0.3s; opacity: 0.4;
         }
         .btn-gema.activo {
-            opacity: 1; cursor: pointer; border-color: #fff; color: #fff;
-            box-shadow: 0 0 20px currentColor; transform: scale(1.1);
+            opacity: 1; cursor: pointer; border-color: white; color: white; transform: scale(1.1);
         }
+        #btn-i.activo { box-shadow: 0 0 25px #f00; }
+        #btn-a.activo { box-shadow: 0 0 25px #0f0; }
+        #btn-t.activo { box-shadow: 0 0 25px #aaa; }
+        #btn-m.activo { box-shadow: 0 0 25px #d0f; }
 
         #container-ar { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         .mago-item { font-size: 22px; margin: 10px; padding: 5px; border-radius: 5px; }
@@ -68,14 +72,20 @@
             text-align: center; font-size: 18px; color: #0f0;
             margin: 10px 0; font-weight: bold;
         }
+        #debug-log {
+            position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8);
+            color: #0f0; padding: 10px; font-size: 12px; max-width: 90%;
+            max-height: 100px; overflow-y: auto; font-family: monospace;
+            border: 1px solid #0f0; border-radius: 5px; z-index: 9999;
+        }
     </style>
 </head>
 <body>
 
     <div id="p-inicio" class="pantalla">
         <button class="btn-master" onclick="navegar('p-inicio', 'p-setup')">⚡ INICIAR SISTEMA ⚡</button>
-        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V9.8</h2>
-        <p style="color:#bf00ff; font-size:12px;">Sistema de Presión Táctil Activado</p>
+        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V9.9</h2>
+        <p style="color:#bf00ff; font-size:12px;">Fix Detección y Sistema de Presión</p>
     </div>
 
     <div id="p-setup" class="pantalla oculto">
@@ -110,7 +120,7 @@
                     <div id="status-txt" style="position:absolute; top:10px; right:20px; background:rgba(0,255,0,0.2); padding:5px 15px; border-radius:15px; border:1px solid #0f0; color:#0f0; z-index:10;">AR OK</div>
                     
                     <div id="pressure-panel">
-                        <div class="pressure-label">PRESIÓN DE CONTACTO</div>
+                        <div class="pressure-label">PRESIÓN DE CONTACTO - V9.9</div>
                         <div id="pressure-display">0.0</div>
                         <div id="pressure-bar">
                             <div id="pressure-fill"></div>
@@ -126,10 +136,10 @@
             <div id="zona-ar"><div id="guia-scanner"></div></div>
             <div id="panel-mando">
                 <div style="display:flex; gap:20px;">
-                    <div id="gem-I" class="btn-gema">I</div>
-                    <div id="gem-A" class="btn-gema">A</div>
-                    <div id="gem-T" class="btn-gema">T</div>
-                    <div id="gem-M" class="btn-gema">M</div>
+                    <button id="btn-i" class="btn-gema">I</button>
+                    <button id="btn-a" class="btn-gema">A</button>
+                    <button id="btn-t" class="btn-gema">T</button>
+                    <button id="btn-m" class="btn-gema">M</button>
                 </div>
                 <p id="hint">ESCANEA CARTA PARA ACTIVAR GEMAS</p>
             </div>
@@ -137,14 +147,23 @@
     </div>
 
     <div id="container-ar"></div>
+    <div id="debug-log"></div>
 
     <script>
         let jugadores = [];
         let cant = 0;
 
+        function log(msg) {
+            const d = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            d.innerHTML = `[${timestamp}] ${msg}<br>` + d.innerHTML;
+            console.log(msg);
+        }
+
         function navegar(oc, mo) {
             document.getElementById(oc).classList.add('oculto');
             document.getElementById(mo).classList.remove('oculto');
+            log(`Navegación: ${oc} → ${mo}`);
         }
 
         function setModo(n) {
@@ -175,12 +194,25 @@
         import * as THREE from 'three';
         import { MindARThree } from 'mindar-image-three';
 
+        const VERSION = "V9.9";
+        console.log(`%c═══════════════════════════════`, "color: #bf00ff; font-size: 20px;");
+        console.log(`%c  DOMUS MAGI ${VERSION}`, "color: #bf00ff; font-size: 20px; font-weight: bold;");
+        console.log(`%c═══════════════════════════════`, "color: #bf00ff; font-size: 20px;");
+
         let tIdx = 0;
         let mindarThree = null;
         let cartaDetectada = false;
         let pressureData = { current: 0, min: 0, max: 0 };
+        let cartaActual = null;
 
-        const gemas = ["I","A","T","M"];
+        const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
+
+        function log(msg) {
+            const d = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            d.innerHTML = `[${timestamp}] ${msg}<br>` + d.innerHTML;
+            console.log(msg);
+        }
 
         function actualizarVisualizacionPresion(presion) {
             document.getElementById('pressure-display').innerText = presion.toFixed(1);
@@ -215,93 +247,41 @@
             document.getElementById('pressure-status').innerText = 'Esperando toque...';
         }
 
-        function activarGemaConPresion(gema) {
-            const el = document.getElementById("gem-"+gema);
-            el.style.transform = 'scale(1.5)';
-            el.style.boxShadow = '0 0 40px currentColor';
+        function activarGemas(bol) {
+            log(`activarGemas(${bol}) - Carta: ${cartaActual}`);
             
-            setTimeout(() => {
-                if(confirm(`¿Confirmar acción ${gema}?`)) {
-                    sig();
+            const botones = [
+                document.getElementById('btn-i'),
+                document.getElementById('btn-a'),
+                document.getElementById('btn-t'),
+                document.getElementById('btn-m')
+            ];
+
+            botones.forEach((btn, idx) => {
+                if(bol) {
+                    btn.classList.add('activo');
+                    log(`  ✓ Botón ${btn.id} ACTIVADO`);
                 } else {
-                    el.style.transform = 'scale(1.1)';
-                    el.style.boxShadow = '0 0 20px currentColor';
-                    resetPresion();
+                    btn.classList.remove('activo');
+                    log(`  ✗ Botón ${btn.id} DESACTIVADO`);
                 }
-            }, 300);
+            });
         }
 
-        // SISTEMA DE EVENTOS PARA GEMAS - IGUAL QUE V7.1
-        function configurarEventosGemas() {
-            gemas.forEach(g => {
-                const el = document.getElementById("gem-"+g);
-                
-                // Touch events
-                let touchStartTime = 0;
-                let presionInterval = null;
-                
-                el.addEventListener('touchstart', (e) => {
-                    if(!cartaDetectada || !el.classList.contains('activo')) return;
-                    e.preventDefault();
-                    
-                    console.log(`🔘 Touch Start en gema ${g}`);
-                    touchStartTime = Date.now();
-                    let presion = 0;
-                    
-                    presionInterval = setInterval(() => {
-                        presion += 10;
-                        pressureData.current = presion;
-                        if(pressureData.min === 0) pressureData.min = presion;
-                        pressureData.max = Math.max(pressureData.max, presion);
-                        actualizarVisualizacionPresion(presion);
-                        
-                        if(presion >= 100) {
-                            clearInterval(presionInterval);
-                            activarGemaConPresion(g);
-                        }
-                    }, 100);
-                });
-                
-                el.addEventListener('touchend', (e) => {
-                    if(presionInterval) {
-                        clearInterval(presionInterval);
-                        const duracion = Date.now() - touchStartTime;
-                        console.log(`🔘 Touch End en gema ${g} - Duración: ${duracion}ms`);
-                        
-                        if(pressureData.current >= 70) {
-                            activarGemaConPresion(g);
-                        } else {
-                            resetPresion();
-                        }
-                    }
-                });
-                
-                // Click events (desktop/mobile respaldo)
-                el.addEventListener('click', (e) => {
-                    if(!cartaDetectada || !el.classList.contains('activo')) {
-                        console.warn(`⚠️ Click ignorado en ${g} - carta:${cartaDetectada} activo:${el.classList.contains('activo')}`);
-                        return;
-                    }
-                    
-                    e.preventDefault();
-                    console.log(`✅ Click en gema ${g} - Carta detectada`);
-                    
-                    // Simular presión instantánea
-                    let presion = 0;
-                    const clickInterval = setInterval(() => {
-                        presion += 20;
-                        pressureData.current = presion;
-                        if(pressureData.min === 0) pressureData.min = presion;
-                        pressureData.max = Math.max(pressureData.max, presion);
-                        actualizarVisualizacionPresion(presion);
-                        
-                        if(presion >= 100) {
-                            clearInterval(clickInterval);
-                            activarGemaConPresion(g);
-                        }
-                    }, 50);
-                });
-            });
+        function sig() {
+            if(tIdx < jugadores.length - 1) {
+                tIdx++;
+                alert("Pasa el dispositivo al siguiente mago.");
+                updHUD();
+                cartaDetectada = false;
+                cartaActual = null;
+                pressureData = { current: 0, min: 0, max: 0 };
+                resetPresion();
+                activarGemas(false);
+            } else {
+                alert("¡BATALLA FINAL INICIADA! Tirando dados...");
+                location.reload();
+            }
         }
 
         document.getElementById('btn-despertar').onclick = async () => {
@@ -310,10 +290,16 @@
             btn.disabled = true;
 
             try {
+                log("🚀 Iniciando MindAR...");
+
                 mindarThree = new MindARThree({
                     container: document.querySelector("#container-ar"),
-                    imageTargetSrc: "https://kairosravina-bot.github.io/domusmagis/targets1.mind",
+                    imageTargetSrc: RUTA_BASE + "targets1.mind",
                     maxTrack: 1,
+                    filterMinCF: 0.0001,
+                    filterBeta: 0.001,
+                    warmupTolerance: 5,
+                    missTolerance: 5,
                     uiLoading: "no",
                     uiScanning: "no",
                     uiError: "no"
@@ -321,11 +307,10 @@
 
                 const {renderer, scene, camera} = mindarThree;
 
-                console.log("📦 Creando anchors...");
+                log("📦 Creando anchors (0-4)...");
 
-                for(let i=0; i<5; i++) {
+                for(let i = 0; i < 5; i++) {
                     const anchor = mindarThree.addAnchor(i);
-                    console.log(`✓ Anchor ${i} creado`);
                     
                     const geometry = new THREE.PlaneGeometry(1, 1);
                     const material = new THREE.MeshBasicMaterial({transparent: true, opacity: 0});
@@ -333,61 +318,48 @@
                     anchor.group.add(plane);
 
                     anchor.onTargetFound = () => {
-                        console.log(`%c🎯 CARTA ${i} DETECTADA`, "color: #0f0; font-size: 16px; font-weight: bold;");
+                        log(`🎯 CARTA ${i} DETECTADA`);
                         cartaDetectada = true;
+                        cartaActual = i;
                         
-                        document.getElementById('guia-scanner').classList.add('detectado');
-                        document.getElementById('hint').innerText = "CARTA VINCULADA - PRESIONA GEMA";
-                        document.getElementById('pressure-status').innerText = '¡Carta detectada! Toca una gema';
+                        document.getElementById('guia-scanner').classList.add('verde');
+                        document.getElementById('hint').innerText = `CARTA ${i} - PRESIONA GEMA`;
+                        document.getElementById('pressure-status').innerText = '¡Carta detectada!';
                         document.getElementById('pressure-status').style.color = '#bf00ff';
                         
-                        // ACTIVAR GEMAS - IGUAL QUE V7.1
-                        gemas.forEach(g => {
-                            const el = document.getElementById("gem-"+g);
-                            el.classList.add('activo');
-                            el.style.borderColor = jugadores[tIdx].color;
-                            el.style.color = jugadores[tIdx].color;
-                        });
-                        
-                        console.log("✅ Gemas activadas");
+                        activarGemas(true);
                     };
 
                     anchor.onTargetLost = () => {
-                        console.log(`❌ CARTA ${i} PERDIDA`);
-                        cartaDetectada = false;
-                        
-                        document.getElementById('guia-scanner').classList.remove('detectado');
-                        document.getElementById('hint').innerText = "ESCANEA TU CARTA FÍSICA";
-                        document.getElementById('pressure-status').innerText = 'Esperando carta...';
-                        document.getElementById('pressure-status').style.color = '#f00';
-                        
-                        // DESACTIVAR GEMAS
-                        gemas.forEach(g => {
-                            const el = document.getElementById("gem-"+g);
-                            el.classList.remove('activo');
-                            el.style.borderColor = "#444";
-                            el.style.color = "#444";
-                        });
-                        
-                        resetPresion();
-                        console.log("🔒 Gemas desactivadas");
+                        log(`❌ CARTA ${i} PERDIDA`);
+                        if(cartaActual === i) {
+                            cartaDetectada = false;
+                            cartaActual = null;
+                            
+                            document.getElementById('guia-scanner').classList.remove('verde');
+                            document.getElementById('hint').innerText = "ESCANEA TU CARTA FÍSICA";
+                            document.getElementById('pressure-status').innerText = 'Esperando carta...';
+                            document.getElementById('pressure-status').style.color = '#f00';
+                            
+                            activarGemas(false);
+                            resetPresion();
+                        }
                     };
                 }
 
                 await mindarThree.start();
-                console.log("✅ MindAR iniciado");
+                log("✅ MindAR INICIADO");
                 
                 navegar('p-resumen', 'ui-juego');
                 document.getElementById('container-ar').style.background = "transparent";
                 updHUD();
                 configurarEventosGemas();
-                console.log("🎮 Sistema listo");
 
                 renderer.setAnimationLoop(() => renderer.render(scene, camera));
 
             } catch (err) {
-                console.error("❌ Error:", err);
-                alert("Error de Cámara: Asegúrate de estar en HTTPS y permitir el acceso.");
+                log(`❌ ERROR: ${err.message}`);
+                alert("Error de Cámara: " + err.message);
                 btn.innerText = "ERROR - REINTENTAR";
                 btn.disabled = false;
             }
@@ -398,27 +370,65 @@
             const div = document.getElementById('txt-turno');
             div.innerText = `${j.esc} MAGO: ${j.nombre}`;
             div.style.color = j.color;
+            log(`🎮 Turno: ${j.nombre}`);
         }
 
-        function sig() {
-            if(tIdx < jugadores.length - 1) {
-                tIdx++;
-                alert("Pasa el dispositivo al siguiente mago.");
-                updHUD();
-                cartaDetectada = false;
-                pressureData = { current: 0, min: 0, max: 0 };
-                resetPresion();
+        function configurarEventosGemas() {
+            log("🔧 Configurando eventos de gemas...");
+            
+            const botones = [
+                {id: 'btn-i', letra: 'I'},
+                {id: 'btn-a', letra: 'A'},
+                {id: 'btn-t', letra: 'T'},
+                {id: 'btn-m', letra: 'M'}
+            ];
+
+            botones.forEach(({id, letra}) => {
+                const btn = document.getElementById(id);
                 
-                gemas.forEach(g => {
-                    const el = document.getElementById("gem-"+g);
-                    el.classList.remove('activo');
-                    el.style.borderColor = "#444";
-                    el.style.color = "#444";
+                btn.addEventListener('click', (e) => {
+                    log(`🖱️ Click en ${letra}`);
+                    log(`  cartaDetectada: ${cartaDetectada}`);
+                    log(`  activo: ${btn.classList.contains('activo')}`);
+                    
+                    if(!cartaDetectada || !btn.classList.contains('activo')) {
+                        log(`  ⚠️ Click rechazado`);
+                        return;
+                    }
+                    
+                    log(`  ✅ Click aceptado - Iniciando presión`);
+                    
+                    let presion = 0;
+                    const interval = setInterval(() => {
+                        presion += 20;
+                        pressureData.current = presion;
+                        if(pressureData.min === 0) pressureData.min = presion;
+                        pressureData.max = Math.max(pressureData.max, presion);
+                        actualizarVisualizacionPresion(presion);
+                        
+                        if(presion >= 100) {
+                            clearInterval(interval);
+                            log(`  💥 Presión completa - Activando ${letra}`);
+                            
+                            btn.style.transform = 'scale(1.5)';
+                            setTimeout(() => {
+                                if(confirm(`¿Confirmar acción ${letra}?`)) {
+                                    log(`  ✓ Acción confirmada`);
+                                    sig();
+                                } else {
+                                    log(`  ✗ Acción cancelada`);
+                                    btn.style.transform = 'scale(1.1)';
+                                    resetPresion();
+                                }
+                            }, 300);
+                        }
+                    }, 50);
                 });
-            } else {
-                alert("¡BATALLA FINAL INICIADA! Tirando dados...");
-                location.reload();
-            }
+                
+                log(`  ✓ ${letra} configurado`);
+            });
+            
+            log("✅ Eventos configurados");
         }
     </script>
 </body>
