@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V10.0</title>
+    <title>DOMUS MAGI V10.1</title>
     
     <script type="importmap">
     {
@@ -33,7 +33,12 @@
             justify-content: center; overflow: hidden;
         }
         #zona-ar { height: 35vh; position: relative; background: transparent; }
-        #panel-mando { height: 25vh; background: #111; border-top: 2px solid #fff; pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px; }
+        #panel-mando { 
+            height: 25vh; background: #111; border-top: 2px solid #fff; 
+            pointer-events: auto; display: flex; flex-direction: column; 
+            align-items: center; justify-content: space-around; padding: 10px;
+            overflow-y: auto;
+        }
 
         #guia-scanner { width: 220px; height: 220px; border: 4px solid red; border-radius: 20px; margin: auto; position: absolute; top:0; bottom:0; left:0; right:0; transition: 0.3s; }
         #guia-scanner.verde { border-color: #0f0; box-shadow: 0 0 50px #0f0; }
@@ -70,6 +75,34 @@
             background: rgba(0,0,0,0.7); padding: 10px; border-radius: 10px;
         }
 
+        #cartas-jugadas {
+            background: rgba(0,0,0,0.8); padding: 10px;
+            border-radius: 10px; margin: 5px 0; max-height: 60px;
+            overflow-y: auto; width: 90%;
+        }
+        .carta-chip {
+            display: inline-block; background: #333; padding: 5px 10px;
+            margin: 3px; border-radius: 8px; font-size: 12px;
+            border: 2px solid #555;
+        }
+
+        .btn-accion {
+            padding: 15px 25px; font-size: 16px; margin: 5px;
+            border-radius: 10px; cursor: pointer; font-weight: bold;
+            border: 2px solid #fff; transition: all 0.3s;
+        }
+        .btn-agregar {
+            background: #0a0; color: white;
+            box-shadow: 0 0 15px #0a0;
+        }
+        .btn-agregar:hover { transform: scale(1.05); }
+        
+        .btn-finalizar {
+            background: #f90; color: white;
+            box-shadow: 0 0 15px #f90;
+        }
+        .btn-finalizar:hover { transform: scale(1.05); }
+
         #resultado-batalla {
             background: rgba(0,0,0,0.95); padding: 30px;
             border: 3px solid gold; border-radius: 20px;
@@ -86,8 +119,8 @@
 
     <div id="p-inicio" class="pantalla">
         <button class="btn-master" onclick="navegar('p-inicio', 'p-setup')">⚡ INICIAR SISTEMA ⚡</button>
-        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V10.0</h2>
-        <p style="color:#bf00ff; font-size:14px;">Sistema Completo de Batalla</p>
+        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V10.1</h2>
+        <p style="color:#bf00ff; font-size:14px;">Sistema Multi-Cartas y Artefactos</p>
     </div>
 
     <div id="p-setup" class="pantalla oculto">
@@ -122,16 +155,28 @@
         </div>
         <div id="zona-ar"><div id="guia-scanner"></div></div>
         <div id="panel-mando">
-            <div style="display:flex; gap:15px; margin-bottom: 10px;">
+            <div id="cartas-jugadas">
+                <strong>Cartas jugadas:</strong>
+                <div id="lista-cartas-chips"></div>
+            </div>
+            
+            <div style="display:flex; gap:15px; margin: 10px 0;">
                 <button id="btn-i" class="btn-gema">I</button>
                 <button id="btn-a" class="btn-gema">A</button>
                 <button id="btn-t" class="btn-gema">T</button>
                 <button id="btn-m" class="btn-gema">M</button>
             </div>
-            <p id="hint" style="margin: 5px 0; text-align: center;">ESCANEA TU CARTA</p>
-            <button id="btn-pasar" class="btn-master" style="padding: 15px 30px; font-size: 16px; display: none;">
-                PASAR TURNO ➡️
-            </button>
+            
+            <p id="hint" style="margin: 5px 0; text-align: center; font-size: 14px;">ESCANEA TU CARTA</p>
+            
+            <div style="display:flex; gap:10px; flex-wrap: wrap; justify-content: center;">
+                <button id="btn-agregar" class="btn-accion btn-agregar">
+                    ➕ AGREGAR OTRA CARTA
+                </button>
+                <button id="btn-finalizar" class="btn-accion btn-finalizar">
+                    ✅ FINALIZAR TURNO
+                </button>
+            </div>
         </div>
     </div>
 
@@ -185,7 +230,8 @@
         import { MindARThree } from 'mindar-image-three';
 
         console.log("%c═══════════════════════════════", "color: #bf00ff; font-size: 20px;");
-        console.log("%c  DOMUS MAGI V10.0", "color: #bf00ff; font-size: 20px; font-weight: bold;");
+        console.log("%c  DOMUS MAGI V10.1", "color: #bf00ff; font-size: 20px; font-weight: bold;");
+        console.log("%c  Sistema Multi-Cartas", "color: #0f0; font-size: 16px;");
         console.log("%c═══════════════════════════════", "color: #bf00ff; font-size: 20px;");
 
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
@@ -216,12 +262,14 @@
             btnA: document.getElementById('btn-a'),
             btnT: document.getElementById('btn-t'),
             btnM: document.getElementById('btn-m'),
-            btnPasar: document.getElementById('btn-pasar'),
+            btnAgregar: document.getElementById('btn-agregar'),
+            btnFinalizar: document.getElementById('btn-finalizar'),
             scanner: document.getElementById('guia-scanner'),
             msg: document.getElementById('msg-visor'),
             txtTurno: document.getElementById('txt-turno'),
             hint: document.getElementById('hint'),
-            videoPlayer: document.getElementById('video-player')
+            videoPlayer: document.getElementById('video-player'),
+            listaChips: document.getElementById('lista-cartas-chips')
         };
 
         function activarGemas(bol) {
@@ -235,12 +283,30 @@
             });
         }
 
+        function actualizarListaCartas() {
+            const jugador = jugadores[tIdx];
+            ui.listaChips.innerHTML = '';
+            
+            if(jugador.cartas.length === 0) {
+                ui.listaChips.innerHTML = '<em style="color:#888;">Ninguna</em>';
+                return;
+            }
+
+            jugador.cartas.forEach(c => {
+                const chip = document.createElement('span');
+                chip.className = 'carta-chip';
+                chip.style.borderColor = jugador.color;
+                chip.innerText = `${c.carta} ${c.lado}:${c.valor}`;
+                ui.listaChips.appendChild(chip);
+            });
+        }
+
         function updHUD() {
             const j = jugadores[tIdx];
-            ui.txtTurno.innerText = `${j.esc} ${j.nombre} - Turno ${tIdx + 1}/${jugadores.length}`;
+            ui.txtTurno.innerText = `${j.esc} ${j.nombre} - Cartas: ${j.cartas.length}`;
             ui.txtTurno.style.color = j.color;
-            ui.msg.innerText = `${j.nombre}, escanea tu carta`;
-            ui.btnPasar.style.display = 'block';
+            ui.msg.innerText = `${j.nombre}, escanea una carta`;
+            actualizarListaCartas();
         }
 
         function reproducirVideo(lado) {
@@ -265,11 +331,38 @@
         function finalizarVideo() {
             ui.videoPlayer.style.display = 'none';
             ui.msg.style.display = 'block';
-            ui.msg.innerText = "¡Carta jugada!";
+            ui.msg.innerText = "¡Carta agregada!";
             esperandoVideo = false;
+            
+            // Resetear para agregar otra carta
+            setTimeout(() => {
+                ui.msg.innerText = "Escanea otra carta o finaliza turno";
+            }, 1500);
         }
 
         ui.videoPlayer.addEventListener('ended', finalizarVideo);
+
+        ui.btnAgregar.onclick = () => {
+            console.log("Preparando para agregar otra carta");
+            cartaDetectada = false;
+            cartaActual = null;
+            activarGemas(false);
+            ui.scanner.classList.remove('verde');
+            ui.hint.innerText = "ESCANEA OTRA CARTA";
+            ui.msg.innerText = "Escanea tu siguiente carta...";
+        };
+
+        ui.btnFinalizar.onclick = () => {
+            const jugador = jugadores[tIdx];
+            if(jugador.cartas.length === 0) {
+                alert("¡Debes jugar al menos una carta!");
+                return;
+            }
+            
+            if(confirm(`¿Finalizar turno con ${jugador.cartas.length} carta(s)?`)) {
+                siguienteTurno();
+            }
+        };
 
         function siguienteTurno() {
             console.log(`Siguiente turno. Actual: ${tIdx}`);
@@ -287,12 +380,6 @@
                 mostrarResultados();
             }
         }
-
-        ui.btnPasar.onclick = () => {
-            if(confirm("¿Pasar al siguiente jugador?")) {
-                siguienteTurno();
-            }
-        };
 
         function mostrarResultados() {
             console.log("Mostrando resultados finales");
@@ -332,8 +419,8 @@
                         ${idx === 0 ? '👑 ' : `${idx + 1}. `}${j.esc} ${j.nombre}
                     </h3>
                     <div style="margin:10px 0;">
-                        <strong>Cartas jugadas:</strong><br>
-                        ${cartasHTML || '<em>No jugó cartas</em>'}
+                        <strong>Cartas jugadas (${j.cartas.length}):</strong><br>
+                        ${cartasHTML}
                     </div>
                     <div style="font-size:18px; margin-top:10px;">
                         📊 Puntos cartas: <strong>${j.puntosTotales}</strong><br>
@@ -463,10 +550,14 @@
                         valor: valor
                     });
                     
+                    // Actualizar UI
+                    actualizarListaCartas();
+                    updHUD();
+                    
                     // Reproducir video
                     reproducirVideo(lado);
                     
-                    // Desactivar gemas
+                    // Desactivar gemas temporalmente
                     activarGemas(false);
                     cartaDetectada = false;
                     ui.scanner.classList.remove('verde');
