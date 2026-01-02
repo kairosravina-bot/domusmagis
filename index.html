@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V14.1</title>
+    <title>DOMUS MAGI V14.5</title>
     
     <script type="importmap">
     {
@@ -161,7 +161,7 @@
     <!-- PANTALLA INICIAL -->
     <div id="p-inicio" class="pantalla">
         <button class="btn-master" onclick="irMenuPrincipal()">⚡ INICIAR SISTEMA ⚡</button>
-        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V14.1</h2>
+        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V14.2</h2>
         <p style="color:#bf00ff; font-size:14px;">Sistema Completo de Batalla</p>
     </div>
 
@@ -427,7 +427,7 @@
         import { MindARThree } from 'mindar-image-three';
 
         console.log("%c═══════════════════════════════", "color: #bf00ff; font-size: 20px;");
-        console.log("%c  DOMUS MAGI V14.1", "color: #bf00ff; font-size: 20px; font-weight: bold;");
+        console.log("%c  DOMUS MAGI V14.2", "color: #bf00ff; font-size: 20px; font-weight: bold;");
         console.log("%c═══════════════════════════════", "color: #bf00ff; font-size: 20px;");
 
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
@@ -505,14 +505,14 @@
             if(mindarThree) return;
             
             try {
-                console.log("🚀 Iniciando sistema AR...");
+                console.log("🚀 Iniciando sistema AR (Configuración Optimizada V14.2)...");
                 
                 mindarThree = new MindARThree({
                     container: document.getElementById('container-ar'),
                     imageTargetSrc: RUTA_BASE + 'targets.mind',
                     maxTrack: 1,
-                    filterMinCF: 0.0001,
-                    filterBeta: 0.001,
+                    // CORRECCIÓN PRINCIPAL: Eliminados filtros extremos que bloqueaban detección
+                    // filterMinCF y filterBeta removidos para usar defaults (0.001 y 1000)
                     warmupTolerance: 5,
                     missTolerance: 5,
                     uiLoading: "no",
@@ -521,13 +521,17 @@
                 });
 
                 const { renderer, scene, camera } = mindarThree;
+                
+                // Mejora de renderizado
+                renderer.setPixelRatio(window.devicePixelRatio);
 
                 console.log("📦 Creando anchors para 5 cartas (0-4)...");
 
                 for(let i = 0; i < 5; i++) {
                     const anchor = mindarThree.addAnchor(i);
-                    console.log(`  ✓ Anchor ${i} creado para ${CARTAS[i].nombre}`);
+                    console.log(`  ✓ Anchor ${i} preparado`);
                     
+                    // Plano invisible para referencia técnica
                     const geometry = new THREE.PlaneGeometry(1, 1);
                     const material = new THREE.MeshBasicMaterial({transparent: true, opacity: 0});
                     const plane = new THREE.Mesh(geometry, material);
@@ -547,7 +551,7 @@
                     };
 
                     anchor.onTargetLost = () => {
-                        console.log(`%c❌ CARTA ${i} PERDIDA`, "color: #f00; font-size: 14px;");
+                        // console.log(`CARTA ${i} PERDIDA`);
                     };
                 }
 
@@ -571,7 +575,6 @@
                 console.log("⏳ Iniciando MindAR...");
                 await mindarThree.start();
                 console.log("✅ MindAR iniciado correctamente");
-                console.log("📷 Cámara lista - Enfoca una carta");
                 
                 renderer.setAnimationLoop(() => {
                     renderer.render(scene, camera);
