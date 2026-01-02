@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V9.9</title>
+    <title>DOMUS MAGI V10.0</title>
     
     <script type="importmap">
     {
@@ -27,17 +27,21 @@
         }
 
         #ui-juego { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; pointer-events: none; z-index: 500; }
-        #visor-top { height: 33vh; background: rgba(0,0,0,0.8); border-bottom: 2px solid #bf00ff; pointer-events: auto; position: relative; display: flex; align-items: center; justify-content: center; overflow-y: auto; }
-        #zona-ar { height: 40vh; position: relative; background: transparent; }
-        #panel-mando { height: 27vh; background: #111; border-top: 2px solid #fff; pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; }
+        #visor-top { 
+            height: 40vh; background: rgba(0,0,0,0.9); border-bottom: 2px solid #bf00ff; 
+            pointer-events: auto; position: relative; display: flex; align-items: center; 
+            justify-content: center; overflow: hidden;
+        }
+        #zona-ar { height: 35vh; position: relative; background: transparent; }
+        #panel-mando { height: 25vh; background: #111; border-top: 2px solid #fff; pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px; }
 
         #guia-scanner { width: 220px; height: 220px; border: 4px solid red; border-radius: 20px; margin: auto; position: absolute; top:0; bottom:0; left:0; right:0; transition: 0.3s; }
         #guia-scanner.verde { border-color: #0f0; box-shadow: 0 0 50px #0f0; }
 
         .btn-gema {
-            width: 75px; height: 75px; border-radius: 50%; border: 3px solid #555;
+            width: 70px; height: 70px; border-radius: 50%; border: 3px solid #555;
             background: #222; color: #555; display: flex; align-items: center;
-            justify-content: center; font-size: 26px; font-weight: bold;
+            justify-content: center; font-size: 24px; font-weight: bold;
             cursor: not-allowed; transition: all 0.3s; opacity: 0.4;
         }
         .btn-gema.activo {
@@ -51,41 +55,39 @@
         #container-ar { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         .mago-item { font-size: 22px; margin: 10px; padding: 5px; border-radius: 5px; }
 
-        #pressure-panel {
-            width: 90%; max-width: 400px; background: rgba(20,20,20,0.95);
-            border: 2px solid #bf00ff; border-radius: 15px; padding: 20px; margin: 10px auto;
+        #video-player { 
+            width: 100%; height: 100%; object-fit: contain; 
+            display: none; position: absolute; top: 0; left: 0; z-index: 10; 
         }
-        #pressure-display {
-            font-size: 48px; font-weight: bold; text-align: center;
-            margin: 15px 0; color: #0ff; text-shadow: 0 0 20px #0ff;
+        #msg-visor {
+            color: white; text-align: center; font-weight: bold; 
+            font-size: 20px; z-index: 5; padding: 20px;
         }
-        #pressure-bar {
-            width: 100%; height: 30px; background: #222; border-radius: 15px;
-            overflow: hidden; border: 2px solid #444; margin: 10px 0;
+
+        #txt-turno {
+            position: absolute; top: 10px; left: 10px; 
+            font-weight: bold; z-index: 20; font-size: 18px;
+            background: rgba(0,0,0,0.7); padding: 10px; border-radius: 10px;
         }
-        #pressure-fill {
-            height: 100%; width: 0%; background: linear-gradient(90deg, #0f0, #ff0, #f00);
-            transition: width 0.1s; box-shadow: 0 0 20px currentColor;
+
+        #resultado-batalla {
+            background: rgba(0,0,0,0.95); padding: 30px;
+            border: 3px solid gold; border-radius: 20px;
+            max-width: 90%; max-height: 80vh; overflow-y: auto;
         }
-        .pressure-label { font-size: 14px; color: #aaa; margin: 5px 0; }
-        #pressure-status {
-            text-align: center; font-size: 18px; color: #0f0;
-            margin: 10px 0; font-weight: bold;
+        .resultado-jugador {
+            background: rgba(50,50,50,0.8); padding: 15px;
+            margin: 10px 0; border-radius: 10px; border: 2px solid #555;
         }
-        #debug-log {
-            position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8);
-            color: #0f0; padding: 10px; font-size: 12px; max-width: 90%;
-            max-height: 100px; overflow-y: auto; font-family: monospace;
-            border: 1px solid #0f0; border-radius: 5px; z-index: 9999;
-        }
+        .ganador { border-color: gold !important; box-shadow: 0 0 30px gold; }
     </style>
 </head>
 <body>
 
     <div id="p-inicio" class="pantalla">
         <button class="btn-master" onclick="navegar('p-inicio', 'p-setup')">⚡ INICIAR SISTEMA ⚡</button>
-        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V9.9</h2>
-        <p style="color:#bf00ff; font-size:12px;">Fix Detección y Sistema de Presión</p>
+        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V10.0</h2>
+        <p style="color:#bf00ff; font-size:14px;">Sistema Completo de Batalla</p>
     </div>
 
     <div id="p-setup" class="pantalla oculto">
@@ -109,61 +111,49 @@
     <div id="p-resumen" class="pantalla oculto">
         <h2 style="color:gold;">EQUIPOS FORMADOS</h2>
         <div id="lista-resumen"></div>
-        <button id="btn-despertar" class="btn-master" style="margin-top:20px; background:gold; color:black;">🔮 DESPERTAR VISOR AR</button>
+        <button id="btn-despertar" class="btn-master" style="margin-top:20px; background:gold; color:black;">🔮 INICIAR BATALLA</button>
     </div>
 
     <div id="ui-juego" class="oculto">
-        <div id="ui-juego-layout">
-            <div id="visor-top">
-                <div style="width:100%;">
-                    <div id="txt-turno" style="position:absolute; top:10px; left:20px; font-weight:bold; z-index:10;">MAGO: ---</div>
-                    <div id="status-txt" style="position:absolute; top:10px; right:20px; background:rgba(0,255,0,0.2); padding:5px 15px; border-radius:15px; border:1px solid #0f0; color:#0f0; z-index:10;">AR OK</div>
-                    
-                    <div id="pressure-panel">
-                        <div class="pressure-label">PRESIÓN DE CONTACTO - V9.9</div>
-                        <div id="pressure-display">0.0</div>
-                        <div id="pressure-bar">
-                            <div id="pressure-fill"></div>
-                        </div>
-                        <div id="pressure-status">Esperando carta...</div>
-                        <div class="pressure-label" style="display:flex; justify-content:space-between;">
-                            <span>Min: <span id="min-pressure">0.0</span></span>
-                            <span>Max: <span id="max-pressure">0.0</span></span>
-                        </div>
-                    </div>
-                </div>
+        <div id="visor-top">
+            <div id="txt-turno">MAGO: ---</div>
+            <div id="msg-visor">INICIANDO...</div>
+            <video id="video-player" playsinline webkit-playsinline></video>
+        </div>
+        <div id="zona-ar"><div id="guia-scanner"></div></div>
+        <div id="panel-mando">
+            <div style="display:flex; gap:15px; margin-bottom: 10px;">
+                <button id="btn-i" class="btn-gema">I</button>
+                <button id="btn-a" class="btn-gema">A</button>
+                <button id="btn-t" class="btn-gema">T</button>
+                <button id="btn-m" class="btn-gema">M</button>
             </div>
-            <div id="zona-ar"><div id="guia-scanner"></div></div>
-            <div id="panel-mando">
-                <div style="display:flex; gap:20px;">
-                    <button id="btn-i" class="btn-gema">I</button>
-                    <button id="btn-a" class="btn-gema">A</button>
-                    <button id="btn-t" class="btn-gema">T</button>
-                    <button id="btn-m" class="btn-gema">M</button>
-                </div>
-                <p id="hint">ESCANEA CARTA PARA ACTIVAR GEMAS</p>
-            </div>
+            <p id="hint" style="margin: 5px 0; text-align: center;">ESCANEA TU CARTA</p>
+            <button id="btn-pasar" class="btn-master" style="padding: 15px 30px; font-size: 16px; display: none;">
+                PASAR TURNO ➡️
+            </button>
+        </div>
+    </div>
+
+    <div id="p-resultado" class="pantalla oculto">
+        <div id="resultado-batalla">
+            <h2 style="color:gold; text-align:center;">⚔️ RESULTADO DE LA BATALLA ⚔️</h2>
+            <div id="resultado-contenido"></div>
+            <button class="btn-master" onclick="location.reload()" style="margin: 20px auto; display: block;">
+                🔄 NUEVA BATALLA
+            </button>
         </div>
     </div>
 
     <div id="container-ar"></div>
-    <div id="debug-log"></div>
 
     <script>
         let jugadores = [];
         let cant = 0;
 
-        function log(msg) {
-            const d = document.getElementById('debug-log');
-            const timestamp = new Date().toLocaleTimeString();
-            d.innerHTML = `[${timestamp}] ${msg}<br>` + d.innerHTML;
-            console.log(msg);
-        }
-
         function navegar(oc, mo) {
             document.getElementById(oc).classList.add('oculto');
             document.getElementById(mo).classList.remove('oculto');
-            log(`Navegación: ${oc} → ${mo}`);
         }
 
         function setModo(n) {
@@ -175,7 +165,7 @@
 
         function registrarMago(casa, color, esc) {
             let n = document.getElementById('mago-nombre').value || "Mago " + (jugadores.length + 1);
-            jugadores.push({nombre: n, casa, color, esc});
+            jugadores.push({nombre: n, casa, color, esc, cartas: []});
             document.getElementById('mago-nombre').value = "";
             
             if(jugadores.length === cant) {
@@ -194,94 +184,178 @@
         import * as THREE from 'three';
         import { MindARThree } from 'mindar-image-three';
 
-        const VERSION = "V9.9";
-        console.log(`%c═══════════════════════════════`, "color: #bf00ff; font-size: 20px;");
-        console.log(`%c  DOMUS MAGI ${VERSION}`, "color: #bf00ff; font-size: 20px; font-weight: bold;");
-        console.log(`%c═══════════════════════════════`, "color: #bf00ff; font-size: 20px;");
+        console.log("%c═══════════════════════════════", "color: #bf00ff; font-size: 20px;");
+        console.log("%c  DOMUS MAGI V10.0", "color: #bf00ff; font-size: 20px; font-weight: bold;");
+        console.log("%c═══════════════════════════════", "color: #bf00ff; font-size: 20px;");
+
+        const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
+        
+        const CARTAS = {
+            0: { nombre: "DRAGÓN", I: 7, A: 2, T: 3, M: 2 },
+            1: { nombre: "ÁGUILA", I: 5, A: 4, T: 2, M: 3 },
+            2: { nombre: "LEÓN", I: 8, A: 1, T: 4, M: 1 },
+            3: { nombre: "JABALÍ", I: 6, A: 3, T: 3, M: 2 },
+            4: { nombre: "BÚHO", I: 2, A: 3, T: 2, M: 7 }
+        };
+
+        const VIDEOS = {
+            I: "ataque.mp4",
+            A: "cura.mp4", 
+            T: "defensa.mp4",
+            M: "magia.mp4"
+        };
 
         let tIdx = 0;
         let mindarThree = null;
         let cartaDetectada = false;
-        let pressureData = { current: 0, min: 0, max: 0 };
         let cartaActual = null;
+        let esperandoVideo = false;
 
-        const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
-
-        function log(msg) {
-            const d = document.getElementById('debug-log');
-            const timestamp = new Date().toLocaleTimeString();
-            d.innerHTML = `[${timestamp}] ${msg}<br>` + d.innerHTML;
-            console.log(msg);
-        }
-
-        function actualizarVisualizacionPresion(presion) {
-            document.getElementById('pressure-display').innerText = presion.toFixed(1);
-            document.getElementById('pressure-fill').style.width = presion + '%';
-            document.getElementById('min-pressure').innerText = pressureData.min.toFixed(1);
-            document.getElementById('max-pressure').innerText = pressureData.max.toFixed(1);
-            
-            const display = document.getElementById('pressure-display');
-            const status = document.getElementById('pressure-status');
-            
-            if(presion < 30) {
-                display.style.color = '#0ff';
-                display.style.textShadow = '0 0 20px #0ff';
-                status.innerText = 'Presión BAJA';
-                status.style.color = '#0ff';
-            } else if(presion < 70) {
-                display.style.color = '#ff0';
-                display.style.textShadow = '0 0 20px #ff0';
-                status.innerText = 'Presión MEDIA';
-                status.style.color = '#ff0';
-            } else {
-                display.style.color = '#0f0';
-                display.style.textShadow = '0 0 20px #0f0';
-                status.innerText = '¡ACTIVACIÓN LISTA!';
-                status.style.color = '#0f0';
-            }
-        }
-
-        function resetPresion() {
-            pressureData.current = 0;
-            actualizarVisualizacionPresion(0);
-            document.getElementById('pressure-status').innerText = 'Esperando toque...';
-        }
+        const ui = {
+            btnI: document.getElementById('btn-i'),
+            btnA: document.getElementById('btn-a'),
+            btnT: document.getElementById('btn-t'),
+            btnM: document.getElementById('btn-m'),
+            btnPasar: document.getElementById('btn-pasar'),
+            scanner: document.getElementById('guia-scanner'),
+            msg: document.getElementById('msg-visor'),
+            txtTurno: document.getElementById('txt-turno'),
+            hint: document.getElementById('hint'),
+            videoPlayer: document.getElementById('video-player')
+        };
 
         function activarGemas(bol) {
-            log(`activarGemas(${bol}) - Carta: ${cartaActual}`);
-            
-            const botones = [
-                document.getElementById('btn-i'),
-                document.getElementById('btn-a'),
-                document.getElementById('btn-t'),
-                document.getElementById('btn-m')
-            ];
-
-            botones.forEach((btn, idx) => {
+            console.log(`activarGemas(${bol})`);
+            [ui.btnI, ui.btnA, ui.btnT, ui.btnM].forEach(btn => {
                 if(bol) {
                     btn.classList.add('activo');
-                    log(`  ✓ Botón ${btn.id} ACTIVADO`);
                 } else {
                     btn.classList.remove('activo');
-                    log(`  ✗ Botón ${btn.id} DESACTIVADO`);
                 }
             });
         }
 
-        function sig() {
+        function updHUD() {
+            const j = jugadores[tIdx];
+            ui.txtTurno.innerText = `${j.esc} ${j.nombre} - Turno ${tIdx + 1}/${jugadores.length}`;
+            ui.txtTurno.style.color = j.color;
+            ui.msg.innerText = `${j.nombre}, escanea tu carta`;
+            ui.btnPasar.style.display = 'block';
+        }
+
+        function reproducirVideo(lado) {
+            if(esperandoVideo) return;
+            esperandoVideo = true;
+
+            const video = VIDEOS[lado];
+            console.log(`Reproduciendo: ${video}`);
+
+            ui.msg.style.display = 'none';
+            ui.videoPlayer.style.display = 'block';
+            ui.videoPlayer.src = RUTA_BASE + video;
+            ui.videoPlayer.load();
+            
+            ui.videoPlayer.play().catch(err => {
+                console.error("Error video:", err);
+                esperandoVideo = false;
+                finalizarVideo();
+            });
+        }
+
+        function finalizarVideo() {
+            ui.videoPlayer.style.display = 'none';
+            ui.msg.style.display = 'block';
+            ui.msg.innerText = "¡Carta jugada!";
+            esperandoVideo = false;
+        }
+
+        ui.videoPlayer.addEventListener('ended', finalizarVideo);
+
+        function siguienteTurno() {
+            console.log(`Siguiente turno. Actual: ${tIdx}`);
+            
             if(tIdx < jugadores.length - 1) {
                 tIdx++;
-                alert("Pasa el dispositivo al siguiente mago.");
-                updHUD();
                 cartaDetectada = false;
                 cartaActual = null;
-                pressureData = { current: 0, min: 0, max: 0 };
-                resetPresion();
                 activarGemas(false);
+                ui.scanner.classList.remove('verde');
+                ui.hint.innerText = "ESCANEA TU CARTA";
+                ui.msg.innerText = "Preparando siguiente turno...";
+                updHUD();
             } else {
-                alert("¡BATALLA FINAL INICIADA! Tirando dados...");
-                location.reload();
+                mostrarResultados();
             }
+        }
+
+        ui.btnPasar.onclick = () => {
+            if(confirm("¿Pasar al siguiente jugador?")) {
+                siguienteTurno();
+            }
+        };
+
+        function mostrarResultados() {
+            console.log("Mostrando resultados finales");
+            navegar('ui-juego', 'p-resultado');
+            
+            const contenido = document.getElementById('resultado-contenido');
+            contenido.innerHTML = '';
+
+            // Calcular puntos totales
+            jugadores.forEach(j => {
+                j.puntosTotales = j.cartas.reduce((sum, c) => sum + c.valor, 0);
+            });
+
+            // Tirar dados
+            jugadores.forEach(j => {
+                j.dado = Math.floor(Math.random() * 6) + 1;
+                j.puntajeFinal = j.puntosTotales + j.dado;
+            });
+
+            // Ordenar por puntaje
+            const ranking = [...jugadores].sort((a, b) => b.puntajeFinal - a.puntajeFinal);
+            const ganador = ranking[0];
+
+            ranking.forEach((j, idx) => {
+                const div = document.createElement('div');
+                div.className = 'resultado-jugador' + (idx === 0 ? ' ganador' : '');
+                div.style.borderLeftColor = j.color;
+                
+                let cartasHTML = j.cartas.map(c => 
+                    `<span style="background:#333; padding:5px 10px; margin:5px; border-radius:5px; display:inline-block;">
+                        ${c.carta} - ${c.lado}: ${c.valor}
+                    </span>`
+                ).join('');
+
+                div.innerHTML = `
+                    <h3 style="color:${j.color}; margin:0 0 10px 0;">
+                        ${idx === 0 ? '👑 ' : `${idx + 1}. `}${j.esc} ${j.nombre}
+                    </h3>
+                    <div style="margin:10px 0;">
+                        <strong>Cartas jugadas:</strong><br>
+                        ${cartasHTML || '<em>No jugó cartas</em>'}
+                    </div>
+                    <div style="font-size:18px; margin-top:10px;">
+                        📊 Puntos cartas: <strong>${j.puntosTotales}</strong><br>
+                        🎲 Dado: <strong>${j.dado}</strong><br>
+                        <span style="color:gold; font-size:24px;">
+                            ⚔️ TOTAL: ${j.puntajeFinal}
+                        </span>
+                    </div>
+                `;
+                
+                contenido.appendChild(div);
+            });
+
+            const mensajeFinal = document.createElement('div');
+            mensajeFinal.style.cssText = 'text-align:center; margin-top:30px; font-size:28px; color:gold;';
+            mensajeFinal.innerHTML = `✨ ¡${ganador.esc} ${ganador.nombre} GANA LA BATALLA! ✨`;
+            contenido.appendChild(mensajeFinal);
+        }
+
+        function navegar(oc, mo) {
+            document.getElementById(oc).classList.add('oculto');
+            document.getElementById(mo).classList.remove('oculto');
         }
 
         document.getElementById('btn-despertar').onclick = async () => {
@@ -290,7 +364,7 @@
             btn.disabled = true;
 
             try {
-                log("🚀 Iniciando MindAR...");
+                console.log("🚀 Iniciando MindAR...");
 
                 mindarThree = new MindARThree({
                     container: document.querySelector("#container-ar"),
@@ -307,8 +381,6 @@
 
                 const {renderer, scene, camera} = mindarThree;
 
-                log("📦 Creando anchors (0-4)...");
-
                 for(let i = 0; i < 5; i++) {
                     const anchor = mindarThree.addAnchor(i);
                     
@@ -318,37 +390,34 @@
                     anchor.group.add(plane);
 
                     anchor.onTargetFound = () => {
-                        log(`🎯 CARTA ${i} DETECTADA`);
+                        console.log(`🎯 CARTA ${i} DETECTADA: ${CARTAS[i].nombre}`);
                         cartaDetectada = true;
                         cartaActual = i;
                         
-                        document.getElementById('guia-scanner').classList.add('verde');
-                        document.getElementById('hint').innerText = `CARTA ${i} - PRESIONA GEMA`;
-                        document.getElementById('pressure-status').innerText = '¡Carta detectada!';
-                        document.getElementById('pressure-status').style.color = '#bf00ff';
+                        ui.scanner.classList.add('verde');
+                        ui.hint.innerText = `${CARTAS[i].nombre} - Elige lado`;
+                        ui.msg.innerText = `Carta: ${CARTAS[i].nombre}`;
                         
                         activarGemas(true);
                     };
 
                     anchor.onTargetLost = () => {
-                        log(`❌ CARTA ${i} PERDIDA`);
                         if(cartaActual === i) {
+                            console.log(`❌ CARTA ${i} PERDIDA`);
                             cartaDetectada = false;
                             cartaActual = null;
                             
-                            document.getElementById('guia-scanner').classList.remove('verde');
-                            document.getElementById('hint').innerText = "ESCANEA TU CARTA FÍSICA";
-                            document.getElementById('pressure-status').innerText = 'Esperando carta...';
-                            document.getElementById('pressure-status').style.color = '#f00';
+                            ui.scanner.classList.remove('verde');
+                            ui.hint.innerText = "ESCANEA TU CARTA";
+                            ui.msg.innerText = "Carta perdida";
                             
                             activarGemas(false);
-                            resetPresion();
                         }
                     };
                 }
 
                 await mindarThree.start();
-                log("✅ MindAR INICIADO");
+                console.log("✅ MindAR iniciado");
                 
                 navegar('p-resumen', 'ui-juego');
                 document.getElementById('container-ar').style.background = "transparent";
@@ -358,77 +427,53 @@
                 renderer.setAnimationLoop(() => renderer.render(scene, camera));
 
             } catch (err) {
-                log(`❌ ERROR: ${err.message}`);
-                alert("Error de Cámara: " + err.message);
-                btn.innerText = "ERROR - REINTENTAR";
+                console.error("❌ ERROR:", err);
+                alert("Error: " + err.message);
+                btn.innerText = "REINTENTAR";
                 btn.disabled = false;
             }
         };
 
-        function updHUD() {
-            const j = jugadores[tIdx];
-            const div = document.getElementById('txt-turno');
-            div.innerText = `${j.esc} MAGO: ${j.nombre}`;
-            div.style.color = j.color;
-            log(`🎮 Turno: ${j.nombre}`);
-        }
-
         function configurarEventosGemas() {
-            log("🔧 Configurando eventos de gemas...");
+            console.log("🔧 Configurando eventos...");
             
             const botones = [
-                {id: 'btn-i', letra: 'I'},
-                {id: 'btn-a', letra: 'A'},
-                {id: 'btn-t', letra: 'T'},
-                {id: 'btn-m', letra: 'M'}
+                {btn: ui.btnI, lado: 'I'},
+                {btn: ui.btnA, lado: 'A'},
+                {btn: ui.btnT, lado: 'T'},
+                {btn: ui.btnM, lado: 'M'}
             ];
 
-            botones.forEach(({id, letra}) => {
-                const btn = document.getElementById(id);
-                
-                btn.addEventListener('click', (e) => {
-                    log(`🖱️ Click en ${letra}`);
-                    log(`  cartaDetectada: ${cartaDetectada}`);
-                    log(`  activo: ${btn.classList.contains('activo')}`);
-                    
-                    if(!cartaDetectada || !btn.classList.contains('activo')) {
-                        log(`  ⚠️ Click rechazado`);
+            botones.forEach(({btn, lado}) => {
+                btn.onclick = () => {
+                    if(!cartaDetectada || !btn.classList.contains('activo') || esperandoVideo) {
+                        console.log(`Click rechazado en ${lado}`);
                         return;
                     }
                     
-                    log(`  ✅ Click aceptado - Iniciando presión`);
+                    const carta = CARTAS[cartaActual];
+                    const valor = carta[lado];
                     
-                    let presion = 0;
-                    const interval = setInterval(() => {
-                        presion += 20;
-                        pressureData.current = presion;
-                        if(pressureData.min === 0) pressureData.min = presion;
-                        pressureData.max = Math.max(pressureData.max, presion);
-                        actualizarVisualizacionPresion(presion);
-                        
-                        if(presion >= 100) {
-                            clearInterval(interval);
-                            log(`  💥 Presión completa - Activando ${letra}`);
-                            
-                            btn.style.transform = 'scale(1.5)';
-                            setTimeout(() => {
-                                if(confirm(`¿Confirmar acción ${letra}?`)) {
-                                    log(`  ✓ Acción confirmada`);
-                                    sig();
-                                } else {
-                                    log(`  ✗ Acción cancelada`);
-                                    btn.style.transform = 'scale(1.1)';
-                                    resetPresion();
-                                }
-                            }, 300);
-                        }
-                    }, 50);
-                });
-                
-                log(`  ✓ ${letra} configurado`);
+                    console.log(`✅ Jugando: ${carta.nombre} - ${lado} = ${valor}`);
+                    
+                    // Guardar la jugada
+                    jugadores[tIdx].cartas.push({
+                        carta: carta.nombre,
+                        lado: lado,
+                        valor: valor
+                    });
+                    
+                    // Reproducir video
+                    reproducirVideo(lado);
+                    
+                    // Desactivar gemas
+                    activarGemas(false);
+                    cartaDetectada = false;
+                    ui.scanner.classList.remove('verde');
+                };
             });
             
-            log("✅ Eventos configurados");
+            console.log("✅ Eventos configurados");
         }
     </script>
 </body>
