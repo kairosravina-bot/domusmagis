@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V14.0</title>
+    <title>DOMUS MAGI V14.1</title>
     
     <script type="importmap">
     {
@@ -161,7 +161,7 @@
     <!-- PANTALLA INICIAL -->
     <div id="p-inicio" class="pantalla">
         <button class="btn-master" onclick="irMenuPrincipal()">⚡ INICIAR SISTEMA ⚡</button>
-        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V14.0</h2>
+        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V14.1</h2>
         <p style="color:#bf00ff; font-size:14px;">Sistema Completo de Batalla</p>
     </div>
 
@@ -427,7 +427,7 @@
         import { MindARThree } from 'mindar-image-three';
 
         console.log("%c═══════════════════════════════", "color: #bf00ff; font-size: 20px;");
-        console.log("%c  DOMUS MAGI V14.0", "color: #bf00ff; font-size: 20px; font-weight: bold;");
+        console.log("%c  DOMUS MAGI V14.1", "color: #bf00ff; font-size: 20px; font-weight: bold;");
         console.log("%c═══════════════════════════════", "color: #bf00ff; font-size: 20px;");
 
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
@@ -505,16 +505,37 @@
             if(mindarThree) return;
             
             try {
+                console.log("🚀 Iniciando sistema AR...");
+                
                 mindarThree = new MindARThree({
                     container: document.getElementById('container-ar'),
-                    imageTargetSrc: RUTA_BASE + 'targets.mind'
+                    imageTargetSrc: RUTA_BASE + 'targets.mind',
+                    maxTrack: 1,
+                    filterMinCF: 0.0001,
+                    filterBeta: 0.001,
+                    warmupTolerance: 5,
+                    missTolerance: 5,
+                    uiLoading: "no",
+                    uiScanning: "no",
+                    uiError: "no"
                 });
 
                 const { renderer, scene, camera } = mindarThree;
 
+                console.log("📦 Creando anchors para 5 cartas (0-4)...");
+
                 for(let i = 0; i < 5; i++) {
                     const anchor = mindarThree.addAnchor(i);
+                    console.log(`  ✓ Anchor ${i} creado para ${CARTAS[i].nombre}`);
+                    
+                    const geometry = new THREE.PlaneGeometry(1, 1);
+                    const material = new THREE.MeshBasicMaterial({transparent: true, opacity: 0});
+                    const plane = new THREE.Mesh(geometry, material);
+                    anchor.group.add(plane);
+
                     anchor.onTargetFound = () => {
+                        console.log(`%c🎯 CARTA DETECTADA: ${i} - ${CARTAS[i].nombre}`, "color: #0f0; font-size: 18px; font-weight: bold;");
+                        
                         if(!cartaDetectada && !esperandoVideo) {
                             cartaDetectada = true;
                             cartaActual = CARTAS[i];
@@ -523,6 +544,10 @@
                             ui.hint.innerText = `${cartaActual.nombre} - Elige lado`;
                             ui.msg.innerText = `${cartaActual.nombre} detectado`;
                         }
+                    };
+
+                    anchor.onTargetLost = () => {
+                        console.log(`%c❌ CARTA ${i} PERDIDA`, "color: #f00; font-size: 14px;");
                     };
                 }
 
@@ -543,13 +568,17 @@
                     };
                 });
 
+                console.log("⏳ Iniciando MindAR...");
                 await mindarThree.start();
+                console.log("✅ MindAR iniciado correctamente");
+                console.log("📷 Cámara lista - Enfoca una carta");
+                
                 renderer.setAnimationLoop(() => {
                     renderer.render(scene, camera);
                 });
             } catch(err) {
-                console.error("Error AR:", err);
-                alert("Error al iniciar AR. Verifica la cámara.");
+                console.error("❌ Error AR:", err);
+                alert("Error al iniciar AR: " + err.message);
             }
         }
 
