@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V23 - FIXED</title>
+    <title>DOMUS MAGI V24 - FIXED COLORS</title>
     
     <script type="importmap">
     {
@@ -61,10 +61,9 @@
 
         #guia-scanner { width: 200px; height: 200px; border: 4px solid red; border-radius: 20px; margin: auto; position: absolute; top:0; bottom:0; left:0; right:0; transition: 0.3s; }
         
-        /* CLASES DE COLOR DEL SCANNER */
+        /* COLORES SCANNER */
         #guia-scanner.verde { border-color: #0f0; box-shadow: 0 0 50px #0f0; }
         #guia-scanner.dorado { border-color: gold; box-shadow: 0 0 60px gold, inset 0 0 20px gold; }
-        /* NUEVO: CLASE VIOLETA */
         #guia-scanner.violeta { border-color: #bf00ff; box-shadow: 0 0 60px #bf00ff, inset 0 0 20px #bf00ff; }
 
         .btn-gema {
@@ -72,8 +71,11 @@
             background: #222; color: #555; display: flex; align-items: center;
             justify-content: center; font-size: 20px; font-weight: bold;
             cursor: pointer; transition: all 0.3s; opacity: 0.5;
+            /* FIX V24: Asegurar lectura inicial */
+            text-shadow: none;
         }
-        .btn-gema.activo { opacity: 1; border-color: white; color: white; transform: scale(1.1); }
+        /* FIX V24: Cuando está activo, la clase .activo se maneja en JS para ponerlo NEGRO */
+        .btn-gema.activo { opacity: 1; border-color: white; transform: scale(1.1); }
         
         #video-player { width: 100%; height: 100%; object-fit: contain; display: none; position: absolute; top: 0; left: 0; z-index: 50; }
         #intro-video { width: 100%; max-width: 600px; border-radius: 20px; }
@@ -96,10 +98,8 @@
         #txt-turno { position: absolute; top: 10px; left: 10px; font-weight: bold; z-index: 20; font-size: 16px; background: rgba(0,0,0,0.7); padding: 8px; border-radius: 8px; }
         #cartas-jugadas { background: rgba(0,0,0,0.8); padding: 5px; border-radius: 10px; width: 95%; min-height: 40px; }
         
-        /* CLASES DE CHIPS */
         .carta-chip { display: inline-block; background: #333; padding: 4px 8px; margin: 2px; border-radius: 5px; font-size: 11px; border: 1px solid #777; }
         .chip-dorado { border: 1px solid gold; color: gold; box-shadow: 0 0 5px gold; }
-        /* NUEVO: CHIP VIOLETA */
         .chip-violeta { border: 1px solid #bf00ff; color: #bf00ff; box-shadow: 0 0 5px #bf00ff; }
 
         .btn-accion { padding: 15px 30px; font-size: 16px; margin: 5px; border-radius: 10px; border: 2px solid #fff; font-weight: bold; }
@@ -111,7 +111,6 @@
         .ganador { border-color: gold; background: #444; box-shadow: 0 0 15px gold; }
         .detalle-item { font-size: 12px; color: #ccc; border-bottom: 1px solid #444; padding: 3px 0; display: flex; justify-content: space-between; }
         
-        /* ESTILO HISTORIAL */
         #historial-box { margin-top: 20px; border-top: 2px solid #555; padding-top: 10px; width: 100%; }
         .hist-row { font-size: 14px; color: #aaa; margin: 5px 0; border-bottom: 1px dashed #333; }
         .hist-win { color: gold; font-weight: bold; }
@@ -124,7 +123,7 @@
     <!-- 1. PANTALLA INICIO -->
     <div id="p-inicio" class="pantalla">
         <button class="btn-master" onclick="irMenuPrincipal()">⚡ INICIAR SISTEMA ⚡</button>
-        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V23</h2>
+        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V24</h2>
         <p style="color:#bf00ff;">TORNEO 7 RONDAS</p>
     </div>
 
@@ -226,7 +225,6 @@
         let tIdx = 0;
         let videoMostrado = false;
         
-        // --- VARIABLES TORNEO ---
         let rondaActual = 1;
         const MAX_RONDAS = 7;
         let historialGanadores = [];
@@ -267,14 +265,12 @@
 
         function registrarMago(casa, color, esc) {
             let n = document.getElementById('mago-nombre').value || "Mago " + (jugadores.length + 1);
-            // Agregamos 'victorias' al objeto jugador
             jugadores.push({nombre:n, casa, color, esc, cartas:[], puntos:0, victorias: 0});
             document.getElementById('mago-nombre').value = "";
             
             if(jugadores.length === cant) {
                 navegar('p-setup', 'ui-juego');
                 tIdx = 0;
-                // Iniciar Torneo
                 rondaActual = 1;
                 historialGanadores = [];
                 window.iniciarAR(); 
@@ -286,13 +282,10 @@
 
         function siguienteRonda() {
             if(rondaActual >= MAX_RONDAS) {
-                // Fin del torneo, reiniciar todo
                 location.reload();
             } else {
-                // Preparar siguiente ronda
                 rondaActual++;
                 tIdx = 0;
-                // Limpiar cartas de la mano, pero mantener jugadores
                 jugadores.forEach(j => {
                     j.cartas = [];
                     j.total = 0;
@@ -300,12 +293,9 @@
                 });
                 
                 navegar('p-resultado-ronda', 'ui-juego');
-                
-                // Reiniciar UI AR
                 document.getElementById('guia-scanner').className = '';
                 document.getElementById('msg-visor').innerText = "ESCANEA TU CARTA";
                 document.getElementById('msg-visor').style.color = "white";
-                
                 actualizarHUD();
                 alert(`¡COMIENZA LA RONDA ${rondaActual} DE ${MAX_RONDAS}!`);
             }
@@ -319,7 +309,7 @@
 
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         
-        // --- BASE DE DATOS CORREGIDA PARA 6 TARGETS (0-5) ---
+        // --- BASE DE DATOS CORREGIDA (SOLUCIÓN VALORES) ---
         const CARTAS = {
             // ID 0, 1, 2, 3: CASAS
             0: { id: 0, nombre: "DRAGÓN", imgEscudo: "ESCUDO_DRAGON.png", tipo: "CASA",
@@ -334,17 +324,17 @@
             3: { id: 3, nombre: "JABALÍ", imgEscudo: "ESCUDO_JABALI.png", tipo: "CASA",
                 botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 6, video: "ataque.mp4", color: "#900" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 3, video: "cura.mp4", color: "#090" }, "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "defensa.mp4", color: "#555" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "magia.mp4", color: "#609" } }
             },
-            // ID 4: BÚHO (Target 4)
+            // ID 4: BÚHO (Target 4) - FIX: Ahora da puntos aunque sea "Misión" para evitar el 0.
             4: {
                 id: 4, nombre: "BÚHO MASTER", imgEscudo: "ESCUDO_BUHO.png", tipo: "BUHO",
                 botones: {
-                    "btn-i": { texto: "I", label: "MANDATUM", valor: 0, video: "BUHO_MISION.mp4", color: "gold" }, 
-                    "btn-a": { texto: "A", label: "CONSILIUM", valor: 0, video: "BUHO_CONSEJO.mp4", color: "gold" },
-                    "btn-t": { texto: "T", label: "PRAESAGIUM", valor: 0, video: "BUHO_PRESAGIO.mp4", color: "gold" },
-                    "btn-m": { texto: "M", label: "ARCANUM", valor: 0, video: "BUHO_SECRETO.mp4", color: "gold" }
+                    "btn-i": { texto: "I", label: "MANDATUM", valor: 5, video: "BUHO_MISION.mp4", color: "gold" }, 
+                    "btn-a": { texto: "A", label: "CONSILIUM", valor: 5, video: "BUHO_CONSEJO.mp4", color: "gold" },
+                    "btn-t": { texto: "T", label: "PRAESAGIUM", valor: 5, video: "BUHO_PRESAGIO.mp4", color: "gold" },
+                    "btn-m": { texto: "M", label: "ARCANUM", valor: 5, video: "BUHO_SECRETO.mp4", color: "gold" }
                 }
             },
-            // ID 5: ARTEFACTO IGNIS (Target 5)
+            // ID 5: ARTEFACTO IGNIS (Target 5) - FIX: Valores Correctos.
             5: {
                 id: 5, nombre: "IGNIS PHIALA", imgEscudo: "ESCUDO_IGNIS.png", tipo: "ARTEFACTO",
                 botones: {
@@ -385,13 +375,13 @@
             j.cartas.forEach(c => {
                 const s = document.createElement('span');
                 s.className = 'carta-chip';
-                // Lógica de colores de CHIPS
+                
                 if(c.tipo === "ARTEFACTO") {
                     s.classList.add('chip-violeta');
                 } else if(c.tipo === "BUHO") {
                     s.classList.add('chip-dorado');
                 } else {
-                    s.classList.add(c.esObjeto ? 'chip-dorado' : ''); // Fallback legacy
+                    s.classList.add(c.esObjeto ? 'chip-dorado' : ''); 
                     if(!c.esObjeto && c.tipo !== "BUHO") s.style.borderColor = j.color;
                 }
                 s.innerText = `${c.carta} [${c.valor}]`;
@@ -399,12 +389,19 @@
             });
         };
 
+        // FIX V24: FUNCIÓN PARA PONER LETRAS NEGRAS EN BOTONES ACTIVOS
         function actualizarBotones(carta) {
             ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
                 const b = document.getElementById(id);
                 const conf = carta.botones[id];
                 b.innerText = conf.texto;
                 b.style.backgroundColor = conf.color;
+                
+                // --- CAMBIO CLAVE V24: LETRA NEGRA PARA QUE SE LEA ---
+                b.style.color = "#000"; 
+                b.style.textShadow = "0px 0px 2px #fff"; // Borde blanco para contraste
+                b.style.fontWeight = "900";
+                
                 b.classList.add('activo');
             });
             ui.hint.innerText = `DETECTADO: ${carta.nombre}. ELIGE LADO.`;
@@ -415,13 +412,19 @@
                 const b = document.getElementById(id);
                 b.innerText = id.split('-')[1].toUpperCase();
                 b.style.backgroundColor = '#222';
+                
+                // RESTAURAR COLOR ORIGINAL GRIS OSCURO
+                b.style.color = "#555";
+                b.style.textShadow = "none";
+                b.style.fontWeight = "bold";
+                
                 b.classList.remove('activo');
             });
         }
 
         window.iniciarAR = async function() {
             if(mindarThree) return;
-            console.log("🚀 INICIANDO MOTOR AR V23...");
+            console.log("🚀 INICIANDO MOTOR AR V24...");
             
             document.body.style.background = 'transparent';
 
@@ -437,7 +440,7 @@
 
             const {renderer, scene, camera} = mindarThree;
 
-            // --- CORRECCIÓN: BUCLE HASTA 6 PARA LEER INDEX 0-5 ---
+            // BUCLE 0 A 5
             for(let i=0; i<6; i++) {
                 const anchor = mindarThree.addAnchor(i);
                 const plane = new THREE.Mesh(
@@ -447,11 +450,10 @@
                 anchor.group.add(plane);
 
                 anchor.onTargetFound = () => {
-                    console.log("🎯 TARGET ENCONTRADO: " + i); // DEBUG
+                    console.log("🎯 TARGET ENCONTRADO: " + i);
                     cartaActual = CARTAS[i];
                     if(!cartaActual) return; 
 
-                    // LÓGICA DE COLORES CORREGIDA
                     if(cartaActual.tipo === "ARTEFACTO") {
                         ui.scanner.className = 'violeta';
                         ui.msg.style.color = "#bf00ff";
@@ -483,12 +485,16 @@
                     if(!cartaActual || reproduciendo) return;
                     
                     const conf = cartaActual.botones[id];
+                    
+                    // FIX V24: Asegurar que el valor sea número
+                    let valNum = (typeof conf.valor === 'number' ? conf.valor : 10);
+                    
                     jugadores[tIdx].cartas.push({
                         carta: cartaActual.nombre,
                         lado: conf.label, 
-                        valor: (typeof conf.valor === 'number' ? conf.valor : 10),
+                        valor: valNum,
                         esObjeto: cartaActual.tipo === "OBJETO" || cartaActual.tipo === "BUHO",
-                        tipo: cartaActual.tipo // Guardamos el tipo para el color del chip
+                        tipo: cartaActual.tipo 
                     });
 
                     reproduciendo = true;
@@ -500,7 +506,7 @@
                     ui.ovImg.src = RUTA_BASE + cartaActual.imgEscudo;
                     ui.ovTxt.innerText = conf.label; 
                     ui.ovTxt.style.borderColor = conf.color;
-                    ui.ovVal.innerText = conf.valor; 
+                    ui.ovVal.innerText = valNum; 
                     ui.overlay.style.display = 'flex';
                     ui.msg.style.display = 'none';
 
@@ -576,12 +582,11 @@
             // Renderizar Resultados
             jugadores.forEach((j, i) => {
                 const esGanador = (i === 0);
-                // Detección genérica de objeto para mostrar etiqueta
                 const usoArtefacto = j.cartas.some(c => c.esObjeto || c.tipo === "ARTEFACTO");
                 
                 let detalleHtml = '<div style="margin-top:5px; padding-top:5px; border-top:1px solid #555;">';
                 j.cartas.forEach(c => {
-                    let colorVal = c.tipo === "ARTEFACTO" ? "#bf00ff" : "gold"; // Valor violeta si es artefacto
+                    let colorVal = c.tipo === "ARTEFACTO" ? "#bf00ff" : "gold"; 
                     detalleHtml += `
                         <div class="detalle-item">
                             <span>${c.carta} (${c.lado})</span>
@@ -606,7 +611,6 @@
                 cont.appendChild(div);
             });
 
-            // Actualizar Historial
             const listaHist = document.getElementById('historial-lista');
             listaHist.innerHTML = '';
             historialGanadores.forEach(h => {
@@ -616,12 +620,10 @@
                 listaHist.appendChild(div);
             });
 
-            // Configurar Botón Siguiente
             if (rondaActual >= MAX_RONDAS) {
                 btnNext.innerText = "🏆 FINALIZAR TORNEO (Reiniciar)";
                 btnNext.style.background = "gold";
                 btnNext.style.color = "black";
-                // Mostrar Campeón Supremo
                 let rankingFinal = [...jugadores].sort((a,b) => b.victorias - a.victorias);
                 alert(`¡TORNEO FINALIZADO!\nCAMPEÓN: ${rankingFinal[0].nombre} con ${rankingFinal[0].victorias} victorias.`);
             } else {
