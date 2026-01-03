@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V16 - GOLD EDITION</title>
+    <title>DOMUS MAGI V17 - FINAL</title>
     
     <script type="importmap">
     {
@@ -20,7 +20,6 @@
         .pantalla { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; z-index: 1000; background: #000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
         .oculto { display: none !important; }
         
-        /* BOTONES ESTILO MAGIA */
         .btn-master {
             padding: 30px 50px; font-size: 24px; background: #bf00ff; color: white;
             border: 4px solid #fff; border-radius: 15px; cursor: pointer;
@@ -35,13 +34,10 @@
         }
         .btn-batalla-directa { background: linear-gradient(135deg, #ff0000, #ff6600); box-shadow: 0 0 25px #ff0000; }
         .btn-juego2 { background: linear-gradient(135deg, #0066ff, #00ccff); box-shadow: 0 0 25px #0066ff; }
-        .btn-juego3 { background: linear-gradient(135deg, #9900ff, #ff00ff); box-shadow: 0 0 25px #9900ff; }
         
-        /* DADOS */
         .dado-gigante { font-size: 100px; color: #fff; text-shadow: 0 0 30px #fff; margin: 20px; font-weight: bold; }
         .suma-dados { font-size: 60px; color: gold; text-shadow: 0 0 30px gold; font-weight: bold; margin: 20px; }
 
-        /* UI JUEGO AR */
         #ui-juego { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; pointer-events: none; z-index: 500; }
         #visor-top { 
             height: 45vh; background: rgba(0,0,0,0.95); border-bottom: 2px solid #bf00ff; 
@@ -56,10 +52,9 @@
             overflow-y: auto;
         }
 
-        /* SCANNER STYLE */
         #guia-scanner { width: 200px; height: 200px; border: 4px solid red; border-radius: 20px; margin: auto; position: absolute; top:0; bottom:0; left:0; right:0; transition: 0.3s; }
-        #guia-scanner.verde { border-color: #0f0; box-shadow: 0 0 50px #0f0; } /* Casas normales */
-        #guia-scanner.dorado { border-color: gold; box-shadow: 0 0 60px gold, inset 0 0 20px gold; } /* Búho/Objetos */
+        #guia-scanner.verde { border-color: #0f0; box-shadow: 0 0 50px #0f0; } 
+        #guia-scanner.dorado { border-color: gold; box-shadow: 0 0 60px gold, inset 0 0 20px gold; } 
 
         .btn-gema {
             width: 70px; height: 70px; border-radius: 50%; border: 3px solid #555;
@@ -92,7 +87,6 @@
         .btn-agregar { background: #0a0; color: white; }
         .btn-finalizar { background: #f90; color: white; }
         
-        /* RESULTADOS */
         #resultado-batalla { background: rgba(20,20,20,0.95); padding: 20px; border: 2px solid gold; border-radius: 15px; width: 90%; max-height: 80vh; overflow-y: auto; }
         .resultado-jugador { background: #333; margin: 10px 0; padding: 10px; border-radius: 8px; border-left: 5px solid #555; }
         .ganador { border-color: gold; background: #444; box-shadow: 0 0 15px gold; }
@@ -103,8 +97,8 @@
     <!-- 1. PANTALLA INICIO -->
     <div id="p-inicio" class="pantalla">
         <button class="btn-master" onclick="irMenuPrincipal()">⚡ INICIAR SISTEMA ⚡</button>
-        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V16</h2>
-        <p style="color:gold;">GOLD EDITION</p>
+        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V17</h2>
+        <p style="color:gold;">SISTEMA ACTIVO</p>
     </div>
 
     <!-- 2. MENÚ PRINCIPAL -->
@@ -114,7 +108,6 @@
         
         <button class="btn-modo-juego btn-batalla-directa" onclick="seleccionarModo('batalla')">⚔️ BATALLA DIRECTA</button>
         <button class="btn-modo-juego btn-juego2" onclick="alert('Modo Torneo en construcción...')">🏆 MODO TORNEO</button>
-        <button class="btn-modo-juego btn-juego3" onclick="alert('Modo Aventura en construcción...')">📜 MODO AVENTURA</button>
         
         <button class="btn-master" onclick="irDados()" style="background: #444; margin-top: 30px;">🎲 TIRAR DADOS</button>
     </div>
@@ -192,7 +185,7 @@
 
     <div id="container-ar"></div>
 
-    <!-- LÓGICA DEL JUEGO (VANILLA JS) -->
+    <!-- LÓGICA DEL JUEGO -->
     <script>
         let jugadores = [];
         let cant = 0;
@@ -208,9 +201,9 @@
             navegar('p-inicio', 'p-menu-principal');
             if(!videoMostrado) {
                 const v = document.getElementById('intro-video');
-                // IMPORTANTE: Asegúrate de tener un video de intro
-                v.src = 'https://kairosravina-bot.github.io/domusmagis/presentacion.mp4';
-                v.muted = false; v.play().catch(()=>{ console.log("Autoplay bloqueado"); });
+                // IMPORTANTE: Asegúrate de tener un video 'presentacion.mp4' si lo usas
+                // v.src = 'https://kairosravina-bot.github.io/domusmagis/presentacion.mp4'; 
+                // v.muted = false; v.play().catch(()=>{});
                 videoMostrado = true;
             }
         }
@@ -242,7 +235,7 @@
             if(jugadores.length === cant) {
                 navegar('p-setup', 'ui-juego');
                 tIdx = 0;
-                window.iniciarAR(); // Dispara el módulo AR
+                window.iniciarAR(); 
                 actualizarHUD();
             } else {
                 document.getElementById('reg-status').innerText = `Mago ${jugadores.length + 1} de ${cant}`;
@@ -254,62 +247,64 @@
         }
     </script>
 
-    <!-- LÓGICA AR + BATALLA (MODULE) -->
+    <!-- LÓGICA AR + BASE DE DATOS -->
     <script type="module">
         import * as THREE from 'three';
         import { MindARThree } from 'mindar-image-three';
 
-        // RUTA BASE (CAMBIAR SI USAS OTRO SERVIDOR)
+        // RUTA BASE
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         
-        // --- BASE DE DATOS DE CARTAS (V16) ---
-        // Aquí está integrada la lógica del Búho y las Casas
+        // --- BASE DE DATOS DE CARTAS (SOLO PALABRAS EN LATÍN) ---
         const CARTAS = {
+            // ID 0: DRAGÓN (CARTA_1)
             0: {
                 id: 0, nombre: "DRAGÓN", imgEscudo: "ESCUDO_DRAGON.png", tipo: "CASA",
                 botones: {
-                    "btn-i": { texto: "I", label: "ATAQUE ÍGNEO", valor: 7, video: "ataque.mp4", color: "#900" },
-                    "btn-a": { texto: "A", label: "VUELO ALTO", valor: 2, video: "cura.mp4", color: "#090" },
-                    "btn-t": { texto: "T", label: "ESCAMAS", valor: 3, video: "defensa.mp4", color: "#555" },
-                    "btn-m": { texto: "M", label: "ALIENTO", valor: 2, video: "magia.mp4", color: "#609" }
+                    "btn-i": { texto: "I", label: "IMPETUS", valor: 7, video: "CARTA_1_ataque.mp4", color: "#900" },
+                    "btn-a": { texto: "A", label: "AUXILIUM", valor: 2, video: "CARTA_1_cura.mp4", color: "#090" },
+                    "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "CARTA_1_defensa.mp4", color: "#555" },
+                    "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "CARTA_1_magia.mp4", color: "#609" }
                 }
             },
+            // ID 1: ÁGUILA 
             1: {
                 id: 1, nombre: "ÁGUILA", imgEscudo: "ESCUDO_AGUILA.png", tipo: "CASA",
                 botones: {
-                    "btn-i": { texto: "I", label: "GARRAS", valor: 5, video: "ataque.mp4", color: "#900" },
-                    "btn-a": { texto: "A", label: "VELOCIDAD", valor: 4, video: "cura.mp4", color: "#090" },
-                    "btn-t": { texto: "T", label: "PLUMAJE", valor: 2, video: "defensa.mp4", color: "#555" },
-                    "btn-m": { texto: "M", label: "VIENTO", valor: 3, video: "magia.mp4", color: "#609" }
+                    "btn-i": { texto: "I", label: "IMPETUS", valor: 5, video: "ataque.mp4", color: "#900" }, 
+                    "btn-a": { texto: "A", label: "AUXILIUM", valor: 4, video: "cura.mp4", color: "#090" },
+                    "btn-t": { texto: "T", label: "TUTELA", valor: 2, video: "defensa.mp4", color: "#555" }, 
+                    "btn-m": { texto: "M", label: "MYSTERIUM", valor: 3, video: "magia.mp4", color: "#609" }
                 }
             },
+            // ID 2: LEÓN
             2: {
                 id: 2, nombre: "LEÓN", imgEscudo: "ESCUDO_LEON.png", tipo: "CASA",
                 botones: {
-                    "btn-i": { texto: "I", label: "RUGIDO", valor: 8, video: "ataque.mp4", color: "#900" },
-                    "btn-a": { texto: "A", label: "MANADA", valor: 1, video: "cura.mp4", color: "#090" },
-                    "btn-t": { texto: "T", label: "MELENA", valor: 4, video: "defensa.mp4", color: "#555" },
-                    "btn-m": { texto: "M", label: "CORAJE", valor: 1, video: "magia.mp4", color: "#609" }
+                    "btn-i": { texto: "I", label: "IMPETUS", valor: 8, video: "ataque.mp4", color: "#900" },
+                    "btn-a": { texto: "A", label: "AUXILIUM", valor: 1, video: "cura.mp4", color: "#090" },
+                    "btn-t": { texto: "T", label: "TUTELA", valor: 4, video: "defensa.mp4", color: "#555" },
+                    "btn-m": { texto: "M", label: "MYSTERIUM", valor: 1, video: "magia.mp4", color: "#609" }
                 }
             },
+            // ID 3: JABALÍ
             3: {
                 id: 3, nombre: "JABALÍ", imgEscudo: "ESCUDO_JABALI.png", tipo: "CASA",
                 botones: {
-                    "btn-i": { texto: "I", label: "EMBESTIDA", valor: 6, video: "ataque.mp4", color: "#900" },
-                    "btn-a": { texto: "A", label: "RAÍCES", valor: 3, video: "cura.mp4", color: "#090" },
-                    "btn-t": { texto: "T", label: "PIEL DURA", valor: 3, video: "defensa.mp4", color: "#555" },
-                    "btn-m": { texto: "M", label: "BOSQUE", valor: 2, video: "magia.mp4", color: "#609" }
+                    "btn-i": { texto: "I", label: "IMPETUS", valor: 6, video: "ataque.mp4", color: "#900" },
+                    "btn-a": { texto: "A", label: "AUXILIUM", valor: 3, video: "cura.mp4", color: "#090" },
+                    "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "defensa.mp4", color: "#555" },
+                    "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "magia.mp4", color: "#609" }
                 }
             },
-            // --- EL BÚHO (OBJETO ESPECIAL) ---
+            // ID 4: ARTEFACTO 1 (IGNIS PHIALA)
             4: {
-                id: 4, nombre: "BÚHO", imgEscudo: "ESCUDO_BUHO.png", tipo: "OBJETO",
+                id: 4, nombre: "IGNIS PHIALA", imgEscudo: "ESCUDO_BUHO.png", tipo: "OBJETO",
                 botones: {
-                    // Mapeo Físico -> Lógica Mística
-                    "btn-i": { texto: "M", label: "MANDATUM (Misión)", valor: 10, video: "owl_mandatum.mp4", color: "#4a148c" }, 
-                    "btn-a": { texto: "P", label: "PRAESAGIUM (Suerte)", valor: 8, video: "owl_praesagium.mp4", color: "#6a1b9a" },
-                    "btn-t": { texto: "C", label: "CONSILIUM (Ayuda)", valor: 8, video: "owl_consilium.mp4", color: "#7b1fa2" },
-                    "btn-m": { texto: "A", label: "ARCANUM (Secreto)", valor: 12, video: "owl_arcanum.mp4", color: "#8e24aa" }
+                    "btn-i": { texto: "I", label: "IMPETUS", valor: 8, video: "ARTEFACTO_1_IMPETUS.mp4", color: "#D80000" }, 
+                    "btn-a": { texto: "A", label: "AUXILIUM", valor: 5, video: "ARTEFACTO_1_AUXILIUM.mp4", color: "#00B300" },
+                    "btn-t": { texto: "T", label: "TUTELA", valor: 6, video: "ARTEFACTO_1_TUTELA.mp4", color: "#666666" },
+                    "btn-m": { texto: "M", label: "MYSTERIUM", valor: 10, video: "ARTEFACTO_1_MYSTERIUM.mp4", color: "#8000FF" }
                 }
             }
         };
@@ -330,20 +325,19 @@
             hint: document.getElementById('hint')
         };
 
-        // --- FUNCIONES UI ---
         window.actualizarHUD = function() {
             const j = jugadores[tIdx];
             ui.txtTurno.innerText = `${j.esc} ${j.nombre} (Cartas: ${j.cartas.length})`;
             ui.txtTurno.style.color = j.color;
             ui.msg.innerText = "ESCANEA TU CARTA";
             ui.msg.style.color = "white";
-            ui.hint.innerText = "Busca el Blasón de tu Casa o un Objeto";
+            ui.hint.innerText = "Busca el Blasón de tu Casa o un Artefacto";
             
             ui.chips.innerHTML = '';
             j.cartas.forEach(c => {
                 const s = document.createElement('span');
                 s.className = 'carta-chip';
-                if(c.esObjeto) s.classList.add('chip-dorado'); // Estilo especial para objetos
+                if(c.esObjeto) s.classList.add('chip-dorado');
                 s.style.borderColor = c.esObjeto ? 'gold' : j.color;
                 s.innerText = `${c.carta} [${c.lado}]`;
                 ui.chips.appendChild(s);
@@ -358,24 +352,21 @@
                 b.style.backgroundColor = conf.color;
                 b.classList.add('activo');
             });
-            // Texto de ayuda dinámico
-            ui.hint.innerText = `DETECTADO: ${carta.nombre}. Selecciona modo.`;
+            ui.hint.innerText = `DETECTADO: ${carta.nombre}. ELIGE ACCIÓN.`;
         }
 
         function resetBotones() {
             ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
                 const b = document.getElementById(id);
-                // Volvemos a las iniciales físicas por defecto
                 b.innerText = id.split('-')[1].toUpperCase();
                 b.style.backgroundColor = '#222';
                 b.classList.remove('activo');
             });
         }
 
-        // --- MOTOR AR (MindAR + ThreeJS) ---
         window.iniciarAR = async function() {
             if(mindarThree) return;
-            console.log("🚀 INICIANDO MOTOR AR V16 (GOLD)...");
+            console.log("🚀 INICIANDO MOTOR AR V17...");
 
             mindarThree = new MindARThree({
                 container: document.getElementById('container-ar'),
@@ -389,10 +380,8 @@
 
             const {renderer, scene, camera} = mindarThree;
 
-            // Generar anclas para los 5 objetivos (4 casas + 1 búho)
             for(let i=0; i<5; i++) {
                 const anchor = mindarThree.addAnchor(i);
-                // Plano invisible para detectar tracking
                 const plane = new THREE.Mesh(
                     new THREE.PlaneGeometry(1,1),
                     new THREE.MeshBasicMaterial({transparent:true, opacity:0})
@@ -401,16 +390,13 @@
 
                 anchor.onTargetFound = () => {
                     cartaActual = CARTAS[i];
-                    
-                    // Lógica visual diferenciada
                     if(cartaActual.tipo === "OBJETO") {
-                        ui.scanner.className = 'dorado'; // Marco Dorado para el Búho
+                        ui.scanner.className = 'dorado';
                         ui.msg.style.color = "gold";
                     } else {
-                        ui.scanner.className = 'verde'; // Marco Verde normal
+                        ui.scanner.className = 'verde';
                         ui.msg.style.color = "#0f0";
                     }
-
                     ui.msg.innerText = "¡" + cartaActual.nombre + "!";
                     actualizarBotones(cartaActual);
                 };
@@ -418,38 +404,33 @@
                 anchor.onTargetLost = () => {
                     if(cartaActual && cartaActual.id === i && !reproduciendo) {
                         cartaActual = null;
-                        ui.scanner.className = ''; // Quitar colores
+                        ui.scanner.className = '';
                         ui.msg.innerText = "BUSCANDO...";
                         ui.msg.style.color = "white";
-                        ui.hint.innerText = "Apunta a una carta";
+                        ui.hint.innerText = "APUNTA A UNA CARTA";
                         resetBotones();
                     }
                 };
             }
 
-            // --- EVENTOS DE CLICK EN BOTONES ---
             ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
                 document.getElementById(id).onclick = () => {
                     if(!cartaActual || reproduciendo) return;
                     
                     const conf = cartaActual.botones[id];
-                    
-                    // 1. Registrar la jugada
                     jugadores[tIdx].cartas.push({
                         carta: cartaActual.nombre,
-                        lado: conf.texto,
+                        lado: conf.label, 
                         valor: conf.valor,
                         esObjeto: cartaActual.tipo === "OBJETO"
                     });
 
-                    // 2. Reproducir video
                     reproduciendo = true;
                     ui.video.style.display = 'block';
-                    // Fallback si no encuentra el video específico del búho, usa uno genérico
                     ui.video.src = RUTA_BASE + conf.video;
                     
                     ui.ovImg.src = RUTA_BASE + cartaActual.imgEscudo;
-                    ui.ovTxt.innerText = conf.label; // Muestra "MANDATUM", "ATAQUE", etc.
+                    ui.ovTxt.innerText = conf.label;
                     ui.ovTxt.style.borderColor = conf.color;
                     ui.overlay.style.display = 'flex';
                     ui.msg.style.display = 'none';
@@ -462,10 +443,7 @@
                         ui.overlay.style.display = 'none';
                         ui.msg.style.display = 'block';
                         actualizarHUD();
-                        
-                        // Feedback táctil visual
                         ui.hint.innerText = "¡PODER REGISTRADO!";
-                        setTimeout(() => ui.hint.innerText = "Escanea otra o finaliza", 1500);
                     };
                 };
             });
@@ -474,7 +452,6 @@
             renderer.setAnimationLoop(() => { renderer.render(scene, camera); });
         };
 
-        // --- CONTROL DE TURNOS ---
         document.getElementById('btn-agregar').onclick = () => {
             cartaActual = null;
             reproduciendo = false;
@@ -485,10 +462,9 @@
 
         document.getElementById('btn-finalizar').onclick = () => {
             if(jugadores[tIdx].cartas.length === 0) {
-                alert("¡Debes jugar al menos una carta para defender tu casa!");
+                alert("¡Debes jugar al menos una carta!");
                 return;
             }
-
             if(tIdx < jugadores.length - 1) {
                 tIdx++;
                 cartaActual = null;
@@ -506,32 +482,25 @@
             navegar('ui-juego', 'p-resultado-ronda');
             const cont = document.getElementById('resultado-contenido');
             cont.innerHTML = '';
-
-            // Calcular puntajes
             jugadores.forEach(j => {
                 let sumaCartas = j.cartas.reduce((acc, c) => acc + c.valor, 0);
                 let dado = Math.floor(Math.random() * 6) + 1;
                 j.total = sumaCartas + dado;
                 j.dado = dado;
             });
-
-            // Ordenar: Mayor puntaje gana
             jugadores.sort((a, b) => b.total - a.total);
-
             jugadores.forEach((j, i) => {
                 const esGanador = (i === 0);
-                // Si usó el Búho, mostramos un ícono especial
-                const usoBuho = j.cartas.some(c => c.carta === "BÚHO");
-                
+                const usoArtefacto = j.cartas.some(c => c.esObjeto);
                 const div = document.createElement('div');
                 div.className = 'resultado-jugador' + (esGanador ? ' ganador' : '');
                 div.innerHTML = `
                     <h3 style="color:${j.color}">
                         ${esGanador ? '👑 ' : ''}${j.esc} ${j.nombre} 
-                        ${usoBuho ? '<span style="font-size:12px; color:gold; border:1px solid gold; padding:2px; border-radius:4px;">BÚHO</span>' : ''}
+                        ${usoArtefacto ? '<span style="font-size:12px; color:gold; border:1px solid gold; padding:2px; border-radius:4px;">ARTEFACTO</span>' : ''}
                     </h3>
                     <p>Poder Base: ${j.cartas.reduce((a,c)=>a+c.valor,0)}</p>
-                    <p>Factor Suerte (Dado): 🎲 ${j.dado}</p>
+                    <p>Dado: 🎲 ${j.dado}</p>
                     <h1 style="color:${esGanador ? 'gold' : '#fff'}; margin:5px 0;">TOTAL: ${j.total}</h1>
                 `;
                 cont.appendChild(div);
