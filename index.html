@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V20 - VISOR CRISTAL</title>
+    <title>DOMUS MAGI V21 - TORNEO 7 RONDAS</title>
     
     <script type="importmap">
     {
@@ -18,7 +18,6 @@
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', Courier, monospace; background: #000; color: white; }
         
-        /* FIX VIDEO FONDO */
         #container-ar { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
         video { z-index: -2 !important; display: block !important; }
 
@@ -39,7 +38,6 @@
         }
         .btn-batalla-directa { background: linear-gradient(135deg, #ff0000, #ff6600); box-shadow: 0 0 25px #ff0000; }
         .btn-juego2 { background: linear-gradient(135deg, #0066ff, #00ccff); box-shadow: 0 0 25px #0066ff; }
-        .btn-juego3 { background: linear-gradient(135deg, #9900ff, #ff00ff); box-shadow: 0 0 25px #9900ff; }
         
         .dado-gigante { font-size: 100px; color: #fff; text-shadow: 0 0 30px #fff; margin: 20px; font-weight: bold; }
         .suma-dados { font-size: 60px; color: gold; text-shadow: 0 0 30px gold; font-weight: bold; margin: 20px; }
@@ -47,7 +45,6 @@
         /* UI JUEGO */
         #ui-juego { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; pointer-events: none; z-index: 500; }
         
-        /* VISOR TOP - Se pone transparente por JS cuando hay video */
         #visor-top { 
             height: 45vh; background: rgba(0,0,0,0.85); border-bottom: 2px solid #bf00ff; 
             pointer-events: auto; position: relative; display: flex; align-items: center; 
@@ -86,7 +83,6 @@
             color: #fff; font-weight: 800; font-size: 20px; background: rgba(0,0,0,0.8);
             padding: 5px 15px; border-radius: 8px; border: 2px solid gold; margin-bottom: 5px;
         }
-        /* NUEVO: VALOR EN PANTALLA MP4 */
         #overlay-value {
             font-size: 35px; color: gold; font-weight: 900; 
             text-shadow: 2px 2px 0px #000; 
@@ -102,11 +98,15 @@
         .btn-agregar { background: #0a0; color: white; }
         .btn-finalizar { background: #f90; color: white; }
         
-        /* RESULTADOS DETALLADOS */
         #resultado-batalla { background: rgba(20,20,20,0.95); padding: 20px; border: 2px solid gold; border-radius: 15px; width: 90%; max-height: 80vh; overflow-y: auto; }
         .resultado-jugador { background: #333; margin: 10px 0; padding: 10px; border-radius: 8px; border-left: 5px solid #555; }
         .ganador { border-color: gold; background: #444; box-shadow: 0 0 15px gold; }
         .detalle-item { font-size: 12px; color: #ccc; border-bottom: 1px solid #444; padding: 3px 0; display: flex; justify-content: space-between; }
+        
+        /* ESTILO HISTORIAL */
+        #historial-box { margin-top: 20px; border-top: 2px solid #555; padding-top: 10px; width: 100%; }
+        .hist-row { font-size: 14px; color: #aaa; margin: 5px 0; border-bottom: 1px dashed #333; }
+        .hist-win { color: gold; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -116,8 +116,8 @@
     <!-- 1. PANTALLA INICIO -->
     <div id="p-inicio" class="pantalla">
         <button class="btn-master" onclick="irMenuPrincipal()">⚡ INICIAR SISTEMA ⚡</button>
-        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V20</h2>
-        <p style="color:#bf00ff;">VISOR CRISTAL</p>
+        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V21</h2>
+        <p style="color:#bf00ff;">TORNEO 7 RONDAS</p>
     </div>
 
     <!-- 2. MENÚ PRINCIPAL -->
@@ -173,7 +173,6 @@
             <div id="video-overlay">
                 <img id="overlay-img" src="" alt="Escudo">
                 <div id="overlay-text"></div>
-                <!-- NUEVO ELEMENTO PARA EL VALOR -->
                 <div id="overlay-value"></div>
             </div>
         </div>
@@ -199,9 +198,16 @@
     <!-- 6. RESULTADOS -->
     <div id="p-resultado-ronda" class="pantalla oculto">
         <div id="resultado-batalla">
-            <h2 style="color:gold; text-align:center;">⚔️ RESULTADOS ⚔️</h2>
+            <h2 id="titulo-resultados" style="color:gold; text-align:center;">⚔️ RESULTADOS ⚔️</h2>
             <div id="resultado-contenido"></div>
-            <button class="btn-master" onclick="reiniciarJuego()" style="margin-top:20px;">🔄 NUEVA BATALLA</button>
+            
+            <!-- HISTORIAL -->
+            <div id="historial-box">
+                <h3 style="color:#aaa; text-align:center;">📜 CRÓNICAS DEL TORNEO</h3>
+                <div id="historial-lista"></div>
+            </div>
+
+            <button id="btn-next-ronda" class="btn-master" onclick="siguienteRonda()" style="margin-top:20px;">🔄 SIGUIENTE RONDA</button>
         </div>
     </div>
 
@@ -211,6 +217,11 @@
         let cant = 0;
         let tIdx = 0;
         let videoMostrado = false;
+        
+        // --- VARIABLES TORNEO ---
+        let rondaActual = 1;
+        const MAX_RONDAS = 7;
+        let historialGanadores = [];
         
         function navegar(oc, mo) {
             document.getElementById(oc).classList.add('oculto');
@@ -248,12 +259,16 @@
 
         function registrarMago(casa, color, esc) {
             let n = document.getElementById('mago-nombre').value || "Mago " + (jugadores.length + 1);
-            jugadores.push({nombre:n, casa, color, esc, cartas:[], puntos:0});
+            // Agregamos 'victorias' al objeto jugador
+            jugadores.push({nombre:n, casa, color, esc, cartas:[], puntos:0, victorias: 0});
             document.getElementById('mago-nombre').value = "";
             
             if(jugadores.length === cant) {
                 navegar('p-setup', 'ui-juego');
                 tIdx = 0;
+                // Iniciar Torneo
+                rondaActual = 1;
+                historialGanadores = [];
                 window.iniciarAR(); 
                 actualizarHUD();
             } else {
@@ -261,8 +276,31 @@
             }
         }
 
-        function reiniciarJuego() {
-            location.reload();
+        function siguienteRonda() {
+            if(rondaActual >= MAX_RONDAS) {
+                // Fin del torneo, reiniciar todo
+                location.reload();
+            } else {
+                // Preparar siguiente ronda
+                rondaActual++;
+                tIdx = 0;
+                // Limpiar cartas de la mano, pero mantener jugadores
+                jugadores.forEach(j => {
+                    j.cartas = [];
+                    j.total = 0;
+                    j.dado = 0;
+                });
+                
+                navegar('p-resultado-ronda', 'ui-juego');
+                
+                // Reiniciar UI AR
+                document.getElementById('guia-scanner').className = '';
+                document.getElementById('msg-visor').innerText = "ESCANEA TU CARTA";
+                document.getElementById('msg-visor').style.color = "white";
+                
+                actualizarHUD();
+                alert(`¡COMIENZA LA RONDA ${rondaActual} DE ${MAX_RONDAS}!`);
+            }
         }
     </script>
 
@@ -328,23 +366,22 @@
         let reproduciendo = false;
 
         const ui = {
-            visorTop: document.getElementById('visor-top'), // Referencia nueva
+            visorTop: document.getElementById('visor-top'), 
             scanner: document.getElementById('guia-scanner'),
             msg: document.getElementById('msg-visor'),
             video: document.getElementById('video-player'),
             overlay: document.getElementById('video-overlay'),
             ovImg: document.getElementById('overlay-img'),
             ovTxt: document.getElementById('overlay-text'),
-            ovVal: document.getElementById('overlay-value'), // Referencia nueva
+            ovVal: document.getElementById('overlay-value'), 
             chips: document.getElementById('lista-cartas-chips'),
             txtTurno: document.getElementById('txt-turno'),
             hint: document.getElementById('hint')
         };
 
-        // --- FUNCIONES UI ---
         window.actualizarHUD = function() {
             const j = jugadores[tIdx];
-            ui.txtTurno.innerText = `${j.esc} ${j.nombre} (Cartas: ${j.cartas.length})`;
+            ui.txtTurno.innerText = `${j.esc} ${j.nombre} [RONDA ${rondaActual}/${MAX_RONDAS}]`;
             ui.txtTurno.style.color = j.color;
             ui.msg.innerText = "ESCANEA TU CARTA";
             ui.msg.style.color = "white";
@@ -380,10 +417,9 @@
             });
         }
 
-        // --- MOTOR AR ---
         window.iniciarAR = async function() {
             if(mindarThree) return;
-            console.log("🚀 INICIANDO MOTOR AR V20...");
+            console.log("🚀 INICIANDO MOTOR AR V21...");
             
             document.body.style.background = 'transparent';
 
@@ -399,6 +435,7 @@
 
             const {renderer, scene, camera} = mindarThree;
 
+            // IMPORTANTE: Asegúrate de que targets1.mind tiene 5 imágenes (0,1,2,3,4)
             for(let i=0; i<5; i++) {
                 const anchor = mindarThree.addAnchor(i);
                 const plane = new THREE.Mesh(
@@ -408,6 +445,7 @@
                 anchor.group.add(plane);
 
                 anchor.onTargetFound = () => {
+                    console.log("🎯 TARGET ENCONTRADO: " + i); // DEBUG
                     cartaActual = CARTAS[i];
                     if(!cartaActual) return; 
 
@@ -434,7 +472,6 @@
                 };
             }
 
-            // --- EVENTOS BOTONES ---
             ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
                 document.getElementById(id).onclick = () => {
                     if(!cartaActual || reproduciendo) return;
@@ -448,7 +485,6 @@
                     });
 
                     reproduciendo = true;
-                    // FIX VISOR: Hacer transparente el fondo
                     ui.visorTop.style.background = "transparent";
 
                     ui.video.style.display = 'block';
@@ -457,14 +493,13 @@
                     ui.ovImg.src = RUTA_BASE + cartaActual.imgEscudo;
                     ui.ovTxt.innerText = conf.label; 
                     ui.ovTxt.style.borderColor = conf.color;
-                    ui.ovVal.innerText = conf.valor; // MOSTRAR VALOR
+                    ui.ovVal.innerText = conf.valor; 
                     ui.overlay.style.display = 'flex';
                     ui.msg.style.display = 'none';
 
                     ui.video.play();
                     ui.video.onended = () => {
                         reproduciendo = false;
-                        // RESTAURAR FONDO OSCURO
                         ui.visorTop.style.background = "rgba(0,0,0,0.85)";
                         
                         ui.video.style.display = 'none';
@@ -479,7 +514,6 @@
             renderer.setAnimationLoop(() => { renderer.render(scene, camera); });
         };
 
-        // --- CONTROL DE TURNOS ---
         document.getElementById('btn-agregar').onclick = () => {
             cartaActual = null;
             reproduciendo = false;
@@ -510,7 +544,11 @@
         function calcularBatalla() {
             navegar('ui-juego', 'p-resultado-ronda');
             const cont = document.getElementById('resultado-contenido');
+            const titulo = document.getElementById('titulo-resultados');
+            const btnNext = document.getElementById('btn-next-ronda');
+            
             cont.innerHTML = '';
+            titulo.innerText = `⚔️ RESULTADOS RONDA ${rondaActual} ⚔️`;
 
             // Calcular puntajes
             jugadores.forEach(j => {
@@ -522,12 +560,17 @@
 
             // Ordenar por puntaje
             jugadores.sort((a, b) => b.total - a.total);
+            
+            // Determinar Ganador Ronda
+            const ganador = jugadores[0];
+            ganador.victorias++;
+            historialGanadores.push({ronda: rondaActual, ganador: ganador.nombre});
 
+            // Renderizar Resultados
             jugadores.forEach((j, i) => {
                 const esGanador = (i === 0);
                 const usoArtefacto = j.cartas.some(c => c.esObjeto);
                 
-                // GENERAR LISTA DE CARTAS JUGADAS
                 let detalleHtml = '<div style="margin-top:5px; padding-top:5px; border-top:1px solid #555;">';
                 j.cartas.forEach(c => {
                     detalleHtml += `
@@ -549,9 +592,35 @@
                     ${detalleHtml}
                     <p style="margin-top:5px; border-top:1px solid #555; padding-top:5px;">Dado: 🎲 ${j.dado}</p>
                     <h2 style="color:gold; margin:5px 0;">TOTAL: ${j.total}</h2>
+                    <p style="font-size:12px; color:#aaa;">Victorias acumuladas: ${j.victorias}</p>
                 `;
                 cont.appendChild(div);
             });
+
+            // Actualizar Historial
+            const listaHist = document.getElementById('historial-lista');
+            listaHist.innerHTML = '';
+            historialGanadores.forEach(h => {
+                const div = document.createElement('div');
+                div.className = 'hist-row';
+                div.innerHTML = `Ronda ${h.ronda}: <span class="hist-win">${h.ganador}</span>`;
+                listaHist.appendChild(div);
+            });
+
+            // Configurar Botón Siguiente
+            if (rondaActual >= MAX_RONDAS) {
+                btnNext.innerText = "🏆 FINALIZAR TORNEO (Reiniciar)";
+                btnNext.style.background = "gold";
+                btnNext.style.color = "black";
+                // Mostrar Campeón Supremo
+                // Ordenar por victorias totales
+                let rankingFinal = [...jugadores].sort((a,b) => b.victorias - a.victorias);
+                alert(`¡TORNEO FINALIZADO!\nCAMPEÓN: ${rankingFinal[0].nombre} con ${rankingFinal[0].victorias} victorias.`);
+            } else {
+                btnNext.innerText = "🔄 SIGUIENTE RONDA";
+                btnNext.style.background = "#bf00ff";
+                btnNext.style.color = "white";
+            }
         }
     </script>
 </body>
