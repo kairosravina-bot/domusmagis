@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V30 - COMPLETE & CLEAR</title>
+    <title>DOMUS MAGI V31 - FULLSCREEN VIDEO FIX</title>
     
     <script type="importmap">
     {
@@ -19,6 +19,8 @@
         body { margin: 0; overflow: hidden; font-family: 'Courier New', Courier, monospace; background: #000; color: white; }
         
         #container-ar { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
+        
+        /* FIX V31: Video AR de fondo oculto visualmente pero activo */
         video { z-index: -2 !important; display: block !important; }
 
         .pantalla { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; z-index: 1000; background: #000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
@@ -41,7 +43,7 @@
         .dado-gigante { font-size: 80px; color: #fff; text-shadow: 0 0 30px #fff; margin: 10px; font-weight: bold; }
         .suma-dados { font-size: 50px; color: gold; font-weight: bold; margin: 20px; }
 
-        /* UI JUEGO ERGONÓMICA (V29 STYLE) */
+        /* UI JUEGO */
         #ui-juego { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; pointer-events: none; z-index: 500; }
         
         #zona-ar { 
@@ -76,7 +78,18 @@
         .letra-grande { font-size: 20px; display:block; }
         .btn-gema.activo { opacity: 1; border-color: white; transform: scale(1.05); }
 
-        #video-player { width: 100%; height: 100%; object-fit: contain; display: none; position: absolute; top: 0; left: 0; z-index: 50; background: black; }
+        /* FIX V31: VIDEOS PANTALLA COMPLETA REAL */
+        #video-player { 
+            width: 100vw; height: 100vh; object-fit: cover; 
+            display: none; position: fixed; top: 0; left: 0; 
+            z-index: 9000; background: black; /* Z-Index alto para tapar UI */
+        }
+
+        /* FIX V31: VIDEO CLASH MÁXIMA PRIORIDAD */
+        #video-clash { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            background: black; z-index: 99999; object-fit: cover; display: none; 
+        }
 
         /* PANTALLA CAMBIO DE TURNO (SEMÁFORO) */
         #pantalla-cambio-turno {
@@ -86,8 +99,6 @@
             text-align: center; transition: background 0.5s;
         }
         
-        #video-clash { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 3000; object-fit: cover; display: none; }
-
         #txt-turno { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px; border: 1px solid white; pointer-events: none; }
         
         #resultado-batalla { background: rgba(10,10,10,0.98); padding: 10px; border: 2px solid gold; border-radius: 15px; width: 100%; height: 90vh; overflow-y: scroll; box-sizing: border-box; }
@@ -101,38 +112,37 @@
 <body>
 
     <div id="container-ar"></div>
+    
+    <!-- FIX V31: VIDEOS FUERA DE CONTENEDORES PARA CUBRIR TODO -->
+    <video id="video-player" playsinline webkit-playsinline></video>
     <video id="video-clash" playsinline webkit-playsinline></video>
 
     <!-- PANTALLA DE CAMBIO DE TURNO (SEMÁFORO) -->
     <div id="pantalla-cambio-turno">
         <h1 style="font-size:40px; margin-bottom:10px;">🛑 ALTO 🛑</h1>
         <p style="font-size:18px;">CAMBIO DE MAGO</p>
-        
         <div id="next-player-escudo" style="font-size:80px; margin:20px;">🛡️</div>
-        
         <h2 style="color:white; text-shadow:0 0 10px black;" id="next-player-name">NOMBRE JUGADOR</h2>
         <p style="color:white; opacity:0.8;">Toma el dispositivo</p>
-        
         <button class="btn-master" style="background:white; color:black; margin-top:30px;" onclick="confirmarCambioTurno()">¡SOY YO, ESTOY LISTO!</button>
     </div>
 
     <!-- 1. PANTALLA INICIO -->
     <div id="p-inicio" class="pantalla">
         <button class="btn-master" onclick="irMenuPrincipal()">⚡ INICIAR SISTEMA ⚡</button>
-        <h2 style="color:#bf00ff; margin-top:20px;">DOMUS MAGI V30</h2>
-        <p style="color:white;">COMPLETE EDITION</p>
+        <h2 style="color:#bf00ff; margin-top:20px;">DOMUS MAGI V31</h2>
+        <p style="color:white;">FULLSCREEN FIX</p>
     </div>
 
-    <!-- 2. MENÚ PRINCIPAL (RESTAURADO) -->
+    <!-- 2. MENÚ PRINCIPAL -->
     <div id="p-menu-principal" class="pantalla oculto">
         <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; max-width:500px; border-radius:15px; margin-bottom:20px;"></video>
-        
         <button class="btn-modo" style="background:linear-gradient(90deg, #900, #f00);" onclick="seleccionarModo()">⚔️ BATALLA TÁCTICA</button>
         <button class="btn-modo" style="background:linear-gradient(90deg, #005, #00a);" onclick="alert('Próximamente: Modo Campaña')">🦉 MISIONES (BÚHO)</button>
         <button class="btn-modo" style="background:#444;" onclick="irDados()">🎲 LANZAR DADOS</button>
     </div>
 
-    <!-- 3. PANTALLA DADOS (RESTAURADA) -->
+    <!-- 3. PANTALLA DADOS -->
     <div id="p-dados" class="pantalla oculto">
         <h1 style="color:#0f0;">🎲 DADOS 🎲</h1>
         <div style="display: flex; gap: 20px; align-items: center; justify-content:center;">
@@ -163,18 +173,17 @@
         </div>
     </div>
 
-    <!-- 5. UI JUEGO AR (ERGONÓMICA) -->
+    <!-- 5. UI JUEGO AR -->
     <div id="ui-juego" class="oculto">
         <!-- CAMARA ARRIBA -->
         <div id="zona-ar">
             <div id="txt-turno">TURNO: ---</div>
             <div id="guia-scanner"></div>
         </div>
-        <!-- VIDEO MEDIO -->
+        <!-- INFORMACION MEDIO (YA SIN VIDEO AQUI) -->
         <div id="zona-medio">
             <div id="info-rival" style="display:none; background:#300; padding:5px; border-radius:5px; border:1px solid red; margin-bottom:5px;">RIVAL USÓ: <span id="rival-last-move" style="font-weight:bold;">???</span></div>
             <div id="msg-visor" style="font-size:18px; font-weight:bold;">ESCANEA CARTA</div>
-            <video id="video-player" playsinline webkit-playsinline></video>
         </div>
         <!-- BOTONES ABAJO -->
         <div id="panel-mando">
@@ -234,7 +243,6 @@
             v.muted = false; v.play().catch(()=>{});
         }
 
-        // --- FUNCIONES RESTAURADAS DADOS ---
         function irDados() { navegar('p-menu-principal', 'p-dados'); }
         function tirarDados() {
             const d1 = Math.floor(Math.random()*6)+1;
@@ -279,14 +287,10 @@
             jugadaPendiente = null;
         }
 
-        // --- SISTEMA TURNOS CLAROS V30 ---
         function mostrarPantallaCambio() {
             const nextJ = jugadores[turnoJugadorIdx];
             const pantalla = document.getElementById('pantalla-cambio-turno');
-            
-            // Poner el fondo del color del jugador que sigue
             pantalla.style.background = nextJ.color;
-            
             document.getElementById('next-player-name').innerText = nextJ.nombre;
             document.getElementById('next-player-escudo').innerText = nextJ.esc;
             pantalla.style.display = 'flex';
@@ -325,7 +329,10 @@
                     if(!cartaDetectada) return;
                     const conf = cartaDetectada.botones[id];
                     jugadaPendiente = { carta: cartaDetectada, lado: conf.label, valor: (typeof conf.valor==='number'?conf.valor:5), video: conf.video, tipoLado: id.split('-')[1].toUpperCase() };
-                    ui.video.style.display = 'block'; ui.video.src = RUTA_BASE + conf.video; ui.msg.style.display = 'none'; ui.video.play().catch(e => console.log(e));
+                    
+                    // FIX V31: REPRODUCCION EN FULLSCREEN (BODY)
+                    ui.video.style.display = 'block'; ui.video.src = RUTA_BASE + conf.video; ui.msg.style.display = 'none'; 
+                    ui.video.play().catch(e => console.log(e));
                     ui.video.onended = () => { ui.video.style.display = 'none'; ui.msg.style.display = 'block'; ui.msg.innerText = "¡LISTO! CONFIRMA ABAJO"; };
                 };
             });
