@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V41</title>
+    <title>DOMUS MAGI V42</title>
     
     <script type="importmap">
     {
@@ -61,7 +61,7 @@
             text-shadow: 2px 2px 0 #000;
         }
 
-        /* HUD DERECHO V35 */
+        /* HUD DERECHO */
         #hud-derecho {
             position: absolute; top: 10px; right: 10px; z-index: 50;
             display: none; flex-direction: column; align-items: flex-end;
@@ -99,7 +99,7 @@
         
         #btn-forzar { font-size: 12px; padding: 10px 5px; margin: 0; flex: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* MODAL FASE DADOS V40 */
+        /* MODAL FASE DADOS */
         #modal-dados-fase {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 9500; display: none;
@@ -115,21 +115,21 @@
             background: rgba(0,0,0,0.3);
         }
 
-        /* MODAL BATALLA FINAL (CLASH) - V41 AJUSTE SUPERIOR */
+        /* MODAL BATALLA FINAL (CLASH) */
         #modal-batalla { 
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
             background: rgba(0,0,0,0.95); z-index: 9999; 
             display: none; flex-direction: column; 
-            align-items: center; justify-content: flex-start; /* Subir contenido */
-            padding-top: 50px; /* Espacio desde arriba */
+            align-items: center; justify-content: flex-start; 
+            padding-top: 50px; 
         }
         #texto-vs { color: gold; font-size: 24px; font-weight: 900; margin-bottom: 20px; text-align: center; text-shadow: 2px 2px 0 #000; background: rgba(0,0,0,0.5); padding: 10px; width: 90%; border-radius: 10px; }
         #video-clash { width: 95%; max-width: 500px; aspect-ratio: 1/1; object-fit: contain; border: 4px solid gold; box-shadow: 0 0 50px gold; }
         
         #pantalla-cambio-turno { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 8000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 
-        /* RESULTADOS */
-        #resultado-batalla { width: 100%; height: 90vh; overflow-y: scroll; padding-bottom: 50px; }
+        /* RESULTADOS Y HISTORIAL */
+        #resultado-batalla { width: 100%; margin-bottom: 20px; }
         .resultado-jugador { background: #333; margin: 10px 0; padding: 20px; border-radius: 15px; border-left: 10px solid #777; }
         .ganador { border-color: gold; box-shadow: 0 0 30px gold; border-left: 10px solid gold; }
         .total-score { font-size: 70px; color: gold; font-weight: 900; text-align: right; text-shadow: 4px 4px 0 #000; margin-top: 10px; line-height: 1; }
@@ -137,9 +137,16 @@
         .fila-res { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #555; padding-bottom: 5px; }
         .res-accion { font-size: 20px; color: white; font-weight: bold; text-transform: uppercase; }
         .res-valor { font-size: 35px; color: #fff; font-weight: 900; }
-        
         .fila-dado { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; background: #222; padding: 10px; border-radius: 10px; }
         .dado-gigante-res { font-size: 60px; color: #0f0; font-weight: 900; text-shadow: 2px 2px 0 #000; }
+
+        /* ESTILO HISTORIAL V42 */
+        .item-historial {
+            background: #222; border-left: 5px solid #555; padding: 10px; margin-bottom: 5px;
+            display: flex; justify-content: space-between; align-items: center; color: #aaa;
+        }
+        .item-historial span strong { color: gold; font-size: 18px; }
+
     </style>
 </head>
 <body>
@@ -160,7 +167,7 @@
     
     <!-- MODAL BATALLA FINAL (CLASH) -->
     <div id="modal-batalla">
-        <div id="texto-vs">BATALLA</div> <!-- Se llena dinamicamente -->
+        <div id="texto-vs">BATALLA</div>
         <video id="video-clash" playsinline webkit-playsinline></video>
     </div>
 
@@ -175,7 +182,7 @@
     <!-- 1. INICIO -->
     <div id="p-inicio" class="pantalla">
         <button class="btn-master" onclick="irMenuPrincipal()">⚡ INICIAR ⚡</button>
-        <h2 style="color:#bf00ff; font-size: 30px;">DOMUS MAGI V41</h2>
+        <h2 style="color:#bf00ff; font-size: 30px;">DOMUS MAGI V42</h2>
     </div>
 
     <!-- 2. MENÚ PRINCIPAL -->
@@ -228,7 +235,7 @@
     <!-- 5. UI JUEGO (SPLIT SCREEN) -->
     <div id="ui-juego" class="oculto">
         
-        <!-- ZONA SUPERIOR (SCANNER + HUD DERECHO V35) -->
+        <!-- ZONA SUPERIOR -->
         <div id="zona-superior">
             <div id="txt-turno">TURNO: ---</div>
             
@@ -267,11 +274,21 @@
         </div>
     </div>
 
-    <!-- 6. RESULTADOS -->
+    <!-- 6. RESULTADOS V42 -->
     <div id="p-resultado" class="pantalla oculto">
         <h2 style="color:gold; font-size:35px;">RESULTADOS</h2>
-        <button class="btn-master" onclick="reiniciarPartida()" style="background:#0a0; margin-bottom:20px;">🔄 NUEVA BATALLA</button>
+        
         <div id="resultado-batalla"><div id="resultado-contenido"></div></div>
+
+        <!-- NUEVOS BOTONES DE FLUJO -->
+        <div style="width:100%; margin: 10px 0 20px 0;">
+            <button class="btn-master" style="background:#0a0;" onclick="continuarContienda()">⚔️ CONTINUAR CONTIENDA</button>
+            <button class="btn-master" style="background:#a00;" onclick="salirTotal()">🚪 SALIR</button>
+        </div>
+
+        <!-- SECCION HISTORIAL -->
+        <h3 style="color:#777; width:100%; border-bottom:1px solid #333; padding-bottom:5px;">HISTORIAL DE CONTIENDAS</h3>
+        <div id="lista-historial" style="width:100%; padding-bottom:50px;"></div>
     </div>
 
     <!-- JAVASCRIPT LOGICA -->
@@ -279,7 +296,7 @@
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         const VIDEOS_BATALLA = ["Explosión_Elemental.mp4", "El_Búho_Juez.mp4", "Invocaciones_Etéreas.mp4", "Escudos_vs_Espadas.mp4", "Choque_de_Energía.mp4"];
         
-        // --- V41 ACTUALIZACION BASE DE DATOS (LATIN ONLY) ---
+        // --- BASE DE DATOS LATIN ---
         const CARTAS = {
             0: { id: 0, nombre: "DRAGÓN", elemento: "TERRA", imgEscudo: "ESCUDO_DRAGON.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 7, video: "CARTA_1_ataque.mp4", color: "#900" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 2, video: "CARTA_1_cura.mp4", color: "#090" }, "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "CARTA_1_defensa.mp4", color: "#555" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "CARTA_1_magia.mp4", color: "#609" } } },
             1: { id: 1, nombre: "ÁGUILA", elemento: "CAELUM", imgEscudo: "ESCUDO_AGUILA.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 5, video: "ataque.mp4", color: "#900" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 4, video: "cura.mp4", color: "#090" }, "btn-t": { texto: "T", label: "TUTELA", valor: 2, video: "defensa.mp4", color: "#555" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 3, video: "magia.mp4", color: "#609" } } },
@@ -294,6 +311,7 @@
         };
 
         let jugadores = []; let cantJugadores = 0; let slotActual = 0; let turnoJugadorIdx = 0; const MAX_SLOTS = 3; let jugadaPendiente = null;
+        let historialPartidas = []; let contadorPartidas = 0;
 
         function navegar(oc, mo) { document.getElementById(oc).classList.add('oculto'); document.getElementById(mo).classList.remove('oculto'); }
         function irMenuPrincipal() { navegar('p-inicio', 'p-menu-principal'); const v = document.getElementById('intro-video'); v.muted = false; v.play().catch(()=>{}); }
@@ -358,13 +376,19 @@
             if(confirm("¿Seguro que quieres forzar la batalla?")) { iniciarFaseDadosBatalla(); }
         }
 
-        function reiniciarPartida() {
+        // --- FLUJO DE CONTINUACION Y SALIDA V42 ---
+        function continuarContienda() {
+            // Resetear lógica de partida pero mantener jugadores
             slotActual = 0; turnoJugadorIdx = 0;
             jugadores.forEach(j => { j.slots = [null, null, null]; j.dado = 0; });
-            document.getElementById('resultado-contenido').innerHTML = '';
-            navegar('p-resultado', 'ui-juego');
+            document.getElementById('resultado-contenido').innerHTML = ''; // Limpiar visual resultados anteriores
+            navegar('p-resultado', 'ui-juego'); // Volver al juego
             actualizarUI();
-            alert("¡NUEVA RONDA!");
+            alert("¡NUEVA CONTIENDA INICIADA!");
+        }
+
+        function salirTotal() {
+            location.reload(); // Recarga la página para reset total
         }
 
         let idxDado = 0;
@@ -407,7 +431,6 @@
             document.getElementById('modal-batalla').style.display = 'flex';
             const txtVs = document.getElementById('texto-vs');
             
-            // --- V41: LOGICA DE COLORES EN NOMBRES (VS) ---
             if(cantJugadores === 2) {
                 txtVs.innerHTML = `<span style="color:${jugadores[0].color}">${jugadores[0].nombre}</span> <span style="color:white; font-size:18px;">VS</span> <span style="color:${jugadores[1].color}">${jugadores[1].nombre}</span>`;
             } else {
@@ -433,6 +456,12 @@
             resultados.forEach(r => r.total += r.dado);
             resultados.sort((a,b) => b.total - a.total);
 
+            // --- V42 GUARDAR HISTORIAL ---
+            contadorPartidas++;
+            const ganador = resultados[0];
+            historialPartidas.push({ partida: contadorPartidas, ganador: ganador.nombre, pts: ganador.total });
+            actualizarListaHistorial();
+
             resultados.forEach((r, i) => {
                 let htmlSlots = "";
                 r.slots.forEach(s => {
@@ -452,6 +481,19 @@
                         <span class="dado-gigante-res">+${r.dado}</span>
                     </div>
                     <div class="total-score">${r.total}</div>
+                </div>`;
+            });
+        }
+
+        function actualizarListaHistorial() {
+            const divHist = document.getElementById('lista-historial');
+            divHist.innerHTML = ''; // Limpiar y repintar
+            // Mostrar las ultimas primero
+            [...historialPartidas].reverse().forEach(h => {
+                divHist.innerHTML += `
+                <div class="item-historial">
+                    <span>Partida ${h.partida}</span>
+                    <span>Ganador: <strong>${h.ganador}</strong> (${h.pts})</span>
                 </div>`;
             });
         }
