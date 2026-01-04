@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V25 - ARTIFACTS EXPANSION</title>
+    <title>DOMUS MAGI V26 - BIG DATA & FIXES</title>
     
     <script type="importmap">
     {
@@ -19,6 +19,7 @@
         body { margin: 0; overflow: hidden; font-family: 'Courier New', Courier, monospace; background: #000; color: white; }
         
         #container-ar { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
+        /* Video de fondo AR oculto visualmente pero activo */
         video { z-index: -2 !important; display: block !important; }
 
         .pantalla { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; z-index: 1000; background: #000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
@@ -74,17 +75,23 @@
             text-shadow: none; padding: 2px; text-align: center;
         }
         
-        .letra-grande { font-size: 18px; margin-bottom: 2px; }
+        .letra-grande { font-size: 22px; margin-bottom: 0px; display:block; }
+        .label-peq { font-size: 9px; text-transform:uppercase; display:block; max-width: 100%; overflow:hidden; }
         
-        /* Cuando está activo, la clase .activo se maneja en JS */
         .btn-gema.activo { opacity: 1; border-color: white; transform: scale(1.05); }
         
-        #video-player { width: 100%; height: 100%; object-fit: contain; display: none; position: absolute; top: 0; left: 0; z-index: 50; }
+        /* FIX VIDEO: Asegurar que el video de ataque esté MUY por encima */
+        #video-player { 
+            width: 100%; height: 100%; object-fit: contain; 
+            display: none; position: absolute; top: 0; left: 0; 
+            z-index: 9999; background: black;
+        }
+        
         #intro-video { width: 100%; max-width: 600px; border-radius: 20px; }
         
         #video-overlay {
             position: absolute; top: 20px; right: 20px; display: none;
-            flex-direction: column; align-items: center; z-index: 60; pointer-events: none;
+            flex-direction: column; align-items: center; z-index: 10000; pointer-events: none;
         }
         #overlay-img { width: 80px; height: auto; filter: drop-shadow(0 0 10px white); margin-bottom: 5px; }
         #overlay-text {
@@ -108,14 +115,64 @@
         .btn-agregar { background: #0a0; color: white; }
         .btn-finalizar { background: #f90; color: white; }
         
-        #resultado-batalla { background: rgba(20,20,20,0.95); padding: 20px; border: 2px solid gold; border-radius: 15px; width: 90%; max-height: 80vh; overflow-y: auto; }
-        .resultado-jugador { background: #333; margin: 10px 0; padding: 10px; border-radius: 8px; border-left: 5px solid #555; }
-        .ganador { border-color: gold; background: #444; box-shadow: 0 0 15px gold; }
-        .detalle-item { font-size: 12px; color: #ccc; border-bottom: 1px solid #444; padding: 3px 0; display: flex; justify-content: space-between; }
+        /* --- ESTILOS MEJORADOS PARA RESULTADOS GRANDES --- */
+        #resultado-batalla { 
+            background: rgba(10,10,10,0.98); 
+            padding: 10px; 
+            border: 2px solid gold; 
+            border-radius: 15px; 
+            width: 100%; 
+            height: 90vh; /* Ocupa casi toda la pantalla */
+            overflow-y: scroll; /* Scroll obligatorio */
+            box-sizing: border-box;
+        }
+
+        .resultado-jugador { 
+            background: #222; 
+            margin: 15px 0; 
+            padding: 20px; /* Más espacio interno */
+            border-radius: 12px; 
+            border-left: 8px solid #555; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
         
-        #historial-box { margin-top: 20px; border-top: 2px solid #555; padding-top: 10px; width: 100%; }
-        .hist-row { font-size: 14px; color: #aaa; margin: 5px 0; border-bottom: 1px dashed #333; }
-        .hist-win { color: gold; font-weight: bold; }
+        .ganador { 
+            border-color: gold; 
+            background: #333; 
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.4); 
+            border: 2px solid gold;
+        }
+
+        /* Títulos de Jugador Grandes */
+        .resultado-jugador h3 {
+            font-size: 24px;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Totales GIGANTES */
+        .total-score {
+            font-size: 50px;
+            color: gold;
+            margin: 10px 0;
+            text-align: right;
+            font-weight: 900;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .detalle-item { 
+            font-size: 16px; /* Letra más grande para los detalles */
+            color: #ddd; 
+            border-bottom: 1px solid #444; 
+            padding: 8px 0; 
+            display: flex; 
+            justify-content: space-between; 
+        }
+        
+        #historial-box { margin-top: 30px; border-top: 4px solid #555; padding-top: 20px; width: 100%; padding-bottom: 50px;}
+        .hist-row { font-size: 16px; color: #aaa; margin: 8px 0; border-bottom: 1px dashed #333; padding: 5px; }
+        .hist-win { color: gold; font-weight: bold; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -125,8 +182,8 @@
     <!-- 1. PANTALLA INICIO -->
     <div id="p-inicio" class="pantalla">
         <button class="btn-master" onclick="irMenuPrincipal()">⚡ INICIAR SISTEMA ⚡</button>
-        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V25</h2>
-        <p style="color:#bf00ff;">EXPANSIÓN DE ARTEFACTOS</p>
+        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V26</h2>
+        <p style="color:#bf00ff;">BIG DATA UPDATE</p>
     </div>
 
     <!-- 2. MENÚ PRINCIPAL -->
@@ -204,10 +261,10 @@
         </div>
     </div>
 
-    <!-- 6. RESULTADOS -->
+    <!-- 6. RESULTADOS (ESTILO MEJORADO) -->
     <div id="p-resultado-ronda" class="pantalla oculto">
         <div id="resultado-batalla">
-            <h2 id="titulo-resultados" style="color:gold; text-align:center;">⚔️ RESULTADOS ⚔️</h2>
+            <h2 id="titulo-resultados" style="color:gold; text-align:center; font-size: 28px; margin-bottom: 20px;">⚔️ RESULTADOS ⚔️</h2>
             <div id="resultado-contenido"></div>
             
             <!-- HISTORIAL -->
@@ -216,7 +273,7 @@
                 <div id="historial-lista"></div>
             </div>
 
-            <button id="btn-next-ronda" class="btn-master" onclick="siguienteRonda()" style="margin-top:20px;">🔄 SIGUIENTE RONDA</button>
+            <button id="btn-next-ronda" class="btn-master" onclick="siguienteRonda()" style="margin-top:20px; width: 90%;">🔄 SIGUIENTE RONDA</button>
         </div>
     </div>
 
@@ -311,9 +368,9 @@
 
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         
-        // --- BASE DE DATOS ACTUALIZADA V25 (ARTEFACTOS + BUHO) ---
+        // --- BASE DE DATOS (IDs 0 a 9) ---
         const CARTAS = {
-            // 0-3: CASAS (Estándar)
+            // 0-3: CASAS
             0: { id: 0, nombre: "DRAGÓN", imgEscudo: "ESCUDO_DRAGON.png", tipo: "CASA",
                 botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 7, video: "CARTA_1_ataque.mp4", color: "#900" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 2, video: "CARTA_1_cura.mp4", color: "#090" }, "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "CARTA_1_defensa.mp4", color: "#555" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "CARTA_1_magia.mp4", color: "#609" } }
             },
@@ -327,7 +384,7 @@
                 botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 6, video: "ataque.mp4", color: "#900" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 3, video: "cura.mp4", color: "#090" }, "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "defensa.mp4", color: "#555" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "magia.mp4", color: "#609" } }
             },
             
-            // ID 4: BÚHO (Target 4) - NUEVOS NOMBRES
+            // ID 4: BÚHO 
             4: {
                 id: 4, nombre: "BÚHO MASTER", imgEscudo: "ESCUDO_BUHO.png", tipo: "BUHO",
                 botones: {
@@ -338,7 +395,7 @@
                 }
             },
             
-            // ID 5: FRASCO DE FUEGO (IGNIS PHIALA)
+            // ID 5: IGNIS
             5: {
                 id: 5, nombre: "IGNIS PHIALA", imgEscudo: "ESCUDO_IGNIS.png", tipo: "ARTEFACTO",
                 botones: {
@@ -349,7 +406,7 @@
                 }
             },
 
-            // ID 6: ESCUDO ESPEJO (SPECULUM AEGIS)
+            // ID 6: ESPEJO
             6: {
                 id: 6, nombre: "SPECULUM AEGIS", imgEscudo: "ESCUDO_ESPEJO.png", tipo: "ARTEFACTO",
                 botones: {
@@ -360,18 +417,18 @@
                 }
             },
 
-            // ID 7: RELOJ DE ARENA (TEMPUS FUGIT)
+            // ID 7: RELOJ
             7: {
                 id: 7, nombre: "TEMPUS FUGIT", imgEscudo: "ESCUDO_RELOJ.png", tipo: "ARTEFACTO",
                 botones: {
                     "btn-i": { texto: "I", label: "ACELERAR", valor: 8, video: "RELOJ_ACELERAR.mp4", color: "#bf00ff" }, 
                     "btn-a": { texto: "A", label: "REVERTIR", valor: 7, video: "RELOJ_REVERTIR.mp4", color: "#bf00ff" },
                     "btn-t": { texto: "T", label: "CONGELAR", valor: 10, video: "RELOJ_CONGELAR.mp4", color: "#bf00ff" },
-                    "btn-m": { texto: "M", label: "ROMPER", valor: 15, video: "RELOJ_ROMPER.mp4", color: "#bf00ff" } // Alto riesgo/recompensa
+                    "btn-m": { texto: "M", label: "ROMPER", valor: 15, video: "RELOJ_ROMPER.mp4", color: "#bf00ff" }
                 }
             },
 
-            // ID 8: LIBRO DE SOMBRAS (GRIMORIUM UMBRA)
+            // ID 8: LIBRO
             8: {
                 id: 8, nombre: "GRIMORIUM UMBRA", imgEscudo: "ESCUDO_LIBRO.png", tipo: "ARTEFACTO",
                 botones: {
@@ -382,7 +439,7 @@
                 }
             },
 
-            // ID 9: PIEDRA MANÁ (LAPIS AETHER)
+            // ID 9: PIEDRA
             9: {
                 id: 9, nombre: "LAPIS AETHER", imgEscudo: "ESCUDO_PIEDRA.png", tipo: "ARTEFACTO",
                 botones: {
@@ -443,12 +500,9 @@
                 const b = document.getElementById(id);
                 const conf = carta.botones[id];
                 
-                // Texto Principal (I, A, T, M) + Etiqueta pequeña (MANDATUM, LANZAR, etc)
-                b.innerHTML = `<span class="letra-grande">${conf.texto}</span><span style="font-size:8px;">${conf.label.substring(0,8)}</span>`;
-                
+                b.innerHTML = `<span class="letra-grande">${conf.texto}</span><span class="label-peq">${conf.label.substring(0,8)}</span>`;
                 b.style.backgroundColor = conf.color;
                 
-                // Letra NEGRA para contraste máximo
                 b.style.color = "#000"; 
                 b.style.textShadow = "0px 0px 2px #fff";
                 b.style.fontWeight = "900";
@@ -462,7 +516,7 @@
             ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
                 const b = document.getElementById(id);
                 const letra = id.split('-')[1].toUpperCase();
-                b.innerHTML = `<span class="letra-grande">${letra}</span>`;
+                b.innerHTML = `<span class="letra-grande">${letra}</span><span class="label-peq"></span>`;
                 b.style.backgroundColor = '#222';
                 b.style.color = "#555";
                 b.style.textShadow = "none";
@@ -472,7 +526,7 @@
 
         window.iniciarAR = async function() {
             if(mindarThree) return;
-            console.log("🚀 INICIANDO MOTOR AR V25 (10 TARGETS)...");
+            console.log("🚀 INICIANDO MOTOR AR V26 (10 TARGETS)...");
             
             document.body.style.background = 'transparent';
 
@@ -488,7 +542,7 @@
 
             const {renderer, scene, camera} = mindarThree;
 
-            // BUCLE AUMENTADO A 10 (0 a 9)
+            // BUCLE 0 A 9
             for(let i=0; i<10; i++) {
                 const anchor = mindarThree.addAnchor(i);
                 const plane = new THREE.Mesh(
@@ -533,7 +587,6 @@
                     if(!cartaActual || reproduciendo) return;
                     
                     const conf = cartaActual.botones[id];
-                    
                     let valNum = (typeof conf.valor === 'number' ? conf.valor : 10);
                     
                     jugadores[tIdx].cartas.push({
@@ -547,6 +600,7 @@
                     reproduciendo = true;
                     ui.visorTop.style.background = "transparent";
 
+                    // LOGICA VIDEO FIX
                     ui.video.style.display = 'block';
                     ui.video.src = RUTA_BASE + conf.video;
                     
@@ -557,7 +611,17 @@
                     ui.overlay.style.display = 'flex';
                     ui.msg.style.display = 'none';
 
-                    ui.video.play();
+                    // Intentar reproducir con catch de errores
+                    const playPromise = ui.video.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(error => {
+                            console.error("Error reproduciendo video:", error);
+                            // Si falla (ej: formato), terminamos la animación manualmente
+                            alert("⚠️ Error cargando video: " + conf.video);
+                            ui.video.onended(); 
+                        });
+                    }
+
                     ui.video.onended = () => {
                         reproduciendo = false;
                         ui.visorTop.style.background = "rgba(0,0,0,0.85)";
@@ -621,7 +685,6 @@
             // Ordenar por puntaje
             jugadores.sort((a, b) => b.total - a.total);
             
-            // Determinar Ganador Ronda
             const ganador = jugadores[0];
             ganador.victorias++;
             historialGanadores.push({ronda: rondaActual, ganador: ganador.nombre});
@@ -632,7 +695,7 @@
                 const usoArtefacto = j.cartas.some(c => c.tipo === "ARTEFACTO");
                 const usoBuho = j.cartas.some(c => c.tipo === "BUHO");
                 
-                let detalleHtml = '<div style="margin-top:5px; padding-top:5px; border-top:1px solid #555;">';
+                let detalleHtml = '<div style="margin-top:10px; padding-top:10px; border-top:1px solid #555;">';
                 j.cartas.forEach(c => {
                     let colorVal = c.tipo === "ARTEFACTO" ? "#bf00ff" : (c.tipo === "BUHO" ? "gold" : "#fff"); 
                     detalleHtml += `
@@ -648,8 +711,8 @@
                 div.className = 'resultado-jugador' + (esGanador ? ' ganador' : '');
                 
                 let badges = '';
-                if(usoArtefacto) badges += '<span style="font-size:10px; color:#bf00ff; border:1px solid #bf00ff; padding:2px 4px; border-radius:4px; margin-left:5px;">ARTEFACTO</span>';
-                if(usoBuho) badges += '<span style="font-size:10px; color:gold; border:1px solid gold; padding:2px 4px; border-radius:4px; margin-left:5px;">BÚHO</span>';
+                if(usoArtefacto) badges += '<span style="font-size:12px; color:#bf00ff; border:1px solid #bf00ff; padding:2px 6px; border-radius:4px; margin-left:10px;">ARTEFACTO</span>';
+                if(usoBuho) badges += '<span style="font-size:12px; color:gold; border:1px solid gold; padding:2px 6px; border-radius:4px; margin-left:10px;">BÚHO</span>';
 
                 div.innerHTML = `
                     <h3 style="color:${j.color}">
@@ -657,9 +720,9 @@
                         ${badges}
                     </h3>
                     ${detalleHtml}
-                    <p style="margin-top:5px; border-top:1px solid #555; padding-top:5px;">Dado: 🎲 ${j.dado}</p>
-                    <h2 style="color:gold; margin:5px 0;">TOTAL: ${j.total}</h2>
-                    <p style="font-size:12px; color:#aaa;">Victorias acumuladas: ${j.victorias}</p>
+                    <p style="margin-top:10px; font-size:18px; color:#ccc;">Dado: 🎲 ${j.dado}</p>
+                    <div class="total-score">TOTAL: ${j.total}</div>
+                    <p style="font-size:14px; color:#aaa; text-align:right;">Victorias: ${j.victorias}</p>
                 `;
                 cont.appendChild(div);
             });
