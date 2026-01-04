@@ -1,9 +1,16 @@
+<!-- 
+╔════════════════════════════════════════════════════════════╗
+║  DOMUS MAGI: REVELATIONS                                   ║
+║  VERSIÓN 7.1 - CORRECCIÓN DETECCIÓN BÚHO Y VIDEOS         ║
+║  Fix: Detección búho + estabilidad reproducción            ║
+╚════════════════════════════════════════════════════════════╝
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: REVELATIONS</title>
+    <title>DOMUS MAGI: REVELATIONS - VERSIÓN 7.1</title>
 
     <script type="importmap">
     {
@@ -16,301 +23,109 @@
     </script>
 
     <style>
-        body { 
-            margin: 0; 
-            overflow: hidden; 
-            font-family: 'Segoe UI', sans-serif; 
-            background: #000; 
-        }
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
 
-        /* PANTALLA DE INICIO */
         #splash-screen {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: radial-gradient(circle, #1a001a, #000);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; transition: opacity 0.5s;
         }
-        #splash-screen.oculto {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* CAPA DE VIDEO PRESENTACIÓN */
-        #intro-layer {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: #000;
-            z-index: 10000; /* Encima del splash */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #intro-layer.oculto {
-            display: none;
-        }
-        
-        /* CORRECCIÓN AQUI: object-fit: contain para que no corte el texto */
-        #intro-video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* Muestra el video ENTERO sin recortar bordes */
-        }
+        #splash-screen.oculto { opacity: 0; pointer-events: none; }
 
         #btn-inicio {
-            padding: 25px 50px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #000;
-            background: #bf00ff;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 0 30px #bf00ff, 0 0 60px #bf00ff;
-            animation: pulso 2s infinite;
-            position: relative;
-            overflow: hidden;
+            padding: 25px 50px; font-size: 24px; font-weight: bold; color: #000;
+            background: #bf00ff; border: none; border-radius: 15px; cursor: pointer;
+            text-transform: uppercase; box-shadow: 0 0 30px #bf00ff;
+            animation: pulso 2s infinite; z-index: 10;
+        }
+        @keyframes pulso { 50% { box-shadow: 0 0 60px #bf00ff; } }
+        
+        #version-display {
+            margin-top: 20px;
+            color: #00ff00;
+            font-family: monospace;
+            font-size: 14px;
+            text-shadow: 0 0 5px #00ff00;
+            z-index: 11;
         }
 
-        @keyframes pulso {
-            0%, 100% { box-shadow: 0 0 30px #bf00ff, 0 0 60px #bf00ff; }
-            50% { box-shadow: 0 0 50px #bf00ff, 0 0 100px #bf00ff, 0 0 150px #bf00ff; }
+        #intro-layer {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center;
         }
+        #intro-layer.oculto { display: none; }
+        #intro-video { width: 100%; height: 100%; object-fit: contain; }
 
-        #btn-inicio:active {
-            transform: scale(0.95);
-        }
+        #container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 0; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; pointer-events: none; display: flex; flex-direction: column; }
 
-        .rayo {
-            position: absolute;
-            width: 3px;
-            height: 100px;
-            background: linear-gradient(180deg, #bf00ff, transparent);
-            animation: rayo-cae 1s forwards;
-            pointer-events: none;
-        }
-
-        @keyframes rayo-cae {
-            0% { top: -100px; opacity: 1; }
-            100% { top: 100vh; opacity: 0; }
-        }
-
-        .chispa {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #bf00ff;
-            animation: chispa-explota 0.8s forwards;
-            pointer-events: none;
-        }
-
-        @keyframes chispa-explota {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
-        }
-
-        /* APLICACIÓN PRINCIPAL */
-        #container {
-            width: 100vw; 
-            height: 100vh;
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        #ui-layer {
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%;
-            z-index: 100; 
-            pointer-events: none;
-            display: flex; 
-            flex-direction: column;
-        }
-
-        /* VISOR VIDEO - 1:1 */
         #video-visor {
-            width: 100%;
-            height: 100vw; 
-            max-height: 65vh; 
-            background: rgba(0,0,0,0.9);
-            border-bottom: 2px solid #555; 
-            pointer-events: auto;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            position: relative;
+            width: 100%; height: 100vw; max-height: 65vh; background: rgba(0,0,0,0.9);
+            border-bottom: 2px solid #555; pointer-events: auto; display: flex;
+            align-items: center; justify-content: center; position: relative;
         }
-        #video-player { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain; 
-            display: none; 
-            z-index: 10;
-        }
-        #msg-visor { 
-            color: white; 
-            text-align: center; 
-            font-weight: bold; 
-            letter-spacing: 1px; 
-            z-index: 20;
-        }
+        #video-player { width: 100%; height: 100%; object-fit: contain; display: none; z-index: 10; }
+        #msg-visor { color: white; text-align: center; font-weight: bold; letter-spacing: 1px; z-index: 20; }
 
-        /* OVERLAY ESCUDO + VALOR - GRANDE */
         #video-overlay {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            z-index: 500;
-            pointer-events: none;
+            position: absolute; top: 20px; right: 20px; display: none;
+            flex-direction: column; align-items: center; z-index: 500; pointer-events: none;
         }
-        #overlay-img {
-            width: 75px; 
-            height: auto;
-            filter: drop-shadow(0 0 8px rgba(255,255,255,0.9));
-            margin-bottom: 5px;
-            display: block;
-        }
+        #overlay-img { width: 75px; height: auto; filter: drop-shadow(0 0 8px rgba(255,255,255,0.9)); margin-bottom: 5px; }
         #overlay-text {
-            color: #fff;
-            font-weight: 800;
-            font-size: 22px; 
-            background: rgba(0,0,0,0.7);
-            padding: 4px 10px;
-            border-radius: 8px;
-            border: 2px solid #aaa;
-            text-shadow: 0 0 4px #000;
-            text-align: center;
-            min-width: 45px;
+            color: #fff; font-weight: 800; font-size: 22px; background: rgba(0,0,0,0.7);
+            padding: 4px 10px; border-radius: 8px; border: 2px solid #aaa; text-align: center; min-width: 45px;
         }
 
-        /* ZONA SCANNER */
-        #zona-ar { 
-            flex-grow: 1; 
-            position: relative; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
-        
+        #zona-ar { flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: center; }
         #guia-scanner {
-            width: 60vw; 
-            height: 60vw;
-            max-width: 250px; 
-            max-height: 250px;
-            border: 4px solid red; 
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(255,0,0,0.5);
-            transition: 0.3s;
+            width: 60vw; height: 60vw; max-width: 250px; max-height: 250px;
+            border: 4px solid red; border-radius: 15px; box-shadow: 0 0 20px rgba(255,0,0,0.5); transition: 0.3s;
         }
-        #guia-scanner.verde { 
-            border-color: #0f0; 
-            box-shadow: 0 0 50px #0f0; 
-            background: rgba(0,255,0,0.1); 
-        }
+        #guia-scanner.verde { border-color: #0f0; box-shadow: 0 0 50px #0f0; background: rgba(0,255,0,0.1); }
 
-        /* PANEL INFERIOR - SOLO BOTONES */
         #panel-inferior {
-            background: #111; 
-            border-top: 2px solid #fff;
-            padding: 20px;
-            padding-bottom: calc(20px + env(safe-area-inset-bottom));
-            pointer-events: auto; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center;
-            gap: 10px;
+            background: #111; border-top: 2px solid #fff; padding: 20px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom)); pointer-events: auto;
+            display: flex; flex-direction: column; gap: 10px;
         }
-
-        /* 4 BOTONES SELECTORES */
-        #selectores {
-            display: flex;
-            justify-content: space-around;
-            padding-top: 5px;
-            gap: 15px;
-        }
-        .btn-selector {
-            width: 75px;
-            height: 75px;
-            border-radius: 50%;
-            background: #222;
-            border: 3px solid #555;
-            color: #555;
-            font-size: 26px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.4;
-            transition: 0.3s;
-            cursor: not-allowed;
-        }
-        .btn-selector.activo {
-            opacity: 1;
-            cursor: pointer;
-            color: white;
-            border-color: white;
-            transform: scale(1.1);
-        }
+        #selectores { display: flex; justify-content: space-around; padding-top: 5px; gap: 15px; }
         
-        #btn-i.activo { background: #900; box-shadow: 0 0 25px #f00; }
-        #btn-a.activo { background: #090; box-shadow: 0 0 25px #0f0; }
-        #btn-t.activo { background: #555; box-shadow: 0 0 25px #aaa; }
-        #btn-m.activo { background: #609; box-shadow: 0 0 25px #d0f; }
+        .btn-selector {
+            width: 75px; height: 75px; border-radius: 50%; background: #222; border: 3px solid #555;
+            color: #555; font-size: 26px; font-weight: bold; display: flex; align-items: center; justify-content: center;
+            opacity: 0.4; transition: all 0.3s; cursor: not-allowed;
+        }
+        .btn-selector.activo { opacity: 1; cursor: pointer; color: white; border-color: white; transform: scale(1.1); }
+        
+        #btn-i.activo { box-shadow: 0 0 25px #f00; }
+        #btn-a.activo { box-shadow: 0 0 25px #0f0; }
+        #btn-t.activo { box-shadow: 0 0 25px #aaa; }
+        #btn-m.activo { box-shadow: 0 0 25px #d0f; }
     </style>
 </head>
 <body>
 
-    <!-- CAPA DE VIDEO PRESENTACIÓN (Inicialmente oculta) -->
-    <div id="intro-layer" class="oculto">
-        <video id="intro-video" playsinline webkit-playsinline></video>
-    </div>
-
-    <!-- PANTALLA DE INICIO -->
+    <div id="intro-layer" class="oculto"><video id="intro-video" playsinline webkit-playsinline></video></div>
+    
     <div id="splash-screen">
         <button id="btn-inicio">⚡ INICIAR SISTEMA ⚡</button>
+        <div id="version-display">VERSIÓN 7.1 - CORRECCIÓN DETECCIÓN BÚHO Y VIDEOS</div>
     </div>
 
-    <!-- CONTENEDOR AR -->
     <div id="container"></div>
 
-    <!-- UI PRINCIPAL -->
     <div id="ui-layer">
-        
-        <!-- VISOR -->
         <div id="video-visor">
-            <div id="msg-visor">INICIANDO SISTEMA...<br><span style="font-size:11px; color:#aaa">Espere...</span></div>
+            <div id="msg-visor">INICIANDO...</div>
             <video id="video-player" playsinline webkit-playsinline></video>
-            
-            <!-- LAYER TRANSPARENTE -->
             <div id="video-overlay">
                 <img id="overlay-img" src="" alt="Escudo">
                 <div id="overlay-text"></div>
             </div>
         </div>
-
-        <!-- SCANNER -->
-        <div id="zona-ar">
-            <div id="guia-scanner"></div>
-        </div>
-
-        <!-- PANEL INFERIOR -->
+        <div id="zona-ar"><div id="guia-scanner"></div></div>
         <div id="panel-inferior">
             <div id="selectores">
                 <button id="btn-i" class="btn-selector" data-lado="IMPETUS">I</button>
@@ -325,263 +140,297 @@
         import * as THREE from 'three';
         import { MindARThree } from 'mindar-image-three';
 
-        // --- DATOS DE LAS 4 CARTAS ---
+        // ==========================================
+        // VERSIÓN 7.1 - CORRECCIÓN DETECCIÓN BÚHO Y VIDEOS
+        // ==========================================
+        const VERSION = "VERSIÓN 7.1 - CORRECCIÓN DETECCIÓN BÚHO Y VIDEOS";
+        console.log("%c" + VERSION, "color: #0f0; font-size: 20px; font-weight: bold;");
+
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         
         const CARTAS = {
-            0: { // Dragón
+            0: {
+                nombre: "DRAGÓN",
                 imgEscudo: "ESCUDO_DRAGON.png",
-                valores: { IMPETUS: 7, AUXILIUM: 2, TUTELA: 3, MYSTERIUM: 2 },
-                videos: { 
-                    IMPETUS: RUTA_BASE + "ataque.mp4", 
-                    AUXILIUM: RUTA_BASE + "cura.mp4", 
-                    TUTELA: RUTA_BASE + "defensa.mp4", 
-                    MYSTERIUM: RUTA_BASE + "magia.mp4" 
+                botones: {
+                    "btn-i": { texto: "I", valor: 7, video: "ataque.mp4", color: "#900" },
+                    "btn-a": { texto: "A", valor: 2, video: "cura.mp4", color: "#090" },
+                    "btn-t": { texto: "T", valor: 3, video: "defensa.mp4", color: "#555" },
+                    "btn-m": { texto: "M", valor: 2, video: "magia.mp4", color: "#609" }
                 }
             },
-            1: { // Águila
-                imgEscudo: "ESCUDO_AGUILA.png", 
-                valores: { IMPETUS: 5, AUXILIUM: 4, TUTELA: 2, MYSTERIUM: 3 },
-                videos: { 
-                    IMPETUS: RUTA_BASE + "ataque.mp4", 
-                    AUXILIUM: RUTA_BASE + "cura.mp4", 
-                    TUTELA: RUTA_BASE + "defensa.mp4", 
-                    MYSTERIUM: RUTA_BASE + "magia.mp4" 
+            1: {
+                nombre: "ÁGUILA",
+                imgEscudo: "ESCUDO_AGUILA.png",
+                botones: {
+                    "btn-i": { texto: "I", valor: 5, video: "ataque.mp4", color: "#900" },
+                    "btn-a": { texto: "A", valor: 4, video: "cura.mp4", color: "#090" },
+                    "btn-t": { texto: "T", valor: 2, video: "defensa.mp4", color: "#555" },
+                    "btn-m": { texto: "M", valor: 3, video: "magia.mp4", color: "#609" }
                 }
             },
-            2: { // León
+            2: {
+                nombre: "LEÓN",
                 imgEscudo: "ESCUDO_LEON.png",
-                valores: { IMPETUS: 8, AUXILIUM: 1, TUTELA: 4, MYSTERIUM: 1 },
-                videos: { 
-                    IMPETUS: RUTA_BASE + "ataque.mp4", 
-                    AUXILIUM: RUTA_BASE + "cura.mp4", 
-                    TUTELA: RUTA_BASE + "defensa.mp4", 
-                    MYSTERIUM: RUTA_BASE + "magia.mp4" 
+                botones: {
+                    "btn-i": { texto: "I", valor: 8, video: "ataque.mp4", color: "#900" },
+                    "btn-a": { texto: "A", valor: 1, video: "cura.mp4", color: "#090" },
+                    "btn-t": { texto: "T", valor: 4, video: "defensa.mp4", color: "#555" },
+                    "btn-m": { texto: "M", valor: 1, video: "magia.mp4", color: "#609" }
                 }
             },
-            3: { // Lobo/Jabalí
+            3: {
+                nombre: "JABALÍ",
                 imgEscudo: "ESCUDO_JABALI.png",
-                valores: { IMPETUS: 6, AUXILIUM: 3, TUTELA: 3, MYSTERIUM: 2 },
-                videos: { 
-                    IMPETUS: RUTA_BASE + "ataque.mp4", 
-                    AUXILIUM: RUTA_BASE + "cura.mp4", 
-                    TUTELA: RUTA_BASE + "defensa.mp4", 
-                    MYSTERIUM: RUTA_BASE + "magia.mp4" 
+                botones: {
+                    "btn-i": { texto: "I", valor: 6, video: "ataque.mp4", color: "#900" },
+                    "btn-a": { texto: "A", valor: 3, video: "cura.mp4", color: "#090" },
+                    "btn-t": { texto: "T", valor: 3, video: "defensa.mp4", color: "#555" },
+                    "btn-m": { texto: "M", valor: 2, video: "magia.mp4", color: "#609" }
+                }
+            },
+            4: {
+                nombre: "BÚHO",
+                imgEscudo: "ESCUDO_BUHO.png",
+                botones: {
+                    "btn-i": { texto: "M", valor: "MANDATUM", video: "owl_mandatum.mp4", color: "#4a148c" },
+                    "btn-a": { texto: "P", valor: "PRAESAGIUM", video: "owl_praesagium.mp4", color: "#6a1b9a" },
+                    "btn-t": { texto: "C", valor: "CONSILIUM", video: "owl_consilium.mp4", color: "#7b1fa2" },
+                    "btn-m": { texto: "S", valor: "ARCANUM", video: "owl_arcanum.mp4", color: "#8e24aa" }
                 }
             }
         };
 
         let cartaActual = null;
+        let reproduciendo = false; // Evita clicks múltiples durante reproducción
 
-        // --- REFERENCIAS UI ---
-        const splash = document.querySelector("#splash-screen");
-        const introLayer = document.querySelector("#intro-layer");
-        const introVideo = document.querySelector("#intro-video");
-        const btnInicio = document.querySelector("#btn-inicio");
-        const msgVisor = document.querySelector("#msg-visor");
-        const guiaScanner = document.querySelector("#guia-scanner");
-        const videoPlayer = document.querySelector("#video-player");
-        
-        // Referencias Overlay
-        const videoOverlay = document.querySelector("#video-overlay");
-        const overlayImg = document.querySelector("#overlay-img");
-        const overlayText = document.querySelector("#overlay-text");
-        
-        const selectores = document.querySelectorAll(".btn-selector");
+        const ui = {
+            btnI: document.getElementById('btn-i'),
+            btnA: document.getElementById('btn-a'),
+            btnT: document.getElementById('btn-t'),
+            btnM: document.getElementById('btn-m'),
+            scanner: document.getElementById('guia-scanner'),
+            msg: document.getElementById('msg-visor'),
+            overlay: document.getElementById('video-overlay'),
+            ovImg: document.getElementById('overlay-img'),
+            ovTxt: document.getElementById('overlay-text'),
+            videoPlayer: document.getElementById('video-player')
+        };
 
-        // --- EFECTO RAYOS Y CHISPAS ---
-        function crearRayos() {
-            for(let i = 0; i < 20; i++) {
-                setTimeout(() => {
-                    const rayo = document.createElement('div');
-                    rayo.className = 'rayo';
-                    rayo.style.left = Math.random() * 100 + 'vw';
-                    splash.appendChild(rayo);
-                    setTimeout(() => rayo.remove(), 1000);
-                }, i * 50);
-            }
-        }
-
-        function crearChispas() {
-            for(let i = 0; i < 30; i++) {
-                const chispa = document.createElement('div');
-                chispa.className = 'chispa';
-                chispa.style.left = '50%';
-                chispa.style.top = '50%';
-                const x = (Math.random() - 0.5) * 500;
-                const y = (Math.random() - 0.5) * 500;
-                chispa.style.setProperty('--x', x + 'px');
-                chispa.style.setProperty('--y', y + 'px');
-                splash.appendChild(chispa);
-                setTimeout(() => chispa.remove(), 800);
-            }
-        }
-
-        // --- LOGICA DE INICIO + VIDEO INTRO ---
-        btnInicio.addEventListener('click', async () => {
-            // 1. Animaciones visuales
-            crearRayos();
-            crearChispas();
+        function actualizarBotones(carta) {
+            console.log(`%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, "color: #ff0;");
+            console.log(`%c🔄 ACTUALIZANDO BOTONES PARA: ${carta.nombre}`, "color: #ff0; font-size: 16px; font-weight: bold; background: #222200; padding: 5px;");
+            console.log(`%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, "color: #ff0;");
             
-            // 2. Esperar animación y lanzar video de presentación
-            setTimeout(() => {
-                splash.classList.add('oculto'); // Ocultar boton/fondo splash
-                introLayer.classList.remove('oculto'); // Mostrar capa video
+            const botones = [
+                { elem: ui.btnI, id: "btn-i" },
+                { elem: ui.btnA, id: "btn-a" },
+                { elem: ui.btnT, id: "btn-t" },
+                { elem: ui.btnM, id: "btn-m" }
+            ];
+
+            botones.forEach(({elem, id}) => {
+                const config = carta.botones[id];
                 
-                // Cargar y reproducir presentación
-                introVideo.src = RUTA_BASE + "presentacion.mp4";
-                introVideo.muted = false; // Intenta audio
-                introVideo.volume = 1.0;
-                introVideo.play().catch(e => {
-                    console.log("Auto-play bloqueado, iniciando AR directo o muteado", e);
-                    // Si falla el play (raro tras click), saltar a AR
-                    introLayer.classList.add('oculto');
-                    iniciarAR();
-                });
-            }, 1200);
+                console.log(`  🔘 ${id}:`);
+                console.log(`     Texto anterior: "${elem.innerText}"`);
+                console.log(`     Texto nuevo: "${config.texto}"`);
+                console.log(`     Color: ${config.color}`);
+                console.log(`     Valor: ${config.valor}`);
+                console.log(`     Video: ${config.video}`);
+                
+                elem.innerText = config.texto;
+                elem.style.backgroundColor = config.color;
+                elem.classList.add('activo');
+                
+                console.log(`     ✓ Actualizado`);
+            });
+            
+            console.log(`%c✅ TODOS LOS BOTONES ACTUALIZADOS`, "color: #0f0; font-size: 14px; font-weight: bold;");
+        }
+
+        function resetearBotones() {
+            console.log(`🔄 Reseteando botones a valores por defecto`);
+            const botones = [ui.btnI, ui.btnA, ui.btnT, ui.btnM];
+            botones.forEach(btn => {
+                btn.classList.remove('activo');
+                btn.style.backgroundColor = '#222';
+            });
+            ui.btnI.innerText = "I";
+            ui.btnA.innerText = "A";
+            ui.btnT.innerText = "T";
+            ui.btnM.innerText = "M";
+            console.log(`  ✓ Botones: I, A, T, M (color #222)`);
+        }
+
+        document.getElementById('btn-inicio').addEventListener('click', () => {
+            const splash = document.getElementById('splash-screen');
+            const intro = document.getElementById('intro-layer');
+            const vid = document.getElementById('intro-video');
+
+            splash.classList.add('oculto');
+            intro.classList.remove('oculto');
+            
+            vid.src = RUTA_BASE + "presentacion.mp4";
+            vid.play().catch(() => {
+                intro.classList.add('oculto');
+                iniciarAR();
+            });
+
+            vid.addEventListener('ended', () => {
+                intro.classList.add('oculto');
+                iniciarAR();
+            });
         });
 
-        // 3. Cuando termina la presentación -> INICIAR AR
-        introVideo.addEventListener('ended', async () => {
-            console.log("Presentación terminada");
-            introLayer.classList.add('oculto'); // Ocultar capa video
-            await iniciarAR(); // Arrancar juego
-        });
-
-        // --- INICIAR AR ---
         async function iniciarAR() {
+            console.log("🚀 Iniciando sistema AR...");
+            
             const mindarThree = new MindARThree({
                 container: document.querySelector("#container"),
-                imageTargetSrc: RUTA_BASE + "targets1.mind"
+                imageTargetSrc: RUTA_BASE + "targets1.mind",
+                maxTrack: 1,
+                filterMinCF: 0.0001,
+                filterBeta: 0.001,
+                warmupTolerance: 5,
+                missTolerance: 5,
+                uiLoading: "no",
+                uiScanning: "no",
+                uiError: "no"
             });
 
             const {renderer, scene, camera} = mindarThree;
 
-            // Desbloquear audio del reproductor principal del juego
-            videoPlayer.muted = false;
-            videoPlayer.play().then(() => {
-                videoPlayer.pause();
-                videoPlayer.currentTime = 0;
-            }).catch(() => {});
+            console.log("📦 Creando anchors para 5 cartas (0-4)...");
 
-            // Crear anchors para las 4 cartas
-            for(let i = 0; i < 4; i++) {
+            for(let i = 0; i < 5; i++) {
                 const anchor = mindarThree.addAnchor(i);
+                console.log(`  ✓ Anchor ${i} creado`);
                 
-                // Plano invisible
                 const geometry = new THREE.PlaneGeometry(1, 1);
                 const material = new THREE.MeshBasicMaterial({transparent: true, opacity: 0});
                 const plane = new THREE.Mesh(geometry, material);
                 anchor.group.add(plane);
 
-                // DETECCIÓN
                 anchor.onTargetFound = () => {
-                    console.log(`Carta ${i} detectada`);
-                    cartaActual = i;
-                    mostrarDatosCarta(i);
+                    console.log(`%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, "color: #0f0;");
+                    console.log(`%c🎯 CARTA DETECTADA: ${i} - ${CARTAS[i].nombre}`, "color: #0f0; font-size: 18px; font-weight: bold; background: #002200; padding: 5px;");
+                    console.log(`%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, "color: #0f0;");
+                    
+                    // Detener video si está reproduciendo al cambiar de carta
+                    if(reproduciendo) {
+                        ui.videoPlayer.pause();
+                        ui.videoPlayer.style.display = 'none';
+                        ui.overlay.style.display = 'none';
+                        reproduciendo = false;
+                    }
+                    
+                    cartaActual = CARTAS[i];
+                    
+                    console.log(`🔧 Ejecutando actualizarBotones()...`);
+                    actualizarBotones(cartaActual);
+                    
+                    ui.scanner.classList.add('verde');
+                    ui.msg.style.display = 'block';
+                    ui.msg.innerText = "CONECTADO - " + CARTAS[i].nombre;
+                    ui.msg.style.color = "#0f0";
+                    
+                    console.log(`✅ UI actualizada correctamente`);
                 };
 
                 anchor.onTargetLost = () => {
-                    console.log(`Carta ${i} perdida`);
-                    if(cartaActual === i) {
+                    console.log(`%c❌ CARTA ${i} PERDIDA`, "color: #f00; font-size: 14px;");
+                    if(cartaActual === CARTAS[i]) {
                         cartaActual = null;
-                        resetearUI();
+                        
+                        // Detener video si se pierde la carta
+                        if(reproduciendo) {
+                            ui.videoPlayer.pause();
+                            ui.videoPlayer.style.display = 'none';
+                            ui.overlay.style.display = 'none';
+                            reproduciendo = false;
+                        }
+                        
+                        resetearBotones();
+                        ui.scanner.classList.remove('verde');
+                        ui.msg.innerText = "ESCANEAR...";
+                        ui.msg.style.color = "#fff";
+                        ui.overlay.style.display = 'none';
+                        ui.videoPlayer.style.display = 'none';
                     }
                 };
             }
 
-            try {
-                await mindarThree.start();
-                renderer.setAnimationLoop(() => {
-                    renderer.render(scene, camera);
-                });
-                msgVisor.innerHTML = "ESCANEA UNA CARTA<br><span style='font-size:10px'>Centra la imagen</span>";
-            } catch(e) {
-                alert("Error al iniciar: " + e);
-            }
-        }
-
-        // --- MOSTRAR DATOS DE CARTA ---
-        function mostrarDatosCarta(index) {
-            guiaScanner.classList.add('verde');
-            msgVisor.innerText = "¡CARTA ENLAZADA!";
-            msgVisor.style.color = "#0f0";
-
-            // Activar selectores
-            selectores.forEach(btn => {
-                btn.classList.add('activo');
+            console.log("⏳ Iniciando MindAR...");
+            await mindarThree.start();
+            console.log("✅ MindAR iniciado correctamente");
+            console.log("📷 Cámara lista - Enfoca una carta");
+            console.log("💡 NOTA BÚHO: Si detecta mal, intenta enfocar desde más lejos o centrar mejor la imagen");
+            
+            renderer.setAnimationLoop(() => {
+                renderer.render(scene, camera);
             });
         }
 
-        // --- RESETEAR UI ---
-        function resetearUI() {
-            guiaScanner.classList.remove('verde');
-            msgVisor.innerText = "BUSCANDO CARTA...";
-            msgVisor.style.color = "#fff";
-
-            // Ocultar overlay
-            videoOverlay.style.display = 'none';
-            videoPlayer.style.display = 'none';
-
-            selectores.forEach(btn => {
-                btn.classList.remove('activo');
-            });
-        }
-
-        // --- SELECTORES DE LADO ---
-        selectores.forEach(btn => {
+        [ui.btnI, ui.btnA, ui.btnT, ui.btnM].forEach(btn => {
             btn.addEventListener('click', () => {
-                if(!btn.classList.contains('activo') || cartaActual === null) return;
+                if(!btn.classList.contains('activo') || !cartaActual || reproduciendo) {
+                    if(reproduciendo) console.warn("⚠️ Video en reproducción - click ignorado");
+                    else console.warn("⚠️ Click ignorado - botón inactivo o sin carta");
+                    return;
+                }
 
-                const lado = btn.getAttribute('data-lado');
-                const carta = CARTAS[cartaActual];
-                const valor = carta.valores[lado];
-                const videoSrc = carta.videos[lado];
-
-                // ACTIVAR OVERLAY (Escudo + Valor)
-                const inicial = lado.charAt(0);
+                reproduciendo = true; // Bloquea nuevos clicks
                 
-                overlayImg.src = RUTA_BASE + carta.imgEscudo;
+                const config = cartaActual.botones[btn.id];
                 
-                overlayImg.onerror = function() { this.style.display='none'; };
-                overlayImg.onload = function() { this.style.display='block'; };
+                console.log(`%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, "color: #0ff;");
+                console.log(`%c▶️ REPRODUCIENDO VIDEO`, "color: #0ff; font-size: 16px; font-weight: bold; background: #002222; padding: 5px;");
+                console.log(`   Carta: ${cartaActual.nombre}`);
+                console.log(`   Botón: ${btn.id} (${config.texto})`);
+                console.log(`   Video: ${config.video}`);
+                console.log(`   Valor: ${config.valor}`);
+                console.log(`   URL completa: ${RUTA_BASE + config.video}`);
 
-                overlayText.innerText = `${inicial}:${valor}`;
+                // Detener y limpiar cualquier reproducción previa
+                ui.videoPlayer.pause();
+                ui.videoPlayer.currentTime = 0;
+                ui.videoPlayer.src = '';
                 
-                if(lado === 'IMPETUS') overlayText.style.borderColor = "#f55";
-                else if(lado === 'AUXILIUM') overlayText.style.borderColor = "#5f5";
-                else if(lado === 'MYSTERIUM') overlayText.style.borderColor = "#d5f";
-                else overlayText.style.borderColor = "#aaa";
+                // Configurar overlay
+                ui.ovImg.src = RUTA_BASE + cartaActual.imgEscudo;
+                ui.ovTxt.innerText = config.valor;
+                ui.ovTxt.style.borderColor = config.color;
+                ui.overlay.style.display = 'flex';
 
-                videoOverlay.style.display = 'flex';
-
-                // Reproducir video
-                msgVisor.style.display = 'none';
-                videoPlayer.style.display = 'block';
-                videoPlayer.src = videoSrc;
-                videoPlayer.load();
-                videoPlayer.muted = false;
-                videoPlayer.volume = 1.0;
+                // Configurar y reproducir video
+                ui.msg.style.display = 'none';
+                ui.videoPlayer.style.display = 'block';
                 
-                videoPlayer.play().then(() => {
-                    console.log("Video OK");
-                }).catch((error) => {
-                    console.error("Error Video", error);
-                    msgVisor.style.display = 'block';
-                    msgVisor.innerText = "ERROR VIDEO";
-                    videoPlayer.style.display = 'none';
-                    videoOverlay.style.display = 'none';
-                });
+                // Pequeño delay para asegurar que el DOM se actualizó
+                setTimeout(() => {
+                    ui.videoPlayer.src = RUTA_BASE + config.video;
+                    ui.videoPlayer.muted = false;
+                    ui.videoPlayer.volume = 1.0;
+                    ui.videoPlayer.load(); // Forzar carga del video
+                    
+                    ui.videoPlayer.play()
+                        .then(() => {
+                            console.log("✅ Video iniciado correctamente");
+                        })
+                        .catch(err => {
+                            console.error("❌ Error al reproducir:", err);
+                            reproduciendo = false;
+                        });
+                }, 100);
             });
         });
 
-        // Al terminar video
-        videoPlayer.addEventListener('ended', () => {
-            videoPlayer.style.display = 'none';
-            videoOverlay.style.display = 'none'; 
-            msgVisor.style.display = 'block';
-            msgVisor.innerText = "FIN DE ACCIÓN";
-            msgVisor.style.color = "#fff";
+        ui.videoPlayer.addEventListener('ended', () => {
+            ui.videoPlayer.style.display = 'none';
+            ui.overlay.style.display = 'none';
+            ui.msg.style.display = 'block';
+            ui.msg.innerText = "LISTO";
         });
 
     </script>
