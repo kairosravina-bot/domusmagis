@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V31 - FULLSCREEN VIDEO FIX</title>
+    <title>DOMUS MAGI V32 - SPLIT SCREEN FIX</title>
     
     <script type="importmap">
     {
@@ -18,200 +18,220 @@
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', Courier, monospace; background: #000; color: white; }
         
+        /* VIDEO FONDO WEBCAM (MindAR) */
         #container-ar { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
-        
-        /* FIX V31: Video AR de fondo oculto visualmente pero activo */
-        video { z-index: -2 !important; display: block !important; }
+        video { display: block; } 
 
-        .pantalla { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; z-index: 1000; background: #000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        /* PANTALLAS GENERALES */
+        .pantalla { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            z-index: 1000; background: #000; overflow-y: auto; padding: 20px; box-sizing: border-box; 
+        }
         .oculto { display: none !important; }
         
         .btn-master {
-            padding: 20px 30px; font-size: 20px; background: #bf00ff; color: white;
+            padding: 20px; font-size: 18px; background: #bf00ff; color: white;
             border: 3px solid #fff; border-radius: 12px; cursor: pointer;
-            box-shadow: 0 0 20px #bf00ff; text-transform: uppercase; font-weight: bold;
-            margin: 10px; min-width: 250px; width: 90%;
+            box-shadow: 0 0 15px #bf00ff; text-transform: uppercase; font-weight: bold;
+            margin: 10px 0; width: 100%;
         }
 
         .btn-modo {
-            padding: 25px; font-size: 18px; width: 90%; margin: 10px 0;
-            border: 2px solid white; border-radius: 15px; cursor: pointer;
+            padding: 20px; font-size: 16px; width: 100%; margin: 10px 0;
+            border: 2px solid white; border-radius: 10px; cursor: pointer;
             font-weight: bold; text-transform: uppercase;
         }
 
-        /* DADOS */
-        .dado-gigante { font-size: 80px; color: #fff; text-shadow: 0 0 30px #fff; margin: 10px; font-weight: bold; }
-        .suma-dados { font-size: 50px; color: gold; font-weight: bold; margin: 20px; }
-
-        /* UI JUEGO */
-        #ui-juego { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; pointer-events: none; z-index: 500; }
+        /* --- UI JUEGO DIVIDIDA (SPLIT SCREEN) --- */
+        #ui-juego { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            display: flex; flex-direction: column; z-index: 500; pointer-events: none;
+        }
         
-        #zona-ar { 
-            height: 45vh; width: 100%; position: relative; 
-            background: transparent; display: flex; justify-content: center; align-items: center;
+        /* MITAD SUPERIOR: SCANNER Y VIDEO ACCIÓN */
+        #zona-superior { 
+            height: 50%; width: 100%; position: relative; 
+            display: flex; justify-content: center; align-items: center;
+            border-bottom: 4px solid gold;
+            background: rgba(0,0,0,0.1); /* Transparente para ver cámara */
+            pointer-events: none; /* Dejar pasar clicks si fuera necesario */
         }
 
-        #zona-medio { 
-            height: 25vh; width: 100%; background: rgba(0,0,0,0.9); 
-            border-top: 2px solid #bf00ff; border-bottom: 2px solid #bf00ff;
-            pointer-events: auto; position: relative; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        #guia-scanner { 
+            width: 220px; height: 220px; border: 4px solid red; 
+            border-radius: 20px; transition: 0.3s; z-index: 10;
+        }
+        #guia-scanner.verde { border-color: #0f0; box-shadow: 0 0 40px #0f0; }
+        #guia-scanner.violeta { border-color: #bf00ff; box-shadow: 0 0 40px #bf00ff; }
+        #guia-scanner.dorado { border-color: gold; box-shadow: 0 0 40px gold; }
+
+        /* VIDEO ACCION: TAPA EL SCANNER CUANDO SE ACTIVA */
+        #video-action {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: contain; background: black; z-index: 20; 
+            display: none; /* Se activa con JS */
         }
 
-        #panel-mando { 
-            height: 30vh; background: rgba(15,15,15,0.98); 
-            pointer-events: auto; display: flex; flex-direction: column; 
-            align-items: center; justify-content: space-around; padding: 10px;
+        /* MITAD INFERIOR: DATOS Y BOTONES */
+        #zona-inferior { 
+            height: 50%; width: 100%; 
+            background: rgba(10,10,10,0.98); 
+            pointer-events: auto; /* Habilitar botones */
+            display: flex; flex-direction: column; 
+            align-items: center; justify-content: space-around; 
+            padding: 10px; box-sizing: border-box;
         }
 
-        #guia-scanner { width: 200px; height: 200px; border: 4px solid red; border-radius: 20px; transition: 0.3s; }
-        #guia-scanner.verde { border-color: #0f0; box-shadow: 0 0 50px #0f0; }
-        #guia-scanner.violeta { border-color: #bf00ff; box-shadow: 0 0 60px #bf00ff; }
-        #guia-scanner.dorado { border-color: gold; box-shadow: 0 0 60px gold; }
+        /* MODAL BATALLA FINAL (CENTRADO) */
+        #modal-batalla {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.95); z-index: 9999;
+            display: none; align-items: center; justify-content: center;
+        }
+        #video-clash {
+            width: 95%; max-width: 500px; aspect-ratio: 1/1; 
+            object-fit: contain; border: 4px solid gold; box-shadow: 0 0 50px gold;
+        }
 
+        /* OTROS ESTILOS */
         .btn-gema {
             width: 70px; height: 70px; border-radius: 12px; border: 2px solid #555;
             background: #222; color: #555; display: flex; flex-direction: column; align-items: center;
             justify-content: center; font-size: 10px; font-weight: bold;
-            cursor: pointer; transition: all 0.3s; opacity: 0.5; padding: 2px; text-align: center;
+            cursor: pointer; transition: all 0.3s; opacity: 0.5;
         }
-        .letra-grande { font-size: 20px; display:block; }
+        .letra-grande { font-size: 22px; display:block; }
         .btn-gema.activo { opacity: 1; border-color: white; transform: scale(1.05); }
 
-        /* FIX V31: VIDEOS PANTALLA COMPLETA REAL */
-        #video-player { 
-            width: 100vw; height: 100vh; object-fit: cover; 
-            display: none; position: fixed; top: 0; left: 0; 
-            z-index: 9000; background: black; /* Z-Index alto para tapar UI */
+        #txt-turno { 
+            position: absolute; top: 10px; left: 10px; z-index: 15;
+            background: rgba(0,0,0,0.8); color: white; padding: 5px 10px; 
+            border: 1px solid white; font-weight: bold; font-size: 14px; 
         }
 
-        /* FIX V31: VIDEO CLASH MÁXIMA PRIORIDAD */
-        #video-clash { 
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
-            background: black; z-index: 99999; object-fit: cover; display: none; 
-        }
-
-        /* PANTALLA CAMBIO DE TURNO (SEMÁFORO) */
+        /* PANTALLA CAMBIO TURNO */
         #pantalla-cambio-turno {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000; z-index: 2000; display: none; 
+            background: #000; z-index: 8000; display: none; 
             flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; transition: background 0.5s;
+            text-align: center;
         }
-        
-        #txt-turno { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px; border: 1px solid white; pointer-events: none; }
-        
-        #resultado-batalla { background: rgba(10,10,10,0.98); padding: 10px; border: 2px solid gold; border-radius: 15px; width: 100%; height: 90vh; overflow-y: scroll; box-sizing: border-box; }
-        .resultado-jugador { background: #222; margin: 15px 0; padding: 20px; border-radius: 12px; border-left: 8px solid #555; }
-        .ganador { border-color: gold; background: #333; box-shadow: 0 0 25px rgba(255, 215, 0, 0.4); border: 2px solid gold; }
-        .total-score { font-size: 50px; color: gold; margin: 10px 0; text-align: right; font-weight: 900; }
-        .detalle-clash { font-size: 14px; margin: 5px 0; border-bottom: 1px solid #444; padding: 5px; display:flex; justify-content:space-between; }
 
+        #resultado-batalla { width: 100%; height: 90vh; overflow-y: scroll; }
+        .resultado-jugador { background: #222; margin: 10px 0; padding: 15px; border-radius: 10px; border-left: 5px solid #555; }
+        .ganador { border-color: gold; box-shadow: 0 0 20px gold; }
+        .total-score { font-size: 40px; color: gold; font-weight: 900; text-align: right; }
+        .detalle-clash { font-size: 12px; margin: 5px 0; padding: 5px; border-bottom: 1px solid #444; display:flex; justify-content:space-between; }
+        
+        /* DADOS */
+        .dado-gigante { font-size: 60px; margin: 10px; }
+        .suma-dados { font-size: 40px; color: gold; font-weight: bold; }
     </style>
 </head>
 <body>
 
+    <!-- CONTENEDOR CÁMARA WEBCAM -->
     <div id="container-ar"></div>
     
-    <!-- FIX V31: VIDEOS FUERA DE CONTENEDORES PARA CUBRIR TODO -->
-    <video id="video-player" playsinline webkit-playsinline></video>
-    <video id="video-clash" playsinline webkit-playsinline></video>
+    <!-- MODAL BATALLA FINAL (CENTRADO) -->
+    <div id="modal-batalla">
+        <video id="video-clash" playsinline webkit-playsinline></video>
+    </div>
 
-    <!-- PANTALLA DE CAMBIO DE TURNO (SEMÁFORO) -->
+    <!-- PANTALLA CAMBIO TURNO -->
     <div id="pantalla-cambio-turno">
-        <h1 style="font-size:40px; margin-bottom:10px;">🛑 ALTO 🛑</h1>
-        <p style="font-size:18px;">CAMBIO DE MAGO</p>
-        <div id="next-player-escudo" style="font-size:80px; margin:20px;">🛡️</div>
-        <h2 style="color:white; text-shadow:0 0 10px black;" id="next-player-name">NOMBRE JUGADOR</h2>
-        <p style="color:white; opacity:0.8;">Toma el dispositivo</p>
-        <button class="btn-master" style="background:white; color:black; margin-top:30px;" onclick="confirmarCambioTurno()">¡SOY YO, ESTOY LISTO!</button>
+        <h1 style="font-size:40px;">🛑 ALTO 🛑</h1>
+        <p>TURNO DE:</p>
+        <h2 style="color:gold; font-size:30px;" id="next-player-name">JUGADOR</h2>
+        <button class="btn-master" style="background:white; color:black; margin-top:30px;" onclick="confirmarCambioTurno()">¡SOY YO!</button>
     </div>
 
-    <!-- 1. PANTALLA INICIO -->
+    <!-- 1. INICIO -->
     <div id="p-inicio" class="pantalla">
-        <button class="btn-master" onclick="irMenuPrincipal()">⚡ INICIAR SISTEMA ⚡</button>
-        <h2 style="color:#bf00ff; margin-top:20px;">DOMUS MAGI V31</h2>
-        <p style="color:white;">FULLSCREEN FIX</p>
+        <button class="btn-master" onclick="irMenuPrincipal()">⚡ INICIAR ⚡</button>
+        <h2 style="color:#bf00ff;">DOMUS MAGI V32</h2>
+        <p>SPLIT SCREEN FIX</p>
     </div>
 
-    <!-- 2. MENÚ PRINCIPAL -->
+    <!-- 2. MENÚ -->
     <div id="p-menu-principal" class="pantalla oculto">
-        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; max-width:500px; border-radius:15px; margin-bottom:20px;"></video>
+        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border-radius:10px; margin-bottom:10px;"></video>
         <button class="btn-modo" style="background:linear-gradient(90deg, #900, #f00);" onclick="seleccionarModo()">⚔️ BATALLA TÁCTICA</button>
-        <button class="btn-modo" style="background:linear-gradient(90deg, #005, #00a);" onclick="alert('Próximamente: Modo Campaña')">🦉 MISIONES (BÚHO)</button>
-        <button class="btn-modo" style="background:#444;" onclick="irDados()">🎲 LANZAR DADOS</button>
+        <button class="btn-modo" style="background:#444;" onclick="irDados()">🎲 DADOS</button>
     </div>
 
-    <!-- 3. PANTALLA DADOS -->
+    <!-- 3. DADOS -->
     <div id="p-dados" class="pantalla oculto">
-        <h1 style="color:#0f0;">🎲 DADOS 🎲</h1>
-        <div style="display: flex; gap: 20px; align-items: center; justify-content:center;">
-            <div class="dado-gigante" id="dado1">?</div>
-            <div style="font-size: 50px;">+</div>
-            <div class="dado-gigante" id="dado2">?</div>
+        <h1>🎲 DADOS</h1>
+        <div style="display:flex; justify-content:center;">
+            <div class="dado-gigante" id="dado1">?</div><div style="font-size:40px;">+</div><div class="dado-gigante" id="dado2">?</div>
         </div>
         <div class="suma-dados" id="suma-dados">= ?</div>
-        <button class="btn-master" style="background:#0a0;" onclick="tirarDados()">🎲 LANZAR</button>
-        <button class="btn-master" style="background:#a00;" onclick="navegar('p-dados','p-menu-principal')">⬅️ VOLVER</button>
+        <button class="btn-master" onclick="tirarDados()" style="background:#0a0;">LANZAR</button>
+        <button class="btn-master" onclick="navegar('p-dados','p-menu-principal')" style="background:#a00;">VOLVER</button>
     </div>
 
     <!-- 4. SETUP -->
     <div id="p-setup" class="pantalla oculto">
         <h2>REGISTRO</h2>
-        <div id="setup-selector">
-            <button class="btn-master" onclick="setModo(2)">2 JUGADORES (1vs1)</button>
-        </div>
-        <div id="registro" class="oculto" style="text-align:center; width: 90%;">
-            <input type="text" id="mago-nombre" placeholder="NOMBRE DEL MAGO" style="padding:15px; font-size:20px; width:100%; margin-bottom: 15px; color:black;">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button onclick="registrarMago('TERRA','#ff0000','🛡️')" class="btn-master" style="background:#800; min-width:auto; padding:15px;">🛡️ TERRA</button>
-                <button onclick="registrarMago('CAELUM','#00aaff','⚔️')" class="btn-master" style="background:#005; min-width:auto; padding:15px;">⚔️ CAELUM</button>
-                <button onclick="registrarMago('AQUA','#00ff88','💧')" class="btn-master" style="background:#040; min-width:auto; padding:15px;">💧 AQUA</button>
-                <button onclick="registrarMago('DIMENSIO','#aa00ff','✨')" class="btn-master" style="background:#404; min-width:auto; padding:15px;">✨ DIMENSIO</button>
+        <div id="setup-selector"><button class="btn-master" onclick="setModo(2)">2 JUGADORES</button></div>
+        <div id="registro" class="oculto" style="width:100%;">
+            <input type="text" id="mago-nombre" placeholder="NOMBRE" style="padding:15px; width:90%; color:black; margin-bottom:10px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+                <button onclick="registrarMago('TERRA','#ff0000','🛡️')" class="btn-modo" style="background:#800; padding:15px;">🛡️ TERRA</button>
+                <button onclick="registrarMago('CAELUM','#00aaff','⚔️')" class="btn-modo" style="background:#005; padding:15px;">⚔️ CAELUM</button>
+                <button onclick="registrarMago('AQUA','#00ff88','💧')" class="btn-modo" style="background:#040; padding:15px;">💧 AQUA</button>
+                <button onclick="registrarMago('DIMENSIO','#aa00ff','✨')" class="btn-modo" style="background:#404; padding:15px;">✨ DIMENSIO</button>
             </div>
-            <p id="reg-status" style="color:gold; margin-top:15px;"></p>
+            <p id="reg-status" style="color:gold; text-align:center;"></p>
         </div>
     </div>
 
-    <!-- 5. UI JUEGO AR -->
+    <!-- 5. UI JUEGO (SPLIT SCREEN) -->
     <div id="ui-juego" class="oculto">
-        <!-- CAMARA ARRIBA -->
-        <div id="zona-ar">
+        
+        <!-- ZONA SUPERIOR (50%): CAMARA + VIDEO OVERLAY -->
+        <div id="zona-superior">
             <div id="txt-turno">TURNO: ---</div>
             <div id="guia-scanner"></div>
+            <!-- EL VIDEO DE ACCIÓN ESTÁ AQUI DENTRO PARA TAPAR EL SCANNER -->
+            <video id="video-action" playsinline webkit-playsinline></video>
         </div>
-        <!-- INFORMACION MEDIO (YA SIN VIDEO AQUI) -->
-        <div id="zona-medio">
-            <div id="info-rival" style="display:none; background:#300; padding:5px; border-radius:5px; border:1px solid red; margin-bottom:5px;">RIVAL USÓ: <span id="rival-last-move" style="font-weight:bold;">???</span></div>
-            <div id="msg-visor" style="font-size:18px; font-weight:bold;">ESCANEA CARTA</div>
-        </div>
-        <!-- BOTONES ABAJO -->
-        <div id="panel-mando">
-            <p id="hint" style="color:#aaa; margin:0;">SLOT: <span id="slot-indicator" style="color:gold;">1/3</span></p>
-            <div style="display:flex; gap:10px;">
-                <button id="btn-i" class="btn-gema"><span class="letra-grande">I</span><span class="label-peq"></span></button>
-                <button id="btn-a" class="btn-gema"><span class="letra-grande">A</span><span class="label-peq"></span></button>
-                <button id="btn-t" class="btn-gema"><span class="letra-grande">T</span><span class="label-peq"></span></button>
-                <button id="btn-m" class="btn-gema"><span class="letra-grande">M</span><span class="label-peq"></span></button>
+
+        <!-- ZONA INFERIOR (50%): DATOS + BOTONES -->
+        <div id="zona-inferior">
+            <div id="info-rival" style="width:90%; background:#300; padding:5px; border:1px solid red; display:none; font-size:12px; text-align:center;">
+                RIVAL USÓ: <span id="rival-last-move" style="font-weight:bold; color:white;">???</span>
             </div>
-            <button id="btn-confirmar" class="btn-master" style="background:#0a0; padding:15px;">✅ CONFIRMAR</button>
+            
+            <div id="msg-visor" style="font-size:18px; color:gold; font-weight:bold;">ESCANEA CARTA</div>
+            <p id="hint" style="color:#aaa; font-size:12px; margin:5px;">SLOT: <span id="slot-indicator" style="color:white;">1/3</span></p>
+
+            <div style="display:flex; gap:10px;">
+                <button id="btn-i" class="btn-gema"><span class="letra-grande">I</span></button>
+                <button id="btn-a" class="btn-gema"><span class="letra-grande">A</span></button>
+                <button id="btn-t" class="btn-gema"><span class="letra-grande">T</span></button>
+                <button id="btn-m" class="btn-gema"><span class="letra-grande">M</span></button>
+            </div>
+
+            <button id="btn-confirmar" class="btn-master" style="background:#0a0; padding:15px; margin-top:5px;">✅ CONFIRMAR</button>
         </div>
     </div>
 
     <!-- 6. RESULTADOS -->
     <div id="p-resultado" class="pantalla oculto">
-        <div id="resultado-batalla">
-            <h2 style="color:gold; text-align:center;">RESULTADOS</h2>
-            <div id="resultado-contenido"></div>
-            <button class="btn-master" onclick="location.reload()">🔄 NUEVA PARTIDA</button>
-        </div>
+        <h2 style="color:gold;">RESULTADOS</h2>
+        <div id="resultado-batalla"><div id="resultado-contenido"></div></div>
+        <button class="btn-master" onclick="location.reload()">🔄 NUEVA PARTIDA</button>
     </div>
 
-    <!-- LÓGICA JS -->
+    <!-- JAVASCRIPT LOGICA -->
     <script>
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         const VIDEOS_BATALLA = ["Explosión_Elemental.mp4", "El_Búho_Juez.mp4", "Invocaciones_Etéreas.mp4", "Escudos_vs_Espadas.mp4", "Choque_de_Energía.mp4"];
-
+        
+        // --- BASE DE DATOS CARTAS (IDENTICA V30) ---
         const CARTAS = {
             0: { id: 0, nombre: "DRAGÓN", elemento: "TERRA", imgEscudo: "ESCUDO_DRAGON.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "ATAQUE", valor: 7, video: "CARTA_1_ataque.mp4", color: "#900" }, "btn-a": { texto: "A", label: "CURA", valor: 2, video: "CARTA_1_cura.mp4", color: "#090" }, "btn-t": { texto: "T", label: "DEFENSA", valor: 3, video: "CARTA_1_defensa.mp4", color: "#555" }, "btn-m": { texto: "M", label: "MAGIA", valor: 2, video: "CARTA_1_magia.mp4", color: "#609" } } },
             1: { id: 1, nombre: "ÁGUILA", elemento: "CAELUM", imgEscudo: "ESCUDO_AGUILA.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "PICADA", valor: 5, video: "ataque.mp4", color: "#900" }, "btn-a": { texto: "A", label: "VIENTO", valor: 4, video: "cura.mp4", color: "#090" }, "btn-t": { texto: "T", label: "ESQUIVA", valor: 2, video: "defensa.mp4", color: "#555" }, "btn-m": { texto: "M", label: "TORNADO", valor: 3, video: "magia.mp4", color: "#609" } } },
@@ -225,48 +245,27 @@
             9: { id: 9, nombre: "LAPIS AETHER", elemento: "CAELUM", imgEscudo: "ESCUDO_PIEDRA.png", tipo: "ARTEFACTO", botones: { "btn-i": { texto: "I", label: "DISPARAR", valor: 7, video: "PIEDRA_DISPARAR.mp4", color: "#bf00ff" }, "btn-a": { texto: "A", label: "ABSORBER", valor: 6, video: "PIEDRA_ABSORBER.mp4", color: "#bf00ff" }, "btn-t": { texto: "T", label: "CAMPO", valor: 9, video: "PIEDRA_CAMPO.mp4", color: "#bf00ff" }, "btn-m": { texto: "M", label: "ESTALLIDO", valor: 11, video: "PIEDRA_ESTALLIDO.mp4", color: "#bf00ff" } } }
         };
 
-        let jugadores = [];
-        let cantJugadores = 0;
-        let slotActual = 0; 
-        let turnoJugadorIdx = 0; 
-        const MAX_SLOTS = 3;
-        let jugadaPendiente = null; 
+        let jugadores = []; let cantJugadores = 0; let slotActual = 0; let turnoJugadorIdx = 0; const MAX_SLOTS = 3; let jugadaPendiente = null;
 
-        function navegar(oc, mo) {
-            document.getElementById(oc).classList.add('oculto');
-            document.getElementById(mo).classList.remove('oculto');
-        }
-
-        function irMenuPrincipal() {
-            navegar('p-inicio', 'p-menu-principal');
-            const v = document.getElementById('intro-video');
-            v.muted = false; v.play().catch(()=>{});
-        }
-
+        function navegar(oc, mo) { document.getElementById(oc).classList.add('oculto'); document.getElementById(mo).classList.remove('oculto'); }
+        function irMenuPrincipal() { navegar('p-inicio', 'p-menu-principal'); const v = document.getElementById('intro-video'); v.muted = false; v.play().catch(()=>{}); }
         function irDados() { navegar('p-menu-principal', 'p-dados'); }
         function tirarDados() {
-            const d1 = Math.floor(Math.random()*6)+1;
-            const d2 = Math.floor(Math.random()*6)+1;
-            document.getElementById('dado1').innerText = d1;
-            document.getElementById('dado2').innerText = d2;
+            const d1 = Math.floor(Math.random()*6)+1; const d2 = Math.floor(Math.random()*6)+1;
+            document.getElementById('dado1').innerText = d1; document.getElementById('dado2').innerText = d2;
             document.getElementById('suma-dados').innerText = "= "+(d1+d2);
         }
-
         function seleccionarModo() { navegar('p-menu-principal', 'p-setup'); }
         function setModo(n) { cantJugadores = n; document.getElementById('setup-selector').classList.add('oculto'); document.getElementById('registro').classList.remove('oculto'); document.getElementById('reg-status').innerText = `Mago 1 de ${n}`; }
 
         function registrarMago(casa, color, esc) {
             let n = document.getElementById('mago-nombre').value || "Mago " + (jugadores.length + 1);
-            jugadores.push({ nombre: n, casa, color, esc, slots: [null, null, null], puntos: 0 });
+            jugadores.push({ nombre: n, casa, color, esc, slots: [null, null, null] });
             document.getElementById('mago-nombre').value = "";
             if(jugadores.length === cantJugadores) { iniciarJuego(); } else { document.getElementById('reg-status').innerText = `Mago ${jugadores.length + 1} de ${cantJugadores}`; }
         }
 
-        function iniciarJuego() {
-            navegar('p-setup', 'ui-juego');
-            window.iniciarAR();
-            actualizarUI();
-        }
+        function iniciarJuego() { navegar('p-setup', 'ui-juego'); window.iniciarAR(); actualizarUI(); }
 
         function actualizarUI() {
             const j = jugadores[turnoJugadorIdx];
@@ -292,29 +291,25 @@
             const pantalla = document.getElementById('pantalla-cambio-turno');
             pantalla.style.background = nextJ.color;
             document.getElementById('next-player-name').innerText = nextJ.nombre;
-            document.getElementById('next-player-escudo').innerText = nextJ.esc;
             pantalla.style.display = 'flex';
         }
-
-        function confirmarCambioTurno() {
-            document.getElementById('pantalla-cambio-turno').style.display = 'none';
-            actualizarUI();
-        }
+        function confirmarCambioTurno() { document.getElementById('pantalla-cambio-turno').style.display = 'none'; actualizarUI(); }
 
     </script>
 
-    <!-- MODULE AR -->
+    <!-- LOGICA AR -->
     <script type="module">
         import * as THREE from 'three';
         import { MindARThree } from 'mindar-image-three';
 
         let mindarThree = null; let cartaDetectada = null;
-        const ui = { scanner: document.getElementById('guia-scanner'), msg: document.getElementById('msg-visor'), video: document.getElementById('video-player') };
+        const ui = { scanner: document.getElementById('guia-scanner'), msg: document.getElementById('msg-visor'), videoAction: document.getElementById('video-action') };
 
         window.iniciarAR = async function() {
             if(mindarThree) return;
             mindarThree = new MindARThree({ container: document.getElementById('container-ar'), imageTargetSrc: RUTA_BASE + 'targets1.mind', maxTrack: 1, filterMinCF: 0.0001, filterBeta: 0.001, uiLoading: "no", uiScanning: "no", uiError: "no" });
             const {renderer, scene, camera} = mindarThree;
+
             for(let i=0; i<10; i++) {
                 const anchor = mindarThree.addAnchor(i); anchor.group.add(new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({transparent:true, opacity:0})));
                 anchor.onTargetFound = () => {
@@ -322,20 +317,33 @@
                     if(cartaDetectada.tipo === "ARTEFACTO") ui.scanner.className = 'violeta'; else if(cartaDetectada.tipo === "BUHO") ui.scanner.className = 'dorado'; else ui.scanner.className = 'verde';
                     ui.msg.innerText = cartaDetectada.nombre; actualizarBotones(cartaDetectada);
                 };
-                anchor.onTargetLost = () => { cartaDetectada = null; ui.scanner.className = ''; ui.msg.innerText = "BUSCANDO CARTA..."; resetBotones(); };
+                anchor.onTargetLost = () => { cartaDetectada = null; ui.scanner.className = ''; ui.msg.innerText = "BUSCANDO..."; resetBotones(); };
             }
+
             ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
                 document.getElementById(id).onclick = () => {
                     if(!cartaDetectada) return;
                     const conf = cartaDetectada.botones[id];
                     jugadaPendiente = { carta: cartaDetectada, lado: conf.label, valor: (typeof conf.valor==='number'?conf.valor:5), video: conf.video, tipoLado: id.split('-')[1].toUpperCase() };
                     
-                    // FIX V31: REPRODUCCION EN FULLSCREEN (BODY)
-                    ui.video.style.display = 'block'; ui.video.src = RUTA_BASE + conf.video; ui.msg.style.display = 'none'; 
-                    ui.video.play().catch(e => console.log(e));
-                    ui.video.onended = () => { ui.video.style.display = 'none'; ui.msg.style.display = 'block'; ui.msg.innerText = "¡LISTO! CONFIRMA ABAJO"; };
+                    // FIX V32: DISPARAR VIDEO EN ZONA SUPERIOR
+                    ui.videoAction.style.display = 'block';
+                    ui.videoAction.src = RUTA_BASE + conf.video;
+                    ui.msg.style.display = 'none';
+                    
+                    const playPromise = ui.videoAction.play();
+                    if(playPromise !== undefined) {
+                        playPromise.catch(e => { console.error("Error video:", e); alert("Error al reproducir video: " + conf.video); });
+                    }
+
+                    ui.videoAction.onended = () => { 
+                        ui.videoAction.style.display = 'none'; 
+                        ui.msg.style.display = 'block'; 
+                        ui.msg.innerText = "LISTO: CONFIRMA ABAJO"; 
+                    };
                 };
             });
+
             await mindarThree.start(); renderer.setAnimationLoop(() => { renderer.render(scene, camera); });
         };
 
@@ -348,34 +356,38 @@
         };
 
         function iniciarBatallaFinal() {
-            navegar('ui-juego', 'p-resultado'); 
+            document.getElementById('modal-batalla').style.display = 'flex';
             const vidClash = document.getElementById('video-clash');
-            vidClash.style.display = 'block'; vidClash.src = RUTA_BASE + VIDEOS_BATALLA[Math.floor(Math.random() * VIDEOS_BATALLA.length)];
+            vidClash.src = RUTA_BASE + VIDEOS_BATALLA[Math.floor(Math.random() * VIDEOS_BATALLA.length)];
             vidClash.play().catch(e => console.error(e));
-            vidClash.onended = () => { vidClash.style.display = 'none'; mostrarResultadosComplejos(); };
+            vidClash.onended = () => { document.getElementById('modal-batalla').style.display = 'none'; mostrarResultadosComplejos(); };
         }
 
         function mostrarResultadosComplejos() {
             navegar('ui-juego', 'p-resultado');
             const cont = document.getElementById('resultado-contenido'); cont.innerHTML = '';
-            let scoreJ1 = 0; let scoreJ2 = 0; let logBatalla = "";
-            const j1 = jugadores[0]; const j2 = jugadores[1];
+            let s1 = 0; let s2 = 0; let log = ""; const j1 = jugadores[0]; const j2 = jugadores[1];
 
             for(let i=0; i<MAX_SLOTS; i++) {
                 const c1 = j1.slots[i]; const c2 = j2.slots[i];
-                let pts1 = c1.valor; let pts2 = c2.valor; let notas = "";
-                if(c1.elemento==="TERRA" && c2.elemento==="AQUA") { pts1+=3; notas+="🔥>💧 "; } if(c1.elemento==="AQUA" && c2.elemento==="CAELUM") { pts1+=3; notas+="💧>🌪️ "; } if(c1.elemento==="CAELUM" && c2.elemento==="TERRA") { pts1+=3; notas+="🌪️>🗿 "; }
-                if(c2.elemento==="TERRA" && c1.elemento==="AQUA") { pts2+=3; notas+="🔥>💧 "; } if(c2.elemento==="AQUA" && c1.elemento==="CAELUM") { pts2+=3; notas+="💧>🌪️ "; } if(c2.elemento==="CAELUM" && c1.elemento==="TERRA") { pts2+=3; notas+="🌪️>🗿 "; }
-                if(c1.tipoLado==="I" && c2.tipoLado==="T") { pts2+=4; notas+="🛡️Bloqueo! "; } if(c2.tipoLado==="I" && c1.tipoLado==="T") { pts1+=4; notas+="🛡️Bloqueo! "; }
-                scoreJ1+=pts1; scoreJ2+=pts2;
-                logBatalla += `<div class="detalle-clash"><div style="text-align:left"><span style="color:${j1.color}">${c1.nombre}</span><br><small>${c1.lado} (${pts1})</small></div><div style="font-size:20px;">⚔️</div><div style="text-align:right"><span style="color:${j2.color}">${c2.nombre}</span><br><small>${c2.lado} (${pts2})</small></div></div><div style="text-align:center; font-size:10px; color:#aaa; margin-bottom:10px;">${notas}</div>`;
+                let p1 = c1.valor; let p2 = c2.valor; let n = "";
+                if(c1.elemento==="TERRA" && c2.elemento==="AQUA") { p1+=3; n+="🔥>💧 "; } 
+                if(c1.elemento==="AQUA" && c2.elemento==="CAELUM") { p1+=3; n+="💧>🌪️ "; } 
+                if(c1.elemento==="CAELUM" && c2.elemento==="TERRA") { p1+=3; n+="🌪️>🗿 "; }
+                if(c2.elemento==="TERRA" && c1.elemento==="AQUA") { p2+=3; n+="🔥>💧 "; }
+                if(c2.elemento==="AQUA" && c1.elemento==="CAELUM") { p2+=3; n+="💧>🌪️ "; }
+                if(c2.elemento==="CAELUM" && c1.elemento==="TERRA") { p2+=3; n+="🌪️>🗿 "; }
+                if(c1.tipoLado==="I" && c2.tipoLado==="T") { p2+=4; n+="🛡️Bloqueo! "; }
+                if(c2.tipoLado==="I" && c1.tipoLado==="T") { p1+=4; n+="🛡️Bloqueo! "; }
+                s1+=p1; s2+=p2;
+                log += `<div class="detalle-clash"><div style="text-align:left; color:${j1.color}">${c1.nombre} <br><small>${c1.lado} (${p1})</small></div><div>⚔️</div><div style="text-align:right; color:${j2.color}">${c2.nombre} <br><small>${c2.lado} (${p2})</small></div></div><div style="text-align:center; font-size:10px; color:#aaa; margin-bottom:10px;">${n}</div>`;
             }
-            const d1 = Math.floor(Math.random()*6)+1; const d2 = Math.floor(Math.random()*6)+1; scoreJ1+=d1; scoreJ2+=d2;
-            cont.innerHTML = `<div class="resultado-jugador ${scoreJ1>scoreJ2?'ganador':''}"><h3>${j1.nombre}</h3><div class="total-score">${scoreJ1}</div><small>Dado: +${d1}</small></div><div style="background:#111; padding:5px; border:1px dashed #555; margin:10px 0;">${logBatalla}</div><div class="resultado-jugador ${scoreJ2>scoreJ1?'ganador':''}"><h3>${j2.nombre}</h3><div class="total-score">${scoreJ2}</div><small>Dado: +${d2}</small></div>`;
+            const d1 = Math.floor(Math.random()*6)+1; const d2 = Math.floor(Math.random()*6)+1; s1+=d1; s2+=d2;
+            cont.innerHTML = `<div class="resultado-jugador ${s1>s2?'ganador':''}"><h3>${j1.nombre}</h3><div class="total-score">${s1}</div><small>Dado: +${d1}</small></div><div style="background:#111; border:1px dashed #555; padding:5px;">${log}</div><div class="resultado-jugador ${s2>s1?'ganador':''}"><h3>${j2.nombre}</h3><div class="total-score">${s2}</div><small>Dado: +${d2}</small></div>`;
         }
 
-        function actualizarBotones(carta) { ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => { const b = document.getElementById(id); const conf = carta.botones[id]; b.innerHTML = `<span class="letra-grande">${conf.texto}</span><span class="label-peq">${conf.label.substring(0,8)}</span>`; b.style.backgroundColor = conf.color; b.style.color = "#000"; b.style.fontWeight = "900"; b.classList.add('activo'); }); }
-        function resetBotones() { ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => { const b = document.getElementById(id); const letra = id.split('-')[1].toUpperCase(); b.innerHTML = `<span class="letra-grande">${letra}</span><span class="label-peq"></span>`; b.style.backgroundColor = '#222'; b.style.color = "#555"; b.classList.remove('activo'); }); }
+        function actualizarBotones(c) { ['btn-i','btn-a','btn-t','btn-m'].forEach(id=>{ const b=document.getElementById(id); const cf=c.botones[id]; b.innerHTML=`<span class="letra-grande">${cf.texto}</span>`; b.style.backgroundColor=cf.color; b.classList.add('activo'); }); }
+        function resetBotones() { ['btn-i','btn-a','btn-t','btn-m'].forEach(id=>{ const b=document.getElementById(id); b.innerHTML=`<span class="letra-grande">${id.split('-')[1].toUpperCase()}</span>`; b.style.backgroundColor='#222'; b.classList.remove('activo'); }); }
     </script>
 </body>
 </html>
