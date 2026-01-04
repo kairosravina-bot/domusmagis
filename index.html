@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V26 - BIG DATA & FIXES</title>
+    <title>DOMUS MAGI V27 - FILE FIX</title>
     
     <script type="importmap">
     {
@@ -80,7 +80,6 @@
         
         .btn-gema.activo { opacity: 1; border-color: white; transform: scale(1.05); }
         
-        /* FIX VIDEO: Asegurar que el video de ataque esté MUY por encima */
         #video-player { 
             width: 100%; height: 100%; object-fit: contain; 
             display: none; position: absolute; top: 0; left: 0; 
@@ -115,22 +114,21 @@
         .btn-agregar { background: #0a0; color: white; }
         .btn-finalizar { background: #f90; color: white; }
         
-        /* --- ESTILOS MEJORADOS PARA RESULTADOS GRANDES --- */
         #resultado-batalla { 
             background: rgba(10,10,10,0.98); 
             padding: 10px; 
             border: 2px solid gold; 
             border-radius: 15px; 
             width: 100%; 
-            height: 90vh; /* Ocupa casi toda la pantalla */
-            overflow-y: scroll; /* Scroll obligatorio */
+            height: 90vh; 
+            overflow-y: scroll; 
             box-sizing: border-box;
         }
 
         .resultado-jugador { 
             background: #222; 
             margin: 15px 0; 
-            padding: 20px; /* Más espacio interno */
+            padding: 20px; 
             border-radius: 12px; 
             border-left: 8px solid #555; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
@@ -143,7 +141,6 @@
             border: 2px solid gold;
         }
 
-        /* Títulos de Jugador Grandes */
         .resultado-jugador h3 {
             font-size: 24px;
             margin: 0 0 10px 0;
@@ -151,7 +148,6 @@
             letter-spacing: 1px;
         }
 
-        /* Totales GIGANTES */
         .total-score {
             font-size: 50px;
             color: gold;
@@ -162,7 +158,7 @@
         }
 
         .detalle-item { 
-            font-size: 16px; /* Letra más grande para los detalles */
+            font-size: 16px; 
             color: #ddd; 
             border-bottom: 1px solid #444; 
             padding: 8px 0; 
@@ -182,8 +178,8 @@
     <!-- 1. PANTALLA INICIO -->
     <div id="p-inicio" class="pantalla">
         <button class="btn-master" onclick="irMenuPrincipal()">⚡ INICIAR SISTEMA ⚡</button>
-        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V26</h2>
-        <p style="color:#bf00ff;">BIG DATA UPDATE</p>
+        <h2 style="color:#0f0; margin-top:20px;">DOMUS MAGI V27</h2>
+        <p style="color:#bf00ff;">FILE FIX UPDATE</p>
     </div>
 
     <!-- 2. MENÚ PRINCIPAL -->
@@ -246,7 +242,6 @@
             <div id="cartas-jugadas">
                 <div id="lista-cartas-chips"></div>
             </div>
-            <!-- Botones con estructura para texto grande y pequeño -->
             <div style="display:flex; gap:10px; margin: 10px 0;">
                 <button id="btn-i" class="btn-gema"><span class="letra-grande">I</span><span class="label-peq"></span></button>
                 <button id="btn-a" class="btn-gema"><span class="letra-grande">A</span><span class="label-peq"></span></button>
@@ -261,29 +256,25 @@
         </div>
     </div>
 
-    <!-- 6. RESULTADOS (ESTILO MEJORADO) -->
+    <!-- 6. RESULTADOS -->
     <div id="p-resultado-ronda" class="pantalla oculto">
         <div id="resultado-batalla">
             <h2 id="titulo-resultados" style="color:gold; text-align:center; font-size: 28px; margin-bottom: 20px;">⚔️ RESULTADOS ⚔️</h2>
             <div id="resultado-contenido"></div>
-            
-            <!-- HISTORIAL -->
             <div id="historial-box">
                 <h3 style="color:#aaa; text-align:center;">📜 CRÓNICAS DEL TORNEO</h3>
                 <div id="historial-lista"></div>
             </div>
-
             <button id="btn-next-ronda" class="btn-master" onclick="siguienteRonda()" style="margin-top:20px; width: 90%;">🔄 SIGUIENTE RONDA</button>
         </div>
     </div>
 
-    <!-- LÓGICA DEL JUEGO (VANILLA JS) -->
+    <!-- LÓGICA DEL JUEGO -->
     <script>
         let jugadores = [];
         let cant = 0;
         let tIdx = 0;
         let videoMostrado = false;
-        
         let rondaActual = 1;
         const MAX_RONDAS = 7;
         let historialGanadores = [];
@@ -368,9 +359,9 @@
 
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         
-        // --- BASE DE DATOS (IDs 0 a 9) ---
+        // --- BASE DE DATOS ACTUALIZADA CON NOMBRES REALES DE LA FOTO ---
         const CARTAS = {
-            // 0-3: CASAS
+            // 0-3: CASAS (Según tu foto CARTA_1...)
             0: { id: 0, nombre: "DRAGÓN", imgEscudo: "ESCUDO_DRAGON.png", tipo: "CASA",
                 botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 7, video: "CARTA_1_ataque.mp4", color: "#900" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 2, video: "CARTA_1_cura.mp4", color: "#090" }, "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "CARTA_1_defensa.mp4", color: "#555" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "CARTA_1_magia.mp4", color: "#609" } }
             },
@@ -384,29 +375,29 @@
                 botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 6, video: "ataque.mp4", color: "#900" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 3, video: "cura.mp4", color: "#090" }, "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "defensa.mp4", color: "#555" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "magia.mp4", color: "#609" } }
             },
             
-            // ID 4: BÚHO 
+            // ID 4: BÚHO (FIX NOMBRES ARCHIVOS)
             4: {
                 id: 4, nombre: "BÚHO MASTER", imgEscudo: "ESCUDO_BUHO.png", tipo: "BUHO",
                 botones: {
-                    "btn-i": { texto: "I", label: "MANDATUM", valor: 5, video: "BUHO_MISION.mp4", color: "gold" }, 
-                    "btn-a": { texto: "A", label: "CONSILIUM", valor: 5, video: "BUHO_CONSEJO.mp4", color: "gold" },
-                    "btn-t": { texto: "T", label: "PRAESAGIUM", valor: 5, video: "BUHO_PRESAGIO.mp4", color: "gold" },
-                    "btn-m": { texto: "M", label: "ARCANUM", valor: 5, video: "BUHO_SECRETO.mp4", color: "gold" }
+                    "btn-i": { texto: "I", label: "MANDATUM", valor: 5, video: "owl_mandatum.mp4", color: "gold" }, 
+                    "btn-a": { texto: "A", label: "CONSILIUM", valor: 5, video: "owl_consilium.mp4", color: "gold" },
+                    "btn-t": { texto: "T", label: "PRAESAGIUM", valor: 5, video: "owl_praesagium.mp4", color: "gold" },
+                    "btn-m": { texto: "M", label: "ARCANUM", valor: 5, video: "owl_arcanum.mp4", color: "gold" }
                 }
             },
             
-            // ID 5: IGNIS
+            // ID 5: ARTEFACTO 1 (FIX NOMBRES ARCHIVOS)
             5: {
-                id: 5, nombre: "IGNIS PHIALA", imgEscudo: "ESCUDO_IGNIS.png", tipo: "ARTEFACTO",
+                id: 5, nombre: "ARTEFACTO 1", imgEscudo: "ESCUDO_IGNIS.png", tipo: "ARTEFACTO",
                 botones: {
-                    "btn-i": { texto: "I", label: "LANZAR", valor: 10, video: "IGNIS_LANZAR.mp4", color: "#bf00ff" }, 
-                    "btn-a": { texto: "A", label: "BEBER", valor: 8, video: "IGNIS_BEBER.mp4", color: "#bf00ff" },
-                    "btn-t": { texto: "T", label: "MURO", valor: 8, video: "IGNIS_MURO.mp4", color: "#bf00ff" },
-                    "btn-m": { texto: "M", label: "CATALIZAR", valor: 12, video: "IGNIS_CATALIZAR.mp4", color: "#bf00ff" }
+                    "btn-i": { texto: "I", label: "LANZAR", valor: 10, video: "ARTEFACTO_1_IMPETUS.mp4", color: "#bf00ff" }, 
+                    "btn-a": { texto: "A", label: "BEBER", valor: 8, video: "ARTEFACTO_1_AUXILIUM.mp4", color: "#bf00ff" },
+                    "btn-t": { texto: "T", label: "MURO", valor: 8, video: "ARTEFACTO_1_TUTELA.mp4", color: "#bf00ff" },
+                    "btn-m": { texto: "M", label: "CATALIZAR", valor: 12, video: "ARTEFACTO_1_MYSTERIUM.mp4", color: "#bf00ff" }
                 }
             },
 
-            // ID 6: ESPEJO
+            // ID 6, 7, 8, 9 (Mantengo los anteriores hasta que subas foto de sus nombres reales)
             6: {
                 id: 6, nombre: "SPECULUM AEGIS", imgEscudo: "ESCUDO_ESPEJO.png", tipo: "ARTEFACTO",
                 botones: {
@@ -416,8 +407,6 @@
                     "btn-m": { texto: "M", label: "INVOCAR", valor: 7, video: "ESPEJO_ILUSION.mp4", color: "#bf00ff" }
                 }
             },
-
-            // ID 7: RELOJ
             7: {
                 id: 7, nombre: "TEMPUS FUGIT", imgEscudo: "ESCUDO_RELOJ.png", tipo: "ARTEFACTO",
                 botones: {
@@ -427,8 +416,6 @@
                     "btn-m": { texto: "M", label: "ROMPER", valor: 15, video: "RELOJ_ROMPER.mp4", color: "#bf00ff" }
                 }
             },
-
-            // ID 8: LIBRO
             8: {
                 id: 8, nombre: "GRIMORIUM UMBRA", imgEscudo: "ESCUDO_LIBRO.png", tipo: "ARTEFACTO",
                 botones: {
@@ -438,8 +425,6 @@
                     "btn-m": { texto: "M", label: "QUEMAR", valor: 12, video: "LIBRO_QUEMAR.mp4", color: "#bf00ff" }
                 }
             },
-
-            // ID 9: PIEDRA
             9: {
                 id: 9, nombre: "LAPIS AETHER", imgEscudo: "ESCUDO_PIEDRA.png", tipo: "ARTEFACTO",
                 botones: {
@@ -480,7 +465,6 @@
             j.cartas.forEach(c => {
                 const s = document.createElement('span');
                 s.className = 'carta-chip';
-                
                 if(c.tipo === "ARTEFACTO") {
                     s.classList.add('chip-violeta');
                 } else if(c.tipo === "BUHO") {
@@ -494,19 +478,15 @@
             });
         };
 
-        // ACTUALIZACIÓN VISUAL DE BOTONES
         function actualizarBotones(carta) {
             ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
                 const b = document.getElementById(id);
                 const conf = carta.botones[id];
-                
                 b.innerHTML = `<span class="letra-grande">${conf.texto}</span><span class="label-peq">${conf.label.substring(0,8)}</span>`;
                 b.style.backgroundColor = conf.color;
-                
                 b.style.color = "#000"; 
                 b.style.textShadow = "0px 0px 2px #fff";
                 b.style.fontWeight = "900";
-                
                 b.classList.add('activo');
             });
             ui.hint.innerText = `DETECTADO: ${carta.nombre}`;
@@ -526,58 +506,38 @@
 
         window.iniciarAR = async function() {
             if(mindarThree) return;
-            console.log("🚀 INICIANDO MOTOR AR V26 (10 TARGETS)...");
-            
+            console.log("🚀 INICIANDO MOTOR AR V27...");
             document.body.style.background = 'transparent';
 
             mindarThree = new MindARThree({
                 container: document.getElementById('container-ar'),
                 imageTargetSrc: RUTA_BASE + 'targets1.mind', 
                 maxTrack: 1,
-                filterMinCF: 0.0001, 
-                filterBeta: 0.001,   
+                filterMinCF: 0.0001, filterBeta: 0.001,   
                 warmupTolerance: 5, missTolerance: 5,
                 uiLoading: "no", uiScanning: "no", uiError: "no"
             });
 
             const {renderer, scene, camera} = mindarThree;
 
-            // BUCLE 0 A 9
             for(let i=0; i<10; i++) {
                 const anchor = mindarThree.addAnchor(i);
-                const plane = new THREE.Mesh(
-                    new THREE.PlaneGeometry(1,1),
-                    new THREE.MeshBasicMaterial({transparent:true, opacity:0})
-                );
+                const plane = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({transparent:true, opacity:0}));
                 anchor.group.add(plane);
 
                 anchor.onTargetFound = () => {
-                    console.log("🎯 TARGET ENCONTRADO: " + i);
                     cartaActual = CARTAS[i];
                     if(!cartaActual) return; 
-
-                    if(cartaActual.tipo === "ARTEFACTO") {
-                        ui.scanner.className = 'violeta';
-                        ui.msg.style.color = "#bf00ff";
-                    } else if(cartaActual.tipo === "BUHO") {
-                        ui.scanner.className = 'dorado';
-                        ui.msg.style.color = "gold";
-                    } else {
-                        ui.scanner.className = 'verde';
-                        ui.msg.style.color = "#0f0";
-                    }
-
+                    if(cartaActual.tipo === "ARTEFACTO") { ui.scanner.className = 'violeta'; ui.msg.style.color = "#bf00ff"; }
+                    else if(cartaActual.tipo === "BUHO") { ui.scanner.className = 'dorado'; ui.msg.style.color = "gold"; }
+                    else { ui.scanner.className = 'verde'; ui.msg.style.color = "#0f0"; }
                     ui.msg.innerText = "¡" + cartaActual.nombre + "!";
                     actualizarBotones(cartaActual);
                 };
 
                 anchor.onTargetLost = () => {
                     if(cartaActual && cartaActual.id === i && !reproduciendo) {
-                        cartaActual = null;
-                        ui.scanner.className = '';
-                        ui.msg.innerText = "BUSCANDO...";
-                        ui.msg.style.color = "white";
-                        resetBotones();
+                        cartaActual = null; ui.scanner.className = ''; ui.msg.innerText = "BUSCANDO..."; ui.msg.style.color = "white"; resetBotones();
                     }
                 };
             }
@@ -585,14 +545,11 @@
             ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
                 document.getElementById(id).onclick = () => {
                     if(!cartaActual || reproduciendo) return;
-                    
                     const conf = cartaActual.botones[id];
                     let valNum = (typeof conf.valor === 'number' ? conf.valor : 10);
                     
                     jugadores[tIdx].cartas.push({
-                        carta: cartaActual.nombre,
-                        lado: conf.label, 
-                        valor: valNum,
+                        carta: cartaActual.nombre, lado: conf.label, valor: valNum,
                         esObjeto: cartaActual.tipo === "OBJETO" || cartaActual.tipo === "BUHO" || cartaActual.tipo === "ARTEFACTO",
                         tipo: cartaActual.tipo 
                     });
@@ -600,10 +557,8 @@
                     reproduciendo = true;
                     ui.visorTop.style.background = "transparent";
 
-                    // LOGICA VIDEO FIX
                     ui.video.style.display = 'block';
                     ui.video.src = RUTA_BASE + conf.video;
-                    
                     ui.ovImg.src = RUTA_BASE + cartaActual.imgEscudo;
                     ui.ovTxt.innerText = conf.label; 
                     ui.ovTxt.style.borderColor = conf.color;
@@ -611,13 +566,11 @@
                     ui.overlay.style.display = 'flex';
                     ui.msg.style.display = 'none';
 
-                    // Intentar reproducir con catch de errores
                     const playPromise = ui.video.play();
                     if (playPromise !== undefined) {
                         playPromise.catch(error => {
                             console.error("Error reproduciendo video:", error);
-                            // Si falla (ej: formato), terminamos la animación manualmente
-                            alert("⚠️ Error cargando video: " + conf.video);
+                            alert("⚠️ Archivo no encontrado: " + conf.video);
                             ui.video.onended(); 
                         });
                     }
@@ -625,7 +578,6 @@
                     ui.video.onended = () => {
                         reproduciendo = false;
                         ui.visorTop.style.background = "rgba(0,0,0,0.85)";
-                        
                         ui.video.style.display = 'none';
                         ui.overlay.style.display = 'none';
                         ui.msg.style.display = 'block';
@@ -639,57 +591,31 @@
         };
 
         document.getElementById('btn-agregar').onclick = () => {
-            cartaActual = null;
-            reproduciendo = false;
-            ui.scanner.className = '';
-            resetBotones();
-            ui.msg.innerText = "ESCANEA OTRA...";
+            cartaActual = null; reproduciendo = false; ui.scanner.className = ''; resetBotones(); ui.msg.innerText = "ESCANEA OTRA...";
         };
 
         document.getElementById('btn-finalizar').onclick = () => {
-            if(jugadores[tIdx].cartas.length === 0) {
-                alert("¡Juega al menos una carta!");
-                return;
-            }
-
+            if(jugadores[tIdx].cartas.length === 0) { alert("¡Juega al menos una carta!"); return; }
             if(tIdx < jugadores.length - 1) {
-                tIdx++;
-                cartaActual = null;
-                reproduciendo = false;
-                ui.scanner.className = '';
-                resetBotones();
-                actualizarHUD();
-                alert(`TURNO DE: ${jugadores[tIdx].nombre}`);
-            } else {
-                calcularBatalla();
-            }
+                tIdx++; cartaActual = null; reproduciendo = false; ui.scanner.className = ''; resetBotones(); actualizarHUD(); alert(`TURNO DE: ${jugadores[tIdx].nombre}`);
+            } else { calcularBatalla(); }
         };
 
         function calcularBatalla() {
             navegar('ui-juego', 'p-resultado-ronda');
             const cont = document.getElementById('resultado-contenido');
-            const titulo = document.getElementById('titulo-resultados');
             const btnNext = document.getElementById('btn-next-ronda');
-            
-            cont.innerHTML = '';
-            titulo.innerText = `⚔️ RESULTADOS RONDA ${rondaActual} ⚔️`;
+            cont.innerHTML = ''; document.getElementById('titulo-resultados').innerText = `⚔️ RESULTADOS RONDA ${rondaActual} ⚔️`;
 
-            // Calcular puntajes
             jugadores.forEach(j => {
                 let sumaCartas = j.cartas.reduce((acc, c) => acc + c.valor, 0);
-                let dado = Math.floor(Math.random() * 6) + 1;
-                j.total = sumaCartas + dado;
-                j.dado = dado;
+                j.dado = Math.floor(Math.random() * 6) + 1; j.total = sumaCartas + j.dado;
             });
 
-            // Ordenar por puntaje
             jugadores.sort((a, b) => b.total - a.total);
-            
-            const ganador = jugadores[0];
-            ganador.victorias++;
+            const ganador = jugadores[0]; ganador.victorias++;
             historialGanadores.push({ronda: rondaActual, ganador: ganador.nombre});
 
-            // Renderizar Resultados
             jugadores.forEach((j, i) => {
                 const esGanador = (i === 0);
                 const usoArtefacto = j.cartas.some(c => c.tipo === "ARTEFACTO");
@@ -698,32 +624,17 @@
                 let detalleHtml = '<div style="margin-top:10px; padding-top:10px; border-top:1px solid #555;">';
                 j.cartas.forEach(c => {
                     let colorVal = c.tipo === "ARTEFACTO" ? "#bf00ff" : (c.tipo === "BUHO" ? "gold" : "#fff"); 
-                    detalleHtml += `
-                        <div class="detalle-item">
-                            <span>${c.carta} (${c.lado})</span>
-                            <span style="color:${colorVal}; font-weight:bold;">+${c.valor}</span>
-                        </div>
-                    `;
+                    detalleHtml += `<div class="detalle-item"><span>${c.carta} (${c.lado})</span><span style="color:${colorVal}; font-weight:bold;">+${c.valor}</span></div>`;
                 });
                 detalleHtml += '</div>';
 
                 const div = document.createElement('div');
                 div.className = 'resultado-jugador' + (esGanador ? ' ganador' : '');
-                
                 let badges = '';
                 if(usoArtefacto) badges += '<span style="font-size:12px; color:#bf00ff; border:1px solid #bf00ff; padding:2px 6px; border-radius:4px; margin-left:10px;">ARTEFACTO</span>';
                 if(usoBuho) badges += '<span style="font-size:12px; color:gold; border:1px solid gold; padding:2px 6px; border-radius:4px; margin-left:10px;">BÚHO</span>';
 
-                div.innerHTML = `
-                    <h3 style="color:${j.color}">
-                        ${esGanador ? '👑 ' : ''}${j.esc} ${j.nombre} 
-                        ${badges}
-                    </h3>
-                    ${detalleHtml}
-                    <p style="margin-top:10px; font-size:18px; color:#ccc;">Dado: 🎲 ${j.dado}</p>
-                    <div class="total-score">TOTAL: ${j.total}</div>
-                    <p style="font-size:14px; color:#aaa; text-align:right;">Victorias: ${j.victorias}</p>
-                `;
+                div.innerHTML = `<h3 style="color:${j.color}">${esGanador ? '👑 ' : ''}${j.esc} ${j.nombre} ${badges}</h3>${detalleHtml}<p style="margin-top:10px; font-size:18px; color:#ccc;">Dado: 🎲 ${j.dado}</p><div class="total-score">TOTAL: ${j.total}</div><p style="font-size:14px; color:#aaa; text-align:right;">Victorias: ${j.victorias}</p>`;
                 cont.appendChild(div);
             });
 
@@ -731,21 +642,15 @@
             listaHist.innerHTML = '';
             historialGanadores.forEach(h => {
                 const div = document.createElement('div');
-                div.className = 'hist-row';
-                div.innerHTML = `Ronda ${h.ronda}: <span class="hist-win">${h.ganador}</span>`;
-                listaHist.appendChild(div);
+                div.className = 'hist-row'; div.innerHTML = `Ronda ${h.ronda}: <span class="hist-win">${h.ganador}</span>`; listaHist.appendChild(div);
             });
 
             if (rondaActual >= MAX_RONDAS) {
-                btnNext.innerText = "🏆 FINALIZAR TORNEO";
-                btnNext.style.background = "gold";
-                btnNext.style.color = "black";
+                btnNext.innerText = "🏆 FINALIZAR TORNEO"; btnNext.style.background = "gold"; btnNext.style.color = "black";
                 let rankingFinal = [...jugadores].sort((a,b) => b.victorias - a.victorias);
                 alert(`¡TORNEO FINALIZADO!\nCAMPEÓN: ${rankingFinal[0].nombre} con ${rankingFinal[0].victorias} victorias.`);
             } else {
-                btnNext.innerText = "🔄 SIGUIENTE RONDA";
-                btnNext.style.background = "#bf00ff";
-                btnNext.style.color = "white";
+                btnNext.innerText = "🔄 SIGUIENTE RONDA"; btnNext.style.background = "#bf00ff"; btnNext.style.color = "white";
             }
         }
     </script>
