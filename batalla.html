@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: BATALLA V73</title>
+    <title>DOMUS MAGI: BATALLA V75</title>
     <link rel="stylesheet" href="style.css">
     
     <style>
@@ -15,42 +15,51 @@
         #zona-superior { height: 55%; width: 100%; position: relative; display: flex; justify-content: center; align-items: center; border-bottom: 4px solid var(--borde-dorado); }
         #zona-inferior { height: 45%; width: 100%; background: linear-gradient(to bottom, #1a1a1a, #000); pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px 15px; }
         
-        /* HUD DERECHO BLINDADO (V70/V73) */
+        /* HUD DERECHO V75: TRANSPARENTE */
         #hud-derecho { 
             position: absolute; top: 10px; right: 10px; z-index: 9999 !important; 
             display: none; flex-direction: column; align-items: flex-end; text-align: right; 
             pointer-events: none; 
-            background: rgba(0,0,0,0.95); 
-            padding: 15px; 
-            border-radius: 12px; border: 3px solid gold; 
-            box-shadow: 0 0 20px rgba(0,0,0,1);
+            
+            /* FONDO TRANSPARENTE (Solo 20% de negro para contraste leve) */
+            background: rgba(0,0,0,0.2); 
+            
+            padding: 10px; 
+            border-radius: 12px; 
+            /* Borde más sutil para integrar con el video */
+            border: 1px solid rgba(255, 215, 0, 0.4); 
+            /* Sombra suave solo para separar del fondo */
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
             min-width: 120px; 
+            backdrop-filter: blur(2px); /* Efecto cristal muy leve */
         }
         
-        /* IMAGEN ESCUDO: 100% visible */
+        /* IMAGEN ESCUDO V75: MÁS NÍTIDO */
         #hud-img-escudo { 
-            width: 90px; height: 90px; 
+            width: 95px; height: 95px; /* Un poco más grande */
             object-fit: contain; 
-            filter: drop-shadow(0 0 8px gold); 
-            margin-bottom: 8px; 
+            /* Truco para nitidez: Sombra dura en lugar de resplandor borroso */
+            filter: drop-shadow(0 0 1px gold) drop-shadow(2px 2px 2px black);
+            margin-bottom: 5px; 
             opacity: 1 !important; 
             display: block;
+            image-rendering: -webkit-optimize-contrast; /* Forzar nitidez en navegadores */
         }
 
-        /* TEXTOS HUD */
+        /* TEXTOS HUD: Sombra fuerte para leer sobre video */
         #hud-txt-arma { 
             font-size: 20px; color: #fff; text-transform: uppercase; font-weight: 900; 
-            text-shadow: 2px 2px 4px #000; letter-spacing: 2px; 
-            border-bottom: 2px solid rgba(255,215,0,0.5); padding-bottom: 5px; margin-bottom: 5px; 
+            text-shadow: 2px 2px 0 #000, -1px -1px 0 #000; letter-spacing: 2px; 
+            border-bottom: 1px solid rgba(255,255,255,0.5); padding-bottom: 5px; margin-bottom: 5px; 
             width: 100%; text-align: right; 
         }
         #hud-txt-accion { 
             font-size: 26px; color: gold; font-family: var(--font-titulo); font-weight: 900; 
-            text-transform: uppercase; text-shadow: 2px 2px 0 #000; line-height: 1; margin-top: 5px; 
+            text-transform: uppercase; text-shadow: 3px 3px 0 #000; line-height: 1; margin-top: 5px; 
         }
         #hud-txt-valor { 
             font-size: 70px; color: white; font-family: var(--font-titulo); line-height: 0.9; 
-            text-shadow: 0 0 20px #bf00ff, 4px 4px 0 #000; font-weight: 900; margin-top: 0; 
+            text-shadow: 0 0 10px #bf00ff, 4px 4px 0 #000; font-weight: 900; margin-top: 0; 
         }
 
         /* RESULTADOS */
@@ -164,7 +173,7 @@
         <div id="zona-superior">
             <div id="txt-turno" style="position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(0,0,0,0.8); color: gold; padding: 10px; border: 2px solid gold;">TURNO: ---</div>
             
-            <!-- HUD DERECHO V73 (CON ESCUDO DE LLAVE PARA ARTEFACTOS) -->
+            <!-- HUD DERECHO V75: TRANSPARENTE -->
             <div id="hud-derecho">
                 <img id="hud-img-escudo" src="" alt="Escudo">
                 <div id="hud-txt-arma">ARMA</div>
@@ -195,7 +204,7 @@
         </div>
     </div>
 
-    <!-- RESULTADOS V73 -->
+    <!-- RESULTADOS V75 -->
     <div id="p-resultado" class="pantalla oculto">
         <h2 style="color:#331a00; border-bottom:2px solid #8b4513; width:100%;">DECRETO FINAL</h2>
         <div id="resultado-batalla">
@@ -211,20 +220,18 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LÓGICA V73 -->
+    <!-- JAVASCRIPT LÓGICA V75 -->
     <script>
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         const VIDEOS_BATALLA = ["Explosión_Elemental.mp4", "El_Búho_Juez.mp4", "Invocaciones_Etéreas.mp4"];
         
-        // BASE DE DATOS ACTUALIZADA V73 
-        // CAMBIO: Todos los Artefactos (ID 5-9) usan ESCUDO_LLAVE.png
+        // BASE DE DATOS (NIVEL 1 = SICA / ARTEFACTOS = LLAVE)
         const CARTAS = {
             0: { id: 0, nombre: "DRAGÓN", arma: "SICA", elemento: "TERRA", imgEscudo: "ESCUDO_DRAGON.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 7, video: "CARTA_1_ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 2, video: "CARTA_1_cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "CARTA_1_defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "CARTA_1_magia.mp4" } } },
             1: { id: 1, nombre: "ÁGUILA", arma: "SICA", elemento: "CAELUM", imgEscudo: "ESCUDO_AGUILA.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 5, video: "ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 4, video: "cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 2, video: "defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 3, video: "magia.mp4" } } },
             2: { id: 2, nombre: "LEÓN", arma: "SICA", elemento: "TERRA", imgEscudo: "ESCUDO_LEON.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 8, video: "ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 1, video: "cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 4, video: "defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 1, video: "magia.mp4" } } },
             3: { id: 3, nombre: "JABALÍ", arma: "SICA", elemento: "AQUA", imgEscudo: "ESCUDO_JABALI.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 6, video: "ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 3, video: "cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "magia.mp4" } } },
             4: { id: 4, nombre: "BÚHO MASTER", arma: "ACUTUM", elemento: "NEUTRO", imgEscudo: "ESCUDO_BUHO.png", tipo: "BUHO", botones: { "btn-i": { texto: "M", label: "MANDATUM", valor: 5, video: "owl_mandatum.mp4" }, "btn-a": { texto: "C", label: "CONSILIUM", valor: 5, video: "owl_consilium.mp4" }, "btn-t": { texto: "P", label: "PRAESAGIUM", valor: 5, video: "owl_praesagium.mp4" }, "btn-m": { texto: "A", label: "ARCANUM", valor: 5, video: "owl_arcanum.mp4" } } },
-            // ARTEFACTOS CON ESCUDO_LLAVE.png
             5: { id: 5, nombre: "IGNIS PHIALA", arma: "IGNIS", elemento: "TERRA", imgEscudo: "ESCUDO_LLAVE.png", tipo: "ARTEFACTO", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 10, video: "ARTEFACTO_1_IMPETUS.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 8, video: "ARTEFACTO_1_AUXILIUM.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 8, video: "ARTEFACTO_1_TUTELA.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 12, video: "ARTEFACTO_1_MYSTERIUM.mp4" } } },
             6: { id: 6, nombre: "SPECULUM AEGIS", arma: "SPECULUM", elemento: "DIMENSIO", imgEscudo: "ESCUDO_LLAVE.png", tipo: "ARTEFACTO", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 6, video: "ESPEJO_GOLPE.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 9, video: "ESPEJO_EQUIPAR.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 10, video: "ESPEJO_BLOQUEO.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 7, video: "ESPEJO_ILUSION.mp4" } } },
             7: { id: 7, nombre: "TEMPUS FUGIT", arma: "CHRONOS", elemento: "DIMENSIO", imgEscudo: "ESCUDO_LLAVE.png", tipo: "ARTEFACTO", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 8, video: "RELOJ_ACELERAR.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 7, video: "RELOJ_REVERTIR.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 10, video: "RELOJ_CONGELAR.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 15, video: "RELOJ_ROMPER.mp4" } } },
@@ -400,7 +407,7 @@
         }
     </script>
 
-    <!-- AR LOGIC V73 -->
+    <!-- AR LOGIC V75 -->
     <script type="module">
         import * as THREE from 'three';
         import { MindARThree } from 'mindar-image-three';
