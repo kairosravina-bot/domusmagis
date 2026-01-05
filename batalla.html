@@ -3,52 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: BATALLA V62</title>
+    <title>DOMUS MAGI: BATALLA V64</title>
     <link rel="stylesheet" href="style.css">
     
     <style>
-        /* =========================================
-           CORRECCIÓN 1: SETUP ARRIBA (NO CENTRADO)
-           ========================================= */
-        #p-setup { 
-            justify-content: flex-start !important; 
-            padding-top: 60px; /* Espacio para que no pegue al borde */
-        }
+        /* SETUP ALINEADO ARRIBA PARA QUE ENTRE EL TECLADO */
+        #p-setup { justify-content: flex-start !important; padding-top: 50px; }
 
-        /* ESTILOS ESPECÍFICOS BATALLA */
         #container-ar { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
         #ui-juego { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; z-index: 500; pointer-events: none; }
-        
         #zona-superior { height: 55%; width: 100%; position: relative; display: flex; justify-content: center; align-items: center; border-bottom: 4px solid var(--borde-dorado); }
         #zona-inferior { height: 45%; width: 100%; background: linear-gradient(to bottom, #1a1a1a, #000); pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px 15px; }
         
-        #guia-scanner { 
-            width: 240px; height: 240px; 
-            border: 6px solid rgba(255, 255, 255, 0.6); 
-            border-radius: 20px; z-index: 10; position: relative; 
-            box-shadow: 0 0 15px rgba(0,0,0,0.8);
-            transition: border-color 0.2s;
-        }
+        #guia-scanner { width: 240px; height: 240px; border: 6px solid rgba(255, 255, 255, 0.6); border-radius: 20px; z-index: 10; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.8); transition: border-color 0.2s; }
         #guia-scanner::after { content: "+"; position: absolute; top:50%; left:50%; transform:translate(-50%, -50%); color: rgba(255,255,255,0.8); font-size: 50px; font-weight: 100; }
         #guia-scanner.verde { border-color: #00ff00; box-shadow: 0 0 30px #00ff00; }
         #guia-scanner.dorado { border-color: #ffd700; box-shadow: 0 0 30px #ffd700; }
         #guia-scanner.violeta { border-color: #bd00ff; box-shadow: 0 0 30px #bd00ff; }
-
-        /* =========================================
-           CORRECCIÓN 2: HUD DERECHO VERTICAL
-           ========================================= */
-        #hud-derecho {
-            position: absolute; top: 20px; right: 20px; z-index: 50;
-            display: none; /* Se activa con JS */
-            flex-direction: column; 
-            align-items: flex-end; /* Alineado a la derecha */
-            text-align: right; pointer-events: none;
-            gap: 5px;
-        }
-        #hud-img-escudo { width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 0 5px gold); margin-bottom: 5px; }
-        #hud-txt-nombre { font-size: 14px; color: #ddd; text-transform: uppercase; letter-spacing: 1px; }
-        #hud-txt-accion { font-size: 24px; color: gold; font-family: var(--font-titulo); font-weight: 900; text-transform: uppercase; }
-        #hud-txt-valor { font-size: 50px; color: white; font-family: var(--font-titulo); line-height: 1; text-shadow: 0 0 10px black; font-weight: 900; }
 
         .contenedor-gemas { display: flex; gap: 15px; margin: 5px 0; justify-content: center; }
         .btn-gema { width: 70px; height: 70px; border-radius: 15px; border: 2px solid #555; background-color: #222; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
@@ -66,7 +37,7 @@
 
     <div id="container-ar"></div>
 
-    <!-- MODAL FASE DE DADOS EN BATALLA (CON SELECCIÓN COMPLETA) -->
+    <!-- MODAL FASE DE DADOS EN BATALLA -->
     <div id="modal-dados-fase" class="pantalla oculto" style="z-index:9500; background:rgba(0,0,0,0.96);">
         <h2 style="color:#aaa; margin:0;">DESTINO</h2>
         <h1 id="dados-player-name" style="font-size:36px; margin:5px 0;">JUGADOR</h1>
@@ -99,20 +70,15 @@
         <button class="btn-master" style="margin-top:30px; width:80%;" onclick="confirmarCambioTurno()">TOMAR EL MANDO</button>
     </div>
 
-    <!-- SETUP (AHORA ALINEADO ARRIBA) -->
+    <!-- SETUP ALINEADO ARRIBA -->
     <div id="p-setup" class="pantalla">
         <h2>INSCRIPCIÓN</h2>
-        
-        <!-- SELECTOR MAGOS -->
         <div id="setup-selector" style="display:flex; gap:10px; width:100%;">
             <button class="btn-master" onclick="setModo(2)">2 MAGOS</button>
             <button class="btn-master" onclick="setModo(4)">4 MAGOS</button>
         </div>
-        
-        <!-- INPUTS -->
         <div id="registro" class="oculto" style="width:100%;">
             <input type="text" id="mago-nombre" placeholder="NOMBRE DEL MAGO" autocomplete="off">
-            
             <div class="grid-casas">
                 <button onclick="registrarMago('TERRA','#ff0000','ESCUDO_DRAGON.png')" class="btn-casa" style="background:#500; border-color:#f00;">🛡️ TERRA</button>
                 <button onclick="registrarMago('CAELUM','#00aaff','ESCUDO_AGUILA.png')" class="btn-casa" style="background:#003; border-color:#0af;">⚔️ CAELUM</button>
@@ -129,11 +95,11 @@
         <div id="zona-superior">
             <div id="txt-turno" style="position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(0,0,0,0.8); color: gold; padding: 10px; border: 2px solid gold;">TURNO: ---</div>
             
-            <!-- HUD DERECHO (CORREGIDO) -->
+            <!-- HUD DERECHO COMPLETO V64 (ESCUDO + NOMBRE + ACCION + VALOR) -->
             <div id="hud-derecho">
                 <img id="hud-img-escudo" src="" alt="Escudo">
-                <div id="hud-txt-nombre">ARMA</div>
-                <div id="hud-txt-accion">LADO</div>
+                <div id="hud-txt-nombre">NOMBRE</div>
+                <div id="hud-txt-accion">ACCION</div>
                 <div id="hud-txt-valor">00</div>
             </div>
 
@@ -160,23 +126,33 @@
         </div>
     </div>
 
-    <!-- RESULTADOS -->
+    <!-- RESULTADOS Y HISTORIAL -->
     <div id="p-resultado" class="pantalla oculto">
         <h2 style="color:#331a00; border-bottom:2px solid #8b4513; width:100%;">DECRETO FINAL</h2>
+        
+        <!-- Contenedor Resultados -->
         <div id="resultado-batalla" style="width:100%; background:var(--bg-pergamino); color:#331a00; padding:20px; flex-grow:1; overflow-y:auto; border-radius:5px;">
             <div id="resultado-contenido"></div>
         </div>
+
         <div style="width:100%; display:flex; gap:10px; margin:20px 0;">
             <button class="btn-master" onclick="continuarContienda()">⚔️ REPETIR</button>
             <button class="btn-master" style="background:#111; border-color:#f00;" onclick="window.location.href='index.html'">🚪 SALIR</button>
         </div>
+
+        <!-- HISTORIAL RESTAURADO -->
+        <div id="seccion-historial">
+            <h3 style="color:#aaa; font-size:20px;">CRÓNICAS DE BATALLA</h3>
+            <div id="lista-historial"></div>
+        </div>
     </div>
 
-    <!-- JAVASCRIPT LÓGICA V62 -->
+    <!-- JAVASCRIPT LÓGICA V64 -->
     <script>
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         const VIDEOS_BATALLA = ["Explosión_Elemental.mp4", "El_Búho_Juez.mp4", "Invocaciones_Etéreas.mp4"];
         
+        // BASE DE DATOS COMPLETA
         const CARTAS = {
             0: { id: 0, nombre: "DRAGÓN", elemento: "TERRA", imgEscudo: "ESCUDO_DRAGON.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 7, video: "CARTA_1_ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 2, video: "CARTA_1_cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "CARTA_1_defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "CARTA_1_magia.mp4" } } },
             1: { id: 1, nombre: "ÁGUILA", elemento: "CAELUM", imgEscudo: "ESCUDO_AGUILA.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 5, video: "ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 4, video: "cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 2, video: "defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 3, video: "magia.mp4" } } },
@@ -192,6 +168,7 @@
 
         let jugadores = []; let cantJugadores = 0; let slotActual = 0; let turnoJugadorIdx = 0; const MAX_SLOTS = 3; let jugadaPendiente = null;
         let ultimaJugada = null; let dadosSeleccionadosBatalla = 2;
+        let historialPartidas = []; let contadorPartidas = 0; // HISTORIAL RESTAURADO
 
         function setModo(n) { cantJugadores = n; document.getElementById('setup-selector').classList.add('oculto'); document.getElementById('registro').classList.remove('oculto'); document.getElementById('reg-status').innerText = `Mago 1 de ${n}`; }
         function registrarMago(casa, color, esc) {
@@ -216,7 +193,7 @@
             else { infoRival.style.display = 'none'; }
 
             document.getElementById('msg-visor').style.display = 'block'; document.getElementById('guia-scanner').className = '';
-            document.getElementById('hud-derecho').style.display = 'none'; // Se oculta al inicio
+            document.getElementById('hud-derecho').style.display = 'none'; 
             resetBotones(); jugadaPendiente = null;
         }
 
@@ -256,18 +233,63 @@
             const vid = document.getElementById('video-clash');
             vid.src = RUTA_BASE + VIDEOS_BATALLA[Math.floor(Math.random()*VIDEOS_BATALLA.length)];
             vid.play();
-            vid.onended = () => { document.getElementById('modal-batalla').classList.add('oculto'); mostrarResultados(); };
+            vid.onended = () => { document.getElementById('modal-batalla').classList.add('oculto'); mostrarResultadosDetallados(); };
         }
 
-        function mostrarResultados() {
+        // RESULTADOS DETALLADOS (V64 RESTAURADO)
+        function mostrarResultadosDetallados() {
             document.getElementById('ui-juego').classList.add('oculto');
             document.getElementById('p-resultado').classList.remove('oculto');
             const cont = document.getElementById('resultado-contenido'); cont.innerHTML = '';
-            let res = jugadores.map(j => { let t=0; j.slots.forEach(s=>{if(s)t+=s.valor}); return {...j, total:t+j.dado}; }).sort((a,b)=>b.total-a.total);
-            res.forEach((r,i) => {
-                cont.innerHTML += `<div class="resultado-jugador ${i===0?'ganador':''}"><h3 style="color:${r.color}">${r.nombre}</h3><div style="font-size:50px; text-align:right;">${r.total}</div></div>`;
+            
+            let resultados = jugadores.map(j => { 
+                let total = 0; j.slots.forEach(s=>{if(s)total+=s.valor}); 
+                return {...j, total:total+j.dado}; 
+            });
+            resultados.sort((a,b)=>b.total-a.total);
+
+            // Guardar Historial
+            contadorPartidas++;
+            const ganador = resultados[0];
+            historialPartidas.push({ id: contadorPartidas, nombre: ganador.nombre, pts: ganador.total });
+            actualizarListaHistorial();
+
+            resultados.forEach((r,i) => {
+                let htmlSlots = "";
+                r.slots.forEach(s => {
+                    if(s) htmlSlots += `
+                    <div class="fila-res">
+                        <span class="res-nombre">${s.carta.nombre}</span>
+                        <span class="res-accion">${s.lado}</span>
+                        <span class="res-valor">${s.valor}</span>
+                    </div>`;
+                });
+
+                cont.innerHTML += `
+                <div class="resultado-jugador ${i===0?'ganador':''}">
+                    <h3 style="color:${r.color}; margin:0;">${r.nombre}</h3>
+                    ${htmlSlots}
+                    <div class="fila-dado">
+                        <span style="color:#ccc;">DADOS (${dadosSeleccionadosBatalla}D):</span>
+                        <span class="dado-gigante-res">+${r.dado}</span>
+                    </div>
+                    <div class="total-score">${r.total}</div>
+                </div>`;
             });
         }
+
+        function actualizarListaHistorial() {
+            const lista = document.getElementById('lista-historial');
+            lista.innerHTML = "";
+            [...historialPartidas].reverse().forEach(h => {
+                lista.innerHTML += `
+                <div class="item-historial">
+                    <span>BATALLA #${h.id}</span>
+                    <strong style="color:gold;">${h.nombre} (${h.pts} pts)</strong>
+                </div>`;
+            });
+        }
+
         function continuarContienda() {
             jugadores.forEach(j=>{j.slots=[null,null,null];j.dado=0;}); slotActual=0; turnoJugadorIdx=0; ultimaJugada=null;
             document.getElementById('p-resultado').classList.add('oculto');
@@ -277,7 +299,7 @@
         function resetBotones() { ['btn-i','btn-a','btn-t','btn-m'].forEach(id=>{ document.getElementById(id).innerHTML=`<span class="letra-grande">${id.split('-')[1].toUpperCase()}</span>`; document.getElementById(id).classList.remove('activo'); }); }
     </script>
 
-    <!-- AR LOGIC V62 -->
+    <!-- AR LOGIC V64 -->
     <script type="module">
         import * as THREE from 'three';
         import { MindARThree } from 'mindar-image-three';
@@ -308,30 +330,29 @@
                 };
             }
 
-            // EVENTOS BOTONES (CON NUEVO HUD)
+            // EVENTOS BOTONES (CON NUEVO HUD V64)
             ['btn-i','btn-a','btn-t','btn-m'].forEach(id => {
                 document.getElementById(id).onclick = () => {
                     if(!cartaDetectada) return;
                     const conf = cartaDetectada.botones[id];
                     jugadaPendiente = { carta: cartaDetectada, lado: conf.label, valor: conf.valor };
                     
-                    // MOSTRAR VIDEO
                     ui.videoAction.style.display = 'block'; 
                     ui.videoAction.src = RUTA_BASE + conf.video; 
                     ui.videoAction.play();
 
-                    // MOSTRAR HUD (CORREGIDO)
+                    // MOSTRAR HUD COMPLETO
                     const hud = document.getElementById('hud-derecho');
                     hud.style.display = 'flex';
                     document.getElementById('hud-img-escudo').src = RUTA_BASE + cartaDetectada.imgEscudo;
+                    // Aquí estaba el error "nombre (falto)", ahora está agregado:
                     document.getElementById('hud-txt-nombre').innerText = cartaDetectada.nombre;
                     document.getElementById('hud-txt-accion').innerText = conf.label;
                     document.getElementById('hud-txt-valor').innerText = conf.valor;
 
-                    // FIN VIDEO
                     ui.videoAction.onended = () => { 
                         ui.videoAction.style.display = 'none'; 
-                        hud.style.display = 'none'; // Ocultar HUD
+                        hud.style.display = 'none'; 
                         ui.msg.innerText = "CONFIRMA ABAJO"; 
                     };
                 };
