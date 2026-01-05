@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: BATALLA V68</title>
+    <title>DOMUS MAGI: BATALLA V70</title>
     <link rel="stylesheet" href="style.css">
     
     <style>
@@ -15,21 +15,45 @@
         #zona-superior { height: 55%; width: 100%; position: relative; display: flex; justify-content: center; align-items: center; border-bottom: 4px solid var(--borde-dorado); }
         #zona-inferior { height: 45%; width: 100%; background: linear-gradient(to bottom, #1a1a1a, #000); pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px 15px; }
         
-        /* HUD DERECHO (ESTRUCTURA VERTICAL V68) */
+        /* HUD DERECHO V70 (CORREGIDO Y BLINDADO) */
         #hud-derecho { 
-            position: absolute; top: 15px; right: 15px; z-index: 60; 
+            position: absolute; top: 10px; right: 10px; z-index: 9999 !important; /* Capa Suprema */
             display: none; flex-direction: column; align-items: flex-end; text-align: right; 
-            pointer-events: none; background: rgba(0,0,0,0.7); padding: 15px; 
-            border-radius: 12px; border: 2px solid gold; 
-            box-shadow: 0 0 15px rgba(0,0,0,0.8);
+            pointer-events: none; 
+            background: rgba(0,0,0,0.95); /* Fondo casi negro solido para contraste */
+            padding: 15px; 
+            border-radius: 12px; border: 3px solid gold; 
+            box-shadow: 0 0 20px rgba(0,0,0,1);
+            min-width: 120px; /* Asegura tamaño mínimo */
         }
-        /* ORDEN VISUAL: 1. Escudo, 2. Arma, 3. Lado, 4. Valor */
-        #hud-img-escudo { width: 85px; height: 85px; object-fit: contain; filter: drop-shadow(0 0 5px gold); margin-bottom: 5px; }
-        #hud-txt-arma { font-size: 18px; color: #fff; text-transform: uppercase; font-weight: 900; text-shadow: 2px 2px 4px black; letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 4px; margin-bottom: 5px; width: 100%; text-align: right; }
-        #hud-txt-accion { font-size: 24px; color: gold; font-family: var(--font-titulo); font-weight: 900; text-transform: uppercase; text-shadow: 2px 2px 0 black; line-height: 1; margin-top: 2px; }
-        #hud-txt-valor { font-size: 65px; color: white; font-family: var(--font-titulo); line-height: 0.9; text-shadow: 0 0 15px #bf00ff, 4px 4px 0 black; font-weight: 900; margin-top: 2px; }
+        
+        /* IMAGEN ESCUDO: Sin transparencia, 100% visible */
+        #hud-img-escudo { 
+            width: 90px; height: 90px; 
+            object-fit: contain; 
+            filter: drop-shadow(0 0 8px gold); 
+            margin-bottom: 8px; 
+            opacity: 1 !important; /* Forzar opacidad máxima */
+            display: block;
+        }
 
-        /* RESULTADOS (FONDO CLARO / LETRA NEGRA) */
+        /* TEXTOS HUD */
+        #hud-txt-arma { 
+            font-size: 20px; color: #fff; text-transform: uppercase; font-weight: 900; 
+            text-shadow: 2px 2px 4px #000; letter-spacing: 2px; 
+            border-bottom: 2px solid rgba(255,215,0,0.5); padding-bottom: 5px; margin-bottom: 5px; 
+            width: 100%; text-align: right; 
+        }
+        #hud-txt-accion { 
+            font-size: 26px; color: gold; font-family: var(--font-titulo); font-weight: 900; 
+            text-transform: uppercase; text-shadow: 2px 2px 0 #000; line-height: 1; margin-top: 5px; 
+        }
+        #hud-txt-valor { 
+            font-size: 70px; color: white; font-family: var(--font-titulo); line-height: 0.9; 
+            text-shadow: 0 0 20px #bf00ff, 4px 4px 0 #000; font-weight: 900; margin-top: 0; 
+        }
+
+        /* RESULTADOS */
         #resultado-batalla { width:100%; background: #eecda3; color:#000; padding:20px; flex-grow:1; overflow-y:auto; border-radius:5px; border: 4px solid #5a3a22; }
         .resultado-jugador { background: rgba(0,0,0,0.05); margin: 15px 0; padding: 15px; border-bottom: 2px solid #5a3a22; border-radius: 5px; }
         .ganador { border: 3px solid #d4af37; background: rgba(255, 215, 0, 0.2); position: relative; }
@@ -52,26 +76,26 @@
         #guia-scanner.dorado { border-color: #ffd700; box-shadow: 0 0 30px #ffd700; }
         #guia-scanner.violeta { border-color: #bd00ff; box-shadow: 0 0 30px #bd00ff; }
 
-        /* GEMAS (BOTONES) */
+        /* GEMAS */
         .contenedor-gemas { display: flex; gap: 15px; margin: 5px 0; justify-content: center; }
         .btn-gema { width: 70px; height: 70px; border-radius: 15px; border: 2px solid #555; background-color: #222; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; }
         
-        /* ESTILOS POR DEFECTO (CASAS) */
         #btn-i { background: var(--gema-roja); } 
         #btn-a { background: var(--gema-verde); } 
         #btn-t { background: var(--gema-gris); } 
         #btn-m { background: var(--gema-violeta); }
 
-        /* ESTILOS DINÁMICOS */
         .btn-gema.style-buho { background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%) !important; border-color: #fff !important; color: #331a00 !important; }
         .btn-gema.style-artefacto { background: linear-gradient(135deg, #8a2be2 0%, #4b0082 100%) !important; border-color: #d8bfd8 !important; }
 
         .btn-gema.activo { border-color: white; transform: translateY(4px); filter: brightness(1.2); }
         .letra-grande { font-size: 28px; font-weight: 900; color: rgba(255,255,255,0.9); text-shadow: 0 2px 4px #000; font-family: var(--font-titulo); }
-        /* Ajuste de color de letra para Búho */
         .style-buho .letra-grande { color: #331a00; text-shadow: none; }
 
         #info-rival { width: 100%; background: rgba(50,0,0,0.8); padding: 8px; border: 1px solid red; display: none; font-size: 16px; text-align: center; margin-bottom: 5px; font-family: var(--font-titulo); color: #ffaaaa; font-weight: 900; }
+        
+        /* CAPA VIDEO ACTION (V70) */
+        #video-action { position:absolute; width:100%; height:100%; display:none; background:black; z-index:50; object-fit:contain; }
     </style>
 
     <script type="importmap">
@@ -104,9 +128,7 @@
     <!-- MODAL BATALLA FINAL -->
     <div id="modal-batalla" class="pantalla oculto" style="z-index:9999; background:#000; text-align:center;">
         <h2 style="color:gold; margin-bottom:5px;">BATALLA FINAL</h2>
-        <!-- Contenedor dinámico de nombres VS -->
         <div id="texto-vs" style="font-size:26px; font-weight:900; margin-bottom:10px; font-family:var(--font-titulo); text-transform:uppercase;"></div>
-        
         <video id="video-clash" playsinline webkit-playsinline style="width:100%; border-top:4px solid gold; border-bottom:4px solid gold;"></video>
     </div>
 
@@ -118,7 +140,7 @@
         <button class="btn-master" style="margin-top:30px; width:80%;" onclick="confirmarCambioTurno()">TOMAR EL MANDO</button>
     </div>
 
-    <!-- SETUP ALINEADO ARRIBA -->
+    <!-- SETUP -->
     <div id="p-setup" class="pantalla">
         <h2>INSCRIPCIÓN</h2>
         <div id="setup-selector" style="display:flex; gap:10px; width:100%;">
@@ -143,16 +165,17 @@
         <div id="zona-superior">
             <div id="txt-turno" style="position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(0,0,0,0.8); color: gold; padding: 10px; border: 2px solid gold;">TURNO: ---</div>
             
-            <!-- HUD DERECHO V68 COMPLETO -->
+            <!-- HUD DERECHO V70 (Z-INDEX 9999 + OPAQUE BG) -->
             <div id="hud-derecho">
-                <img id="hud-img-escudo" src="" alt="Escudo" onerror="this.style.opacity='0.3'">
+                <!-- Se eliminó onerror opacity para que no sea transparente -->
+                <img id="hud-img-escudo" src="" alt="Escudo">
                 <div id="hud-txt-arma">ARMA</div>
                 <div id="hud-txt-accion">ACCION</div>
                 <div id="hud-txt-valor">00</div>
             </div>
 
             <div id="guia-scanner"></div>
-            <video id="video-action" playsinline webkit-playsinline style="position:absolute; width:100%; height:100%; display:none; background:black; z-index:20; object-fit:contain;"></video>
+            <video id="video-action" playsinline webkit-playsinline></video>
         </div>
 
         <div id="zona-inferior">
@@ -174,33 +197,28 @@
         </div>
     </div>
 
-    <!-- RESULTADOS V68 -->
+    <!-- RESULTADOS V70 -->
     <div id="p-resultado" class="pantalla oculto">
         <h2 style="color:#331a00; border-bottom:2px solid #8b4513; width:100%;">DECRETO FINAL</h2>
-        
-        <!-- Contenedor Resultados -->
         <div id="resultado-batalla">
             <div id="resultado-contenido"></div>
         </div>
-
         <div style="width:100%; display:flex; gap:10px; margin:20px 0;">
             <button class="btn-master" onclick="continuarContienda()">⚔️ REPETIR</button>
             <button class="btn-master" style="background:#111; border-color:#f00;" onclick="window.location.href='index.html'">🚪 SALIR</button>
         </div>
-
         <div id="seccion-historial">
             <h3 style="color:#aaa; font-size:20px;">CRÓNICAS DE BATALLA</h3>
             <div id="lista-historial"></div>
         </div>
     </div>
 
-    <!-- JAVASCRIPT LÓGICA V68 -->
+    <!-- JAVASCRIPT LÓGICA V70 -->
     <script>
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         const VIDEOS_BATALLA = ["Explosión_Elemental.mp4", "El_Búho_Juez.mp4", "Invocaciones_Etéreas.mp4"];
         
-        // BASE DE DATOS ACTUALIZADA V68 (Lógica por Nivel 1 = SICA)
-        // NOTA: IDs 0, 1, 2, 3 son las Casas en Nivel 1 => Arma: SICA
+        // BASE DE DATOS (NIVEL 1 = SICA)
         const CARTAS = {
             0: { id: 0, nombre: "DRAGÓN", arma: "SICA", elemento: "TERRA", imgEscudo: "ESCUDO_DRAGON.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 7, video: "CARTA_1_ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 2, video: "CARTA_1_cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "CARTA_1_defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "CARTA_1_magia.mp4" } } },
             1: { id: 1, nombre: "ÁGUILA", arma: "SICA", elemento: "CAELUM", imgEscudo: "ESCUDO_AGUILA.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 5, video: "ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 4, video: "cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 2, video: "defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 3, video: "magia.mp4" } } },
@@ -278,8 +296,6 @@
 
         function iniciarClashFinal() {
             document.getElementById('modal-batalla').classList.remove('oculto');
-            
-            // Generar Título VS dinámico
             let vsHTML = "";
             jugadores.forEach((j, index) => {
                 vsHTML += `<span style="color:${j.color}; text-shadow:1px 1px 0 #000;">${j.nombre}</span>`;
@@ -293,7 +309,6 @@
             vid.onended = () => { document.getElementById('modal-batalla').classList.add('oculto'); mostrarResultadosDetallados(); };
         }
 
-        // RESULTADOS DETALLADOS
         function mostrarResultadosDetallados() {
             document.getElementById('ui-juego').classList.add('oculto');
             document.getElementById('p-resultado').classList.remove('oculto');
@@ -358,7 +373,6 @@
             document.getElementById('ui-juego').classList.remove('oculto'); actualizarUI();
         }
 
-        // RESET BOTONES
         function resetBotones() { 
             ['btn-i','btn-a','btn-t','btn-m'].forEach(id=>{ 
                 const btn = document.getElementById(id);
@@ -368,14 +382,11 @@
             }); 
         }
 
-        // ACTUALIZAR ESTILO BOTONES SEGÚN CARTA
         function actualizarEstiloBotones(carta) {
             ['btn-i','btn-a','btn-t','btn-m'].forEach(id => {
                 const btn = document.getElementById(id);
                 const conf = carta.botones[id];
-                
                 btn.classList.remove('style-buho', 'style-artefacto');
-
                 if (carta.tipo === 'BUHO') {
                     btn.classList.add('style-buho');
                     btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
@@ -389,7 +400,7 @@
         }
     </script>
 
-    <!-- AR LOGIC V68 -->
+    <!-- AR LOGIC V70 -->
     <script type="module">
         import * as THREE from 'three';
         import { MindARThree } from 'mindar-image-three';
@@ -423,26 +434,28 @@
                 };
             }
 
-            // EVENTOS BOTONES
+            // EVENTOS BOTONES BLINDADOS (V70)
             ['btn-i','btn-a','btn-t','btn-m'].forEach(id => {
                 document.getElementById(id).onclick = () => {
                     if(!cartaDetectada) return;
                     const conf = cartaDetectada.botones[id];
                     jugadaPendiente = { carta: cartaDetectada, lado: conf.label, valor: conf.valor };
                     
+                    // 1. MOSTRAR VIDEO
                     ui.videoAction.style.display = 'block'; 
                     ui.videoAction.src = RUTA_BASE + conf.video;
                     ui.videoAction.onerror = () => { console.log("Video missing: " + conf.video); };
                     ui.videoAction.play().catch(e => console.log("Play interrupted"));
 
-                    // MOSTRAR HUD V68
+                    // 2. FORZAR HUD VISIBLE (Z-INDEX 9999)
                     const hud = document.getElementById('hud-derecho');
                     hud.style.display = 'flex';
                     document.getElementById('hud-img-escudo').src = RUTA_BASE + cartaDetectada.imgEscudo;
-                    document.getElementById('hud-txt-arma').innerText = cartaDetectada.arma; // MUESTRA SICA
+                    document.getElementById('hud-txt-arma').innerText = cartaDetectada.arma; // SICA
                     document.getElementById('hud-txt-accion').innerText = conf.label;
                     document.getElementById('hud-txt-valor').innerText = conf.valor;
 
+                    // 3. OCULTAR AL TERMINAR
                     ui.videoAction.onended = () => { 
                         ui.videoAction.style.display = 'none'; 
                         hud.style.display = 'none'; 
