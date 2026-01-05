@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: BATALLA V67</title>
+    <title>DOMUS MAGI: BATALLA V68</title>
     <link rel="stylesheet" href="style.css">
     
     <style>
@@ -15,7 +15,7 @@
         #zona-superior { height: 55%; width: 100%; position: relative; display: flex; justify-content: center; align-items: center; border-bottom: 4px solid var(--borde-dorado); }
         #zona-inferior { height: 45%; width: 100%; background: linear-gradient(to bottom, #1a1a1a, #000); pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px 15px; }
         
-        /* HUD DERECHO (ESCUDO -> ARMA -> LADO -> VALOR) */
+        /* HUD DERECHO (ESTRUCTURA VERTICAL V68) */
         #hud-derecho { 
             position: absolute; top: 15px; right: 15px; z-index: 60; 
             display: none; flex-direction: column; align-items: flex-end; text-align: right; 
@@ -23,9 +23,10 @@
             border-radius: 12px; border: 2px solid gold; 
             box-shadow: 0 0 15px rgba(0,0,0,0.8);
         }
+        /* ORDEN VISUAL: 1. Escudo, 2. Arma, 3. Lado, 4. Valor */
         #hud-img-escudo { width: 85px; height: 85px; object-fit: contain; filter: drop-shadow(0 0 5px gold); margin-bottom: 5px; }
-        #hud-txt-arma { font-size: 18px; color: #fff; text-transform: uppercase; font-weight: 900; text-shadow: 2px 2px 4px black; letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 2px; margin-bottom: 5px; }
-        #hud-txt-accion { font-size: 24px; color: gold; font-family: var(--font-titulo); font-weight: 900; text-transform: uppercase; text-shadow: 2px 2px 0 black; line-height: 1; }
+        #hud-txt-arma { font-size: 18px; color: #fff; text-transform: uppercase; font-weight: 900; text-shadow: 2px 2px 4px black; letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 4px; margin-bottom: 5px; width: 100%; text-align: right; }
+        #hud-txt-accion { font-size: 24px; color: gold; font-family: var(--font-titulo); font-weight: 900; text-transform: uppercase; text-shadow: 2px 2px 0 black; line-height: 1; margin-top: 2px; }
         #hud-txt-valor { font-size: 65px; color: white; font-family: var(--font-titulo); line-height: 0.9; text-shadow: 0 0 15px #bf00ff, 4px 4px 0 black; font-weight: 900; margin-top: 2px; }
 
         /* RESULTADOS (FONDO CLARO / LETRA NEGRA) */
@@ -61,7 +62,7 @@
         #btn-t { background: var(--gema-gris); } 
         #btn-m { background: var(--gema-violeta); }
 
-        /* ESTILOS DINÁMICOS V67 */
+        /* ESTILOS DINÁMICOS */
         .btn-gema.style-buho { background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%) !important; border-color: #fff !important; color: #331a00 !important; }
         .btn-gema.style-artefacto { background: linear-gradient(135deg, #8a2be2 0%, #4b0082 100%) !important; border-color: #d8bfd8 !important; }
 
@@ -142,7 +143,7 @@
         <div id="zona-superior">
             <div id="txt-turno" style="position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(0,0,0,0.8); color: gold; padding: 10px; border: 2px solid gold;">TURNO: ---</div>
             
-            <!-- HUD DERECHO V66 COMPLETO -->
+            <!-- HUD DERECHO V68 COMPLETO -->
             <div id="hud-derecho">
                 <img id="hud-img-escudo" src="" alt="Escudo" onerror="this.style.opacity='0.3'">
                 <div id="hud-txt-arma">ARMA</div>
@@ -173,7 +174,7 @@
         </div>
     </div>
 
-    <!-- RESULTADOS V66 -->
+    <!-- RESULTADOS V68 -->
     <div id="p-resultado" class="pantalla oculto">
         <h2 style="color:#331a00; border-bottom:2px solid #8b4513; width:100%;">DECRETO FINAL</h2>
         
@@ -193,17 +194,18 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LÓGICA V67 -->
+    <!-- JAVASCRIPT LÓGICA V68 -->
     <script>
         const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
         const VIDEOS_BATALLA = ["Explosión_Elemental.mp4", "El_Búho_Juez.mp4", "Invocaciones_Etéreas.mp4"];
         
-        // BASE DE DATOS ACTUALIZADA V67 (Armas por ID)
+        // BASE DE DATOS ACTUALIZADA V68 (Lógica por Nivel 1 = SICA)
+        // NOTA: IDs 0, 1, 2, 3 son las Casas en Nivel 1 => Arma: SICA
         const CARTAS = {
             0: { id: 0, nombre: "DRAGÓN", arma: "SICA", elemento: "TERRA", imgEscudo: "ESCUDO_DRAGON.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 7, video: "CARTA_1_ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 2, video: "CARTA_1_cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "CARTA_1_defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "CARTA_1_magia.mp4" } } },
-            1: { id: 1, nombre: "ÁGUILA", arma: "HASTA", elemento: "CAELUM", imgEscudo: "ESCUDO_AGUILA.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 5, video: "ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 4, video: "cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 2, video: "defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 3, video: "magia.mp4" } } },
-            2: { id: 2, nombre: "LEÓN", arma: "CLAVA", elemento: "TERRA", imgEscudo: "ESCUDO_LEON.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 8, video: "ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 1, video: "cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 4, video: "defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 1, video: "magia.mp4" } } },
-            3: { id: 3, nombre: "JABALÍ", arma: "SECURIS", elemento: "AQUA", imgEscudo: "ESCUDO_JABALI.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 6, video: "ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 3, video: "cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "magia.mp4" } } },
+            1: { id: 1, nombre: "ÁGUILA", arma: "SICA", elemento: "CAELUM", imgEscudo: "ESCUDO_AGUILA.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 5, video: "ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 4, video: "cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 2, video: "defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 3, video: "magia.mp4" } } },
+            2: { id: 2, nombre: "LEÓN", arma: "SICA", elemento: "TERRA", imgEscudo: "ESCUDO_LEON.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 8, video: "ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 1, video: "cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 4, video: "defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 1, video: "magia.mp4" } } },
+            3: { id: 3, nombre: "JABALÍ", arma: "SICA", elemento: "AQUA", imgEscudo: "ESCUDO_JABALI.png", tipo: "CASA", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 6, video: "ataque.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 3, video: "cura.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 3, video: "defensa.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 2, video: "magia.mp4" } } },
             4: { id: 4, nombre: "BÚHO MASTER", arma: "ACUTUM", elemento: "NEUTRO", imgEscudo: "ESCUDO_BUHO.png", tipo: "BUHO", botones: { "btn-i": { texto: "M", label: "MANDATUM", valor: 5, video: "owl_mandatum.mp4" }, "btn-a": { texto: "C", label: "CONSILIUM", valor: 5, video: "owl_consilium.mp4" }, "btn-t": { texto: "P", label: "PRAESAGIUM", valor: 5, video: "owl_praesagium.mp4" }, "btn-m": { texto: "A", label: "ARCANUM", valor: 5, video: "owl_arcanum.mp4" } } },
             5: { id: 5, nombre: "IGNIS PHIALA", arma: "IGNIS", elemento: "TERRA", imgEscudo: "ESCUDO_IGNIS.png", tipo: "ARTEFACTO", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 10, video: "ARTEFACTO_1_IMPETUS.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 8, video: "ARTEFACTO_1_AUXILIUM.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 8, video: "ARTEFACTO_1_TUTELA.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 12, video: "ARTEFACTO_1_MYSTERIUM.mp4" } } },
             6: { id: 6, nombre: "SPECULUM AEGIS", arma: "SPECULUM", elemento: "DIMENSIO", imgEscudo: "ESCUDO_ESPEJO.png", tipo: "ARTEFACTO", botones: { "btn-i": { texto: "I", label: "IMPETUS", valor: 6, video: "ESPEJO_GOLPE.mp4" }, "btn-a": { texto: "A", label: "AUXILIUM", valor: 9, video: "ESPEJO_EQUIPAR.mp4" }, "btn-t": { texto: "T", label: "TUTELA", valor: 10, video: "ESPEJO_BLOQUEO.mp4" }, "btn-m": { texto: "M", label: "MYSTERIUM", valor: 7, video: "ESPEJO_ILUSION.mp4" } } },
@@ -291,7 +293,7 @@
             vid.onended = () => { document.getElementById('modal-batalla').classList.add('oculto'); mostrarResultadosDetallados(); };
         }
 
-        // RESULTADOS DETALLADOS (V66/V67)
+        // RESULTADOS DETALLADOS
         function mostrarResultadosDetallados() {
             document.getElementById('ui-juego').classList.add('oculto');
             document.getElementById('p-resultado').classList.remove('oculto');
@@ -356,43 +358,38 @@
             document.getElementById('ui-juego').classList.remove('oculto'); actualizarUI();
         }
 
-        // RESET BOTONES (Limpia clases de Búho/Artefacto)
+        // RESET BOTONES
         function resetBotones() { 
             ['btn-i','btn-a','btn-t','btn-m'].forEach(id=>{ 
                 const btn = document.getElementById(id);
-                btn.className = 'btn-gema'; // Reset a clase base (quita style-buho/artefacto)
-                // Restaura letras originales por defecto (I,A,T,M)
+                btn.className = 'btn-gema';
                 btn.innerHTML=`<span class="letra-grande">${id.split('-')[1].toUpperCase()}</span>`; 
                 btn.classList.remove('activo'); 
             }); 
         }
 
-        // ACTUALIZAR ESTILO BOTONES SEGÚN CARTA (V67)
+        // ACTUALIZAR ESTILO BOTONES SEGÚN CARTA
         function actualizarEstiloBotones(carta) {
             ['btn-i','btn-a','btn-t','btn-m'].forEach(id => {
                 const btn = document.getElementById(id);
                 const conf = carta.botones[id];
                 
-                // Limpiar clases previas
                 btn.classList.remove('style-buho', 'style-artefacto');
 
                 if (carta.tipo === 'BUHO') {
                     btn.classList.add('style-buho');
-                    // Cambiar letra a M, C, P, A (Primera letra del label)
                     btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
                 } else if (carta.tipo === 'ARTEFACTO') {
                     btn.classList.add('style-artefacto');
-                    // Mantener I, A, T, M pero con color violeta
                     btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
                 } else {
-                    // CARTA NORMAL (Reset ya hecho en resetBotones, pero aseguramos)
                     btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
                 }
             });
         }
     </script>
 
-    <!-- AR LOGIC V67 -->
+    <!-- AR LOGIC V68 -->
     <script type="module">
         import * as THREE from 'three';
         import { MindARThree } from 'mindar-image-three';
@@ -413,12 +410,10 @@
                     if(!cartaDetectada) return;
                     ui.msg.innerText = cartaDetectada.nombre; 
                     
-                    // CAMBIO DE COLORES SCANNER
                     if(cartaDetectada.tipo === 'ARTEFACTO') ui.scanner.className = 'violeta';
                     else if(cartaDetectada.tipo === 'BUHO') ui.scanner.className = 'dorado';
                     else ui.scanner.className = 'verde';
 
-                    // CAMBIO DE COLORES BOTONES (V67)
                     actualizarEstiloBotones(cartaDetectada);
                 };
                 anchor.onTargetLost = () => { 
@@ -440,11 +435,11 @@
                     ui.videoAction.onerror = () => { console.log("Video missing: " + conf.video); };
                     ui.videoAction.play().catch(e => console.log("Play interrupted"));
 
-                    // MOSTRAR HUD
+                    // MOSTRAR HUD V68
                     const hud = document.getElementById('hud-derecho');
                     hud.style.display = 'flex';
                     document.getElementById('hud-img-escudo').src = RUTA_BASE + cartaDetectada.imgEscudo;
-                    document.getElementById('hud-txt-arma').innerText = cartaDetectada.arma;
+                    document.getElementById('hud-txt-arma').innerText = cartaDetectada.arma; // MUESTRA SICA
                     document.getElementById('hud-txt-accion').innerText = conf.label;
                     document.getElementById('hud-txt-valor').innerText = conf.valor;
 
