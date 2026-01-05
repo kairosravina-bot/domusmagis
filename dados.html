@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOMUS MAGI: ORÁCULO</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="p-dados" class="pantalla">
+        <h1 style="margin-bottom: 10px;">ORÁCULO</h1>
+        
+        <!-- VIDEO ARRIBA -->
+        <div class="dados-container">
+            <video id="video-dados-solo" class="video-dados" src="https://kairosravina-bot.github.io/domusmagis/Dados.mp4" playsinline webkit-playsinline muted></video>
+            <div id="layer-valor-solo" class="layer-valor">?</div>
+        </div>
+        
+        <!-- 4 BOTONES ABAJO -->
+        <h3 style="margin: 0; margin-top:10px; color:#888; font-size:14px;">SELECCIONA PODER:</h3>
+        
+        <div class="grid-dados">
+            <div class="btn-dado-sel" onclick="tirarDadosCustom(2)"><strong>2</strong><span>(12)</span></div>
+            <div class="btn-dado-sel" onclick="tirarDadosCustom(3)"><strong>3</strong><span>(18)</span></div>
+            <div class="btn-dado-sel" onclick="tirarDadosCustom(4)"><strong>4</strong><span>(24)</span></div>
+            <div class="btn-dado-sel" onclick="tirarDadosCustom(5)"><strong>5</strong><span>(30)</span></div>
+        </div>
+
+        <button class="btn-master" onclick="window.location.href='index.html'" style="background:#333; border-color:#555;">VOLVER AL MENÚ</button>
+    </div>
+
+    <script>
+        function tirarDadosCustom(cantidad) {
+            const vid = document.getElementById('video-dados-solo');
+            const layer = document.getElementById('layer-valor-solo');
+            layer.style.display = 'none'; vid.currentTime = 0; vid.play();
+            vid.onended = () => {
+                let total = 0;
+                for(let i=0; i<cantidad; i++) total += Math.floor(Math.random()*6)+1;
+                layer.innerText = total; layer.style.display = 'flex';
+            };
+        }
+    </script>
+</body>
+</html>
