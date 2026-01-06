@@ -1,20 +1,16 @@
 /* ==========================================================================
-   DOMUS MAGI: REVELATIONS (V77) - HOJA DE ESTILOS MAESTRA
+   DOMUS MAGI: REVELATIONS (V80) - ESTILO FINAL
    ========================================================================== */
-
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap');
 
 :root {
     --font-titulo: 'Cinzel', serif;
     --borde-dorado: #d4af37;
-    --texto-blanco: #ffffff;
-    --texto-violeta-claro: #e0b0ff; /* Violeta Lavanda Claro */
-    --texto-amarillo: #ffd700;
 }
 
 * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
 
-/* FONDO DE PARED GLOBAL PARA V77 */
+/* 1. FONDO DE PARED GLOBAL */
 body {
     margin: 0; padding: 0;
     font-family: var(--font-titulo);
@@ -25,68 +21,71 @@ body {
     height: 100vh; width: 100vw;
 }
 
-.oculto { display: none !important; }
-
-/* CONTENEDORES DE PANTALLA */
+/* 2. CONTENEDORES SEMI-TRANSPARENTES */
 .pantalla {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 20px; z-index: 100;
-    /* Fondo semitransparente oscuro para que el texto se lea sobre la piedra */
-    background: rgba(0, 0, 0, 0.7); 
+    background: rgba(0, 0, 0, 0.85); /* Se ve la piedra de fondo */
 }
 
-/* ESTILOS DE LETRA ESPECÍFICOS V77 (Botones Gemas) */
-.letra-grande {
-    font-size: 32px; font-weight: 900;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.9); /* Sombra fuerte para contraste */
-    font-family: var(--font-titulo); margin-top: -2px;
-}
+.oculto { display: none !important; }
 
-/* Colores solicitados */
-.texto-casa { color: var(--texto-blanco) !important; text-shadow: 0 0 5px rgba(255,255,255,0.5), 2px 2px 0 #000; }
-.texto-artefacto { color: var(--texto-violeta-claro) !important; text-shadow: 0 0 5px rgba(138, 43, 226, 0.8), 2px 2px 0 #000; }
-.texto-buho { color: var(--texto-amarillo) !important; text-shadow: 0 0 5px rgba(255, 215, 0, 0.6), 2px 2px 0 #000; }
-
-/* RESTO DE ESTILOS (Botones Master, Inputs, etc.) MANTENIDOS */
+/* 3. BOTONES DE MENÚ */
 .btn-master, .btn-jugar, .btn-info {
-    font-family: var(--font-titulo); font-weight: 700; font-size: 18px; text-transform: uppercase;
-    color: var(--borde-dorado); background: linear-gradient(to bottom, #3a3a3a, #1a1a1a);
-    border: 2px solid var(--borde-dorado); border-radius: 4px; padding: 15px 20px; margin: 10px 0;
+    font-family: var(--font-titulo); font-weight: 900; font-size: 18px; text-transform: uppercase;
+    color: var(--borde-dorado); background: linear-gradient(to bottom, #2a2a2a, #0a0a0a);
+    border: 2px solid var(--borde-dorado); border-radius: 6px; padding: 15px 20px; margin: 10px 0;
     width: 100%; max-width: 350px; cursor: pointer;
     box-shadow: 0 4px 0 #000; text-shadow: 1px 1px 0 #000;
 }
 .btn-master:active { transform: translateY(4px); box-shadow: 0 0 0 #000; background: #111; }
-.btn-jugar { font-size: 22px; border-color: #fff; background: linear-gradient(to bottom, #444, #222); }
-.btn-info { width: 50px; background: #222; border-color: #555; color: #888; }
-.fila-juego { display: flex; gap: 10px; width: 100%; max-width: 350px; justify-content: center; }
 
 input[type="text"] {
-    background: rgba(0, 0, 0, 0.6); border: none; border-bottom: 2px solid var(--borde-dorado);
+    background: rgba(0, 0, 0, 0.5); border: none; border-bottom: 2px solid var(--borde-dorado);
     color: #fff; font-family: var(--font-titulo); font-size: 24px; text-align: center;
     padding: 10px; width: 100%; margin-bottom: 20px; outline: none; text-transform: uppercase;
 }
-.grid-casas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-.btn-casa {
-    font-family: var(--font-titulo); font-weight: 900; color: #fff; padding: 20px 10px;
-    border: 2px solid #555; border-radius: 8px; font-size: 16px; cursor: pointer;
+
+/* 4. VALORES FLOTANTES (NUMEROS ARRIBA DE LOS BOTONES) */
+.fila-valores-flotantes {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* Debe coincidir con el gap de los botones */
+    width: 100%;
+    height: 40px;
+    margin-bottom: 5px;
+    pointer-events: none;
 }
 
-/* UI DADOS Y RESULTADOS */
-.dados-container {
-    position: relative; width: 250px; height: 250px; margin: 20px auto;
-    border: 4px solid var(--borde-dorado); border-radius: 50%; overflow: hidden; background: #000;
+.val-flotante {
+    width: 80px; /* Mismo ancho que el botón */
+    text-align: center;
+    font-family: var(--font-titulo);
+    font-size: 36px; /* Números grandes */
+    font-weight: 900;
+    opacity: 0; /* Oculto hasta que se enfoca carta */
+    transition: opacity 0.2s;
 }
-.video-dados { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-.layer-valor {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
-    font-size: 100px; font-weight: 900; color: #fff; text-shadow: 0 0 20px #f00; z-index: 10;
+
+/* COLORES FOSFORESCENTES (NEON) */
+/* Casas -> BLANCO */
+.neon-blanco { 
+    opacity: 1 !important; color: #fff; 
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 2px 2px 0 #000; 
 }
-.grid-dados { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
-.btn-dado-sel {
-    width: 60px; height: 70px; background: #222; border: 1px solid #444; border-radius: 5px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #666;
+/* Búho -> VIOLETA CLARO */
+.neon-violeta { 
+    opacity: 1 !important; color: #e0b0ff; 
+    text-shadow: 0 0 10px #e0b0ff, 0 0 20px #bf00ff, 2px 2px 0 #000; 
 }
-.btn-dado-sel.tageado { background: #400; border-color: #f00; color: #fff; transform: scale(1.1); }
-#seccion-historial { width: 100%; margin-top: 10px; border-top: 2px solid #555; padding: 10px; overflow-y: auto; max-height: 150px; }
-.item-historial { display: flex; justify-content: space-between; font-size: 14px; color: #aaa; border-bottom: 1px solid #333; padding: 5px 0; }
+/* Artefactos -> AMARILLO */
+.neon-amarillo { 
+    opacity: 1 !important; color: #ffd700; 
+    text-shadow: 0 0 10px #ffd700, 0 0 20px #ffaa00, 2px 2px 0 #000; 
+}
+
+
+/* 5. ESTILO RESULTADOS */
+#resultado-batalla { width:100%; background: url('BG_PERGAMINO.jpg') no-repeat center center; background-size: cover; color:#000; padding:20px; flex-grow:1; overflow-y:auto; border-radius:5px; border: 4px solid #5a3a22; }
+.ganador { border: 3px solid #d4af37; background: rgba(255, 215, 0, 0.1); }
