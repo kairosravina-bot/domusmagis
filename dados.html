@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: ORÁCULO V91</title>
+    <title>DOMUS MAGI: ORÁCULO V100</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body style="background: url('BG_PIEDRA.jpg') no-repeat center center fixed; background-size: cover;">
@@ -17,10 +17,12 @@
                 <div id="layer-valor-solo" class="layer-valor" style="display:none;">0</div>
             </div>
 
+            <!-- GRID REPARADA: AHORA TIENE 5D -->
             <div class="grid-dados" style="margin: 20px auto;">
                 <div class="btn-dado-sel" id="btn-solo-2" onclick="tirarDados(2)"><strong>2D</strong></div>
                 <div class="btn-dado-sel" id="btn-solo-3" onclick="tirarDados(3)"><strong>3D</strong></div>
                 <div class="btn-dado-sel" id="btn-solo-4" onclick="tirarDados(4)"><strong>4D</strong></div>
+                <div class="btn-dado-sel" id="btn-solo-5" onclick="tirarDados(5)"><strong>5D</strong></div>
             </div>
 
             <button class="btn-master" style="margin-top:20px; background:#333;" onclick="window.location.href='index.html'">VOLVER</button>
@@ -29,8 +31,8 @@
 
     <script>
         function tirarDados(n) {
-            // Reset visual
-            [2,3,4].forEach(i => document.getElementById('btn-solo-'+i).classList.remove('tageado'));
+            // Reset visual (Incluye el 5 ahora)
+            [2,3,4,5].forEach(i => document.getElementById('btn-solo-'+i).classList.remove('tageado'));
             document.getElementById('btn-solo-'+n).classList.add('tageado');
 
             const vid = document.getElementById('video-dados-solo');
