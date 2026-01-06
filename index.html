@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V91: MENU</title>
+    <title>DOMUS MAGI V81: MENU</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body style="background: url('BG_PIEDRA.jpg') no-repeat center center fixed; background-size: cover;">
+<body>
     <!-- PANTALLA DE INICIO -->
     <div id="p-inicio" class="pantalla">
         <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
             <div>
                 <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V91</p>
+                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V81</p>
             </div>
             <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTRAR AL GRIMORIO</button>
         </div>
@@ -24,7 +24,7 @@
         
         <div class="fila-juego">
             <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TÁCTICO</button>
-            <button class="btn-info" onclick="alert('Modo V91: White Screen & Buttons Fix.')">?</button>
+            <button class="btn-info" onclick="alert('Modo V81: Neon Values & Stone Background. Modular Core.')">?</button>
         </div>
         
         <div class="fila-juego">
@@ -40,4 +40,12 @@
         function entrarGrimorio() {
             document.getElementById('p-inicio').classList.add('oculto');
             document.getElementById('p-menu-principal').classList.remove('oculto');
-            const v = document.getElementById('
+            const v = document.getElementById('intro-video');
+            if(v) { 
+                v.muted = false; 
+                v.play().catch(e => console.log("Auto-play blocked by browser policy")); 
+            }
+        }
+    </script>
+</body>
+</html>
