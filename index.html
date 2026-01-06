@@ -3,42 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V76: MENU</title>
+    <title>DOMUS MAGI V77: MENU</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* APLICA FONDO PIEDRA TAMBIÉN AL MENÚ */
-        body {
-            background: url('BG_PIEDRA.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: #e0e0e0;
-        }
-    </style>
 </head>
 <body>
+    <!-- PANTALLA 1: PORTADA -->
     <div id="p-inicio" class="pantalla">
         <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
             <div>
                 <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V76</p>
+                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V77</p>
             </div>
             <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTRAR AL GRIMORIO</button>
         </div>
     </div>
 
+    <!-- PANTALLA 2: MENÚ PRINCIPAL -->
     <div id="p-menu-principal" class="pantalla oculto">
-        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
+        <!-- VIDEO INTRODUCTORIO (Decorative) -->
+        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; max-width: 400px; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.9; box-shadow: 0 0 20px rgba(0,0,0,0.8);"></video>
         
+        <!-- BOTON DUELO -->
         <div class="fila-juego">
             <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TÁCTICO</button>
-            <button class="btn-info" onclick="alert('Modo V76: Integration de Arte Final (Fondos BG_PIEDRA/PERGAMINO y GEMAS PNG).')">?</button>
+            <button class="btn-info" onclick="alert('Sistema V77 Activo:\nFondo de Piedra Global.\nLetras de Gemas corregidas (Blanco/Violeta/Amarillo).')">?</button>
         </div>
         
+        <!-- BOTON MISIONES -->
         <div class="fila-juego">
-            <button class="btn-jugar" style="background:#222; border-color:#555;" onclick="window.location.href='misiones.html'">🦉 MISIONES (WIP)</button>
+            <button class="btn-jugar" style="background: linear-gradient(to bottom, #222, #111); border-color:#555;" onclick="window.location.href='misiones.html'">🦉 MISIONES</button>
         </div>
         
+        <!-- BOTON DADOS -->
         <div class="fila-juego">
-            <button class="btn-jugar" style="background:#333; border-color:#555;" onclick="window.location.href='dados.html'">🎲 ORÁCULO (SOLO)</button>
+            <button class="btn-jugar" style="background: linear-gradient(to bottom, #333, #000); border-color:#555;" onclick="window.location.href='dados.html'">🎲 ORÁCULO</button>
         </div>
     </div>
 
@@ -46,10 +44,16 @@
         function entrarGrimorio() {
             document.getElementById('p-inicio').classList.add('oculto');
             document.getElementById('p-menu-principal').classList.remove('oculto');
+            
+            // Intentar reproducir video con sonido al entrar
             const v = document.getElementById('intro-video');
             if(v) { 
                 v.muted = false; 
-                v.play().catch(e => console.log("Auto-play blocked by browser policy")); 
+                v.play().catch(e => {
+                    console.log("Autoplay bloqueado, intentando muted");
+                    v.muted = true;
+                    v.play();
+                }); 
             }
         }
     </script>
