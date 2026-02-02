@@ -1,4 +1,4 @@
-// ojo.js - MODULO DE REALIDAD AUMENTADA (MindAR + Three)
+// ojo.js - MODULO DE REALIDAD AUMENTADA (MindAR + Three) V100
 import * as THREE from 'three';
 import { MindARThree } from 'mindar-image-three';
 import { RUTA_BASE } from './biblioteca.js';
@@ -11,11 +11,11 @@ let mindarThree = null;
 export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
     if (mindarThree) return; // Evitar doble inicio
 
-    console.log("Iniciando OJO DE DOMUS MAGI...");
+    console.log("Iniciando OJO DE DOMUS MAGI (108 CARTAS)...");
 
     mindarThree = new MindARThree({
         container: document.getElementById(containerId),
-        imageTargetSrc: RUTA_BASE + 'targets1.mind', // Archivo .mind universal
+        imageTargetSrc: RUTA_BASE + 'targets1.mind', // Archivo .mind universal con las 108 cartas
         maxTrack: 1,
         uiLoading: "no",
         uiScanning: "no",
@@ -24,8 +24,8 @@ export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
 
     const { renderer, scene, camera } = mindarThree;
 
-    // Crear anclas invisibles para los IDs del 0 al 9
-    for (let i = 0; i < 10; i++) {
+    // Crear anclas invisibles para los IDs del 0 al 107
+    for (let i = 0; i < 108; i++) {
         const anchor = mindarThree.addAnchor(i);
         // Plano invisible para ayudar al tracking
         const geometry = new THREE.PlaneGeometry(1, 1);
