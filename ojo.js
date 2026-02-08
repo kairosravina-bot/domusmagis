@@ -1,54 +1,51 @@
-// ojo.js - MODULO DE REALIDAD AUMENTADA (MindAR + Three) V100
-import * as THREE from 'three';
-import { MindARThree } from 'mindar-image-three';
-import { RUTA_BASE } from './biblioteca.js';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOMUS MAGI V001: MENU</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- PANTALLA DE INICIO -->
+    <div id="p-inicio" class="pantalla">
+        <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
+            <div>
+                <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
+                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V.001 (INICIO NUEVO)</p>
+            </div>
+            <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTRAR AL GRIMORIO</button>
+        </div>
+    </div>
 
-let mindarThree = null;
+    <!-- MENÚ PRINCIPAL -->
+    <div id="p-menu-principal" class="pantalla oculto">
+        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
+        
+        <div class="fila-juego">
+            <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TÁCTICO</button>
+            <button class="btn-info" onclick="alert('Modo V.001: First Blood (58 Cartas). Neon Values & Stone Background.')">?</button>
+        </div>
+        
+        <div class="fila-juego">
+            <button class="btn-jugar" style="background:#222; border-color:#555;" onclick="window.location.href='misiones.html'">🦉 MISIONES (WIP)</button>
+        </div>
+        
+        <div class="fila-juego">
+            <button class="btn-jugar" style="background:#333; border-color:#555;" onclick="window.location.href='dados.html'">🎲 ORÁCULO (SOLO)</button>
+        </div>
+    </div>
 
-// Esta función inicia la cámara y recibe dos funciones del juego:
-// onEncontrado(id) -> Qué hacer cuando ve una carta
-// onPerdido()      -> Qué hacer cuando la pierde
-export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
-    if (mindarThree) return; // Evitar doble inicio
-
-    console.log("Iniciando OJO DE DOMUS MAGI (108 CARTAS)...");
-
-    mindarThree = new MindARThree({
-        container: document.getElementById(containerId),
-        imageTargetSrc: RUTA_BASE + 'targets1.mind', // Archivo .mind universal con las 108 cartas
-        maxTrack: 1,
-        uiLoading: "no",
-        uiScanning: "no",
-        uiError: "no"
-    });
-
-    const { renderer, scene, camera } = mindarThree;
-
-    // Crear anclas invisibles para los IDs del 0 al 107
-    for (let i = 0; i < 108; i++) {
-        const anchor = mindarThree.addAnchor(i);
-        // Plano invisible para ayudar al tracking
-        const geometry = new THREE.PlaneGeometry(1, 1);
-        const material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
-        const plane = new THREE.Mesh(geometry, material);
-        anchor.group.add(plane);
-
-        // Eventos
-        anchor.onTargetFound = () => {
-            console.log("OJO: Detectado ID " + i);
-            onEncontrado(i);
-        };
-
-        anchor.onTargetLost = () => {
-            console.log("OJO: Perdido ID " + i);
-            onPerdido();
-        };
-    }
-
-    await mindarThree.start();
-    
-    // Bucle de renderizado
-    renderer.setAnimationLoop(() => {
-        renderer.render(scene, camera);
-    });
-}
+    <script>
+        function entrarGrimorio() {
+            document.getElementById('p-inicio').classList.add('oculto');
+            document.getElementById('p-menu-principal').classList.remove('oculto');
+            const v = document.getElementById('intro-video');
+            if(v) { 
+                v.muted = false; 
+                v.play().catch(e => console.log("Auto-play blocked by browser policy")); 
+            }
+        }
+    </script>
+</body>
+</html>
