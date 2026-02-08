@@ -1,0 +1,8 @@
+
+{
+  "name": "Domus Magi Mobile",
+  "description": "Juego de Cartas AR Ver.001",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
