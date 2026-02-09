@@ -3,48 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V101: MENU</title>
+    <title>DOMUS MAGI V101: REVELATIONS</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Refuerzo de estilo para el fondo global en el index */
+        body {
+            background: url('BG_PIEDRA.jpg') no-repeat center center fixed;
+            background-size: cover;
+            background-color: #1a1a1a;
+        }
+    </style>
 </head>
 <body>
-    <!-- PANTALLA DE INICIO -->
+
+    <!-- PANTALLA 1: ENTRADA AL GRIMORIO -->
     <div id="p-inicio" class="pantalla">
         <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
-            <div>
-                <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V100</p>
+            <div style="text-align:center;">
+                <h1 style="font-size: 65px; line-height:1; color: #d4af37; margin-bottom: 5px; text-shadow: 0 0 15px rgba(0,0,0,0.8);">DOMUS<br><span style="color:#ffffff;">MAGI</span></h1>
+                <p style="letter-spacing:6px; color:#00ff00; font-size: 16px; font-weight:900; text-shadow:0 0 10px #00ff00;">REVELATIONS V101</p>
             </div>
-            <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTRAR AL GRIMORIO</button>
+            
+            <button class="btn-master" style="width: 300px; border-color: #fff; background: linear-gradient(to bottom, #600, #200); box-shadow: 0 0 20px rgba(255,0,0,0.3);" onclick="entrarGrimorio()">
+                ENTRAR AL GRIMORIO
+            </button>
         </div>
     </div>
 
-    <!-- MENÚ PRINCIPAL -->
-    <div id="p-menu-principal" class="pantalla oculto">
-        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TÁCTICO</button>
-            <button class="btn-info" onclick="alert('Modo V100: Final Release. Neon Values & Stone Background.')">?</button>
-        </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#222; border-color:#555;" onclick="window.location.href='misiones.html'">🦉 MISIONES (WIP)</button>
-        </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#333; border-color:#555;" onclick="window.location.href='dados.html'">🎲 ORÁCULO (SOLO)</button>
+    <!-- PANTALLA 2: MENÚ PRINCIPAL -->
+    <div id="p-menu-principal" class="pantalla oculto" style="background: rgba(0,0,0,0.4);">
+        <div style="width:100%; max-width:400px; display:flex; flex-direction:column; align-items:center;">
+            
+            <!-- Video de Presentación -->
+            <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:3px solid #d4af37; border-radius:12px; margin-bottom:25px; box-shadow: 0 0 15px gold;"></video>
+            
+            <div class="fila-juego">
+                <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TÁCTICO</button>
+                <button class="btn-info" onclick="mostrarInfo()">?</button>
+            </div>
+            
+            <div class="fila-juego">
+                <button class="btn-jugar" style="background: linear-gradient(to bottom, #222, #000); color:#888; border-color:#444;" onclick="alert('Próximamente en V102')">🦉 MISIONES (WIP)</button>
+            </div>
+            
+            <div class="fila-juego">
+                <button class="btn-jugar" style="background: linear-gradient(to bottom, #333, #111); border-color:#d4af37;" onclick="window.location.href='dados.html'">🎲 ORÁCULO</button>
+            </div>
+
+            <p style="margin-top:20px; color:rgba(255,255,255,0.4); font-size:12px;">DOMUS MAGI © 2026 - SOLO DEV</p>
         </div>
     </div>
 
     <script>
+        // Función para pasar de la portada al menú
         function entrarGrimorio() {
             document.getElementById('p-inicio').classList.add('oculto');
             document.getElementById('p-menu-principal').classList.remove('oculto');
+            
             const v = document.getElementById('intro-video');
             if(v) { 
                 v.muted = false; 
-                v.play().catch(e => console.log("Auto-play blocked by browser policy")); 
+                v.play().catch(function(error) {
+                    console.log("Auto-play prevenido por el navegador, requiere interacción.");
+                }); 
             }
+        }
+
+        function mostrarInfo() {
+            alert("DOMUS MAGI V101\n\n- Sistema de 56 cartas corregido.\n- IDs 001 al 098 sincronizados.\n- Motor de Realidad Aumentada Revelations.");
         }
     </script>
 </body>
