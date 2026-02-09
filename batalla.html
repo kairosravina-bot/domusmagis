@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: BATALLA</title>
+    <title>DOMUS MAGI: BATALLA V111</title>
     <link rel="stylesheet" href="style.css">
     <script type="importmap">
     { "imports": { 
@@ -15,64 +15,100 @@
 <body>
     <div id="container-ar"></div>
 
-    <!-- SETUP PANTALLA PRINCIPAL -->
-    <div id="p-setup" class="pantalla" style="background:rgba(0,0,0,0.85); z-index: 10000;">
-        <h2 style="color: gold; font-size: 30px;">INSCRIPCION</h2>
-        
-        <!-- SELECTOR 2 O 4 MAGOS -->
-        <div id="setup-selector" style="display:flex; gap:10px; width:100%; max-width: 350px;">
-            <button class="btn-master" id="btn-2magos" style="flex: 1;">2 MAGOS</button>
-            <button class="btn-master" id="btn-4magos" style="flex: 1;">4 MAGOS</button>
-        </div>
-        
-        <!-- FORMULARIO REGISTRO MAGOS (OCULTO AL INICIO) -->
-        <div id="registro" style="width:100%; max-width: 350px; display: none;">
-            <input type="text" id="mago-nombre" placeholder="NOMBRE DEL MAGO">
-            <div class="grid-casas">
-                <button id="btn-terra" class="btn-casa" style="background:#500; border-color:#f00;">⚔️ TERRA</button>
-                <button id="btn-caelum" class="btn-casa" style="background:#003; border-color:#0af;">⚡ CAELUM</button>
-                <button id="btn-aqua" class="btn-casa" style="background:#030; border-color:#0f8;">💧 AQUA</button>
-                <button id="btn-dimensio" class="btn-casa" style="background:#303; border-color:#d0f;">✨ DIMENSIO</button>
+    <!-- SETUP -->
+    <div id="p-setup" class="pantalla pantalla-setup" style="background:rgba(0,0,0,0.95); z-index: 10000;">
+        <div class="contenedor-setup">
+            <h2 style="color: gold; font-size: 48px; margin-bottom: 10px; text-shadow: 0 0 20px gold;">INSCRIPCION</h2>
+            <p style="color: #aaa; font-size: 14px; margin-bottom: 30px; letter-spacing: 2px;">ELIGE MODO DE JUEGO</p>
+            
+            <div id="setup-selector" style="display:flex; gap:15px; width:100%; max-width: 350px; margin-bottom: 30px;">
+                <button class="btn-master btn-modo" onclick="window.setModo(2)" style="flex: 1;">
+                    <span style="font-size: 24px;">⚔️</span><br>2 MAGOS
+                </button>
+                <button class="btn-master btn-modo" onclick="window.setModo(4)" style="flex: 1;">
+                    <span style="font-size: 24px;">👥</span><br>4 MAGOS
+                </button>
             </div>
-            <p id="reg-status" style="color:gold; text-align:center; margin-top:10px; font-weight:bold;"></p>
+
+            <div id="registro" class="oculto" style="width:100%; max-width: 350px;">
+                <div style="background: rgba(212, 175, 55, 0.1); border-left: 3px solid gold; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
+                    <p id="contador-magos" style="color: gold; font-size: 14px; margin: 0; text-transform: uppercase; letter-spacing: 2px;">MAGO 1 DE 2</p>
+                </div>
+
+                <input type="text" id="mago-nombre" placeholder="NOMBRE DEL MAGO" maxlength="20">
+                
+                <p style="color: #aaa; font-size: 12px; margin: 15px 0 10px 0; text-transform: uppercase; letter-spacing: 1px;">SELECCIONA TU CASA</p>
+                <div class="grid-casas">
+                    <button onclick="window.registrarMago('TERRA','#ff0000')" class="btn-casa btn-casa-tierra">
+                        <span style="font-size: 32px;">⚔️</span> TERRA
+                    </button>
+                    <button onclick="window.registrarMago('CAELUM','#00aaff')" class="btn-casa btn-casa-cielo">
+                        <span style="font-size: 32px;">⚡</span> CAELUM
+                    </button>
+                    <button onclick="window.registrarMago('AQUA','#00ff88')" class="btn-casa btn-casa-agua">
+                        <span style="font-size: 32px;">💧</span> AQUA
+                    </button>
+                    <button onclick="window.registrarMago('DIMENSIO','#aa00ff')" class="btn-casa btn-casa-magia">
+                        <span style="font-size: 32px;">✨</span> DIMENSIO
+                    </button>
+                </div>
+                
+                <p id="reg-status" style="color:gold; text-align:center; margin-top:20px; font-weight:bold; font-size: 16px; letter-spacing: 1px;"></p>
+            </div>
+
+            <button class="btn-master" style="margin-top:30px; background:#333; border-color: #777; width:100%; max-width: 350px;" onclick="window.location.href='index.html'">⬅️ VOLVER</button>
         </div>
-        
-        <!-- BOTON VOLVER -->
-        <button class="btn-master" style="margin-top:20px; background:#333; border-color: #777;" id="btn-volver">VOLVER</button>
     </div>
 
-    <!-- UI JUEGO (OCULTA AL INICIO) -->
-    <div id="ui-juego" class="pantalla" style="display: none;">
+    <!-- UI JUEGO -->
+    <div id="ui-juego" class="oculto">
         <div id="zona-superior">
-            <!-- CODIGO TARGET EN CENTRO SUPERIOR -->
-            <div id="codigo-target" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 15; background: rgba(0,0,0,0.95); color: #ffffff; padding: 20px 40px; border: 4px solid #ffffff; border-radius: 10px; font-size: 32px; font-weight: 900; font-family: 'Courier New', monospace; letter-spacing: 3px; text-shadow: 0 0 20px rgba(255, 255, 255, 0.6); min-width: 500px; text-align: center; box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);">BUSCANDO...</div>
+            <!-- CODIGO TARGET EN CENTRO SUPERIOR - NUEVO -->
+            <div id="codigo-target" style="position: absolute; top: 30px; left: 50%; transform: translateX(-50%); z-index: 20; background: rgba(0,0,0,0.9); color: #ffffff; padding: 15px 35px; border: 3px solid #ffffff; border-radius: 8px; font-size: 26px; font-weight: 900; font-family: 'Courier New', monospace; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255, 255, 255, 0.5); box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);">BUSCANDO...</div>
 
-            <!-- TURNO ARRIBA IZQUIERDA -->
-            <div id="txt-turno" style="position: absolute; top: 15px; left: 15px; z-index: 14; background: rgba(0,0,0,0.8); color: gold; padding: 10px; border: 2px solid gold;">TURNO: ---</div>
-
-            <!-- HUD DERECHA -->
-            <div id="hud-derecho" style="position: absolute; top: 10px; right: 10px; z-index: 9999; display: none; flex-direction: column; align-items: flex-end; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 1px solid gold;">
-                <img id="hud-img-escudo" src="" style="width: 90px; height: 90px; object-fit: contain;">
-                <div style="font-size: 16px; color: gold;">ARMA</div>
-                <div id="hud-txt-accion" style="font-size: 24px; color: gold; font-weight: 900;">ACCION</div>
-                <div id="hud-txt-valor" style="font-size: 60px; color: white; line-height: 1; text-shadow: 0 0 10px #bf00ff;">00</div>
+            <div id="txt-turno" style="position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(0,0,0,0.8); color: gold; padding: 10px; border: 2px solid gold; border-radius: 5px;">TURNO: ---</div>
+            
+            <div id="hud-derecho">
+                <img id="hud-img-escudo" src="">
+                <div id="hud-txt-arma">ARMA</div>
+                <div id="hud-txt-accion">ACCION</div>
+                <div id="hud-txt-valor">00</div>
             </div>
-
-            <div id="guia-scanner" style="width: 240px; height: 240px; border: 6px solid rgba(255,255,255,0.4); border-radius: 20px;"></div>
-            <video id="video-action" playsinline style="position:absolute; width:100%; height:100%; display:none; background:black; z-index:50; object-fit:contain;"></video>
+            <div id="guia-scanner"></div>
+            <video id="video-action" playsinline></video>
         </div>
 
         <div id="zona-inferior">
             <div id="msg-visor" style="font-size:26px; color:var(--borde-dorado); font-weight:900;">ESCANEA CARTA</div>
-            <p style="color:#aaa; margin:0;">SLOT: <span id="slot-indicator" style="color:gold;">1/3</span></p>
+            <p style="color:#aaa; margin:0; font-size: 12px;">SLOT: <span id="slot-indicator" style="color:gold;">1/3</span> | JUGADOR: <span id="jugador-actual" style="color:gold;">---</span></p>
             
             <div class="contenedor-gemas">
-                <div class="wrapper-gema"><span id="val-i" class="valor-flotante"></span><button id="btn-i" class="btn-gema"><span class="letra-grande">I</span></button></div>
-                <div class="wrapper-gema"><span id="val-a" class="valor-flotante"></span><button id="btn-a" class="btn-gema"><span class="letra-grande">A</span></button></div>
-                <div class="wrapper-gema"><span id="val-t" class="valor-flotante"></span><button id="btn-t" class="btn-gema"><span class="letra-grande">T</span></button></div>
-                <div class="wrapper-gema"><span id="val-m" class="valor-flotante"></span><button id="btn-m" class="btn-gema"><span class="letra-grande">M</span></button></div>
+                <div class="wrapper-gema">
+                    <span id="val-i" class="valor-flotante"></span>
+                    <button id="btn-i" class="btn-gema" title="IMPETUS">
+                        <span class="letra-grande">I</span>
+                    </button>
+                </div>
+                <div class="wrapper-gema">
+                    <span id="val-a" class="valor-flotante"></span>
+                    <button id="btn-a" class="btn-gema" title="AUXILIUM">
+                        <span class="letra-grande">A</span>
+                    </button>
+                </div>
+                <div class="wrapper-gema">
+                    <span id="val-t" class="valor-flotante"></span>
+                    <button id="btn-t" class="btn-gema" title="TUTELA">
+                        <span class="letra-grande">T</span>
+                    </button>
+                </div>
+                <div class="wrapper-gema">
+                    <span id="val-m" class="valor-flotante"></span>
+                    <button id="btn-m" class="btn-gema" title="MYSTERIUM">
+                        <span class="letra-grande">M</span>
+                    </button>
+                </div>
             </div>
-            <button id="btn-confirmar" class="btn-master" style="background:#050; border-color:#0f0;">✔ CONFIRMAR</button>
+            <button id="btn-confirmar" class="btn-master" style="background:#050; border-color:#0f0; width:100%; max-width: 350px;">✔ CONFIRMAR</button>
         </div>
     </div>
 
@@ -80,134 +116,146 @@
         import { CARTAS, RUTA_BASE } from './biblioteca.js';
         import { iniciarOjo } from './ojo.js';
 
-        let jugadores = [];
-        let cantJugadores = 0;
-        let slotActual = 0;
-        let turnoJugadorIdx = 0;
-        let cartaActual = null;
-        let jugadaPendiente = null;
+        let jugadores = [], cantJugadores = 0, slotActual = 0, turnoJugadorIdx = 0;
+        let cartaActual = null, jugadaPendiente = null;
 
-        // ===== BOTONES 2 Y 4 MAGOS =====
-        document.getElementById('btn-2magos').addEventListener('click', function() {
-            console.log('✅ 2 MAGOS seleccionado');
-            cantJugadores = 2;
-            document.getElementById('setup-selector').style.display = 'none';
-            document.getElementById('registro').style.display = 'block';
-            document.getElementById('reg-status').innerText = 'Mago 1 de 2';
-            document.getElementById('mago-nombre').focus();
-        });
-
-        document.getElementById('btn-4magos').addEventListener('click', function() {
-            console.log('✅ 4 MAGOS seleccionado');
-            cantJugadores = 4;
-            document.getElementById('setup-selector').style.display = 'none';
-            document.getElementById('registro').style.display = 'block';
-            document.getElementById('reg-status').innerText = 'Mago 1 de 4';
-            document.getElementById('mago-nombre').focus();
-        });
-
-        // ===== BOTONES CASAS =====
-        document.getElementById('btn-terra').addEventListener('click', () => registrarMago('TERRA', '#ff0000'));
-        document.getElementById('btn-caelum').addEventListener('click', () => registrarMago('CAELUM', '#00aaff'));
-        document.getElementById('btn-aqua').addEventListener('click', () => registrarMago('AQUA', '#00ff88'));
-        document.getElementById('btn-dimensio').addEventListener('click', () => registrarMago('DIMENSIO', '#aa00ff'));
-
-        // ===== BOTON VOLVER =====
-        document.getElementById('btn-volver').addEventListener('click', () => {
-            window.location.href = 'index.html';
-        });
-
-        // ===== REGISTRAR MAGO =====
-        function registrarMago(casa, col) {
-            if (cantJugadores === 0) {
-                alert('Primero selecciona 2 o 4 magos');
-                return;
-            }
-
-            const nombre = document.getElementById('mago-nombre').value.trim() || `MAGO ${jugadores.length + 1}`;
+        window.setModo = function(n) {
+            console.log("🎮 setModo(" + n + ") llamado");
+            cantJugadores = n;
+            const selector = document.getElementById('setup-selector');
+            const registro = document.getElementById('registro');
+            const contador = document.getElementById('contador-magos');
             
-            jugadores.push({nombre, casa, color: col, slots: [null, null, null]});
-            console.log(`✅ ${nombre} (${casa}) registrado - ${jugadores.length}/${cantJugadores}`);
+            if (selector) selector.classList.add('oculto');
+            if (registro) registro.classList.remove('oculto');
+            if (contador) contador.innerText = 'MAGO 1 DE ' + n;
+            
+            console.log("✅ Modo " + n + " activado");
+        };
 
-            document.getElementById('mago-nombre').value = '';
-            document.getElementById('mago-nombre').focus();
-
-            if (jugadores.length === cantJugadores) {
-                console.log('✅✅✅ INICIANDO JUEGO');
-                iniciarJuego();
-            } else {
-                document.getElementById('reg-status').innerText = `Mago ${jugadores.length + 1} de ${cantJugadores}`;
+        window.registrarMago = function(casa, col) {
+            console.log("👤 registrarMago(" + casa + ") llamado");
+            const nombreInput = document.getElementById('mago-nombre');
+            let nombre = nombreInput.value.trim() || "MAGO " + (jugadores.length + 1);
+            
+            jugadores.push({ 
+                nombre: nombre, 
+                casa: casa,
+                color: col, 
+                slots: [null, null, null], 
+                dado: 0 
+            });
+            
+            nombreInput.value = '';
+            
+            console.log("✅ Mago registrado: " + nombre + " (" + casa + ")");
+            console.log("📊 Total: " + jugadores.length + "/" + cantJugadores);
+            
+            if(jugadores.length === cantJugadores) { 
+                console.log("✅✅✅ INICIANDO JUEGO");
+                setTimeout(() => iniciarJuego(), 300);
+            } else { 
+                const contador = document.getElementById('contador-magos');
+                if (contador) contador.innerText = 'MAGO ' + (jugadores.length + 1) + ' DE ' + cantJugadores;
+                nombreInput.focus();
             }
-        }
+        };
 
-        // ===== INICIAR JUEGO =====
         function iniciarJuego() {
-            document.getElementById('p-setup').style.display = 'none';
-            document.getElementById('ui-juego').style.display = 'flex';
-            console.log('✅ Juego iniciado');
+            console.log("🚀 iniciarJuego()");
+            document.getElementById('p-setup').classList.add('oculto');
+            document.getElementById('ui-juego').classList.remove('oculto');
 
             iniciarOjo('container-ar', (id) => {
                 cartaActual = CARTAS[id];
                 document.getElementById('msg-visor').innerText = cartaActual.nombre;
-                document.getElementById('codigo-target').innerText = cartaActual.codTarget;
-                document.getElementById('codigo-target').style.borderColor = '#00d7ff';
+                
+                // MOSTRAR CODIGO TARGET
+                const codigoDiv = document.getElementById('codigo-target');
+                if (codigoDiv) {
+                    codigoDiv.innerText = cartaActual.codTarget;
+                    codigoDiv.style.color = '#00ffff';
+                    codigoDiv.style.textShadow = '0 0 15px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 215, 255, 0.5)';
+                    codigoDiv.style.borderColor = '#00ffff';
+                }
+                
                 actualizarEstiloBotones(cartaActual);
             }, () => {
                 cartaActual = null;
                 document.getElementById('msg-visor').innerText = "BUSCANDO...";
-                document.getElementById('codigo-target').innerText = "BUSCANDO...";
+                const codigoDiv = document.getElementById('codigo-target');
+                if (codigoDiv) {
+                    codigoDiv.innerText = "BUSCANDO...";
+                    codigoDiv.style.color = '#ffffff';
+                    codigoDiv.style.borderColor = '#ffffff';
+                }
                 document.getElementById('hud-derecho').style.display = 'none';
             });
-
+            
             actualizarTurnoUI();
         }
 
         function actualizarTurnoUI() {
+            if (jugadores.length === 0) return;
+            
             const j = jugadores[turnoJugadorIdx];
-            document.getElementById('txt-turno').innerText = "TURNO: " + j.nombre;
-            document.getElementById('txt-turno').style.color = j.color;
-            document.getElementById('txt-turno').style.borderColor = j.color;
-            document.getElementById('slot-indicator').innerText = `${slotActual + 1} / 3`;
+            const txt = document.getElementById('txt-turno');
+            txt.innerText = "TURNO: " + j.nombre;
+            txt.style.color = j.color;
+            txt.style.borderColor = j.color;
+
+            const jugadorActual = document.getElementById('jugador-actual');
+            if (jugadorActual) {
+                jugadorActual.innerText = j.nombre;
+                jugadorActual.style.color = j.color;
+            }
+            
+            const indicator = document.getElementById('slot-indicator');
+            if (indicator) indicator.innerText = (slotActual + 1) + " / 3";
         }
 
         function actualizarEstiloBotones(carta) {
             ['i','a','t','m'].forEach(l => {
                 const conf = carta.botones['btn-'+l];
-                document.getElementById('val-'+l).innerText = conf.valor;
+                const vSpan = document.getElementById('val-'+l);
+                vSpan.innerText = conf.valor;
             });
         }
 
-        // ===== BOTONES GEMAS (I, A, T, M) =====
         ['i','a','t','m'].forEach(l => {
             document.getElementById('btn-'+l).addEventListener('click', function() {
                 if (!cartaActual) return;
 
                 const conf = cartaActual.botones['btn-'+l];
                 const vid = document.getElementById('video-action');
+                let vidEspecifico = cartaActual['mp4'+l.toUpperCase()];
                 
                 vid.style.display = 'block';
-                vid.src = RUTA_BASE + cartaActual['mp4'+l.toUpperCase()];
+                vid.src = RUTA_BASE + vidEspecifico;
                 vid.play().catch(() => {
                     vid.src = RUTA_BASE + conf.video;
                     vid.play();
                 });
 
-                jugadaPendiente = { carta: cartaActual, valor: conf.valor, lado: conf.label };
-
+                jugadaPendiente = { 
+                    carta: cartaActual, 
+                    valor: conf.valor, 
+                    lado: conf.label 
+                };
+                
                 const hud = document.getElementById('hud-derecho');
                 hud.style.display = 'flex';
                 document.getElementById('hud-img-escudo').src = RUTA_BASE + cartaActual.imgEscudo;
                 document.getElementById('hud-txt-accion').innerText = conf.label;
                 document.getElementById('hud-txt-valor').innerText = conf.valor;
                 
-                vid.onended = () => {
-                    vid.style.display = 'none';
-                    hud.style.display = 'none';
+                vid.onended = () => { 
+                    vid.style.display = 'none'; 
+                    hud.style.display = 'none'; 
                 };
             });
         });
 
-        // ===== BOTON CONFIRMAR =====
         document.getElementById('btn-confirmar').addEventListener('click', function() {
             if (!jugadaPendiente) {
                 alert('Selecciona una acción primero');
@@ -217,21 +265,21 @@
             jugadores[turnoJugadorIdx].slots[slotActual] = jugadaPendiente;
             jugadaPendiente = null;
             turnoJugadorIdx++;
-
-            if (turnoJugadorIdx >= cantJugadores) {
-                turnoJugadorIdx = 0;
+            
+            if(turnoJugadorIdx >= cantJugadores) { 
+                turnoJugadorIdx = 0; 
                 slotActual++;
             }
-
-            if (slotActual >= 3) {
+            
+            if(slotActual >= 3) { 
                 alert("BATALLA COMPLETADA");
                 location.reload();
-            } else {
-                actualizarTurnoUI();
+            } else { 
+                actualizarTurnoUI(); 
             }
         });
 
-        console.log('✅ BATALLA CARGADA');
+        console.log("✅ BATALLA V111 + CODIGO TARGET CARGADA");
     </script>
 </body>
 </html>
