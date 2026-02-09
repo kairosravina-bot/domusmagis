@@ -15,33 +15,26 @@
     } }
     </script>
     <style>
-        #display-codigo {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            color: #00ff00;
-            font-size: 72px;
+        #display-codigo-scan {
+            font-size: 48px;
             font-weight: 900;
-            padding: 30px 50px;
-            border: 4px solid #00ff00;
-            border-radius: 10px;
-            z-index: 10000;
-            display: none;
-            font-family: 'Courier New', monospace;
-            text-shadow: 0 0 20px #00ff00;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            color: #00ff00;
+            text-shadow: 0 0 15px #00ff00;
             text-align: center;
-            min-width: 300px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #00ff00;
+            padding: 10px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <div id="container-ar"></div>
-    
-    <!-- DISPLAY CÓDIGO DETECTADO (ENCIMA DE TODO) -->
-    <div id="display-codigo"></div>
 
     <!-- MODAL FASE DE DADOS EN BATALLA -->
     <div id="modal-dados-fase" class="pantalla oculto" style="z-index:9500; background:rgba(0,0,0,0.85);">
@@ -121,6 +114,9 @@
             <div id="msg-visor" style="font-size:26px; color:var(--borde-dorado); font-weight:900;">ESCANEA CARTA</div>
             <p style="color:#aaa; font-size:20px; margin:0;">SLOT: <span id="slot-indicator" style="color:gold;">1/3</span></p>
             
+            <!-- DISPLAY CODIGO DETECTADO ARRIBA DE LOS BOTONES -->
+            <div id="display-codigo-scan">---</div>
+            
             <!-- GEMAS NEON V81 -->
             <div class="contenedor-gemas">
                 <div class="wrapper-gema">
@@ -185,20 +181,7 @@
 
         // UI
         const ui = { videoAction: document.getElementById('video-action'), msg: document.getElementById('msg-visor') };
-
-        // Acceso a elementos
-        const displayCodigo = document.getElementById('display-codigo');
-        let timerCodigo = null;
-
-        // FUNCION PARA MOSTRAR CODIGO
-        function mostrarCodigoDetectado(codigo) {
-            if (timerCodigo) clearTimeout(timerCodigo);
-            displayCodigo.innerText = codigo;
-            displayCodigo.style.display = 'block';
-            timerCodigo = setTimeout(() => {
-                displayCodigo.style.display = 'none';
-            }, 2000);
-        }
+        const displayCodigo = document.getElementById('display-codigo-scan');
 
         // INICIO
         window.setModo = (n) => {
@@ -228,7 +211,7 @@
                 setTimeout(() => {
                     document.getElementById('p-setup').classList.add('oculto');
                     document.getElementById('ui-juego').classList.remove('oculto');
-                    iniciarOjo(mostrarCodigoDetectado, procesarCartaEscaneada);
+                    iniciarOjo(procesarCartaEscaneada);
                     actualizarUI();
                 }, 500);
             }
@@ -239,9 +222,7 @@
             resetBotones();
             actualizarEstiloBotones(carta);
             ui.msg.innerText = `${carta.nombre} (${carta.casa})`;
-            
-            // Mostrar código detectado
-            mostrarCodigoDetectado(carta.codigo || '---');
+            displayCodigo.innerText = carta.codigo || '---';
         }
 
         function actualizarUI() {
@@ -250,6 +231,7 @@
             document.getElementById('rival-last-move').innerText = ultimaJugada ? `${ultimaJugada.nombre} - ${ultimaJugada.accion}` : "Esperando...";
             resetBotones();
             ui.msg.innerText = "ESCANEA CARTA";
+            displayCodigo.innerText = '---';
         }
 
         window.confirmarCambioTurno = () => {
@@ -421,7 +403,7 @@
                 document.getElementById('hud-txt-valor').innerText = conf.valor;
 
                 ui.videoAction.onended = () => { 
-                    ui.videoAction.style = 'none'; 
+                    ui.videoAction.style.display = 'none'; 
                     hud.style.display = 'none'; 
                     ui.msg.innerText = "CONFIRMA ABAJO"; 
                 };
