@@ -1,51 +1,560 @@
+// ojo.js - MODULO DE REALIDAD AUMENTADA OPTIMIZADO (58 CARTAS)
+// Para First Blood - Sin Búhos ni Armas
+import * as THREE from 'three';
+import { MindARThree } from 'mindar-image-three';
+import { RUTA_BASE } from './biblioteca.js';
+
+let mindarThree = null;
+
+/**
+ * Inicia el motor AR con 58 cartas (0-57)
+ * @param {string} containerId - ID del contenedor donde renderizar
+ * @param {function} onEncontrado - Callback cuando se detecta una carta (recibe ID 0-57)
+ * @param {function} onPerdido - Callback cuando se pierde la detección
+ */
+export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
+    if (mindarThree) return; // Evitar doble inicio
+
+    console.log("Iniciando OJO DE DOMUS MAGI FIRST BLOOD (58 CARTAS)...");
+
+    try {
+        mindarThree = new MindARThree({
+            container: document.getElementById(containerId),
+            imageTargetSrc: RUTA_BASE + 'targets1.mind', // Archivo .mind con 58 cartas
+            maxTrack: 1,
+            uiLoading: "no",
+            uiScanning: "no",
+            uiError: "no"
+        });
+
+        const { renderer, scene, camera } = mindarThree;
+
+        // Crear anclas invisibles para IDs 0-57 (58 cartas)
+        for (let i = 0; i < 58; i++) {
+            const anchor = mindarThree.addAnchor(i);
+            
+            // Plano invisible para tracking
+            const geometry = new THREE.PlaneGeometry(1, 1);
+            const material = new THREE.MeshBasicMaterial({ 
+                transparent: true, 
+                opacity: 0 
+            });
+            const plane = new THREE.Mesh(geometry, material);
+            anchor.group.add(plane);
+
+            // Eventos de detección
+            anchor.onTargetFound = () => {
+                console.log(`[OJO] Detectada carta ID: ${i}`);
+                onEncontrado(i);
+            };
+
+            anchor.onTargetLost = () => {
+                console.log(`[OJO] Perdida carta ID: ${i}`);
+                onPerdido();
+            };
+        }
+
+        // Iniciar AR
+        await mindarThree.start();
+        console.log("✅ AR iniciado correctamente");
+        
+        // Bucle de renderizado
+        renderer.setAnimationLoop(() => {
+            renderer.render(scene, camera);
+        });
+
+    } catch (error) {
+        console.error("❌ Error iniciando AR:", error);
+        throw error;
+    }
+}
+
+/**
+ * Detiene el motor AR
+ */
+export function detenerOjo() {
+    if (mindarThree) {
+        mindarThree.stop();
+        mindarThree = null;
+    }
+}```
+
+## 3. `batalla.html`
+
+No se han realizado cambios funcionales significativos, solo la importación para usar el nuevo nombre de la librería.
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V001: MENU</title>
+    <title>DOMUS MAGI: FIRST BLOOD (58 CARTAS)</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- MAPA DE IMPORTACIONES (MODULOS) -->
+    <script type="importmap">
+    { "imports": { 
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js", 
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/", 
+        "mindar-image-three":"https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js" 
+    } }
+    </script>
 </head>
 <body>
-    <!-- PANTALLA DE INICIO -->
-    <div id="p-inicio" class="pantalla">
-        <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
-            <div>
-                <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V.001 (INICIO NUEVO)</p>
+    <div id="container-ar"></div>
+
+    <!-- MODAL FASE DE DADOS EN BATALLA -->
+    <div id="modal-dados-fase" class="pantalla oculto" style="z-index:9500; background:rgba(0,0,0,0.85);">
+        <h2 style="color:#aaa; margin:0;">DESTINO</h2>
+        <h1 id="dados-player-name" style="font-size:36px; margin:5px 0;">JUGADOR</h1>
+        
+        <div class="dados-container">
+            <video id="video-dados-batalla" class="video-dados" src="https://kairosravina-bot.github.io/domusmagis/Dados.mp4" playsinline webkit-playsinline muted></video>
+            <div id="layer-valor-batalla" class="layer-valor">0</div>
+        </div>
+
+        <h3 style="margin: 0; margin-top:5px; color:#888; font-size:14px;">SELECCIONA TUS DADOS:</h3>
+        <div class="grid-dados">
+            <div class="btn-dado-sel" id="btn-batalla-2" onclick="window.ejecutarLanzamientoBatalla(2)"><strong>2</strong><span>(12)</span></div>
+            <div class="btn-dado-sel" id="btn-batalla-3" onclick="window.ejecutarLanzamientoBatalla(3)"><strong>3</strong><span>(18)</span></div>
+            <div class="btn-dado-sel" id="btn-batalla-4" onclick="window.ejecutarLanzamientoBatalla(4)"><strong>4</strong><span>(24)</span></div>
+            <div class="btn-dado-sel" id="btn-batalla-5" onclick="window.ejecutarLanzamientoBatalla(5)"><strong>5</strong><span>(30)</span></div>
+        </div>
+    </div>
+
+    <!-- MODAL BATALLA FINAL -->
+    <div id="modal-batalla" class="pantalla oculto" style="z-index:9999; background:rgba(0,0,0,0.9);">
+        <h2 style="color:gold; margin-bottom:5px;">BATALLA FINAL</h2>
+        <div id="texto-vs" style="font-size:26px; font-weight:900; margin-bottom:10px; font-family:var(--font-titulo); text-transform:uppercase;"></div>
+        <video id="video-clash" playsinline webkit-playsinline style="width:100%; border-top:4px solid gold; border-bottom:4px solid gold;"></video>
+    </div>
+
+    <!-- PANTALLA CAMBIO TURNO -->
+    <div id="pantalla-cambio-turno" class="pantalla oculto" style="z-index:8000; background: rgba(0,0,0,0.6);">
+        <div style="background:rgba(20,20,20,0.95); padding:20px; border-radius:10px; border:2px solid gold; box-shadow: 0 0 20px #000;">
+            <h1 style="font-size:50px; color: #ff4444; margin:0;">🛑 ALTO 🛑</h1>
+            <p style="font-size:22px; color:#aaa;">ES EL TURNO DE:</p>
+            <h2 style="color:var(--borde-dorado); font-size:50px;" id="next-player-name">JUGADOR</h2>
+            <button class="btn-master" style="margin-top:30px; width:100%;" onclick="window.confirmarCambioTurno()">TOMAR EL MANDO</button>
+        </div>
+    </div>
+
+    <!-- SETUP -->
+    <div id="p-setup" class="pantalla" style="background:rgba(0,0,0,0.8);">
+        <h2>INSCRIPCIÓN</h2>
+        <div id="setup-selector" style="display:flex; gap:10px; width:100%; flex-wrap:wrap; justify-content:center;">
+            <button class="btn-master" onclick="window.setModo(2)" style="flex:1; min-width:150px;">2 MAGOS</button>
+            <button class="btn-master" onclick="window.setModo(4)" style="flex:1; min-width:150px;">4 MAGOS</button>
+        </div>
+        <div id="registro" class="oculto" style="width:100%;">
+            <input type="text" id="mago-nombre" placeholder="NOMBRE DEL MAGO" autocomplete="off">
+            <div class="grid-casas">
+                <button onclick="window.registrarMago('TIERRA','#ff0000','ESCUDO_LEON.png')" class="btn-casa" style="background:#500; border-color:#f00;">🪨 TIERRA</button>
+                <button onclick="window.registrarMago('CIELO','#00aaff','ESCUDO_AGUILA.png')" class="btn-casa" style="background:#003; border-color:#0af;">☁️ CIELO</button>
+                <button onclick="window.registrarMago('AGUA','#00ff88','ESCUDO_TRITON.png')" class="btn-casa" style="background:#030; border-color:#0f8;">💧 AGUA</button>
+                <button onclick="window.registrarMago('MAGIA','#aa00ff','ESCUDO_ARCANUM.png')" class="btn-casa" style="background:#303; border-color:#d0f;">✨ MAGIA</button>
             </div>
-            <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTRAR AL GRIMORIO</button>
+            <p id="reg-status" style="color:var(--borde-dorado); text-align:center; font-size:24px; margin-top:20px; font-weight:900;"></p>
+        </div>
+        <button class="btn-master" style="margin-top:20px; background:#333;" onclick="window.location.href='index.html'">CANCELAR</button>
+    </div>
+
+    <!-- UI JUEGO -->
+    <div id="ui-juego" class="oculto">
+        <div id="zona-superior">
+            <div id="txt-turno" style="position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(0,0,0,0.8); color: gold; padding: 10px; border: 2px solid gold;">TURNO: ---</div>
+            
+            <!-- HUD DERECHO -->
+            <div id="hud-derecho">
+                <img id="hud-img-escudo" src="" alt="Escudo">
+                <div id="hud-txt-arma">CARTA</div>
+                <div id="hud-txt-accion">ACCION</div>
+                <div id="hud-txt-valor">00</div>
+            </div>
+
+            <div id="guia-scanner"></div>
+            <video id="video-action" playsinline webkit-playsinline></video>
+        </div>
+
+        <div id="zona-inferior">
+            <div id="info-rival">RIVAL JUGÓ: <span id="rival-last-move">???</span></div>
+            <div id="msg-visor" style="font-size:26px; color:var(--borde-dorado); font-weight:900;">ESCANEA CARTA</div>
+            <p style="color:#aaa; font-size:20px; margin:0;">SLOT: <span id="slot-indicator" style="color:gold;">1/3</span></p>
+            
+            <!-- GEMAS NEON -->
+            <div class="contenedor-gemas">
+                <div class="wrapper-gema">
+                    <span id="val-i" class="valor-flotante"></span>
+                    <button id="btn-i" class="btn-gema"><span class="letra-grande">I</span></button>
+                </div>
+                <div class="wrapper-gema">
+                    <span id="val-a" class="valor-flotante"></span>
+                    <button id="btn-a" class="btn-gema"><span class="letra-grande">A</span></button>
+                </div>
+                <div class="wrapper-gema">
+                    <span id="val-t" class="valor-flotante"></span>
+                    <button id="btn-t" class="btn-gema"><span class="letra-grande">T</span></button>
+                </div>
+                <div class="wrapper-gema">
+                    <span id="val-m" class="valor-flotante"></span>
+                    <button id="btn-m" class="btn-gema"><span class="letra-grande">M</span></button>
+                </div>
+            </div>
+            
+            <div style="display:flex; gap:10px; width:100%;">
+                <button id="btn-confirmar" class="btn-master" style="background:#050; border-color:#0f0; flex:2;">✅ CONFIRMAR</button>
+                <button id="btn-forzar" class="btn-master" style="background:#500; font-size:14px;" onclick="window.forzarBatalla()">⚔️ YA</button>
+            </div>
         </div>
     </div>
 
-    <!-- MENÚ PRINCIPAL -->
-    <div id="p-menu-principal" class="pantalla oculto">
-        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TÁCTICO</button>
-            <button class="btn-info" onclick="alert('Modo V.001: First Blood (58 Cartas). Neon Values & Stone Background.')">?</button>
+    <!-- RESULTADOS -->
+    <div id="p-resultado" class="pantalla oculto" style="background:rgba(0,0,0,0.8);">
+        <h2 style="color:#331a00; border-bottom:2px solid #8b4513; width:100%; text-shadow:none; background:rgba(255,255,255,0.8); padding:5px;">DECRETO FINAL</h2>
+        <div id="resultado-batalla">
+            <div id="resultado-contenido"></div>
         </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#222; border-color:#555;" onclick="window.location.href='misiones.html'">🦉 MISIONES (WIP)</button>
+        <div style="width:100%; display:flex; gap:10px; margin:20px 0;">
+            <button class="btn-master" onclick="window.continuarContienda()">⚔️ REPETIR</button>
+            <button class="btn-master" style="background:#111; border-color:#f00;" onclick="window.location.href='index.html'">🚪 SALIR</button>
         </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#333; border-color:#555;" onclick="window.location.href='dados.html'">🎲 ORÁCULO (SOLO)</button>
+        <div id="seccion-historial" style="background:rgba(0,0,0,0.7);">
+            <h3 style="color:#aaa; font-size:20px;">CRÓNICAS DE BATALLA</h3>
+            <div id="lista-historial"></div>
         </div>
     </div>
 
-    <script>
-        function entrarGrimorio() {
-            document.getElementById('p-inicio').classList.add('oculto');
-            document.getElementById('p-menu-principal').classList.remove('oculto');
-            const v = document.getElementById('intro-video');
-            if(v) { 
-                v.muted = false; 
-                v.play().catch(e => console.log("Auto-play blocked by browser policy")); 
+    <!-- LOGICA DEL JUEGO (MODULOS) -->
+    <script type="module">
+        // ═══════════════════════════════════════════════════════
+        // DOMUS MAGI - FIRST BLOOD V.001
+        // ═══════════════════════════════════════════════════════
+        import { CARTAS, VIDEOS_BATALLA, RUTA_BASE, QR_MAPPING } from './biblioteca.js';
+        import { iniciarOjo } from './ojo.js';
+
+        // CONFIGURACIÓN GLOBAL
+        const MAX_SLOTS = 3;
+        const TARGETS_TOTAL = 58; // 58 cartas (0-57)
+
+        // ESTADO DEL JUEGO
+        let cantJugadores = 0;
+        let jugadores = [];
+        let turnoJugadorIdx = 0;
+        let slotActual = 0;
+        let cartaActualEnPantalla = null;
+        let jugadaPendiente = null;
+        let ultimaJugada = null;
+        let dadosSeleccionadosBatalla = 0;
+        let contadorPartidas = 0;
+        let historialPartidas = [];
+
+        const ui = {
+            containerAR: document.getElementById('container-ar'),
+            uiJuego: document.getElementById('ui-juego'),
+            msg: document.getElementById('msg-visor'),
+            videoAction: document.getElementById('video-action'),
+            guiaScanner: document.getElementById('guia-scanner'),
+            txtTurno: document.getElementById('txt-turno'),
+        };
+
+        // ═══════════════════════════════════════════════════════
+        // FUNCIONES SETUP
+        // ═══════════════════════════════════════════════════════
+        window.setModo = (n) => {
+            cantJugadores = n;
+            document.getElementById('setup-selector').style.display = 'none';
+            document.getElementById('registro').classList.remove('oculto');
+            actualizarStatusReg();
+        };
+
+        const actualizarStatusReg = () => {
+            const faltantes = cantJugadores - jugadores.length;
+            document.getElementById('reg-status').innerText = 
+                faltantes > 0 ? `${faltantes} MAGO(S) MÁS` : "¡LISTOS!";
+        };
+        
+        // Se asumen los nombres de los escudos para cada facción como en la biblioteca.js
+        window.registrarMago = (casa, color, escudo) => {
+            const nombre = document.getElementById('mago-nombre').value.trim().toUpperCase();
+            if (!nombre) { alert("Escribe tu nombre"); return; }
+            
+            // Asignar el escudo correcto basado en la casa
+            let escudoURL = '';
+            if (casa === 'TIERRA') escudoURL = 'ESCUDO_LEON.png';
+            else if (casa === 'CIELO') escudoURL = 'ESCUDO_AGUILA.png';
+            else if (casa === 'AGUA') escudoURL = 'ESCUDO_TRITON.png';
+            else if (casa === 'MAGIA') escudoURL = 'ESCUDO_ARCANUM.png';
+            
+            jugadores.push({ nombre, casa, color, slots: [null,null,null], dado: 0, imgEscudo: escudoURL });
+            document.getElementById('mago-nombre').value = '';
+            actualizarStatusReg();
+            if (jugadores.length === cantJugadores) {
+                iniciarPartida();
             }
-        }
+        };
+
+        const iniciarPartida = async () => {
+            document.getElementById('p-setup').classList.add('oculto');
+            ui.uiJuego.classList.remove('oculto');
+            actualizarUI();
+            
+            // Iniciar AR
+            try {
+                await iniciarOjo('container-ar', onCartaEncontrada, onCartaPerdida);
+            } catch (e) {
+                console.error("Error iniciando AR:", e);
+                alert("Error iniciando cámara AR");
+            }
+        };
+
+        // ═══════════════════════════════════════════════════════
+        // DETECCION AR
+        // ═══════════════════════════════════════════════════════
+        const onCartaEncontrada = (targetId) => {
+            // targetId es 0-57 según targets.mind
+            const carta = CARTAS[targetId];
+            if (!carta) {
+                console.warn("Target no mapeado:", targetId);
+                return;
+            }
+            cartaActualEnPantalla = carta;
+            actualizarUICartaEscaneada();
+        };
+
+        const onCartaPerdida = () => {
+            cartaActualEnPantalla = null;
+            resetBotones();
+            ui.msg.innerText = "ESCANEA CARTA";
+            ui.guiaScanner.classList.remove('verde','dorado','violeta');
+        };
+
+        // ═══════════════════════════════════════════════════════
+        // ACTUALIZAR UI
+        // ═══════════════════════════════════════════════════════
+        const actualizarUI = () => {
+            const jugadorActual = jugadores[turnoJugadorIdx];
+            ui.txtTurno.innerText = `TURNO: ${jugadorActual.nombre} (SLOT ${slotActual + 1}/3)`;
+            document.getElementById('slot-indicator').innerText = `${slotActual + 1}/3`;
+            ui.msg.innerText = "ESCANEA CARTA";
+            resetBotones();
+        };
+
+        const actualizarUICartaEscaneada = () => {
+            if (!cartaActualEnPantalla) return;
+            
+            const carta = cartaActualEnPantalla;
+            ui.msg.innerText = carta.nombre.toUpperCase();
+            
+            // Actualizar colores según elemento
+            ui.guiaScanner.className = 'verde'; // Default al escanear
+            if (carta.elemento === 'CIELO') ui.guiaScanner.classList.add('dorado');
+            else if (carta.elemento === 'MAGIA') ui.guiaScanner.classList.add('violeta');
+            
+            actualizarEstiloBotones(carta);
+        };
+
+        const actualizarEstiloBotones = (carta) => {
+            ['btn-i','btn-a','btn-t','btn-m'].forEach(id => {
+                const btn = document.getElementById(id);
+                const conf = carta.botones[id];
+                btn.classList.remove('style-buho', 'style-artefacto');
+
+                if (carta.tipo === 'POCION' || carta.tipo === 'ARTEFACTO') {
+                    btn.classList.add('style-artefacto');
+                }
+
+                btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
+
+                const valId = id.replace('btn-','val-');
+                const valSpan = document.getElementById(valId);
+                valSpan.innerText = conf.valor; 
+                valSpan.className = "valor-flotante"; 
+                // Colores Neon V.100
+                if (carta.tipo === 'CASA') valSpan.classList.add('neon-blanco');
+                else if (carta.tipo === 'POCION' || carta.tipo === 'ARTEFACTO') valSpan.classList.add('neon-amarillo');
+            });
+        };
+
+        // ═══════════════════════════════════════════════════════
+        // CLICKS A GEMAS (ACCIONES)
+        // ═══════════════════════════════════════════════════════
+        ['btn-i','btn-a','btn-t','btn-m'].forEach(id => {
+            document.getElementById(id).onclick = () => {
+                if(!cartaActualEnPantalla) return;
+                const conf = cartaActualEnPantalla.botones[id];
+                jugadaPendiente = { carta: cartaActualEnPantalla, lado: conf.label, valor: conf.valor };
+                
+                ui.videoAction.style.display = 'block'; 
+                ui.videoAction.src = RUTA_BASE + conf.video;
+                ui.videoAction.onerror = () => { console.log("Video missing: " + conf.video); };
+                ui.videoAction.play().catch(e => console.log("Play interrupted"));
+
+                const hud = document.getElementById('hud-derecho');
+                hud.style.display = 'flex';
+                document.getElementById('hud-img-escudo').src = RUTA_BASE + cartaActualEnPantalla.imgEscudo;
+                document.getElementById('hud-txt-arma').innerText = cartaActualEnPantalla.arma;
+                document.getElementById('hud-txt-accion').innerText = conf.label;
+                document.getElementById('hud-txt-valor').innerText = conf.valor;
+
+                ui.videoAction.onended = () => { 
+                    ui.videoAction.style.display = 'none'; 
+                    hud.style.display = 'none'; 
+                    ui.msg.innerText = "CONFIRMA ABAJO"; 
+                };
+            };
+        });
+
+        // CONFIRMAR JUGADA
+        document.getElementById('btn-confirmar').onclick = () => {
+            if(!jugadaPendiente) { alert("Escanea primero"); return; }
+            ultimaJugada = { nombre: jugadaPendiente.carta.nombre, accion: jugadaPendiente.lado }; 
+            jugadores[turnoJugadorIdx].slots[slotActual] = jugadaPendiente;
+            turnoJugadorIdx++; 
+            if(turnoJugadorIdx >= cantJugadores) { 
+                turnoJugadorIdx=0; 
+                slotActual++; 
+            }
+            if(slotActual >= MAX_SLOTS) { 
+                forzarBatalla(); 
+            } else { 
+                document.getElementById('pantalla-cambio-turno').classList.remove('oculto'); 
+                document.getElementById('next-player-name').innerText = jugadores[turnoJugadorIdx].nombre; 
+            }
+            jugadaPendiente = null;
+        };
+
+        window.confirmarCambioTurno = () => {
+            document.getElementById('pantalla-cambio-turno').classList.add('oculto');
+            actualizarUI();
+        };
+
+        // BATALLA
+        window.forzarBatalla = () => {
+            document.getElementById('modal-dados-fase').classList.remove('oculto');
+            document.getElementById('dados-player-name').innerText = jugadores[turnoJugadorIdx].nombre;
+        };
+
+        window.ejecutarLanzamientoBatalla = (n) => {
+            dadosSeleccionadosBatalla = n;
+            [2,3,4,5].forEach(i => {
+                const btn = document.getElementById(`btn-batalla-${i}`);
+                if(btn) btn.classList.remove('tageado');
+            });
+            document.getElementById(`btn-batalla-${n}`).classList.add('tageado');
+
+            const vid = document.getElementById('video-dados-batalla');
+            const layer = document.getElementById('layer-valor-batalla');
+            
+            layer.style.display = 'none';
+            vid.currentTime = 0;
+            vid.play();
+            
+            vid.onended = () => {
+                let total = 0;
+                for(let i=0; i<n; i++) total += Math.floor(Math.random()*6) + 1;
+                layer.innerText = total;
+                layer.style.display = 'flex';
+                
+                setTimeout(() => {
+                    jugadores[turnoJugadorIdx].dado = total;
+                    turnoJugadorIdx++;
+                    if(turnoJugadorIdx >= cantJugadores) {
+                        mostrarResultados();
+                    } else {
+                        document.getElementById('modal-dados-fase').classList.add('oculto');
+                        document.getElementById('pantalla-cambio-turno').classList.remove('oculto');
+                        document.getElementById('next-player-name').innerText = jugadores[turnoJugadorIdx].nombre;
+                    }
+                }, 1500);
+            };
+        };
+
+        // RESULTADOS
+        const mostrarResultados = () => {
+            document.getElementById('modal-dados-fase').classList.add('oculto');
+            document.getElementById('ui-juego').classList.add('oculto');
+            document.getElementById('p-resultado').classList.remove('oculto');
+            
+            const cont = document.getElementById('resultado-contenido'); 
+            cont.innerHTML = '';
+            
+            let resultados = jugadores.map(j => { 
+                let total = 0; 
+                j.slots.forEach(s=>{if(s)total+=s.valor}); 
+                return {...j, total:total+j.dado}; 
+            });
+            resultados.sort((a,b)=>b.total-a.total);
+
+            contadorPartidas++;
+            const ganador = resultados[0];
+            historialPartidas.push({ id: contadorPartidas, nombre: ganador.nombre, pts: ganador.total });
+            actualizarListaHistorial();
+
+            resultados.forEach((r,i) => {
+                let htmlSlots = "";
+                r.slots.forEach(s => {
+                    if(s) htmlSlots += `
+                    <div class="fila-res">
+                        <div style="display:flex; align-items:center;">
+                            <img src="${RUTA_BASE + s.carta.imgEscudo}" class="mini-escudo-res" onerror="this.style.display='none'">
+                            <div style="display:flex; flex-direction:column;">
+                                <span class="res-nombre">${s.carta.nombre}</span>
+                                <span style="font-size:10px; color:#555;">${s.carta.arma}</span>
+                            </div>
+                        </div>
+                        <span class="res-accion">${s.lado}</span>
+                        <span class="res-valor">${s.valor}</span>
+                    </div>`;
+                });
+
+                cont.innerHTML += `
+                <div class="resultado-jugador ${i===0?'ganador':''}">
+                    <h3 style="color:${r.color}; margin:0; text-shadow:none;">${r.nombre}</h3>
+                    ${htmlSlots}
+                    <div class="fila-dado">
+                        <span>DADOS (${dadosSeleccionadosBatalla}D):</span>
+                        <span class="dado-gigante-res">+${r.dado}</span>
+                    </div>
+                    <div class="total-score">${r.total}</div>
+                </div>`;
+            });
+        };
+
+        const actualizarListaHistorial = () => {
+            const lista = document.getElementById('lista-historial');
+            lista.innerHTML = "";
+            [...historialPartidas].reverse().forEach(h => {
+                lista.innerHTML += `
+                <div class="item-historial" style="background:rgba(255,255,255,0.1); padding:10px; margin:5px 0; border-radius:5px;">
+                    <span style="color:#aaa;">BATALLA #${h.id}</span>
+                    <strong style="color:gold;"> | ${h.nombre} (${h.pts} pts)</strong>
+                </div>`;
+            });
+        };
+
+        window.continuarContienda = () => {
+            jugadores.forEach(j=>{j.slots=[null,null,null];j.dado=0;}); 
+            slotActual=0; 
+            turnoJugadorIdx=0; 
+            ultimaJugada=null;
+            document.getElementById('p-resultado').classList.add('oculto');
+            document.getElementById('ui-juego').classList.remove('oculto'); 
+            actualizarUI();
+        };
+
+        const resetBotones = () => { 
+            ['btn-i','btn-a','btn-t','btn-m'].forEach(id=>{ 
+                const btn = document.getElementById(id);
+                btn.className = 'btn-gema';
+                btn.innerHTML=`<span class="letra-grande">${id.split('-')[1].toUpperCase()}</span>`; 
+                btn.classList.remove('activo');
+                const valId = id.replace('btn-','val-');
+                const valSpan = document.getElementById(valId);
+                valSpan.innerText = "";
+                valSpan.className = "valor-flotante"; 
+            }); 
+        };
     </script>
 </body>
 </html>
