@@ -3,34 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: ORACULO V111</title>
+    <title>DOMUS MAGI: ORACULO V112</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body style="background: url('BG_PIEDRA.jpg') no-repeat center center fixed; background-size: cover;">
     
     <div class="pantalla">
-        <div style="background:rgba(0,0,0,0.7); padding:30px; border:2px solid gold; border-radius:15px; text-align:center; max-width: 400px;">
-            <h1 style="color:var(--borde-dorado); font-size:40px; margin-top: 0;">ORACULO</h1>
+        <div style="background:rgba(0,0,0,0.7); padding:30px; border:2px solid gold; border-radius:15px; text-align:center; max-width: 400px; animation: fadeIn 0.5s ease-out;">
+            <h1 style="color:var(--borde-dorado); font-size:48px; margin-top: 0; text-shadow: 0 0 20px gold;">ORACULO</h1>
+            <p style="color: #aaa; font-size: 12px; letter-spacing: 2px; margin-bottom: 20px;">CONSULTA EL DESTINO</p>
             
-            <div class="dados-container" style="margin: 20px auto;">
+            <div class="dados-container" style="margin: 20px auto; animation: slideUp 0.6s ease-out 0.2s both;">
                 <video id="video-dados-solo" class="video-dados" src="https://kairosravina-bot.github.io/domusmagis/Dados.mp4" playsinline webkit-playsinline muted></video>
                 <div id="layer-valor-solo" class="layer-valor" style="display:none;">0</div>
             </div>
 
             <!-- GRID DE DADOS -->
-            <div class="grid-dados" style="margin: 20px auto;">
+            <div class="grid-dados" style="margin: 20px auto; animation: slideUp 0.6s ease-out 0.3s both;">
                 <div class="btn-dado-sel" id="btn-solo-2" onclick="tirarDados(2)"><strong>2D</strong></div>
                 <div class="btn-dado-sel" id="btn-solo-3" onclick="tirarDados(3)"><strong>3D</strong></div>
                 <div class="btn-dado-sel" id="btn-solo-4" onclick="tirarDados(4)"><strong>4D</strong></div>
                 <div class="btn-dado-sel" id="btn-solo-5" onclick="tirarDados(5)"><strong>5D</strong></div>
             </div>
 
-            <button class="btn-master" style="margin-top:20px; background:#333; width: 100%; max-width: 350px;" onclick="window.location.href='index.html'">VOLVER</button>
+            <button class="btn-master" style="margin-top:20px; background:#333; width: 100%; max-width: 350px; animation: slideUp 0.6s ease-out 0.4s both;" onclick="window.location.href='index.html'">⬅️ VOLVER</button>
         </div>
     </div>
 
     <script>
         function tirarDados(n) {
+            console.log(`🎲 Tirando ${n}D...`);
+            
             // Reset visual
             [2,3,4,5].forEach(i => {
                 const btn = document.getElementById('btn-solo-'+i);
@@ -43,12 +46,15 @@
             const vid = document.getElementById('video-dados-solo');
             const layer = document.getElementById('layer-valor-solo');
             
-            if (!vid || !layer) return;
+            if (!vid || !layer) {
+                console.error("❌ Elementos no encontrados");
+                return;
+            }
 
             layer.style.display = 'none';
             vid.currentTime = 0;
             
-            vid.play().catch(e => console.log("Error al reproducir video:", e));
+            vid.play().catch(e => console.log("⚠️ Error al reproducir video:", e));
             
             vid.onended = () => {
                 let total = 0;
@@ -57,9 +63,12 @@
                 }
                 layer.innerText = total;
                 layer.style.display = 'flex';
-                console.log("Resultado de " + n + "D: " + total);
+                console.log(`✅ Resultado de ${n}D: ${total}`);
             };
         }
+
+        // Inicializar
+        console.log("🎯 ORACULO V112 Cargado");
     </script>
 </body>
 </html>
