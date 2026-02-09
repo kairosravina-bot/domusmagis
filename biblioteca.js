@@ -27,7 +27,6 @@ export const CARTAS = {
     7: { id: 6, nombre: "SAGITIS", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(10,2,5,3), codTarget: "008-TI-HU-ID6", ...genMp4s("008-TI-HU-ID6") },
     8: { id: 8, nombre: "ALCHEMIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(4,9,5,6), codTarget: "009-TI-HU-ID8", ...genMp4s("009-TI-HU-ID8") },
     9: { id: 10, nombre: "CAESAR", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(9,8,6,4), codTarget: "010-TI-HU-ID10", ...genMp4s("010-TI-HU-ID10") },
-    // CIELO
     10: { id: 1, nombre: "FENRIS", elemento: "CAELUM", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(7,1,2,2), codTarget: "021-CI-BE-ID1", ...genMp4s("021-CI-BE-ID1") },
     11: { id: 3, nombre: "THALGRIM", elemento: "CAELUM", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(4,3,8,3), codTarget: "022-CI-BE-ID3", ...genMp4s("022-CI-BE-ID3") },
     12: { id: 5, nombre: "AQUILON", elemento: "CAELUM", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(2,5,3,9), codTarget: "023-CI-BE-ID5", ...genMp4s("023-CI-BE-ID5") },
@@ -38,7 +37,6 @@ export const CARTAS = {
     17: { id: 6, nombre: "EIDOLON", elemento: "CAELUM", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(3,4,9,2), codTarget: "028-CI-HU-ID6", ...genMp4s("028-CI-HU-ID6") },
     18: { id: 8, nombre: "KORIN", elemento: "CAELUM", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(2,7,2,7), codTarget: "029-CI-HU-ID8", ...genMp4s("029-CI-HU-ID8") },
     19: { id: 10, nombre: "TYRION", elemento: "CAELUM", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(6,6,6,5), codTarget: "030-CI-HU-ID10", ...genMp4s("030-CI-HU-ID10") },
-    // AGUA
     20: { id: 1, nombre: "SCORPIUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "041-AG-BE-ID1.png", botones: genB(5,1,5,5), codTarget: "041-AG-BE-ID1", ...genMp4s("041-AG-BE-ID1") },
     21: { id: 3, nombre: "TRITONIS", elemento: "AQUA", tipo: "CASA", imgEscudo: "042-AG-BE-ID3.png", botones: genB(6,4,6,4), codTarget: "042-AG-BE-ID3", ...genMp4s("042-AG-BE-ID3") },
     22: { id: 5, nombre: "HYDRUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "043-AG-BE-ID5.png", botones: genB(8,8,4,2), codTarget: "043-AG-BE-ID5", ...genMp4s("043-AG-BE-ID5") },
@@ -49,7 +47,6 @@ export const CARTAS = {
     27: { id: 6, nombre: "ORACULUM", elemento: "AQUA", tipo: "CASA", imgEscudo: "048-AG-HU-ID6.png", botones: genB(1,5,6,9), codTarget: "048-AG-HU-ID6", ...genMp4s("048-AG-HU-ID6") },
     28: { id: 8, nombre: "ADMIRALIS", elemento: "AQUA", tipo: "CASA", imgEscudo: "049-AG-HU-ID8.png", botones: genB(5,6,6,5), codTarget: "049-AG-HU-ID8", ...genMp4s("049-AG-HU-ID8") },
     29: { id: 10, nombre: "NEPTUNUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "050-AG-HU-ID10.png", botones: genB(7,8,7,6), codTarget: "050-AG-HU-ID10", ...genMp4s("050-AG-HU-ID10") },
-    // MAGIA
     30: { id: 1, nombre: "FAMILIARES", elemento: "DIMENSIO", tipo: "CASA", imgEscudo: "061-MA-BE-ID1.png", botones: genB(3,2,3,8), codTarget: "061-MA-BE-ID1", ...genMp4s("061-MA-BE-ID1") },
     31: { id: 3, nombre: "ELEMENTUM", elemento: "DIMENSIO", tipo: "CASA", imgEscudo: "062-MA-BE-ID3.png", botones: genB(5,4,5,9), codTarget: "062-MA-BE-ID3", ...genMp4s("062-MA-BE-ID3") },
     32: { id: 5, nombre: "PHANTASMA", elemento: "DIMENSIO", tipo: "CASA", imgEscudo: "063-MA-BE-ID5.png", botones: genB(8,1,1,11), codTarget: "063-MA-BE-ID5", ...genMp4s("063-MA-BE-ID5") },
@@ -60,7 +57,6 @@ export const CARTAS = {
     37: { id: 6, nombre: "MIMUS", elemento: "DIMENSIO", tipo: "CASA", imgEscudo: "068-MA-HU-ID6.png", botones: genB(1,4,6,10), codTarget: "068-MA-HU-ID6", ...genMp4s("068-MA-HU-ID6") },
     38: { id: 8, nombre: "ARCHIMAGUS", elemento: "DIMENSIO", tipo: "CASA", imgEscudo: "069-MA-HU-ID8.png", botones: genB(3,5,2,12), codTarget: "069-MA-HU-ID8", ...genMp4s("069-MA-HU-ID8") },
     39: { id: 10, nombre: "MAGITER", elemento: "DIMENSIO", tipo: "CASA", imgEscudo: "070-MA-HU-ID10.png", botones: genB(5,7,4,10), codTarget: "070-MA-HU-ID10", ...genMp4s("070-MA-HU-ID10") },
-    // ARTEFACTOS
     40: { id: 1, nombre: "IGNIS FIALA", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "081-AR-ID1.png", botones: genB(6,0,-2,2), codTarget: "081-AR-ID1", ...genMp4s("081-AR-ID1") },
     41: { id: 3, nombre: "SPECULUM", elemento: "TERRA", tipo: "ARTEFACTO", imgEscudo: "082-AR-ID3.png", botones: genB(1,2,7,4), codTarget: "082-AR-ID3", ...genMp4s("082-AR-ID3") },
     42: { id: 5, nombre: "MANICA", elemento: "TERRA", tipo: "ARTEFACTO", imgEscudo: "083-AR-ID5.png", botones: genB(7,0,-2,2), codTarget: "083-AR-ID5", ...genMp4s("083-AR-ID5") },
@@ -70,7 +66,6 @@ export const CARTAS = {
     46: { id: 13, nombre: "VEXILLUM", elemento: "DIMENSIO", tipo: "ARTEFACTO", imgEscudo: "087-AR-ID13.png", botones: genB(3,9,2,3), codTarget: "087-AR-ID13", ...genMp4s("087-AR-ID13") },
     47: { id: 15, nombre: "OCULUS", elemento: "DIMENSIO", tipo: "ARTEFACTO", imgEscudo: "088-AR-ID15.png", botones: genB(2,9,2,10), codTarget: "088-AR-ID15", ...genMp4s("088-AR-ID15") },
     48: { id: 17, nombre: "MONOLITH", elemento: "AQUA", tipo: "ARTEFACTO", imgEscudo: "089-AR-ID17.png", botones: genB(0,0,12,6), codTarget: "089-AR-ID17", ...genMp4s("089-AR-ID17") },
-    // POCIONES
     49: { id: 2, nombre: "VITA", elemento: "CAELUM", tipo: "BUHO", imgEscudo: "090-PO-ID2.png", botones: genB(1,8,3,4), codTarget: "090-PO-ID2", ...genMp4s("090-PO-ID2") },
     50: { id: 4, nombre: "AETHER", elemento: "CAELUM", tipo: "BUHO", imgEscudo: "091-PO-ID4.png", botones: genB(1,3,1,8), codTarget: "091-PO-ID4", ...genMp4s("091-PO-ID4") },
     51: { id: 6, nombre: "PETRA", elemento: "TERRA", tipo: "BUHO", imgEscudo: "092-PO-ID6.png", botones: genB(2,1,8,1), codTarget: "092-PO-ID6", ...genMp4s("092-PO-ID6") },
