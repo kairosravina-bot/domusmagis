@@ -1,7 +1,7 @@
-// ojo.js - MODULO DE REALIDAD AUMENTADA (MindAR + Three)
+// ojo.js - MODULO DE REALIDAD AUMENTADA
 import * as THREE from 'three';
 import { MindARThree } from 'mindar-image-three';
-import { RUTA_BASE, CARTAS } from './biblioteca.js';
+import { RUTA_BASE } from './biblioteca.js';
 
 let mindarThree = null;
 
@@ -11,7 +11,7 @@ export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
     mindarThree = new MindARThree({
         container: document.getElementById(containerId),
         imageTargetSrc: RUTA_BASE + 'targets1.mind', 
-        maxTrack: 1,
+        maxTrack: 1, // Solo una carta a la vez para máxima precisión
         uiLoading: "no",
         uiScanning: "no",
         uiError: "no"
@@ -19,24 +19,26 @@ export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
 
     const { renderer, scene, camera } = mindarThree;
 
-    // Registramos los 58 targets (del 0 al 57)
-    for (let targetId = 0; targetId < 58; targetId++) {
-        const anchor = mindarThree.addAnchor(targetId);
+    // Registramos los 58 targets (0 al 57)
+    for (let i = 0; i < 58; i++) {
+        const anchor = mindarThree.addAnchor(i);
         
-        // Obtenemos la carta correspondiente de la biblioteca por su índice de target
-        const carta = CARTAS[targetId];
-        const codReal = carta ? carta.codTarget : null;
-
+        // Usamos una función de flecha para capturar el valor exacto de 'i' en cada iteración
         anchor.onTargetFound = () => {
-            if (codReal) {
-                console.log("Detectado:", codReal);
-                onEncontrado(codReal);
-            }
+            console.log("OJO: Target detectado índice:", i);
+            onEncontrado(i); // Enviamos el índice numérico directamente
         };
 
         anchor.onTargetLost = () => {
             onPerdido();
         };
+
+        // Objeto visual invisible para el tracking
+        const plane = new THREE.Mesh(
+            new THREE.PlaneGeometry(1, 1),
+            new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })
+        );
+        anchor.group.add(plane);
     }
 
     await mindarThree.start();
