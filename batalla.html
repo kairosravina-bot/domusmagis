@@ -202,9 +202,9 @@
             
             cartaActualEnPantalla = carta;
             ui.msg.innerText = carta.nombre;
-            // Actualizar display del codigo escaneado
+            // Actualizar display del codigo escaneado (código completo de la carta)
             const displayCodigo = document.getElementById('display-codigo-carta');
-            if(displayCodigo) displayCodigo.innerText = id || '---';
+            if(displayCodigo) displayCodigo.innerText = carta.codTarget || '---';
 
             // Logica Visual especifica de Batalla (Colores del scanner)
             if(carta.tipo === 'ARTEFACTO') ui.scanner.className = 'violeta';
