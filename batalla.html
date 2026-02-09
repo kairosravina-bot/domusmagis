@@ -6,7 +6,6 @@
     <title>DOMUS MAGI: BATALLA V81 (MODULAR)</title>
     <link rel="stylesheet" href="style.css">
     
-    <!-- MAPA DE IMPORTACIONES (VITAL PARA MODULOS) -->
     <script type="importmap">
     { "imports": { 
         "three": "https://unpkg.com/three@0.160.0/build/three.module.js", 
@@ -79,7 +78,6 @@
         <div id="zona-superior">
             <div id="txt-turno" style="position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(0,0,0,0.8); color: gold; padding: 10px; border: 2px solid gold;">TURNO: ---</div>
             
-            <!-- HUD DERECHO -->
             <div id="hud-derecho">
                 <img id="hud-img-escudo" src="" alt="Escudo">
                 <div id="hud-txt-arma">ARMA</div>
@@ -95,14 +93,12 @@
             <div id="info-rival">RIVAL JUGÓ: <span id="rival-last-move">???</span></div>
             <div id="msg-visor" style="font-size:26px; color:var(--borde-dorado); font-weight:900;">ESCANEA CARTA</div>
             <p style="color:#aaa; font-size:20px; margin:0;">SLOT: <span id="slot-indicator" style="color:gold;">1/3</span></p>
-            <!-- DISPLAY CODIGO ESCANEADO -->
+            
             <div style="background:rgba(0,255,0,0.1); border:2px solid #00ff00; border-radius:5px; padding:12px; margin:10px 0; text-align:center;">
                 <div style="color:#aaa; font-size:12px; margin-bottom:5px;">CÓDIGO</div>
                 <div id="display-codigo-carta" style="font-size:42px; font-weight:900; color:#00ff00; text-shadow:0 0 10px #00ff00; font-family:'Courier New',monospace;">---</div>
             </div>
 
-            
-            <!-- GEMAS NEON V81 -->
             <div class="contenedor-gemas">
                 <div class="wrapper-gema">
                     <span id="val-i" class="valor-flotante"></span>
@@ -129,7 +125,7 @@
         </div>
     </div>
 
-    <!-- RESULTADOS V81 -->
+    <!-- RESULTADOS -->
     <div id="p-resultado" class="pantalla oculto" style="background:rgba(0,0,0,0.8);">
         <h2 style="color:#331a00; border-bottom:2px solid #8b4513; width:100%; text-shadow:none; background:rgba(255,255,255,0.8); padding:5px;">DECRETO FINAL</h2>
         <div id="resultado-batalla">
@@ -145,13 +141,10 @@
         </div>
     </div>
 
-    <!-- LOGICA DEL JUEGO (MODULOS INTEGRADOS) -->
     <script type="module">
-        // Importar Biblioteca y Ojo
         import { CARTAS, VIDEOS_BATALLA, RUTA_BASE } from './biblioteca.js';
         import { iniciarOjo } from './ojo.js';
 
-        // Variables Globales de Juego
         let jugadores = []; let cantJugadores = 0; let slotActual = 0; 
         let turnoJugadorIdx = 0; const MAX_SLOTS = 3; 
         let jugadaPendiente = null; let ultimaJugada = null; 
@@ -164,8 +157,6 @@
             msg: document.getElementById('msg-visor'), 
             videoAction: document.getElementById('video-action') 
         };
-
-        // --- FUNCIONES DEL SISTEMA DE JUEGO (Expuestas a Window para HTML onclicks) ---
 
         window.setModo = (n) => { 
             cantJugadores = n; 
@@ -188,49 +179,41 @@
         function iniciarJuego() { 
             document.getElementById('p-setup').classList.add('oculto'); 
             document.getElementById('ui-juego').classList.remove('oculto'); 
-            
-            // AQUI LLAMAMOS AL MÓDULO OJO
             iniciarOjo('container-ar', alEncontrarCarta, alPerderCarta);
-            
             actualizarUI(); 
         }
 
-        // --- CALLBACKS QUE LE PASAMOS AL OJO ---
         function alEncontrarCarta(codTarget) {
             let carta = null;
+            // Búsqueda exhaustiva en toda la biblioteca
             for (let key in CARTAS) {
                 if (CARTAS[key].codTarget === codTarget) {
                     carta = CARTAS[key];
                     break;
                 }
             }
-            if(!carta) {
-                console.log("Carta no encontrada para codTarget:", codTarget);
-                return;
-            }
+            if(!carta) return;
+
             cartaActualEnPantalla = carta;
             ui.msg.innerText = carta.nombre;
-            const displayCodigo = document.getElementById('display-codigo-carta');
-            if(displayCodigo) displayCodigo.innerText = codTarget;
+            document.getElementById('display-codigo-carta').innerText = codTarget;
+            
             if(carta.tipo === 'ARTEFACTO') ui.scanner.className = 'violeta';
             else if(carta.tipo === 'BUHO') ui.scanner.className = 'dorado';
             else ui.scanner.className = 'verde';
+            
             actualizarEstiloBotones(carta);
             document.getElementById('hud-derecho').style.display = 'none';
         }
 
-
         function alPerderCarta() {
-            const displayCodigo = document.getElementById('display-codigo-carta');
-            if(displayCodigo) displayCodigo.innerText = '---';
+            document.getElementById('display-codigo-carta').innerText = '---';
             cartaActualEnPantalla = null;
             ui.msg.innerText = "BUSCANDO..."; 
             ui.scanner.className = ''; 
             document.getElementById('hud-derecho').style.display = 'none';
             resetBotones();
         }
-
-        // --- LOGICA DE UI Y JUEGO ---
 
         function actualizarUI() {
             const j = jugadores[turnoJugadorIdx];
@@ -404,15 +387,10 @@
                 const conf = carta.botones[id];
                 btn.classList.remove('style-buho', 'style-artefacto');
 
-                if (carta.tipo === 'BUHO') {
-                    btn.classList.add('style-buho');
-                    btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
-                } else if (carta.tipo === 'ARTEFACTO') {
-                    btn.classList.add('style-artefacto');
-                    btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
-                } else {
-                    btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
-                }
+                if (carta.tipo === 'BUHO') btn.classList.add('style-buho');
+                else if (carta.tipo === 'ARTEFACTO') btn.classList.add('style-artefacto');
+
+                btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
 
                 const valId = id.replace('btn-','val-');
                 const valSpan = document.getElementById(valId);
@@ -424,7 +402,6 @@
             });
         }
 
-        // Asignación de clicks a los botones de Gemas (Lógica del Turno)
         ['btn-i','btn-a','btn-t','btn-m'].forEach(id => {
             document.getElementById(id).onclick = () => {
                 if(!cartaActualEnPantalla) return;
@@ -433,7 +410,6 @@
                 
                 ui.videoAction.style.display = 'block'; 
                 ui.videoAction.src = RUTA_BASE + conf.video;
-                ui.videoAction.onerror = () => { console.log("Video missing: " + conf.video); };
                 ui.videoAction.play().catch(e => console.log("Play interrupted"));
 
                 const hud = document.getElementById('hud-derecho');
@@ -451,7 +427,6 @@
             };
         });
 
-        // Botón Confirmar
         document.getElementById('btn-confirmar').onclick = () => {
             if(!jugadaPendiente) { alert("Escanea primero"); return; }
             ultimaJugada = { nombre: jugadaPendiente.carta.nombre, accion: jugadaPendiente.lado }; 

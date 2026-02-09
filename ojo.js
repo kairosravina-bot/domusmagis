@@ -5,17 +5,12 @@ import { RUTA_BASE, CARTAS } from './biblioteca.js';
 
 let mindarThree = null;
 
-// Esta función inicia la cámara y recibe dos funciones del juego:
-// onEncontrado(codTarget) -> Qué hacer cuando ve una carta (recibe el código completo)
-// onPerdido()             -> Qué hacer cuando la pierde
 export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
-    if (mindarThree) return; // Evitar doble inicio
-
-    console.log("Iniciando OJO DE DOMUS MAGI...");
+    if (mindarThree) return;
 
     mindarThree = new MindARThree({
         container: document.getElementById(containerId),
-        imageTargetSrc: RUTA_BASE + 'targets1.mind', // Archivo .mind universal
+        imageTargetSrc: RUTA_BASE + 'targets1.mind', 
         maxTrack: 1,
         uiLoading: "no",
         uiScanning: "no",
@@ -24,43 +19,27 @@ export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
 
     const { renderer, scene, camera } = mindarThree;
 
-    // Crear anclas para cada una de las 58 cartas
-    // Cada posición en CARTAS tiene un codTarget único
+    // Registramos los 58 targets (del 0 al 57)
     for (let targetId = 0; targetId < 58; targetId++) {
-        try {
-            const anchor = mindarThree.addAnchor(targetId);
-            
-            // Plano invisible para ayudar al tracking
-            const geometry = new THREE.PlaneGeometry(1, 1);
-            const material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
-            const plane = new THREE.Mesh(geometry, material);
-            anchor.group.add(plane);
+        const anchor = mindarThree.addAnchor(targetId);
+        
+        // Obtenemos la carta correspondiente de la biblioteca por su índice de target
+        const carta = CARTAS[targetId];
+        const codReal = carta ? carta.codTarget : null;
 
-            // Obtener la carta en esta posición
-            const carta = CARTAS[targetId];
-            const codTarget = carta ? carta.codTarget : null;
+        anchor.onTargetFound = () => {
+            if (codReal) {
+                console.log("Detectado:", codReal);
+                onEncontrado(codReal);
+            }
+        };
 
-            // Eventos
-            anchor.onTargetFound = () => {
-                console.log("OJO: Detectado Target " + targetId + " -> Código: " + codTarget);
-                // Pasar el codTarget COMPLETO al callback
-                if (codTarget) {
-                    onEncontrado(codTarget);
-                }
-            };
-
-            anchor.onTargetLost = () => {
-                console.log("OJO: Perdido Target " + targetId);
-                onPerdido();
-            };
-        } catch (e) {
-            console.warn("No se pudo crear ancla para target " + targetId, e);
-        }
+        anchor.onTargetLost = () => {
+            onPerdido();
+        };
     }
 
     await mindarThree.start();
-    
-    // Bucle de renderizado
     renderer.setAnimationLoop(() => {
         renderer.render(scene, camera);
     });
