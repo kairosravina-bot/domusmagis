@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: FIRST BLOOD (58 CARTAS)</title>
+    <title>DOMUS MAGI: FIRST BLOOD (58 CARTAS) V004</title>
     <link rel="stylesheet" href="style.css">
     
     <!-- MAPA DE IMPORTACIONES (MODULOS) -->
@@ -139,216 +139,75 @@
         </div>
     </div>
 
-    <!-- LOGICA DEL JUEGO (MODULOS) -->
-    <script type="module">
+    <!-- LOGICA DEL JUEGO -->
+    <script>
         // ═══════════════════════════════════════════════════════
-        // DOMUS MAGI - FIRST BLOOD V.003 (Flujo Corregido)
+        // DOMUS MAGI - FIRST BLOOD V.004 (Setup Completo)
         // ═══════════════════════════════════════════════════════
-        import { CARTAS, VIDEOS_BATALLA, RUTA_BASE, QR_MAPPING } from './biblioteca.js';
-        import { iniciarOjo } from './ojo.js';
 
         // CONFIGURACIÓN GLOBAL
         const MAX_SLOTS = 3;
-        const TARGETS_TOTAL = 58; // 58 cartas (0-57)
+        const TARGETS_TOTAL = 58;
 
         // ESTADO DEL JUEGO
         let cantJugadores = 0;
         let jugadores = [];
         let turnoJugadorIdx = 0;
         let slotActual = 0;
-        let cartaActualEnPantalla = null;
         let jugadaPendiente = null;
         let ultimaJugada = null;
-        let dadosSeleccionadosBatalla = 0;
+        let dadosSeleccionadosBatalla = 2;
         let contadorPartidas = 0;
         let historialPartidas = [];
 
-        const ui = {
-            containerAR: document.getElementById('container-ar'),
-            uiJuego: document.getElementById('ui-juego'),
-            msg: document.getElementById('msg-visor'),
-            videoAction: document.getElementById('video-action'),
-            guiaScanner: document.getElementById('guia-scanner'),
-            txtTurno: document.getElementById('txt-turno'),
-        };
-
         // ═══════════════════════════════════════════════════════
-        // FUNCIONES SETUP (Corregidas para el flujo)
+        // SETUP DE MAGOS (V004 - FUNCIÓN PRINCIPAL)
         // ═══════════════════════════════════════════════════════
-        window.setModo = (n) => {
-            cantJugadores = n;
-            // CORRECCIÓN: Oculta el selector de modo de juego
+        window.setModo = (numMagos) => {
+            cantJugadores = numMagos;
             document.getElementById('setup-selector').classList.add('oculto');
-            // CORRECCIÓN: Muestra la sección de registro
             document.getElementById('registro').classList.remove('oculto');
-            actualizarStatusReg();
+            document.getElementById('reg-status').innerText = `Inscribe ${numMagos} magos (0/${numMagos})`;
         };
 
-        const actualizarStatusReg = () => {
-            const faltantes = cantJugadores - jugadores.length;
-            document.getElementById('reg-status').innerText = 
-                faltantes > 0 ? `${faltantes} MAGO(S) MÁS` : "¡LISTOS!";
-        };
-        
         window.registrarMago = (casa, color, escudo) => {
             const nombre = document.getElementById('mago-nombre').value.trim().toUpperCase();
-            if (!nombre) { alert("Escribe tu nombre"); return; }
+            if(!nombre) { alert("Escribe un nombre"); return; }
             
-            // Asignar el escudo correcto basado en la casa
-            let escudoURL = '';
-            if (casa === 'TIERRA') escudoURL = 'ESCUDO_LEON.png';
-            else if (casa === 'CIELO') escudoURL = 'ESCUDO_AGUILA.png';
-            else if (casa === 'AGUA') escudoURL = 'ESCUDO_TRITON.png';
-            else if (casa === 'MAGIA') escudoURL = 'ESCUDO_ARCANUM.png';
+            jugadores.push({
+                nombre: nombre,
+                casa: casa,
+                color: color,
+                imgEscudo: escudo,
+                slots: [null, null, null],
+                dado: 0
+            });
             
-            jugadores.push({ nombre, casa, color, slots: [null,null,null], dado: 0, imgEscudo: escudoURL });
-            document.getElementById('mago-nombre').value = '';
+            const registrados = jugadores.length;
+            document.getElementById('reg-status').innerText = `Inscribe ${cantJugadores} magos (${registrados}/${cantJugadores})`;
+            document.getElementById('mago-nombre').value = "";
             
-            if (jugadores.length === cantJugadores) {
-                // CORRECCIÓN: Al completar el registro, iniciar la partida.
-                iniciarPartida();
-            } else {
-                // Si falta gente, actualiza el estado.
-                actualizarStatusReg();
-            }
-        };
-
-        const iniciarPartida = async () => {
-            document.getElementById('p-setup').classList.add('oculto');
-            ui.uiJuego.classList.remove('oculto');
-            actualizarUI();
-            
-            // Iniciar AR
-            try {
-                await iniciarOjo('container-ar', onCartaEncontrada, onCartaPerdida);
-            } catch (e) {
-                console.error("Error iniciando AR:", e);
-                alert("Error iniciando cámara AR");
+            if(registrados === cantJugadores) {
+                setTimeout(() => {
+                    document.getElementById('p-setup').classList.add('oculto');
+                    document.getElementById('ui-juego').classList.remove('oculto');
+                    actualizarUI();
+                }, 500);
             }
         };
 
         // ═══════════════════════════════════════════════════════
-        // DETECCION AR
-        // ═══════════════════════════════════════════════════════
-        const onCartaEncontrada = (targetId) => {
-            // targetId es 0-57 según targets.mind
-            const carta = CARTAS[targetId];
-            if (!carta) {
-                console.warn("Target no mapeado:", targetId);
-                return;
-            }
-            cartaActualEnPantalla = carta;
-            actualizarUICartaEscaneada();
-        };
-
-        const onCartaPerdida = () => {
-            cartaActualEnPantalla = null;
-            resetBotones();
-            ui.msg.innerText = "ESCANEA CARTA";
-            ui.guiaScanner.classList.remove('verde','dorado','violeta');
-        };
-
-        // ═══════════════════════════════════════════════════════
-        // ACTUALIZAR UI
+        // ACTUALIZAR UI DURANTE JUEGO
         // ═══════════════════════════════════════════════════════
         const actualizarUI = () => {
-            const jugadorActual = jugadores[turnoJugadorIdx];
-            ui.txtTurno.innerText = `TURNO: ${jugadorActual.nombre} (SLOT ${slotActual + 1}/3)`;
-            document.getElementById('slot-indicator').innerText = `${slotActual + 1}/3`;
-            ui.msg.innerText = "ESCANEA CARTA";
-            resetBotones();
-        };
-
-        const actualizarUICartaEscaneada = () => {
-            if (!cartaActualEnPantalla) return;
-            
-            const carta = cartaActualEnPantalla;
-            ui.msg.innerText = carta.nombre.toUpperCase();
-            
-            // Actualizar colores según elemento
-            ui.guiaScanner.className = 'verde'; // Default al escanear
-            if (carta.elemento === 'CIELO') ui.guiaScanner.classList.add('dorado');
-            else if (carta.elemento === 'MAGIA') ui.guiaScanner.classList.add('violeta');
-            
-            actualizarEstiloBotones(carta);
-        };
-
-        const actualizarEstiloBotones = (carta) => {
-            ['btn-i','btn-a','btn-t','btn-m'].forEach(id => {
-                const btn = document.getElementById(id);
-                const conf = carta.botones[id];
-                btn.classList.remove('style-buho', 'style-artefacto');
-
-                if (carta.tipo === 'POCION' || carta.tipo === 'ARTEFACTO') {
-                    btn.classList.add('style-artefacto');
-                }
-
-                btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
-
-                const valId = id.replace('btn-','val-');
-                const valSpan = document.getElementById(valId);
-                valSpan.innerText = conf.valor; 
-                valSpan.className = "valor-flotante"; 
-                // Colores Neon V.100
-                if (carta.tipo === 'CASA') valSpan.classList.add('neon-blanco');
-                else if (carta.tipo === 'POCION' || carta.tipo === 'ARTEFACTO') valSpan.classList.add('neon-amarillo');
-            });
+            const jugador = jugadores[turnoJugadorIdx];
+            document.getElementById('txt-turno').innerText = `TURNO: ${jugador.nombre}`;
+            document.getElementById('slot-indicator').innerText = `${slotActual + 1}/${MAX_SLOTS}`;
         };
 
         // ═══════════════════════════════════════════════════════
-        // CLICKS A GEMAS (ACCIONES)
+        // BATALLA Y RESULTADOS
         // ═══════════════════════════════════════════════════════
-        ['btn-i','btn-a','btn-t','btn-m'].forEach(id => {
-            document.getElementById(id).onclick = () => {
-                if(!cartaActualEnPantalla) return;
-                const conf = cartaActualEnPantalla.botones[id];
-                jugadaPendiente = { carta: cartaActualEnPantalla, lado: conf.label, valor: conf.valor };
-                
-                ui.videoAction.style.display = 'block'; 
-                ui.videoAction.src = RUTA_BASE + conf.video;
-                ui.videoAction.onerror = () => { console.log("Video missing: " + conf.video); };
-                ui.videoAction.play().catch(e => console.log("Play interrupted"));
-
-                const hud = document.getElementById('hud-derecho');
-                hud.style.display = 'flex';
-                document.getElementById('hud-img-escudo').src = RUTA_BASE + cartaActualEnPantalla.imgEscudo;
-                document.getElementById('hud-txt-arma').innerText = cartaActualEnPantalla.arma;
-                document.getElementById('hud-txt-accion').innerText = conf.label;
-                document.getElementById('hud-txt-valor').innerText = conf.valor;
-
-                ui.videoAction.onended = () => { 
-                    ui.videoAction.style.display = 'none'; 
-                    hud.style.display = 'none'; 
-                    ui.msg.innerText = "CONFIRMA ABAJO"; 
-                };
-            };
-        });
-
-        // CONFIRMAR JUGADA
-        document.getElementById('btn-confirmar').onclick = () => {
-            if(!jugadaPendiente) { alert("Escanea primero"); return; }
-            ultimaJugada = { nombre: jugadaPendiente.carta.nombre, accion: jugadaPendiente.lado }; 
-            jugadores[turnoJugadorIdx].slots[slotActual] = jugadaPendiente;
-            turnoJugadorIdx++; 
-            if(turnoJugadorIdx >= cantJugadores) { 
-                turnoJugadorIdx=0; 
-                slotActual++; 
-            }
-            if(slotActual >= MAX_SLOTS) { 
-                forzarBatalla(); 
-            } else { 
-                document.getElementById('pantalla-cambio-turno').classList.remove('oculto'); 
-                document.getElementById('next-player-name').innerText = jugadores[turnoJugadorIdx].nombre; 
-            }
-            jugadaPendiente = null;
-        };
-
-        window.confirmarCambioTurno = () => {
-            document.getElementById('pantalla-cambio-turno').classList.add('oculto');
-            actualizarUI();
-        };
-
-        // BATALLA
         window.forzarBatalla = () => {
             document.getElementById('modal-dados-fase').classList.remove('oculto');
             document.getElementById('dados-player-name').innerText = jugadores[turnoJugadorIdx].nombre;
@@ -389,7 +248,11 @@
             };
         };
 
-        // RESULTADOS
+        window.confirmarCambioTurno = () => {
+            document.getElementById('pantalla-cambio-turno').classList.add('oculto');
+            actualizarUI();
+        };
+
         const mostrarResultados = () => {
             document.getElementById('modal-dados-fase').classList.add('oculto');
             document.getElementById('ui-juego').classList.add('oculto');
@@ -416,14 +279,11 @@
                     if(s) htmlSlots += `
                     <div class="fila-res">
                         <div style="display:flex; align-items:center;">
-                            <img src="${RUTA_BASE + s.carta.imgEscudo}" class="mini-escudo-res" onerror="this.style.display='none'">
                             <div style="display:flex; flex-direction:column;">
-                                <span class="res-nombre">${s.carta.nombre}</span>
-                                <span style="font-size:10px; color:#555;">${s.carta.arma}</span>
+                                <span class="res-nombre">${s.nombre || 'CARTA'}</span>
                             </div>
                         </div>
-                        <span class="res-accion">${s.lado}</span>
-                        <span class="res-valor">${s.valor}</span>
+                        <span style="color:#aaa;">+${s.valor}</span>
                     </div>`;
                 });
 
@@ -431,11 +291,11 @@
                 <div class="resultado-jugador ${i===0?'ganador':''}">
                     <h3 style="color:${r.color}; margin:0; text-shadow:none;">${r.nombre}</h3>
                     ${htmlSlots}
-                    <div class="fila-dado">
+                    <div style="margin-top:10px;">
                         <span>DADOS (${dadosSeleccionadosBatalla}D):</span>
-                        <span class="dado-gigante-res">+${r.dado}</span>
+                        <span style="color:#ffd700; font-weight:900; margin-left:10px;">+${r.dado}</span>
                     </div>
-                    <div class="total-score">${r.total}</div>
+                    <div style="font-size:60px; color:#ffd700; font-weight:900; margin-top:10px;">${r.total}</div>
                 </div>`;
             });
         };
@@ -462,18 +322,8 @@
             actualizarUI();
         };
 
-        const resetBotones = () => { 
-            ['btn-i','btn-a','btn-t','btn-m'].forEach(id=>{ 
-                const btn = document.getElementById(id);
-                btn.className = 'btn-gema';
-                btn.innerHTML=`<span class="letra-grande">${id.split('-')[1].toUpperCase()}</span>`; 
-                btn.classList.remove('activo');
-                const valId = id.replace('btn-','val-');
-                const valSpan = document.getElementById(valId);
-                valSpan.innerText = "";
-                valSpan.className = "valor-flotante"; 
-            }); 
-        };
+        // INICIALIZACIÓN
+        console.log('DOMUS MAGI V004 - Setup listo');
     </script>
 </body>
 </html>
