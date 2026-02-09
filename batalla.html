@@ -142,7 +142,7 @@
     <!-- LOGICA DEL JUEGO (MODULOS) -->
     <script type="module">
         // ═══════════════════════════════════════════════════════
-        // DOMUS MAGI - FIRST BLOOD V.001
+        // DOMUS MAGI - FIRST BLOOD V.002
         // ═══════════════════════════════════════════════════════
         import { CARTAS, VIDEOS_BATALLA, RUTA_BASE, QR_MAPPING } from './biblioteca.js';
         import { iniciarOjo } from './ojo.js';
@@ -173,11 +173,13 @@
         };
 
         // ═══════════════════════════════════════════════════════
-        // FUNCIONES SETUP
+        // FUNCIONES SETUP (Corregidas para el flujo)
         // ═══════════════════════════════════════════════════════
         window.setModo = (n) => {
             cantJugadores = n;
-            document.getElementById('setup-selector').style.display = 'none';
+            // CORRECCIÓN: Oculta el selector de modo de juego
+            document.getElementById('setup-selector').classList.add('oculto');
+            // CORRECCIÓN: Muestra la sección de registro
             document.getElementById('registro').classList.remove('oculto');
             actualizarStatusReg();
         };
@@ -188,7 +190,6 @@
                 faltantes > 0 ? `${faltantes} MAGO(S) MÁS` : "¡LISTOS!";
         };
         
-        // Se asumen los nombres de los escudos para cada facción como en la biblioteca.js
         window.registrarMago = (casa, color, escudo) => {
             const nombre = document.getElementById('mago-nombre').value.trim().toUpperCase();
             if (!nombre) { alert("Escribe tu nombre"); return; }
@@ -202,9 +203,13 @@
             
             jugadores.push({ nombre, casa, color, slots: [null,null,null], dado: 0, imgEscudo: escudoURL });
             document.getElementById('mago-nombre').value = '';
-            actualizarStatusReg();
+            
             if (jugadores.length === cantJugadores) {
+                // CORRECCIÓN: Al completar el registro, iniciar la partida.
                 iniciarPartida();
+            } else {
+                // Si falta gente, actualiza el estado.
+                actualizarStatusReg();
             }
         };
 
