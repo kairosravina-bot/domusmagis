@@ -13,6 +13,18 @@
         "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/", 
         "mindar-image-three":"https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js" 
     } }
+        // ACTUALIZAR CODIGO TARGET
+        const originalAlEncontrarCarta = alEncontrarCarta;
+        window.alEncontrarCarta = function(id) {
+            originalAlEncontrarCarta(id);
+            const carta = CARTAS[id];
+            if(carta) document.getElementById("codigo-target").innerText = carta.codTarget;
+        };
+        const originalAlPerderCarta = alPerderCarta;
+        window.alPerderCarta = function() {
+            originalAlPerderCarta();
+            document.getElementById("codigo-target").innerText = "---";
+        };
     </script>
 </head>
 <body>
@@ -93,12 +105,8 @@
 
         <div id="zona-inferior">
             <div id="info-rival">RIVAL JUGÓ: <span id="rival-last-move">???</span></div>
-            
-            <!-- VISOR CON CODIGO TARGET EN BLANCO GRANDE -->
-            <div id="msg-visor" style="font-size:26px; color:var(--borde-dorado); font-weight:900;">ESCANEA CARTA
-                <div id="codigo-target" style="font-size:28px; color:#ffffff; font-weight:900; font-family:'Courier New',monospace; letter-spacing:2px; margin-top:8px; padding:10px; background:rgba(0,0,0,0.7); border:2px solid #ffffff; border-radius:4px; text-shadow:0 0 10px rgba(255,255,255,0.5);">---</div>
-            </div>
-            
+            <div id="msg-visor" style="font-size:26px; color:var(--borde-dorado); font-weight:900;">ESCANEA CARTA</div>
+            <div id="codigo-target" style="font-size:20px; color:#ffffff; margin-top:5px; font-family:Courier New,monospace; letter-spacing:2px; font-weight:900;">---</div>
             <p style="color:#aaa; font-size:20px; margin:0;">SLOT: <span id="slot-indicator" style="color:gold;">1/3</span></p>
             
             <!-- GEMAS NEON V81 -->
@@ -150,117 +158,167 @@
         import { CARTAS, VIDEOS_BATALLA, RUTA_BASE } from './biblioteca.js';
         import { iniciarOjo } from './ojo.js';
 
-        // VARIABLES GLOBALES
-        const MAX_SLOTS = 3;
-        const ui = {
-            setup: document.getElementById('p-setup'),
-            uiJuego: document.getElementById('ui-juego'),
-            msg: document.getElementById('msg-visor'),
-            modalDados: document.getElementById('modal-dados-fase'),
-            modalBatalla: document.getElementById('modal-batalla'),
-            resultado: document.getElementById('p-resultado'),
-            cambioTurno: document.getElementById('pantalla-cambio-turno'),
-            videoAction: document.getElementById('video-action'),
-            turno: document.getElementById('txt-turno'),
-            slotIndicator: document.getElementById('slot-indicator'),
-            codigoTarget: document.getElementById('codigo-target')
+        // Variables Globales de Juego
+        let jugadores = []; let cantJugadores = 0; let slotActual = 0; 
+        let turnoJugadorIdx = 0; const MAX_SLOTS = 3; 
+        let jugadaPendiente = null; let ultimaJugada = null; 
+        let dadosSeleccionadosBatalla = 2; let historialPartidas = []; 
+        let contadorPartidas = 0; let idxDado = 0;
+        let cartaActualEnPantalla = null;
+
+        const ui = { 
+            scanner: document.getElementById('guia-scanner'), 
+            msg: document.getElementById('msg-visor'), 
+            videoAction: document.getElementById('video-action') 
         };
 
-        let jugadores = [], cartaActualEnPantalla = null, jugadaPendiente = null;
-        let cantJugadores = 0, slotActual = 0, turnoJugadorIdx = 0;
-        let ultimaJugada = null, dadosSeleccionadosBatalla = 0;
-        let contadorPartidas = 0, historialPartidas = [];
+        // --- FUNCIONES DEL SISTEMA DE JUEGO (Expuestas a Window para HTML onclicks) ---
 
-        // Escucha de detección AR
-        function iniciarDeteccionAR() {
-            console.log("Iniciando detección AR...");
-            iniciarOjo('container-ar', (targetId) => {
-                cartaActualEnPantalla = CARTAS[targetId];
-                if (cartaActualEnPantalla) {
-                    ui.msg.innerText = 'ESCANEA CARTA';
-                    ui.codigoTarget.innerText = cartaActualEnPantalla.codTarget;
-                    ui.codigoTarget.style.color = '#00ffff';
-                    ui.codigoTarget.style.borderColor = '#00ffff';
-                    ui.codigoTarget.style.textShadow = '0 0 15px rgba(0,255,255,0.8)';
-                    actualizarEstiloBotones(cartaActualEnPantalla);
-                    console.log("🎴 Detectada:", cartaActualEnPantalla.nombre, "- Código:", cartaActualEnPantalla.codTarget);
-                }
-            }, () => {
-                cartaActualEnPantalla = null;
-                ui.msg.innerText = "ESCANEA CARTA";
-                ui.codigoTarget.innerText = "---";
-                ui.codigoTarget.style.color = '#ffffff';
-                ui.codigoTarget.style.borderColor = '#ffffff';
-                ui.codigoTarget.style.textShadow = '0 0 10px rgba(255,255,255,0.3)';
-                document.getElementById('hud-derecho').style.display = 'none';
-            });
-        }
-
-        // Funciones Globales
-        window.setModo = (n) => {
-            cantJugadores = n;
-            document.getElementById('setup-selector').style.display = 'none';
-            document.getElementById('registro').style.display = 'block';
-            document.getElementById('reg-status').innerText = 'MAGO 1 DE ' + n;
-            document.getElementById('mago-nombre').focus();
+        window.setModo = (n) => { 
+            cantJugadores = n; 
+            document.getElementById('setup-selector').classList.add('oculto'); 
+            document.getElementById('registro').classList.remove('oculto'); 
+            document.getElementById('reg-status').innerText = `Mago 1 de ${n}`; 
         };
 
-        window.registrarMago = (casa, color, escudo) => {
-            const nombre = document.getElementById('mago-nombre').value.trim() || 'MAGO ' + (jugadores.length + 1);
-            jugadores.push({ nombre, casa, color, escudo, slots: [null, null, null], dado: 0 });
-            document.getElementById('mago-nombre').value = '';
-            
-            if (jugadores.length === cantJugadores) {
-                ui.setup.classList.add('oculto');
-                ui.uiJuego.classList.remove('oculto');
-                iniciarDeteccionAR();
-                actualizarUI();
-            } else {
-                document.getElementById('reg-status').innerText = 'MAGO ' + (jugadores.length + 1) + ' DE ' + cantJugadores;
-                document.getElementById('mago-nombre').focus();
+        window.registrarMago = (casa, color, esc) => {
+            let n = document.getElementById('mago-nombre').value || "Mago " + (jugadores.length + 1);
+            jugadores.push({ nombre: n, casa, color, esc, slots: [null, null, null], dado: 0 });
+            document.getElementById('mago-nombre').value = "";
+            if(jugadores.length === cantJugadores) { 
+                iniciarJuego(); 
+            } else { 
+                document.getElementById('reg-status').innerText = `Mago ${jugadores.length + 1} de ${cantJugadores}`; 
             }
         };
 
-        window.confirmarCambioTurno = () => {
-            ui.cambioTurno.classList.add('oculto');
-            ui.uiJuego.classList.remove('oculto');
-            actualizarUI();
-        };
+        function iniciarJuego() { 
+            document.getElementById('p-setup').classList.add('oculto'); 
+            document.getElementById('ui-juego').classList.remove('oculto'); 
+            
+            // AQUI LLAMAMOS AL MÓDULO OJO
+            iniciarOjo('container-ar', alEncontrarCarta, alPerderCarta);
+            
+            actualizarUI(); 
+        }
 
-        function actualizarUI() {
-            const jugador = jugadores[turnoJugadorIdx];
-            ui.turno.innerText = 'TURNO: ' + jugador.nombre;
-            ui.turno.style.color = jugador.color;
-            ui.turno.style.borderColor = jugador.color;
-            ui.slotIndicator.innerText = (slotActual + 1) + ' / 3';
+        // --- CALLBACKS QUE LE PASAMOS AL OJO ---
+        function alEncontrarCarta(id) {
+            const carta = CARTAS[id];
+            if(!carta) return;
+            
+            cartaActualEnPantalla = carta;
+            ui.msg.innerText = carta.nombre;
+
+            // Logica Visual especifica de Batalla (Colores del scanner)
+            if(carta.tipo === 'ARTEFACTO') ui.scanner.className = 'violeta';
+            else if(carta.tipo === 'BUHO') ui.scanner.className = 'dorado';
+            else ui.scanner.className = 'verde';
+
+            actualizarEstiloBotones(carta);
+            document.getElementById('hud-derecho').style.display = 'none'; // Se muestra al tocar botón
+        }
+
+        function alPerderCarta() {
+            cartaActualEnPantalla = null;
+            ui.msg.innerText = "BUSCANDO..."; 
+            ui.scanner.className = ''; 
+            document.getElementById('hud-derecho').style.display = 'none';
             resetBotones();
         }
 
-        window.forzarBatalla = () => {
-            ui.uiJuego.classList.add('oculto');
-            ui.modalBatalla.classList.remove('oculto');
-            
-            const vs = jugadores.map(j => j.nombre).join(' VS ');
-            document.getElementById('texto-vs').innerText = vs;
-            document.getElementById('video-clash').src = RUTA_BASE + VIDEOS_BATALLA[Math.floor(Math.random()*VIDEOS_BATALLA.length)];
-            document.getElementById('video-clash').play();
+        // --- LOGICA DE UI Y JUEGO ---
 
-            setTimeout(() => mostrarResultado(), 3000);
+        function actualizarUI() {
+            const j = jugadores[turnoJugadorIdx];
+            const txt = document.getElementById('txt-turno'); 
+            txt.innerText = `TURNO: ${j.nombre}`; txt.style.color = j.color; txt.style.borderColor = j.color;
+            document.getElementById('slot-indicator').innerText = `${slotActual + 1} / ${MAX_SLOTS}`;
+            
+            const infoRival = document.getElementById('info-rival');
+            if (ultimaJugada) { 
+                infoRival.style.display = 'block'; 
+                document.getElementById('rival-last-move').innerText = `${ultimaJugada.nombre} (${ultimaJugada.accion})`; 
+            } else { 
+                infoRival.style.display = 'none'; 
+            }
+            
+            document.getElementById('msg-visor').style.display = 'block'; 
+            document.getElementById('guia-scanner').className = '';
+            document.getElementById('hud-derecho').style.display = 'none'; 
+            resetBotones(); 
+            jugadaPendiente = null;
+        }
+
+        window.confirmarCambioTurno = () => { 
+            document.getElementById('pantalla-cambio-turno').classList.add('oculto'); 
+            actualizarUI(); 
         };
 
-        window.ejecutarLanzamientoBatalla = (n) => {
-            dadosSeleccionadosBatalla = n;
-            const resultados = [2,3,4,5].map(v=>Math.floor(Math.random()*6)+1).slice(0,n);
-            const total = resultados.reduce((a,b)=>a+b,0);
-            
-            jugadores[turnoJugadorIdx].dado = total;
-            ui.modalDados.classList.add('oculto');
-            forzarBatalla();
+        window.forzarBatalla = () => { 
+            if(confirm("¿Forzar Batalla?")) iniciarFaseDadosBatalla(); 
         };
 
-        function mostrarResultado() {
-            ui.modalBatalla.classList.add('oculto');
-            ui.resultado.classList.remove('oculto');
+        function iniciarFaseDadosBatalla() {
+            idxDado = 0; 
+            document.getElementById('modal-dados-fase').classList.remove('oculto'); 
+            prepararDadoJugador();
+        }
+
+        function prepararDadoJugador() {
+            if(idxDado >= cantJugadores) { 
+                document.getElementById('modal-dados-fase').classList.add('oculto'); 
+                iniciarClashFinal(); 
+                return; 
+            }
+            const jug = jugadores[idxDado];
+            const nameEl = document.getElementById('dados-player-name'); 
+            nameEl.innerText = jug.nombre; nameEl.style.color = jug.color;
+            document.getElementById('layer-valor-batalla').style.display = 'none';
+            actualizarBotonesDadosVisual();
+        }
+
+        function actualizarBotonesDadosVisual() {
+            for(let i=2; i<=5; i++) document.getElementById('btn-batalla-'+i).classList.remove('tageado');
+            document.getElementById('btn-batalla-'+dadosSeleccionadosBatalla).classList.add('tageado');
+        }
+
+        window.ejecutarLanzamientoBatalla = (cantidad) => {
+            dadosSeleccionadosBatalla = cantidad; 
+            actualizarBotonesDadosVisual();
+            const vid = document.getElementById('video-dados-batalla');
+            vid.currentTime = 0; vid.play();
+            vid.onended = () => {
+                let total = 0; 
+                for(let i=0; i<cantidad; i++) total += Math.floor(Math.random()*6)+1;
+                jugadores[idxDado].dado = total;
+                document.getElementById('layer-valor-batalla').innerText = total;
+                document.getElementById('layer-valor-batalla').style.display = 'flex';
+                setTimeout(() => { idxDado++; prepararDadoJugador(); }, 2000);
+            };
+        };
+
+        function iniciarClashFinal() {
+            document.getElementById('modal-batalla').classList.remove('oculto');
+            let vsHTML = "";
+            jugadores.forEach((j, index) => {
+                vsHTML += `<span style="color:${j.color}; text-shadow:1px 1px 0 #000;">${j.nombre}</span>`;
+                if (index < jugadores.length - 1) vsHTML += ` <span style="color:#666; font-size:18px;">VS</span> `;
+            });
+            document.getElementById('texto-vs').innerHTML = vsHTML;
+
+            const vid = document.getElementById('video-clash');
+            vid.src = RUTA_BASE + VIDEOS_BATALLA[Math.floor(Math.random()*VIDEOS_BATALLA.length)];
+            vid.play().catch(e=>console.log("Error play clash"));
+            vid.onended = () => { 
+                document.getElementById('modal-batalla').classList.add('oculto'); 
+                mostrarResultadosDetallados(); 
+            };
+        }
+
+        function mostrarResultadosDetallados() {
+            document.getElementById('ui-juego').classList.add('oculto');
+            document.getElementById('p-resultado').classList.remove('oculto');
             const cont = document.getElementById('resultado-contenido'); cont.innerHTML = '';
             
             let resultados = jugadores.map(j => { 
@@ -403,6 +461,18 @@
             }
         };
 
+        // ACTUALIZAR CODIGO TARGET
+        const originalAlEncontrarCarta = alEncontrarCarta;
+        window.alEncontrarCarta = function(id) {
+            originalAlEncontrarCarta(id);
+            const carta = CARTAS[id];
+            if(carta) document.getElementById("codigo-target").innerText = carta.codTarget;
+        };
+        const originalAlPerderCarta = alPerderCarta;
+        window.alPerderCarta = function() {
+            originalAlPerderCarta();
+            document.getElementById("codigo-target").innerText = "---";
+        };
     </script>
 </body>
 </html>
