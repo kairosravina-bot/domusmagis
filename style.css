@@ -1,23 +1,428 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap');
-:root { --font-titulo: 'Cinzel', serif; --color-oro: #ffd700; --borde-dorado: #d4af37; }
-body { margin: 0; font-family: var(--font-titulo); background: #000; color: #fff; overflow: hidden; }
+
+:root {
+    --font-titulo: 'Cinzel', serif;
+    --color-oro: #ffd700;
+    --borde-dorado: #d4af37;
+    --color-texto: #e0e0e0;
+}
+
+* { 
+    box-sizing: border-box; 
+    user-select: none; 
+    -webkit-tap-highlight-color: transparent; 
+}
+
+html, body {
+    margin: 0; 
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family: var(--font-titulo);
+    background: url('BG_PIEDRA.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: var(--color-texto);
+    overflow: hidden; 
+    height: 100vh; 
+    width: 100vw;
+}
+
 .oculto { display: none !important; }
-.pantalla { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-.btn-master, .btn-jugar { background: linear-gradient(to bottom, #444, #111); color: var(--color-oro); border: 2px solid var(--borde-dorado); padding: 15px; width: 100%; cursor: pointer; font-family: var(--font-titulo); font-weight: 700; margin: 10px 0; }
-#debug-target { position: fixed; top: 80px; left: 20px; background: rgba(255,0,0,0.8); color: white; padding: 10px; font-size: 24px; font-weight: 900; border: 2px solid white; z-index: 10000; display: none; }
-#zona-superior { height: 60%; position: relative; border-bottom: 3px solid gold; }
-#zona-inferior { height: 40%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; padding: 10px; }
-.contenedor-gemas { display: flex; gap: 10px; }
-.btn-gema { width: 70px; height: 70px; background-size: contain; background-repeat: no-repeat; background-color: transparent; border: none; color: white; font-weight: 900; font-size: 24px; }
-#btn-i { background-image: url('GEMA_ROJA.png'); }
-#btn-a { background-image: url('GEMA_VERDE.png'); }
-#btn-t { background-image: url('GEMA_GRIS.png'); }
+
+.pantalla {
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center;
+    padding: 20px; 
+    z-index: 100;
+}
+
+.btn-master, .btn-jugar {
+    font-family: var(--font-titulo); 
+    font-weight: 700; 
+    font-size: 18px; 
+    text-transform: uppercase;
+    color: var(--color-oro); 
+    background: linear-gradient(to bottom, #3a3a3a, #1a1a1a);
+    border: 2px solid var(--borde-dorado); 
+    border-radius: 4px;
+    padding: 15px 20px; 
+    margin: 10px 0; 
+    width: 100%; 
+    max-width: 350px;
+    cursor: pointer; 
+    box-shadow: 0 4px 0 #000; 
+    text-shadow: 1px 1px 0 #000;
+    transition: all 0.2s ease;
+}
+
+.btn-master:hover, .btn-jugar:hover {
+    background: linear-gradient(to bottom, #4a4a4a, #2a2a2a);
+    box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
+}
+
+.btn-master:active { 
+    transform: translateY(4px); 
+    box-shadow: 0 0 0 #000; 
+}
+
+.fila-juego { 
+    display: flex; 
+    gap: 10px; 
+    width: 100%; 
+    max-width: 350px; 
+    justify-content: center; 
+}
+
+input[type="text"] {
+    background: rgba(0,0,0,0.6); 
+    border: none; 
+    border-bottom: 2px solid var(--borde-dorado);
+    color: #fff; 
+    font-family: var(--font-titulo); 
+    font-size: 24px; 
+    text-align: center;
+    padding: 10px; 
+    width: 100%; 
+    margin-bottom: 20px; 
+    outline: none; 
+    text-transform: uppercase;
+    box-sizing: border-box;
+}
+
+input[type="text"]::placeholder {
+    color: #888;
+}
+
+.grid-casas { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px; 
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.btn-casa {
+    font-family: var(--font-titulo); 
+    font-weight: 900; 
+    color: #fff; 
+    padding: 20px 15px;
+    border: 2px solid;
+    border-radius: 8px; 
+    font-size: 16px; 
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    background-color: rgba(0,0,0,0.4);
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.btn-casa:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px currentColor;
+}
+
+.btn-casa:active {
+    transform: scale(0.98);
+}
+
+.btn-casa-tierra {
+    background: linear-gradient(135deg, rgba(139, 0, 0, 0.6), rgba(85, 0, 0, 0.8));
+    border-color: #ff0000;
+    color: #ffcccc;
+}
+
+.btn-casa-tierra:hover {
+    background: linear-gradient(135deg, rgba(200, 0, 0, 0.7), rgba(139, 0, 0, 0.9));
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+}
+
+.btn-casa-cielo {
+    background: linear-gradient(135deg, rgba(0, 50, 100, 0.6), rgba(0, 30, 80, 0.8));
+    border-color: #00aaff;
+    color: #99ddff;
+}
+
+.btn-casa-cielo:hover {
+    background: linear-gradient(135deg, rgba(0, 80, 150, 0.7), rgba(0, 50, 120, 0.9));
+    box-shadow: 0 0 20px rgba(0, 170, 255, 0.6);
+}
+
+.btn-casa-agua {
+    background: linear-gradient(135deg, rgba(0, 100, 50, 0.6), rgba(0, 60, 30, 0.8));
+    border-color: #00ff88;
+    color: #99ffcc;
+}
+
+.btn-casa-agua:hover {
+    background: linear-gradient(135deg, rgba(0, 150, 80, 0.7), rgba(0, 100, 50, 0.9));
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+}
+
+.btn-casa-magia {
+    background: linear-gradient(135deg, rgba(100, 0, 150, 0.6), rgba(60, 0, 100, 0.8));
+    border-color: #aa00ff;
+    color: #dd99ff;
+}
+
+.btn-casa-magia:hover {
+    background: linear-gradient(135deg, rgba(150, 0, 200, 0.7), rgba(100, 0, 150, 0.9));
+    box-shadow: 0 0 20px rgba(170, 0, 255, 0.6);
+}
+
+/* CONTENEDOR AR */
+#container-ar { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    z-index: 0; 
+}
+
+/* UI DEL JUEGO */
+#ui-juego { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    display: flex; 
+    flex-direction: column; 
+    z-index: 500; 
+    pointer-events: none; 
+}
+
+#zona-superior { 
+    height: 55%; 
+    width: 100%; 
+    position: relative; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    border-bottom: 4px solid var(--borde-dorado); 
+}
+
+#zona-inferior { 
+    height: 45%; 
+    width: 100%; 
+    background: linear-gradient(to bottom, rgba(26,5,5,0.95), rgba(0,0,0,1)); 
+    pointer-events: auto; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: space-around; 
+    padding: 10px 15px; 
+}
+
+#hud-derecho { 
+    position: absolute; 
+    top: 10px; 
+    right: 10px; 
+    z-index: 9999; 
+    display: none; 
+    flex-direction: column; 
+    align-items: flex-end; 
+    background: rgba(0,0,0,0.4); 
+    padding: 10px; 
+    border-radius: 12px; 
+    border: 1px solid gold;
+}
+
+#hud-img-escudo { 
+    width: 90px; 
+    height: 90px; 
+    object-fit: contain; 
+}
+
+#hud-txt-accion { 
+    font-size: 24px; 
+    color: gold; 
+    font-weight: 900; 
+}
+
+#hud-txt-valor { 
+    font-size: 60px; 
+    color: white; 
+    line-height: 1; 
+    text-shadow: 0 0 10px #bf00ff; 
+}
+
+#guia-scanner { 
+    width: 240px; 
+    height: 240px; 
+    border: 6px solid rgba(255,255,255,0.4); 
+    border-radius: 20px; 
+}
+
+.contenedor-gemas { 
+    display: flex; 
+    gap: 15px; 
+    justify-content: center; 
+    align-items: flex-end; 
+}
+
+.wrapper-gema { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+}
+
+.valor-flotante { 
+    font-size: 40px; 
+    font-weight: 900; 
+    margin-bottom: 2px; 
+}
+
+.neon-blanco { 
+    color: #fff; 
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff; 
+}
+
+.neon-violeta { 
+    color: #bd00ff; 
+    text-shadow: 0 0 10px #bd00ff, 0 0 20px #bd00ff; 
+}
+
+.neon-amarillo { 
+    color: #ffd700; 
+    text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700; 
+}
+
+.btn-gema { 
+    width: 80px; 
+    height: 80px; 
+    background-size: contain; 
+    background-repeat: no-repeat; 
+    background-color: transparent; 
+    border: none; 
+    cursor: pointer; 
+    transition: transform 0.2s ease;
+}
+
+.btn-gema:hover {
+    transform: scale(1.1);
+}
+
+.btn-gema:active {
+    transform: scale(0.95);
+}
+
+#btn-i { background-image: url('GEMA_ROJA.png'); } 
+#btn-a { background-image: url('GEMA_VERDE.png'); } 
+#btn-t { background-image: url('GEMA_GRIS.png'); } 
 #btn-m { background-image: url('GEMA_VIOLETA.png'); }
-.valor-flotante { font-size: 35px; font-weight: 900; display: block; text-align: center; }
-.neon-blanco { color: #fff; text-shadow: 0 0 10px #fff; }
-.neon-amarillo { color: #ff0; text-shadow: 0 0 10px #ff0; }
-.neon-violeta { color: #d0f; text-shadow: 0 0 10px #d0f; }
-#video-action { position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; display:none; z-index: 50; }
-#hud-derecho { position: absolute; top: 10px; right: 10px; display: none; flex-direction: column; align-items: center; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 10px; }
-#hud-img-escudo { width: 80px; }
-#hud-txt-valor { font-size: 50px; font-weight: 900; }
+
+.letra-grande { 
+    font-size: 32px; 
+    font-weight: 900; 
+    color: #fff; 
+    text-shadow: 0 2px 5px #000; 
+    font-family: var(--font-titulo); 
+}
+
+#video-action { 
+    position: absolute; 
+    width: 100%; 
+    height: 100%; 
+    display: none; 
+    background: black; 
+    z-index: 50; 
+    object-fit: contain; 
+}
+
+/* ESTILOS ADICIONALES PARA DADOS */
+.grid-dados {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.btn-dado-sel {
+    background: linear-gradient(135deg, rgba(139, 69, 19, 0.6), rgba(85, 42, 10, 0.8));
+    border: 2px solid var(--borde-dorado);
+    color: var(--color-oro);
+    padding: 20px;
+    border-radius: 8px;
+    font-family: var(--font-titulo);
+    font-weight: 900;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-dado-sel:hover {
+    background: linear-gradient(135deg, rgba(184, 92, 25, 0.7), rgba(130, 63, 15, 0.9));
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+}
+
+.btn-dado-sel.tageado {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(212, 175, 55, 0.5));
+    border-color: #ffff00;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+}
+
+.dados-container {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    border: 3px solid var(--borde-dorado);
+    border-radius: 15px;
+    overflow: hidden;
+    background: rgba(0,0,0,0.3);
+}
+
+.video-dados {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.layer-valor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.7);
+    font-size: 120px;
+    font-weight: 900;
+    color: var(--color-oro);
+    text-shadow: 0 0 20px var(--borde-dorado);
+    z-index: 10;
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+    .btn-master, .btn-jugar {
+        font-size: 16px;
+        padding: 12px 15px;
+    }
+    
+    .grid-casas {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .btn-casa {
+        padding: 15px 10px;
+        font-size: 14px;
+    }
+}

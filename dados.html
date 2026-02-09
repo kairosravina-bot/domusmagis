@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: ORÁCULO V100</title>
+    <title>DOMUS MAGI: ORACULO V111</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body style="background: url('BG_PIEDRA.jpg') no-repeat center center fixed; background-size: cover;">
     
     <div class="pantalla">
-        <div style="background:rgba(0,0,0,0.7); padding:30px; border:2px solid gold; border-radius:15px; text-align:center;">
-            <h1 style="color:var(--borde-dorado); font-size:40px;">ORÁCULO</h1>
+        <div style="background:rgba(0,0,0,0.7); padding:30px; border:2px solid gold; border-radius:15px; text-align:center; max-width: 400px;">
+            <h1 style="color:var(--borde-dorado); font-size:40px; margin-top: 0;">ORACULO</h1>
             
             <div class="dados-container" style="margin: 20px auto;">
                 <video id="video-dados-solo" class="video-dados" src="https://kairosravina-bot.github.io/domusmagis/Dados.mp4" playsinline webkit-playsinline muted></video>
                 <div id="layer-valor-solo" class="layer-valor" style="display:none;">0</div>
             </div>
 
-            <!-- GRID REPARADA: AHORA TIENE 5D -->
+            <!-- GRID DE DADOS -->
             <div class="grid-dados" style="margin: 20px auto;">
                 <div class="btn-dado-sel" id="btn-solo-2" onclick="tirarDados(2)"><strong>2D</strong></div>
                 <div class="btn-dado-sel" id="btn-solo-3" onclick="tirarDados(3)"><strong>3D</strong></div>
@@ -25,28 +25,39 @@
                 <div class="btn-dado-sel" id="btn-solo-5" onclick="tirarDados(5)"><strong>5D</strong></div>
             </div>
 
-            <button class="btn-master" style="margin-top:20px; background:#333;" onclick="window.location.href='index.html'">VOLVER</button>
+            <button class="btn-master" style="margin-top:20px; background:#333; width: 100%; max-width: 350px;" onclick="window.location.href='index.html'">VOLVER</button>
         </div>
     </div>
 
     <script>
         function tirarDados(n) {
-            // Reset visual (Incluye el 5 ahora)
-            [2,3,4,5].forEach(i => document.getElementById('btn-solo-'+i).classList.remove('tageado'));
-            document.getElementById('btn-solo-'+n).classList.add('tageado');
+            // Reset visual
+            [2,3,4,5].forEach(i => {
+                const btn = document.getElementById('btn-solo-'+i);
+                if (btn) btn.classList.remove('tageado');
+            });
+
+            const btnSeleccionado = document.getElementById('btn-solo-'+n);
+            if (btnSeleccionado) btnSeleccionado.classList.add('tageado');
 
             const vid = document.getElementById('video-dados-solo');
             const layer = document.getElementById('layer-valor-solo');
             
+            if (!vid || !layer) return;
+
             layer.style.display = 'none';
             vid.currentTime = 0;
-            vid.play();
+            
+            vid.play().catch(e => console.log("Error al reproducir video:", e));
             
             vid.onended = () => {
                 let total = 0;
-                for(let i=0; i<n; i++) total += Math.floor(Math.random()*6) + 1;
+                for(let i = 0; i < n; i++) {
+                    total += Math.floor(Math.random() * 6) + 1;
+                }
                 layer.innerText = total;
                 layer.style.display = 'flex';
+                console.log("Resultado de " + n + "D: " + total);
             };
         }
     </script>
