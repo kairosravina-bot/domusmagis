@@ -1,13 +1,13 @@
 // ojo.js - MODULO DE REALIDAD AUMENTADA (MindAR + Three)
 import * as THREE from 'three';
 import { MindARThree } from 'mindar-image-three';
-import { RUTA_BASE } from './biblioteca.js';
+import { RUTA_BASE, CARTAS } from './biblioteca.js';
 
 let mindarThree = null;
 
 // Esta función inicia la cámara y recibe dos funciones del juego:
-// onEncontrado(id) -> Qué hacer cuando ve una carta
-// onPerdido()      -> Qué hacer cuando la pierde
+// onEncontrado(codTarget) -> Qué hacer cuando ve una carta (recibe el código completo)
+// onPerdido()             -> Qué hacer cuando la pierde
 export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
     if (mindarThree) return; // Evitar doble inicio
 
@@ -24,25 +24,38 @@ export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
 
     const { renderer, scene, camera } = mindarThree;
 
-    // Crear anclas invisibles para los IDs del 0 al 9
-    for (let i = 0; i < 10; i++) {
-        const anchor = mindarThree.addAnchor(i);
-        // Plano invisible para ayudar al tracking
-        const geometry = new THREE.PlaneGeometry(1, 1);
-        const material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
-        const plane = new THREE.Mesh(geometry, material);
-        anchor.group.add(plane);
+    // Crear anclas para cada una de las 58 cartas
+    // Cada posición en CARTAS tiene un codTarget único
+    for (let targetId = 0; targetId < 58; targetId++) {
+        try {
+            const anchor = mindarThree.addAnchor(targetId);
+            
+            // Plano invisible para ayudar al tracking
+            const geometry = new THREE.PlaneGeometry(1, 1);
+            const material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
+            const plane = new THREE.Mesh(geometry, material);
+            anchor.group.add(plane);
 
-        // Eventos
-        anchor.onTargetFound = () => {
-            console.log("OJO: Detectado ID " + i);
-            onEncontrado(i);
-        };
+            // Obtener la carta en esta posición
+            const carta = CARTAS[targetId];
+            const codTarget = carta ? carta.codTarget : null;
 
-        anchor.onTargetLost = () => {
-            console.log("OJO: Perdido ID " + i);
-            onPerdido();
-        };
+            // Eventos
+            anchor.onTargetFound = () => {
+                console.log("OJO: Detectado Target " + targetId + " -> Código: " + codTarget);
+                // Pasar el codTarget COMPLETO al callback
+                if (codTarget) {
+                    onEncontrado(codTarget);
+                }
+            };
+
+            anchor.onTargetLost = () => {
+                console.log("OJO: Perdido Target " + targetId);
+                onPerdido();
+            };
+        } catch (e) {
+            console.warn("No se pudo crear ancla para target " + targetId, e);
+        }
     }
 
     await mindarThree.start();
