@@ -3,54 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V112: MENU</title>
+    <title>DOMUS MAGI V100: MENU</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- PANTALLA DE INICIO -->
     <div id="p-inicio" class="pantalla">
-        <div style="display:flex; flex-direction:column; align-items:center; gap: 30px; animation: fadeIn 1s ease-out;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
             <div>
-                <h1 style="font-size: 72px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px; text-shadow: 0 0 20px var(--borde-dorado);">DOMUS<br><span style="color:#fff; text-shadow: 0 0 30px gold;">MAGI</span></h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0; animation: pulse 2s ease-in-out infinite;">REVELATIONS V112</p>
+                <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
+                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V100</p>
             </div>
-            <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200); animation: slideUp 1s ease-out 0.3s both;" onclick="entrarGrimorio()">📖 ENTRAR AL GRIMORIO</button>
+            <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTRAR AL GRIMORIO</button>
         </div>
     </div>
 
-    <!-- MENU PRINCIPAL -->
+    <!-- MENÚ PRINCIPAL -->
     <div id="p-menu-principal" class="pantalla oculto">
-        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8; animation: fadeIn 0.5s ease-out;"></video>
+        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
         
-        <div class="fila-juego" style="animation: slideUp 0.6s ease-out 0.1s both;">
-            <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TACTICO</button>
-            <button class="btn-info" style="font-size: 20px; width: 50px; max-width: none;" onclick="alert('🎮 DOMUS MAGI V112\n\n✨ Nuevas características:\n- Animaciones mejoradas\n- UI más fluida\n- Resumen de batalla\n- Mejor feedback visual\n\n¡Que comience el duelo!')">?</button>
+        <div class="fila-juego">
+            <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TÁCTICO</button>
+            <button class="btn-info" onclick="alert('Modo V100: Final Release. Neon Values & Stone Background.')">?</button>
         </div>
         
-        <div class="fila-juego" style="animation: slideUp 0.6s ease-out 0.2s both;">
-            <button class="btn-jugar" style="background:#222; border-color:#555;" onclick="alert('⏳ Próximamente en V113')">🦉 MISIONES (WIP)</button>
+        <div class="fila-juego">
+            <button class="btn-jugar" style="background:#222; border-color:#555;" onclick="window.location.href='misiones.html'">🦉 MISIONES (WIP)</button>
         </div>
         
-        <div class="fila-juego" style="animation: slideUp 0.6s ease-out 0.3s both;">
-            <button class="btn-jugar" style="background:#333; border-color:#555;" onclick="window.location.href='dados.html'">🎲 ORACULO (SOLO)</button>
+        <div class="fila-juego">
+            <button class="btn-jugar" style="background:#333; border-color:#555;" onclick="window.location.href='dados.html'">🎲 ORÁCULO (SOLO)</button>
         </div>
     </div>
 
     <script>
         function entrarGrimorio() {
-            const pInicio = document.getElementById('p-inicio');
-            const pMenu = document.getElementById('p-menu-principal');
-            
-            if (pInicio) pInicio.classList.add('oculto');
-            if (pMenu) {
-                pMenu.classList.remove('oculto');
-                pMenu.style.animation = 'fadeIn 0.5s ease-in';
-            }
-            
+            document.getElementById('p-inicio').classList.add('oculto');
+            document.getElementById('p-menu-principal').classList.remove('oculto');
             const v = document.getElementById('intro-video');
             if(v) { 
                 v.muted = false; 
-                v.play().catch(e => console.log("Auto-play bloqueado:", e)); 
+                v.play().catch(e => console.log("Auto-play blocked by browser policy")); 
             }
         }
     </script>
