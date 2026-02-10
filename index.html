@@ -3,49 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V100000: MENU</title>
-    <link rel="stylesheet" href="style.css">
+    <title>DOMUS MAGI - SCANNER</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+        #container-ar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        #display {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 3px solid #00ff00;
+            border-radius: 10px;
+            min-width: 300px;
+        }
+        #codigo {
+            font-size: 48px;
+            font-weight: bold;
+            color: #00ff00;
+            text-shadow: 0 0 20px #00ff00;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 3px;
+        }
+        #estado {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 10px;
+        }
+    </style>
+    <script type="importmap">
+    { "imports": { 
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js", 
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/", 
+        "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js" 
+    } }
+    </script>
 </head>
 <body>
-    <!-- PANTALLA DE INICIO -->
-    <div id="p-inicio" class="pantalla">
-        <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
-            <div>
-                <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V1000000</p>
-            </div>
-            <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTRAR AL GRIMORIO</button>
-        </div>
+    <div id="container-ar"></div>
+    
+    <div id="display">
+        <div id="codigo">---</div>
+        <div id="estado">Escanea una carta</div>
     </div>
 
-    <!-- MENÚ PRINCIPAL -->
-    <div id="p-menu-principal" class="pantalla oculto">
-        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TÁCTICO</button>
-            <button class="btn-info" onclick="alert('Modo V100: Final Release. Neon Values & Stone Background.')">?</button>
-        </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#222; border-color:#555;" onclick="window.location.href='misiones.html'">🦉 MISIONES (WIP)</button>
-        </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#333; border-color:#555;" onclick="window.location.href='dados.html'">🎲 ORÁCULO (SOLO)</button>
-        </div>
-    </div>
+    <script type="module">
+        import { iniciarOjo } from './ojo.js';
 
-    <script>
-        function entrarGrimorio() {
-            document.getElementById('p-inicio').classList.add('oculto');
-            document.getElementById('p-menu-principal').classList.remove('oculto');
-            const v = document.getElementById('intro-video');
-            if(v) { 
-                v.muted = false; 
-                v.play().catch(e => console.log("Auto-play blocked by browser policy")); 
+        function mostrarCodigo(codigo) {
+            const displayCodigo = document.getElementById('codigo');
+            const estado = document.getElementById('estado');
+            
+            if (codigo) {
+                displayCodigo.innerText = codigo;
+                estado.innerText = 'Carta detectada';
+            } else {
+                displayCodigo.innerText = '---';
+                estado.innerText = 'Escanea una carta';
             }
         }
+
+        iniciarOjo('container-ar', mostrarCodigo);
     </script>
 </body>
 </html>
