@@ -3,47 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI - MENU</title>
-    <link rel="stylesheet" href="style.css">
+    <title>MAPEO DE TARGETS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; width: 100vw; height: 100vh; overflow: hidden; background: #000; }
+        #container-ar { width: 100%; height: 100%; }
+        
+        #ventana-mapeo {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 4px solid #00ff00;
+            padding: 30px;
+            border-radius: 15px;
+            z-index: 1000;
+            box-shadow: 0 0 50px #00ff00;
+            min-width: 400px;
+            text-align: center;
+        }
+        
+        #codigo-grande {
+            font-size: 72px;
+            font-weight: bold;
+            color: #00ff00;
+            margin: 20px 0;
+            font-family: monospace;
+            text-shadow: 0 0 20px #00ff00;
+            min-height: 100px;
+        }
+        
+        #target-numero {
+            font-size: 48px;
+            color: #ffff00;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        
+        #instruccion {
+            font-size: 18px;
+            color: #aaa;
+            margin-top: 20px;
+            border-top: 2px solid #00ff00;
+            padding-top: 15px;
+        }
+        
+        #lista-mapeo {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00aaff;
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            width: 350px;
+            z-index: 1000;
+        }
+        
+        #lista-mapeo h3 {
+            color: #00aaff;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .item-mapeo {
+            background: rgba(0,0,0,0.5);
+            padding: 8px;
+            margin: 5px 0;
+            border-left: 3px solid #0f0;
+            font-size: 12px;
+            font-family: monospace;
+            color: #0f0;
+        }
+        
+        #boton-copiar {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: #005;
+            color: #0ff;
+            border: 2px solid #0ff;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+        
+        #boton-copiar:active {
+            background: #008;
+        }
+    </style>
+    
+    <script type="importmap">
+    { "imports": { 
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js", 
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/", 
+        "mindar-image-three":"https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js" 
+    } }
+    </script>
 </head>
 <body>
-    <div id="p-inicio" class="pantalla">
-        <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
-            <div>
-                <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V100</p>
-            </div>
-            <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTRAR AL GRIMORIO</button>
-        </div>
+    <div id="container-ar"></div>
+    
+    <div id="ventana-mapeo">
+        <h2 style="color:#00ff00; margin-bottom:10px;">📍 MAPEO DE TARGETS</h2>
+        <div id="target-numero">TARGET: ---</div>
+        <div id="codigo-grande">---</div>
+        <div id="instruccion">Apunta cada carta una por una</div>
     </div>
-
-    <div id="p-menu-principal" class="pantalla oculto">
-        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TÁCTICO</button>
-            <button class="btn-info" onclick="alert('Modo V100: Final Release.')">?</button>
-        </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#222; border-color:#555;" onclick="window.location.href='misiones.html'">🦉 MISIONES (WIP)</button>
-        </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#333; border-color:#555;" onclick="window.location.href='dados.html'">🎲 ORÁCULO (SOLO)</button>
-        </div>
+    
+    <div id="lista-mapeo">
+        <h3>MAPEO ACTUAL:</h3>
+        <div id="contenido-mapeo"></div>
     </div>
+    
+    <button id="boton-copiar" onclick="copiarMapeo()">📋 COPIAR MAPEO</button>
 
-    <script>
-        function entrarGrimorio() {
-            document.getElementById('p-inicio').classList.add('oculto');
-            document.getElementById('p-menu-principal').classList.remove('oculto');
-            const v = document.getElementById('intro-video');
-            if(v) { 
-                v.muted = false; 
-                v.play().catch(e => console.log("Auto-play blocked")); 
+    <script type="module">
+        import * as THREE from 'three';
+        import { MindARThree } from 'mindar-image-three';
+
+        const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
+        const codigosPorTarget = [
+            "001-TI-BE-ID1",    // 0
+            "002-TI-BE-ID3",    // 1
+            "003-TI-BE-ID5",    // 2
+            "004-TI-BE-ID7",    // 3
+            "005-TI-BE-ID9",    // 4
+            "006-TI-HU-ID2",    // 5
+            "007-TI-HU-ID4",    // 6
+            "008-TI-HU-ID6",    // 7
+            "009-TI-HU-ID8",    // 8
+            "010-TI-HU-ID10",   // 9
+            "021-CI-BE-ID1",    // 10
+            "022-CI-BE-ID3",    // 11
+            "023-CI-BE-ID5",    // 12
+            "024-CI-BE-ID7",    // 13
+            "025-CI-BE-ID9",    // 14
+            "026-CI-HU-ID2",    // 15
+            "027-CI-HU-ID4",    // 16
+            "028-CI-HU-ID6",    // 17
+            "029-CI-HU-ID8",    // 18
+            "030-CI-HU-ID10",   // 19
+            "041-AG-BE-ID1",    // 20
+            "042-AG-BE-ID3",    // 21
+            "043-AG-BE-ID5",    // 22
+            "044-AG-BE-ID7",    // 23
+            "045-AG-BE-ID9",    // 24
+            "046-AG-HU-ID2",    // 25
+            "047-AG-HU-ID4",    // 26
+            "048-AG-HU-ID6",    // 27
+            "049-AG-HU-ID8",    // 28
+            "050-AG-HU-ID10",   // 29
+            "061-MA-BE-ID1",    // 30
+            "062-MA-BE-ID3",    // 31
+            "063-MA-BE-ID5",    // 32
+            "064-MA-BE-ID7",    // 33
+            "065-MA-BE-ID9",    // 34
+            "066-MA-HU-ID2",    // 35
+            "067-MA-HU-ID4",    // 36
+            "068-MA-HU-ID6",    // 37
+            "069-MA-HU-ID8",    // 38
+            "070-MA-HU-ID10",   // 39
+            "081-AR-ID1",       // 40
+            "082-AR-ID3",       // 41
+            "083-AR-ID5",       // 42
+            "084-AR-ID7",       // 43
+            "085-AR-ID9",       // 44
+            "086-AR-ID11",      // 45
+            "087-AR-ID13",      // 46
+            "088-AR-ID15",      // 47
+            "089-AR-ID17",      // 48
+            "090-PO-ID2",       // 49
+            "091-PO-ID4",       // 50
+            "092-PO-ID6",       // 51
+            "093-PO-ID8",       // 52
+            "094-PO-ID10",      // 53
+            "095-PO-ID12",      // 54
+            "096-PO-ID14",      // 55
+            "097-PO-ID16",      // 56
+            "098-PO-ID18"       // 57
+        ];
+        
+        let mapeoReal = {};
+        let targetActual = null;
+
+        window.copiarMapeo = () => {
+            const lineas = [];
+            for (let i = 0; i < 58; i++) {
+                const codigo = mapeoReal[i] || "NO DETECTADO";
+                lineas.push(`TARGET ${i} = ${codigo}`);
             }
+            const texto = lineas.join("\n");
+            navigator.clipboard.writeText(texto).then(() => {
+                alert("✅ MAPEO COPIADO AL PORTAPAPELES");
+                console.log(texto);
+            });
+        };
+
+        function actualizarListaMapeo() {
+            const div = document.getElementById('contenido-mapeo');
+            let html = "";
+            for (let i = 0; i < 58; i++) {
+                const codigo = mapeoReal[i] || "---";
+                const clase = mapeoReal[i] ? "item-mapeo" : "item-mapeo";
+                html += `<div class="${clase}">T${i.toString().padStart(2, '0')} → ${codigo}</div>`;
+            }
+            div.innerHTML = html;
         }
+
+        async function iniciar() {
+            const mindarThree = new MindARThree({
+                container: document.getElementById('container-ar'),
+                imageTargetSrc: RUTA_BASE + 'targets1.mind',
+                maxTrack: 1,
+                uiLoading: "no",
+                uiScanning: "no",
+                uiError: "no"
+            });
+
+            const { renderer, scene, camera } = mindarThree;
+
+            for (let i = 0; i < 58; i++) {
+                const anchor = mindarThree.addAnchor(i);
+
+                const geometry = new THREE.PlaneGeometry(1, 1);
+                const material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
+                const plane = new THREE.Mesh(geometry, material);
+                anchor.group.add(plane);
+
+                anchor.onTargetFound = () => {
+                    const codigoEsperado = codigosPorTarget[i];
+                    targetActual = i;
+                    mapeoReal[i] = codigoEsperado;
+                    
+                    document.getElementById('target-numero').textContent = `TARGET: ${i}`;
+                    document.getElementById('codigo-grande').textContent = codigoEsperado;
+                    document.getElementById('ventana-mapeo').style.borderColor = '#00ff00';
+                    document.getElementById('ventana-mapeo').style.boxShadow = '0 0 50px #00ff00';
+                    
+                    console.log(`✅ TARGET ${i} = ${codigoEsperado}`);
+                    actualizarListaMapeo();
+                };
+
+                anchor.onTargetLost = () => {
+                    if (targetActual === i) {
+                        targetActual = null;
+                        document.getElementById('target-numero').textContent = `TARGET: ---`;
+                        document.getElementById('codigo-grande').textContent = `---`;
+                        document.getElementById('ventana-mapeo').style.borderColor = '#ff0000';
+                        document.getElementById('ventana-mapeo').style.boxShadow = '0 0 50px #ff0000';
+                    }
+                };
+            }
+
+            await mindarThree.start();
+
+            renderer.setAnimationLoop(() => {
+                renderer.render(scene, camera);
+            });
+        }
+
+        window.addEventListener('load', iniciar);
+
     </script>
 </body>
 </html>
