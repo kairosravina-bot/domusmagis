@@ -272,7 +272,7 @@
 
         window.ejecutarLanzamientoBatalla = (cantidad) => {
             dadosSeleccionadosBatalla = cantidad; 
-            for(let i=2; i<=5; i++) document.getElementById("btn-batalla-"+i).classList.remove("tageado"); document.getElementById("btn-batalla-"+cantidad).classList.add("tageado");
+            actualizarBotonesDadosVisual();
             const vid = document.getElementById('video-dados-batalla');
             vid.currentTime = 0; vid.play();
             vid.onended = () => {
