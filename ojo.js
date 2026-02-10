@@ -1,4 +1,4 @@
-// ojo.js - MODULO DE REALIDAD AUMENTADA
+// ojo.js - MODULO DE REALIDAD AUMENTADA (Optimizado)
 import * as THREE from 'three';
 import { MindARThree } from 'mindar-image-three';
 import { RUTA_BASE } from './biblioteca.js';
@@ -11,35 +11,35 @@ export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
     mindarThree = new MindARThree({
         container: document.getElementById(containerId),
         imageTargetSrc: RUTA_BASE + 'targets1.mind', 
-        maxTrack: 1, 
+        maxTrack: 1, // Enfoca toda la potencia en una sola carta
         uiLoading: "no",
         uiScanning: "no",
         uiError: "no",
-        filterMinCF: 0.0001, // Aumenta la estabilidad
+        // Parámetros de estabilidad para evitar confusiones
+        filterMinCF: 0.0001, 
         filterBeta: 0.001
     });
 
     const { renderer, scene, camera } = mindarThree;
 
-    // Registramos los 58 targets uno por uno
+    // Registramos los 58 targets por su ID de compilación
     for (let i = 0; i < 58; i++) {
         const anchor = mindarThree.addAnchor(i);
         
-        // Usamos una función autoejecutada para cerrar el alcance de 'idx'
-        ((idx) => {
-            anchor.onTargetFound = () => {
-                console.log("Target detectado físicamente:", idx);
-                onEncontrado(idx); 
-            };
-            anchor.onTargetLost = () => {
-                onPerdido();
-            };
-        })(i);
+        // El ojo ahora solo reporta el NÚMERO que ve, no busca nombres
+        anchor.onTargetFound = () => {
+            onEncontrado(i); 
+        };
 
-        // Objeto invisible para ayudar al motor
-        const geometry = new THREE.PlaneGeometry(1, 1);
-        const material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
-        const plane = new THREE.Mesh(geometry, material);
+        anchor.onTargetLost = () => {
+            onPerdido();
+        };
+
+        // Objeto invisible para mantener el tracking estable
+        const plane = new THREE.Mesh(
+            new THREE.PlaneGeometry(1, 1),
+            new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })
+        );
         anchor.group.add(plane);
     }
 
