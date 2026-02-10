@@ -262,11 +262,12 @@
             const nameEl = document.getElementById('dados-player-name'); 
             nameEl.innerText = jug.nombre; nameEl.style.color = jug.color;
             document.getElementById('layer-valor-batalla').style.display = 'none';
-            actualizarBotonesDadosVisual();
+            for(let i=2; i<=5; i++) document.getElementById("btn-batalla-"+i).classList.remove("tageado");
         }
 
         function actualizarBotonesDadosVisual() {
             for(let i=2; i<=5; i++) document.getElementById('btn-batalla-'+i).classList.remove('tageado');
+            document.getElementById('btn-batalla-'+dadosSeleccionadosBatalla).classList.add('tageado');
         }
 
         window.ejecutarLanzamientoBatalla = (cantidad) => {

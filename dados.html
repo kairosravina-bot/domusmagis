@@ -34,13 +34,12 @@
         function tirarDados(n) {
             console.log(`🎲 Tirando ${n}D...`);
             
-            // Reset visual - quitar clase tageado de todos
+            // Reset visual
             [2,3,4,5].forEach(i => {
                 const btn = document.getElementById('btn-solo-'+i);
                 if (btn) btn.classList.remove('tageado');
             });
 
-            // Agregar clase tageado solo al botón seleccionado
             const btnSeleccionado = document.getElementById('btn-solo-'+n);
             if (btnSeleccionado) btnSeleccionado.classList.add('tageado');
 
