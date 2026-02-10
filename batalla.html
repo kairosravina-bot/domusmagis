@@ -262,7 +262,7 @@
             const nameEl = document.getElementById('dados-player-name'); 
             nameEl.innerText = jug.nombre; nameEl.style.color = jug.color;
             document.getElementById('layer-valor-batalla').style.display = 'none';
-            for(let i=2; i<=5; i++) document.getElementById("btn-batalla-"+i).classList.remove("tageado");
+            actualizarBotonesDadosVisual();
         }
 
         function actualizarBotonesDadosVisual() {
@@ -441,7 +441,7 @@
             ultimaJugada = { nombre: jugadaPendiente.carta.nombre, accion: jugadaPendiente.lado }; 
             jugadores[turnoJugadorIdx].slots[slotActual] = jugadaPendiente;
             turnoJugadorIdx++; if(turnoJugadorIdx >= cantJugadores) { turnoJugadorIdx=0; slotActual++; }
-            if(slotActual >= MAX_SLOTS) { iniciarFaseDadosBatalla(); }
+            if(slotActual >= MAX_SLOTS) { forzarBatalla(); }
             else { 
                 document.getElementById('pantalla-cambio-turno').classList.remove('oculto'); 
                 document.getElementById('next-player-name').innerText = jugadores[turnoJugadorIdx].nombre; 
