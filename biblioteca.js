@@ -16,7 +16,6 @@ const genMp4s = (target) => ({
 });
 
 export const CARTAS = {
-    // TIERRA
     0: { id: 1, nombre: "APER", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(6,1,5,0), codTarget: "001-TI-BE-ID1", ...genMp4s("001-TI-BE-ID1") },
     1: { id: 3, nombre: "SAXUM", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(3,1,12,1), codTarget: "002-TI-BE-ID3", ...genMp4s("002-TI-BE-ID3") },
     2: { id: 5, nombre: "BESTIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(9,1,5,5), codTarget: "003-TI-BE-ID5", ...genMp4s("003-TI-BE-ID5") },
@@ -33,7 +32,7 @@ export const CARTAS = {
     13: { id: 7, nombre: "NIVIS", elemento: "CAELUM", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(6,2,5,9), codTarget: "024-CI-BE-ID7", ...genMp4s("024-CI-BE-ID7") },
     14: { id: 9, nombre: "AURORA", elemento: "CAELUM", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(8,7,7,6), codTarget: "025-CI-BE-ID9", ...genMp4s("025-CI-BE-ID9") },
     15: { id: 2, nombre: "BOREAS", elemento: "CAELUM", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(5,2,3,1), codTarget: "026-CI-HU-ID2", ...genMp4s("026-CI-HU-ID2") },
-    16: { id: 4, nombre: "VALKYR",  elemento: "CAELUM", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(9,1,2,1), codTarget: "027-CI-HU-ID4", ...genMp4s("027-CI-HU-ID4") },
+    16: { id: 4, nombre: "VALKYR", elemento: "CAELUM", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(9,1,2,1), codTarget: "027-CI-HU-ID4", ...genMp4s("027-CI-HU-ID4") },
     17: { id: 6, nombre: "EIDOLON", elemento: "CAELUM", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(3,4,9,2), codTarget: "028-CI-HU-ID6", ...genMp4s("028-CI-HU-ID6") },
     18: { id: 8, nombre: "KORIN", elemento: "CAELUM", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(2,7,2,7), codTarget: "029-CI-HU-ID8", ...genMp4s("029-CI-HU-ID8") },
     19: { id: 10, nombre: "TYRION", elemento: "CAELUM", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(6,6,6,5), codTarget: "030-CI-HU-ID10", ...genMp4s("030-CI-HU-ID10") },

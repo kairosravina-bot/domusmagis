@@ -79,6 +79,7 @@
         <div id="zona-superior">
             <div id="txt-turno" style="position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(0,0,0,0.8); color: gold; padding: 10px; border: 2px solid gold;">TURNO: ---</div>
             
+            <!-- HUD DERECHO -->
             <div id="hud-derecho">
                 <img id="hud-img-escudo" src="" alt="Escudo">
                 <div id="hud-txt-arma">ARMA</div>
@@ -100,6 +101,7 @@
                 <div id="display-codigo-carta" style="font-size:42px; font-weight:900; color:#00ff00; text-shadow:0 0 10px #00ff00; font-family:'Courier New',monospace;">---</div>
             </div>
 
+            
             <!-- GEMAS NEON V81 -->
             <div class="contenedor-gemas">
                 <div class="wrapper-gema">
@@ -143,14 +145,18 @@
         </div>
     </div>
 
+    <!-- LOGICA DEL JUEGO (MODULOS INTEGRADOS) -->
     <script type="module">
+        // Importar Biblioteca y Ojo
         import { CARTAS, VIDEOS_BATALLA, RUTA_BASE } from './biblioteca.js';
         import { iniciarOjo } from './ojo.js';
 
+        // Variables Globales de Juego
         let jugadores = []; let cantJugadores = 0; let slotActual = 0; 
         let turnoJugadorIdx = 0; const MAX_SLOTS = 3; 
         let jugadaPendiente = null; let ultimaJugada = null; 
-        let dadosSeleccionadosBatalla = 2; let idxDado = 0;
+        let dadosSeleccionadosBatalla = 2; let historialPartidas = []; 
+        let contadorPartidas = 0; let idxDado = 0;
         let cartaActualEnPantalla = null;
 
         const ui = { 
@@ -158,6 +164,8 @@
             msg: document.getElementById('msg-visor'), 
             videoAction: document.getElementById('video-action') 
         };
+
+        // --- FUNCIONES DEL SISTEMA DE JUEGO (Expuestas a Window para HTML onclicks) ---
 
         window.setModo = (n) => { 
             cantJugadores = n; 
@@ -180,46 +188,76 @@
         function iniciarJuego() { 
             document.getElementById('p-setup').classList.add('oculto'); 
             document.getElementById('ui-juego').classList.remove('oculto'); 
+            
+            // AQUI LLAMAMOS AL MÓDULO OJO
             iniciarOjo('container-ar', alEncontrarCarta, alPerderCarta);
+            
             actualizarUI(); 
         }
 
-        // LA CLAVE: El ojo nos da el NÚMERO, la biblioteca nos da la CARTA al instante
-        function alEncontrarCarta(index) {
-            const carta = CARTAS[index];
-            if(!carta) return;
-
+        // --- CALLBACKS QUE LE PASAMOS AL OJO ---
+        function alEncontrarCarta(codTarget) {
+            // El OJO envió el código completo (ej: "064-MA-BE-ID7")
+            // Buscar la carta en CARTAS por su codTarget
+            let carta = null;
+            for (let key in CARTAS) {
+                if (CARTAS[key].codTarget === codTarget) {
+                    carta = CARTAS[key];
+                    break;
+                }
+            }
+            if(!carta) {
+                console.log("ERROR: Carta no encontrada para código:", codTarget);
+                return;
+            }
+            
+            // Carta encontrada - actualizar UI
             cartaActualEnPantalla = carta;
             ui.msg.innerText = carta.nombre;
-            document.getElementById('display-codigo-carta').innerText = carta.codTarget;
             
+            // Mostrar el código completo en el recuadro neon
+            const displayCodigo = document.getElementById('display-codigo-carta');
+            if(displayCodigo) displayCodigo.innerText = codTarget;
+
+            // Logica Visual especifica de Batalla (Colores del scanner)
             if(carta.tipo === 'ARTEFACTO') ui.scanner.className = 'violeta';
             else if(carta.tipo === 'BUHO') ui.scanner.className = 'dorado';
             else ui.scanner.className = 'verde';
-            
+
             actualizarEstiloBotones(carta);
             document.getElementById('hud-derecho').style.display = 'none';
         }
 
+
         function alPerderCarta() {
-            document.getElementById('display-codigo-carta').innerText = '---';
+            const displayCodigo = document.getElementById('display-codigo-carta');
+            if(displayCodigo) displayCodigo.innerText = '---';
             cartaActualEnPantalla = null;
             ui.msg.innerText = "BUSCANDO..."; 
             ui.scanner.className = ''; 
+            document.getElementById('hud-derecho').style.display = 'none';
             resetBotones();
         }
+
+        // --- LOGICA DE UI Y JUEGO ---
 
         function actualizarUI() {
             const j = jugadores[turnoJugadorIdx];
             const txt = document.getElementById('txt-turno'); 
             txt.innerText = `TURNO: ${j.nombre}`; txt.style.color = j.color; txt.style.borderColor = j.color;
             document.getElementById('slot-indicator').innerText = `${slotActual + 1} / ${MAX_SLOTS}`;
+            
+            const infoRival = document.getElementById('info-rival');
             if (ultimaJugada) { 
-                document.getElementById('info-rival').style.display = 'block'; 
+                infoRival.style.display = 'block'; 
                 document.getElementById('rival-last-move').innerText = `${ultimaJugada.nombre} (${ultimaJugada.accion})`; 
             } else { 
-                document.getElementById('info-rival').style.display = 'none'; 
+                infoRival.style.display = 'none'; 
             }
+            
+            document.getElementById('msg-visor').style.display = 'block'; 
+            document.getElementById('guia-scanner').className = '';
+            document.getElementById('hud-derecho').style.display = 'none'; 
             resetBotones(); 
             jugadaPendiente = null;
         }
@@ -249,10 +287,17 @@
             const nameEl = document.getElementById('dados-player-name'); 
             nameEl.innerText = jug.nombre; nameEl.style.color = jug.color;
             document.getElementById('layer-valor-batalla').style.display = 'none';
+            actualizarBotonesDadosVisual();
+        }
+
+        function actualizarBotonesDadosVisual() {
+            for(let i=2; i<=5; i++) document.getElementById('btn-batalla-'+i).classList.remove('tageado');
+            document.getElementById('btn-batalla-'+dadosSeleccionadosBatalla).classList.add('tageado');
         }
 
         window.ejecutarLanzamientoBatalla = (cantidad) => {
             dadosSeleccionadosBatalla = cantidad; 
+            actualizarBotonesDadosVisual();
             const vid = document.getElementById('video-dados-batalla');
             vid.currentTime = 0; vid.play();
             vid.onended = () => {
@@ -261,15 +306,22 @@
                 jugadores[idxDado].dado = total;
                 document.getElementById('layer-valor-batalla').innerText = total;
                 document.getElementById('layer-valor-batalla').style.display = 'flex';
-                setTimeout(() => { idxDado++; prepararDadoJugador(); }, 1500);
+                setTimeout(() => { idxDado++; prepararDadoJugador(); }, 2000);
             };
         };
 
         function iniciarClashFinal() {
             document.getElementById('modal-batalla').classList.remove('oculto');
+            let vsHTML = "";
+            jugadores.forEach((j, index) => {
+                vsHTML += `<span style="color:${j.color}; text-shadow:1px 1px 0 #000;">${j.nombre}</span>`;
+                if (index < jugadores.length - 1) vsHTML += ` <span style="color:#666; font-size:18px;">VS</span> `;
+            });
+            document.getElementById('texto-vs').innerHTML = vsHTML;
+
             const vid = document.getElementById('video-clash');
             vid.src = RUTA_BASE + VIDEOS_BATALLA[Math.floor(Math.random()*VIDEOS_BATALLA.length)];
-            vid.play();
+            vid.play().catch(e=>console.log("Error play clash"));
             vid.onended = () => { 
                 document.getElementById('modal-batalla').classList.add('oculto'); 
                 mostrarResultadosDetallados(); 
@@ -287,23 +339,71 @@
             });
             resultados.sort((a,b)=>b.total-a.total);
 
+            contadorPartidas++;
+            const ganador = resultados[0];
+            historialPartidas.push({ id: contadorPartidas, nombre: ganador.nombre, pts: ganador.total });
+            actualizarListaHistorial();
+
             resultados.forEach((r,i) => {
+                let htmlSlots = "";
+                r.slots.forEach(s => {
+                    if(s) htmlSlots += `
+                    <div class="fila-res">
+                        <div style="display:flex; align-items:center;">
+                            <img src="${RUTA_BASE + s.carta.imgEscudo}" class="mini-escudo-res" onerror="this.style.display='none'">
+                            <div style="display:flex; flex-direction:column;">
+                                <span class="res-nombre">${s.carta.nombre}</span>
+                                <span style="font-size:10px; color:#555;">${s.carta.codTarget}</span>
+                            </div>
+                        </div>
+                        <span class="res-accion">${s.lado}</span>
+                        <span class="res-valor">${s.valor}</span>
+                    </div>`;
+                });
+
                 cont.innerHTML += `
                 <div class="resultado-jugador ${i===0?'ganador':''}">
-                    <h3 style="color:${r.color}">${r.nombre}</h3>
-                    <div class="total-score">${r.total} PTS</div>
+                    <h3 style="color:${r.color}; margin:0; text-shadow:none;">${r.nombre}</h3>
+                    ${htmlSlots}
+                    <div class="fila-dado">
+                        <span>DADOS (${dadosSeleccionadosBatalla}D):</span>
+                        <span class="dado-gigante-res">+${r.dado}</span>
+                    </div>
+                    <div class="total-score">${r.total}</div>
                 </div>`;
             });
         }
 
-        window.continuarContienda = () => { location.reload(); };
+        function actualizarListaHistorial() {
+            const lista = document.getElementById('lista-historial');
+            lista.innerHTML = "";
+            [...historialPartidas].reverse().forEach(h => {
+                lista.innerHTML += `
+                <div class="item-historial">
+                    <span>BATALLA #${h.id}</span>
+                    <strong style="color:gold;">${h.nombre} (${h.pts} pts)</strong>
+                </div>`;
+            });
+        }
+
+        window.continuarContienda = () => {
+            jugadores.forEach(j=>{j.slots=[null,null,null];j.dado=0;}); 
+            slotActual=0; turnoJugadorIdx=0; ultimaJugada=null;
+            document.getElementById('p-resultado').classList.add('oculto');
+            document.getElementById('ui-juego').classList.remove('oculto'); 
+            actualizarUI();
+        };
 
         function resetBotones() { 
             ['btn-i','btn-a','btn-t','btn-m'].forEach(id=>{ 
                 const btn = document.getElementById(id);
                 btn.className = 'btn-gema';
+                btn.innerHTML=`<span class="letra-grande">${id.split('-')[1].toUpperCase()}</span>`; 
+                btn.classList.remove('activo');
                 const valId = id.replace('btn-','val-');
-                document.getElementById(valId).innerText = "";
+                const valSpan = document.getElementById(valId);
+                valSpan.innerText = "";
+                valSpan.className = "valor-flotante"; 
             }); 
         }
 
@@ -312,13 +412,28 @@
                 const btn = document.getElementById(id);
                 const conf = carta.botones[id];
                 btn.classList.remove('style-buho', 'style-artefacto');
-                if (carta.tipo === 'BUHO') btn.classList.add('style-buho');
-                else if (carta.tipo === 'ARTEFACTO') btn.classList.add('style-artefacto');
-                btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
-                document.getElementById(id.replace('btn-','val-')).innerText = conf.valor; 
+
+                if (carta.tipo === 'BUHO') {
+                    btn.classList.add('style-buho');
+                    btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
+                } else if (carta.tipo === 'ARTEFACTO') {
+                    btn.classList.add('style-artefacto');
+                    btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
+                } else {
+                    btn.innerHTML = `<span class="letra-grande">${conf.texto}</span>`;
+                }
+
+                const valId = id.replace('btn-','val-');
+                const valSpan = document.getElementById(valId);
+                valSpan.innerText = conf.valor; 
+                valSpan.className = "valor-flotante"; 
+                if (carta.tipo === 'CASA') valSpan.classList.add('neon-blanco');
+                else if (carta.tipo === 'BUHO') valSpan.classList.add('neon-violeta');
+                else if (carta.tipo === 'ARTEFACTO') valSpan.classList.add('neon-amarillo');
             });
         }
 
+        // Asignación de clicks a los botones de Gemas (Lógica del Turno)
         ['btn-i','btn-a','btn-t','btn-m'].forEach(id => {
             document.getElementById(id).onclick = () => {
                 if(!cartaActualEnPantalla) return;
@@ -327,7 +442,8 @@
                 
                 ui.videoAction.style.display = 'block'; 
                 ui.videoAction.src = RUTA_BASE + conf.video;
-                ui.videoAction.play();
+                ui.videoAction.onerror = () => { console.log("Video missing: " + conf.video); };
+                ui.videoAction.play().catch(e => console.log("Play interrupted"));
 
                 const hud = document.getElementById('hud-derecho');
                 hud.style.display = 'flex';
@@ -336,12 +452,18 @@
                 document.getElementById('hud-txt-accion').innerText = conf.label;
                 document.getElementById('hud-txt-valor').innerText = conf.valor;
 
-                ui.videoAction.onended = () => { ui.videoAction.style.display = 'none'; hud.style.display = 'none'; };
+                ui.videoAction.onended = () => { 
+                    ui.videoAction.style.display = 'none'; 
+                    hud.style.display = 'none'; 
+                    ui.msg.innerText = "CONFIRMA ABAJO"; 
+                };
             };
         });
 
+        // Botón Confirmar
         document.getElementById('btn-confirmar').onclick = () => {
             if(!jugadaPendiente) { alert("Escanea primero"); return; }
+            ultimaJugada = { nombre: jugadaPendiente.carta.nombre, accion: jugadaPendiente.lado }; 
             jugadores[turnoJugadorIdx].slots[slotActual] = jugadaPendiente;
             turnoJugadorIdx++; if(turnoJugadorIdx >= cantJugadores) { turnoJugadorIdx=0; slotActual++; }
             if(slotActual >= MAX_SLOTS) { forzarBatalla(); }
