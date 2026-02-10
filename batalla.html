@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: BATALLA V82</title>
+    <title>DOMUS MAGI: BATALLA V83</title>
     <link rel="stylesheet" href="style.css">
     
     <script type="importmap">
@@ -76,7 +76,8 @@
     <!-- UI JUEGO -->
     <div id="ui-juego" class="oculto">
         <div id="zona-superior">
-            <div id="txt-turno" style="position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(0,0,0,0.8); color: gold; padding: 10px; border: 2px solid gold;">TURNO: ---</div>
+            <!-- CAMBIO: Estilo actualizado (más grande, sombra) -->
+            <div id="txt-turno" style="position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(0,0,0,0.9); padding: 15px 20px; border: 3px solid gold; font-size: 26px; font-weight: 900; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-shadow: 0 0 5px rgba(0,0,0,0.8);">TURNO: ---</div>
             
             <!-- HUD DERECHO -->
             <div id="hud-derecho">
@@ -196,7 +197,6 @@
         // --- FUNCIONES CORE DEL JUEGO ---
 
         function onCartaDetectada(carta) {
-            // Evitar conflictos con pantallas superpuestas
             if(!document.getElementById('modal-dados-fase').classList.contains('oculto') || 
                !document.getElementById('modal-batalla').classList.contains('oculto') ||
                !document.getElementById('pantalla-cambio-turno').classList.contains('oculto')) {
@@ -220,34 +220,33 @@
             resetBotones();
         }
 
+        // --- CAMBIO: Función actualizada para cambiar color del cartel ---
         function actualizarUI() {
             const jugador = jugadores[turnoJugadorIdx];
-            document.getElementById('txt-turno').innerText = `TURNO: ${jugador.nombre}`;
+            const divTurno = document.getElementById('txt-turno');
+            
+            divTurno.innerText = `TURNO: ${jugador.nombre}`;
+            // Cambiar color texto y bordes según la casa del jugador
+            divTurno.style.color = jugador.color;
+            divTurno.style.borderColor = jugador.color;
+            // Añadir un brillo extra del mismo color
+            divTurno.style.boxShadow = `0 0 15px ${jugador.color}`;
+            
             document.getElementById('slot-indicator').innerText = `${slotActual + 1}/${MAX_SLOTS}`;
         }
 
-        // --- FUNCION CRÍTICA ARREGLADA: CAMBIO DE TURNO ---
+        // --- FUNCIONES DE CONTROL DE TURNO Y DADOS ---
         window.confirmarCambioTurno = () => {
-            // 1. Limpiar estado de jugada anterior para que no se "trabe"
             jugadaPendiente = null;
             resetBotones();
-            
-            // 2. Restaurar Visor
             document.getElementById('msg-visor').innerText = "ESCANEA CARTA";
             document.getElementById('guia-scanner').style.borderColor = 'rgba(255,255,255,0.6)';
-            
-            // 3. Cambiar pantalla
             document.getElementById('pantalla-cambio-turno').classList.add('oculto');
             document.getElementById('ui-juego').classList.remove('oculto');
-            
-            // 4. Actualizar nombres
             actualizarUI();
-            
             console.log("✅ Turno cambiado exitosamente.");
         };
 
-        // --- FASE FINAL: DADOS RECURSIVOS ---
-        
         window.iniciarFaseFinal = () => {
             document.getElementById('ui-juego').classList.add('oculto');
             indiceJugadorDados = 0;
@@ -256,7 +255,7 @@
 
         function prepararDadosParaJugador() {
             if (indiceJugadorDados >= jugadores.length) {
-                lanzarVideoBatalla(); // Todos tiraron
+                lanzarVideoBatalla(); 
                 return;
             }
 
@@ -265,7 +264,6 @@
             document.getElementById('dados-player-name').innerText = jugador.nombre;
             document.getElementById('layer-valor-batalla').innerText = "0"; 
             
-            // Reset botones
             [2, 3, 4, 5].forEach(i => {
                 document.getElementById(`btn-batalla-${i}`).classList.remove('tageado');
             });
