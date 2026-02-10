@@ -3,49 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V100: MENU</title>
-    <link rel="stylesheet" href="style.css">
+    <title>DOMUS MAGI - TEST DETECCIÓN</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; width: 100vw; height: 100vh; overflow: hidden; background: #000; }
+        #container-ar { width: 100%; height: 100%; }
+        #resultado {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.95);
+            color: #0f0;
+            padding: 30px;
+            border: 3px solid #0f0;
+            font-size: 48px;
+            font-weight: bold;
+            font-family: monospace;
+            z-index: 1000;
+            min-width: 250px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #0f0;
+        }
+        #info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.95);
+            color: #aaa;
+            padding: 20px;
+            border: 2px solid #555;
+            font-size: 14px;
+            font-family: monospace;
+            z-index: 1000;
+            border-radius: 5px;
+            max-width: 300px;
+        }
+    </style>
+    
+    <script type="importmap">
+    { "imports": { 
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js", 
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/", 
+        "mindar-image-three":"https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js" 
+    } }
+    </script>
 </head>
 <body>
-    <!-- PANTALLA DE INICIO -->
-    <div id="p-inicio" class="pantalla">
-        <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
-            <div>
-                <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V100</p>
-            </div>
-            <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTRAR AL GRIMORIO</button>
-        </div>
+    <div id="container-ar"></div>
+    <div id="resultado">ESPERANDO...</div>
+    <div id="info">
+        <strong>🔮 TEST DETECCIÓN</strong><br>
+        Apunta las cartas a la cámara<br>
+        <br>
+        <span id="estado">Inicializando...</span>
     </div>
 
-    <!-- MENÚ PRINCIPAL -->
-    <div id="p-menu-principal" class="pantalla oculto">
-        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TÁCTICO</button>
-            <button class="btn-info" onclick="alert('Modo V100: Final Release. Neon Values & Stone Background.')">?</button>
-        </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#222; border-color:#555;" onclick="window.location.href='misiones.html'">🦉 MISIONES (WIP)</button>
-        </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#333; border-color:#555;" onclick="window.location.href='dados.html'">🎲 ORÁCULO (SOLO)</button>
-        </div>
-    </div>
+    <script type="module">
+        import * as THREE from 'three';
+        import { MindARThree } from 'mindar-image-three';
 
-    <script>
-        function entrarGrimorio() {
-            document.getElementById('p-inicio').classList.add('oculto');
-            document.getElementById('p-menu-principal').classList.remove('oculto');
-            const v = document.getElementById('intro-video');
-            if(v) { 
-                v.muted = false; 
-                v.play().catch(e => console.log("Auto-play blocked by browser policy")); 
+        const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
+        const resultDiv = document.getElementById('resultado');
+        const estadoDiv = document.getElementById('estado');
+        let targetActual = null;
+
+        async function iniciar() {
+            console.log("🔮 Iniciando detección...");
+            estadoDiv.textContent = "Inicializando cámara...";
+
+            try {
+                const mindarThree = new MindARThree({
+                    container: document.getElementById('container-ar'),
+                    imageTargetSrc: RUTA_BASE + 'targets1.mind',
+                    maxTrack: 1,
+                    uiLoading: "no",
+                    uiScanning: "no",
+                    uiError: "no"
+                });
+
+                const { renderer, scene, camera } = mindarThree;
+
+                console.log("📌 Creando 58 anchors...");
+                
+                for (let i = 0; i < 58; i++) {
+                    const anchor = mindarThree.addAnchor(i);
+
+                    const geometry = new THREE.PlaneGeometry(1, 1);
+                    const material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
+                    const plane = new THREE.Mesh(geometry, material);
+                    anchor.group.add(plane);
+
+                    anchor.onTargetFound = () => {
+                        console.log(`✅ TARGET ${i} DETECTADO`);
+                        targetActual = i;
+                        resultDiv.textContent = `TARGET: ${i}`;
+                        resultDiv.style.borderColor = '#0f0';
+                        resultDiv.style.color = '#0f0';
+                        resultDiv.style.boxShadow = '0 0 30px #0f0';
+                        estadoDiv.innerHTML = `<strong>✅ Detectado</strong><br>Target: ${i}<br><br>Cambia de carta`;
+                    };
+
+                    anchor.onTargetLost = () => {
+                        console.log(`❌ TARGET ${i} PERDIDO`);
+                        if (targetActual === i) {
+                            targetActual = null;
+                            resultDiv.textContent = 'ESPERANDO...';
+                            resultDiv.style.borderColor = '#ff0000';
+                            resultDiv.style.color = '#ff0000';
+                            resultDiv.style.boxShadow = '0 0 30px #ff0000';
+                            estadoDiv.innerHTML = `<strong>❌ Perdido</strong><br>Vuelve a apuntar`;
+                        }
+                    };
+                }
+
+                console.log("✅ Anchors creados");
+                estadoDiv.textContent = "Cámara lista";
+
+                await mindarThree.start();
+                console.log("✅ AR INICIADO");
+                estadoDiv.innerHTML = `<strong>✅ Listo</strong><br>Apunta una carta`;
+
+                renderer.setAnimationLoop(() => {
+                    renderer.render(scene, camera);
+                });
+
+            } catch (error) {
+                console.error("❌ Error:", error);
+                resultDiv.textContent = 'ERROR';
+                resultDiv.style.color = '#f00';
+                resultDiv.style.borderColor = '#f00';
+                estadoDiv.innerHTML = `<strong>❌ ERROR</strong><br>${error.message}`;
             }
         }
+
+        window.addEventListener('load', iniciar);
+
     </script>
 </body>
 </html>
