@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: BATALLA V81</title>
+    <title>DOMUS MAGI: BATALLA V82</title>
     <link rel="stylesheet" href="style.css">
     
     <script type="importmap">
@@ -117,7 +117,6 @@
             
             <div style="display:flex; gap:10px; width:100%;">
                 <button id="btn-confirmar" class="btn-master" style="background:#050; border-color:#0f0; flex:2;">✅ CONFIRMAR</button>
-                <!-- CAMBIO: Ahora llama a iniciarFaseFinal en vez de forzarBatalla directamente -->
                 <button id="btn-forzar" class="btn-master" style="background:#500; font-size:14px;" onclick="window.iniciarFaseFinal()">⚔️ YA</button>
             </div>
         </div>
@@ -153,11 +152,10 @@
         let contadorPartidas = 0;
         let historialPartidas = [];
         
-        // Control de fase de dados
         let dadosSeleccionadosBatalla = 0;
         let indiceJugadorDados = 0; 
 
-        // SETUP
+        // --- SETUP INICIAL ---
         window.setModo = (modo) => {
             cantJugadores = modo;
             document.getElementById('setup-selector').classList.add('oculto');
@@ -195,14 +193,17 @@
             actualizarUI();
         }
 
+        // --- FUNCIONES CORE DEL JUEGO ---
+
         function onCartaDetectada(carta) {
-            // Evitar detecciones si estamos en modal de dados o batalla
+            // Evitar conflictos con pantallas superpuestas
             if(!document.getElementById('modal-dados-fase').classList.contains('oculto') || 
-               !document.getElementById('modal-batalla').classList.contains('oculto')) {
+               !document.getElementById('modal-batalla').classList.contains('oculto') ||
+               !document.getElementById('pantalla-cambio-turno').classList.contains('oculto')) {
                 return;
             }
 
-            console.log(`🎴 DETECTADA: ${carta.nombre} (${carta.codTarget})`);
+            console.log(`🎴 DETECTADA: ${carta.nombre}`);
             cartaActualEnPantalla = carta;
             document.getElementById('msg-visor').innerHTML = `${carta.nombre}<br><span style="font-size:12px; color:#888;">${carta.codTarget}</span>`;
             document.getElementById('guia-scanner').style.borderColor = '#00ff00';
@@ -225,37 +226,50 @@
             document.getElementById('slot-indicator').innerText = `${slotActual + 1}/${MAX_SLOTS}`;
         }
 
-        // --- NUEVA LOGICA: FASE FINAL (DADOS -> BATALLA) ---
+        // --- FUNCION CRÍTICA ARREGLADA: CAMBIO DE TURNO ---
+        window.confirmarCambioTurno = () => {
+            // 1. Limpiar estado de jugada anterior para que no se "trabe"
+            jugadaPendiente = null;
+            resetBotones();
+            
+            // 2. Restaurar Visor
+            document.getElementById('msg-visor').innerText = "ESCANEA CARTA";
+            document.getElementById('guia-scanner').style.borderColor = 'rgba(255,255,255,0.6)';
+            
+            // 3. Cambiar pantalla
+            document.getElementById('pantalla-cambio-turno').classList.add('oculto');
+            document.getElementById('ui-juego').classList.remove('oculto');
+            
+            // 4. Actualizar nombres
+            actualizarUI();
+            
+            console.log("✅ Turno cambiado exitosamente.");
+        };
+
+        // --- FASE FINAL: DADOS RECURSIVOS ---
         
         window.iniciarFaseFinal = () => {
-            // 1. Ocultar la interfaz de juego AR
             document.getElementById('ui-juego').classList.add('oculto');
-            
-            // 2. Iniciar secuencia de dados desde el primer jugador
             indiceJugadorDados = 0;
             prepararDadosParaJugador();
         };
 
         function prepararDadosParaJugador() {
             if (indiceJugadorDados >= jugadores.length) {
-                // Todos tiraron, vamos a la batalla
-                lanzarVideoBatalla();
+                lanzarVideoBatalla(); // Todos tiraron
                 return;
             }
 
             const jugador = jugadores[indiceJugadorDados];
-            
-            // Resetear UI de dados
             document.getElementById('modal-dados-fase').classList.remove('oculto');
             document.getElementById('dados-player-name').innerText = jugador.nombre;
             document.getElementById('layer-valor-batalla').innerText = "0"; 
             
-            // Resetear botones dados
+            // Reset botones
             [2, 3, 4, 5].forEach(i => {
                 document.getElementById(`btn-batalla-${i}`).classList.remove('tageado');
             });
             
-            // Asegurar que el video esté listo (pero pausado hasta que tiren)
             const video = document.getElementById('video-dados-batalla');
             video.currentTime = 0;
             video.pause();
@@ -266,31 +280,23 @@
             const video = document.getElementById('video-dados-batalla');
             const layer = document.getElementById('layer-valor-batalla');
             
-            // Marcar botón
-            [2, 3, 4, 5].forEach(i => {
-                document.getElementById(`btn-batalla-${i}`).classList.remove('tageado');
-            });
+            [2, 3, 4, 5].forEach(i => document.getElementById(`btn-batalla-${i}`).classList.remove('tageado'));
             document.getElementById(`btn-batalla-${n}`).classList.add('tageado');
 
             video.currentTime = 0;
             video.play().catch(e => console.log("Play error"));
 
             video.onended = () => {
-                // Calcular puntaje
                 let total = 0;
-                for (let i = 0; i < n; i++) {
-                    total += Math.floor(Math.random() * 6) + 1;
-                }
+                for (let i = 0; i < n; i++) total += Math.floor(Math.random() * 6) + 1;
                 
-                // Guardar puntaje en el jugador actual
                 jugadores[indiceJugadorDados].dado = total;
                 layer.innerText = total;
 
-                // Pequeña pausa para ver el resultado y pasar al siguiente
                 setTimeout(() => {
                     document.getElementById('modal-dados-fase').classList.add('oculto');
-                    indiceJugadorDados++; // Siguiente jugador
-                    prepararDadosParaJugador(); // Recursión
+                    indiceJugadorDados++;
+                    prepararDadosParaJugador();
                 }, 1500);
             };
         };
@@ -312,8 +318,6 @@
                 mostrarResultados();
             };
         }
-
-        // --- FIN LOGICA NUEVA ---
 
         function mostrarResultados() {
             document.getElementById('p-resultado').classList.remove('oculto');
@@ -367,23 +371,17 @@
         }
 
         window.continuarContienda = () => {
-            // Reiniciar valores
             jugadores.forEach(j => { j.slots = [null, null, null]; j.dado = 0; });
             slotActual = 0;
             turnoJugadorIdx = 0;
             cartaActualEnPantalla = null;
             jugadaPendiente = null;
 
-            // Asegurar que las pantallas superpuestas esten ocultas
             document.getElementById('p-resultado').classList.add('oculto');
             document.getElementById('modal-dados-fase').classList.add('oculto');
             document.getElementById('modal-batalla').classList.add('oculto');
-            
-            // Mostrar UI de juego
             document.getElementById('ui-juego').classList.remove('oculto');
             actualizarUI();
-            
-            console.log("⚔️ Contienda reiniciada, cámara activa.");
         };
 
         function resetBotones() {
@@ -449,7 +447,6 @@
             if (turnoJugadorIdx >= cantJugadores) { turnoJugadorIdx = 0; slotActual++; }
             
             if (slotActual >= MAX_SLOTS) {
-                // Si se llenan todos los slots, iniciar fase final automáticamente
                 window.iniciarFaseFinal();
             } else {
                 document.getElementById('pantalla-cambio-turno').classList.remove('oculto');
