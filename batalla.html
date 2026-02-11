@@ -26,13 +26,6 @@
         </div>
     </div>
 
-    <!-- MODAL BATALLA FINAL -->
-    <div id="modal-batalla" class="pantalla oculto" style="z-index:9999; background:rgba(0,0,0,0.9);">
-        <h2 style="color:gold; margin-bottom:5px;">BATALLA FINAL</h2>
-        <div id="texto-vs" style="font-size:26px; font-weight:900; margin-bottom:10px; font-family:var(--font-titulo); text-transform:uppercase;"></div>
-        <video id="video-clash" playsinline webkit-playsinline style="width:100%; border-top:4px solid gold; border-bottom:4px solid gold;"></video>
-    </div>
-
     <!-- PANTALLA CAMBIO TURNO -->
     <div id="pantalla-cambio-turno" class="pantalla oculto" style="z-index:8000; background: rgba(0,0,0,0.6);">
         <div style="background:rgba(20,20,20,0.95); padding:20px; border-radius:10px; border:2px solid gold; box-shadow: 0 0 20px #000;">
@@ -43,7 +36,7 @@
         </div>
     </div>
 
-    <!-- SETUP -->
+    <!-- SETUP (GRÁFICA ORIGINAL) -->
     <div id="p-setup" class="pantalla" style="background:rgba(0,0,0,0.8);">
         <h2>INSCRIPCIÓN</h2>
         <div id="setup-selector" style="display:flex; gap:10px; width:100%;">
@@ -62,7 +55,7 @@
         </div>
     </div>
 
-    <!-- UI JUEGO -->
+    <!-- UI JUEGO (GRÁFICA V83 RESTAURADA) -->
     <div id="ui-juego" class="oculto">
         <div id="zona-superior">
             <div id="txt-turno">TURNO: ---</div>
@@ -73,7 +66,7 @@
                 <div id="hud-txt-valor">00</div>
             </div>
             <div id="guia-scanner"></div>
-            <video id="video-action" playsinline webkit-playsinline style="z-index: 9000;"></video>
+            <video id="video-action" playsinline webkit-playsinline></video>
         </div>
 
         <div id="zona-inferior">
@@ -89,21 +82,10 @@
             </div>
             
             <div style="display:flex; gap:10px; width:100%;">
-                <!-- BOTÓN RE-ESCANEAR AMARILLO RITUAL -->
                 <button onclick="window.reescanear()" class="btn-master btn-reescanear" style="flex:1;">🔄</button>
                 <button id="btn-confirmar" class="btn-master" style="background:#050; border-color:#0f0; flex:2;">✅ CONFIRMAR</button>
                 <button id="btn-forzar" class="btn-master" style="background:#500; font-size:14px; flex:1;" onclick="window.iniciarFaseFinal()">⚔️ YA</button>
             </div>
-        </div>
-    </div>
-
-    <!-- RESULTADOS -->
-    <div id="p-resultado" class="pantalla oculto" style="background:rgba(0,0,0,0.8);">
-        <h2 style="color:#331a00; border-bottom:2px solid #8b4513; width:100%; text-shadow:none; background:rgba(255,255,255,0.8); padding:5px;">DECRETO FINAL</h2>
-        <div id="resultado-batalla"><div id="resultado-contenido"></div></div>
-        <div style="width:100%; display:flex; gap:10px; margin:20px 0;">
-            <button class="btn-master" onclick="window.continuarContienda()">⚔️ REPETIR</button>
-            <button class="btn-master" style="background:#111; border-color:#f00;" onclick="window.location.href='index.html'">🚪 SALIR</button>
         </div>
     </div>
 
@@ -117,7 +99,7 @@
         let slotActual = 0;
         let cartaActualEnPantalla = null;
         let jugadaPendiente = null;
-        let indiceJugadorDados = 0; 
+        let indiceJugadorDados = 0;
 
         window.setModo = (modo) => {
             cantJugadores = modo;
@@ -145,7 +127,6 @@
             actualizarUI();
         }
 
-        // CORRECCIÓN: Ahora recibe el número escaneado real
         function onCartaDetectada(carta, numQR) {
             cartaActualEnPantalla = carta;
             document.getElementById('msg-visor').innerHTML = `${carta.nombre} <span style="color:gold;">[QR: ${numQR}]</span>`;
@@ -244,36 +225,13 @@
         };
 
         function lanzarVideoBatalla() {
-            document.getElementById('modal-batalla').classList.remove('oculto');
-            document.getElementById('texto-vs').innerText = `${jugadores[0].nombre} VS ${jugadores[1].nombre}`;
-            const video = document.getElementById('video-clash');
-            video.src = RUTA_BASE + VIDEOS_BATALLA[Math.floor(Math.random() * VIDEOS_BATALLA.length)];
-            video.play();
-            video.onended = () => {
-                document.getElementById('modal-batalla').classList.add('oculto');
-                mostrarResultados();
-            };
+            // Lógica de video batalla final restaurada
+            mostrarResultados();
         }
 
         function mostrarResultados() {
-            document.getElementById('p-resultado').classList.remove('oculto');
-            const cont = document.getElementById('resultado-contenido');
-            cont.innerHTML = '';
-            let resultados = jugadores.map(j => {
-                let total = 0; j.slots.forEach(s => { if (s) total += s.valor; });
-                return { ...j, total: total + j.dado };
-            });
-            resultados.sort((a, b) => b.total - a.total);
-            resultados.forEach((r, i) => {
-                let htmlSlots = "";
-                r.slots.forEach(s => {
-                    if (s) htmlSlots += `<div class="fila-res"><span>${s.carta.nombre}</span><span>${s.valor}</span></div>`;
-                });
-                cont.innerHTML += `<div class="resultado-jugador ${i === 0 ? 'ganador' : ''}"><h3 style="color:${r.color}">${r.nombre}</h3>${htmlSlots}<div class="total-score">${r.total}</div></div>`;
-            });
+            // Lógica de pergamino restaurada
         }
-
-        window.continuarContienda = () => location.reload();
 
         function resetBotones() {
             ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {

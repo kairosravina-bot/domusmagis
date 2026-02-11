@@ -6,7 +6,7 @@ export async function iniciarOjo(containerId, onEncontrado) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d', { willReadFrequently: true });
     
-    let ultimoId = null;
+    let ultimoIdDetectado = null;
 
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -17,6 +17,7 @@ export async function iniciarOjo(containerId, onEncontrado) {
         video.play();
         container.appendChild(video);
 
+        // Carga dinámica de jsQR para no depender de compilados
         const script = document.createElement('script');
         script.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
         document.head.appendChild(script);
@@ -30,16 +31,13 @@ export async function iniciarOjo(containerId, onEncontrado) {
                 const code = jsQR(imageData.data, imageData.width, imageData.height);
 
                 if (code && code.data) {
-                    const idString = code.data.trim();
-                    const idNum = parseInt(idString);
-                    // Solo actualiza si el ID es un número válido y cambió
-                    if (!isNaN(idNum) && idNum !== ultimoId) {
-                        if (CARTAS[idNum]) {
-                            ultimoId = idNum;
-                            console.log("✅ QR detectado:", idNum);
-                            // Enviamos la carta Y el número escaneado real
-                            onEncontrado(CARTAS[idNum], idString);
-                        }
+                    const idLimpio = code.data.trim();
+                    const idNum = parseInt(idLimpio);
+
+                    // Solo avisamos si es un número válido y es distinto al que ya está cargado
+                    if (!isNaN(idNum) && idNum !== ultimoIdDetectado && CARTAS[idNum]) {
+                        ultimoIdDetectado = idNum;
+                        onEncontrado(CARTAS[idNum], idLimpio);
                     }
                 }
             }
@@ -47,6 +45,6 @@ export async function iniciarOjo(containerId, onEncontrado) {
         }
         requestAnimationFrame(tick);
     } catch (e) {
-        console.error("Error cámara:", e);
+        console.error("Cámara bloqueada:", e);
     }
 }
