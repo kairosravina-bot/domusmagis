@@ -34,7 +34,7 @@
     <div id="modal-batalla" class="pantalla oculto" style="z-index:9999; background:rgba(0,0,0,0.95);">
         <h2 style="color:gold; font-weight:900;">BATALLA FINAL</h2>
         <div id="texto-vs" style="font-size:30px; font-weight:900; color:white;"></div>
-        <video id="video-clash" playsinline style="width:100%; border-top:4px solid gold; border-bottom:4px solid gold;"></video>
+        <video id="video-clash" playsinline webkit-playsinline muted controls style="width:100%; max-height:60vh; border-top:4px solid gold; border-bottom:4px solid gold; background:black;"></video>
     </div>
 
     <!-- CAMBIO TURNO -->
@@ -197,16 +197,31 @@
             document.getElementById('modal-batalla').classList.remove('oculto');
             const video = document.getElementById('video-clash');
             video.muted = true;
-            const videoUrl = RUTA_BASE + VIDEOS_BATALLA[Math.floor(Math.random() * VIDEOS_BATALLA.length)];
+            
+            // Videos que EXISTEN en el servidor
+            const nombresVideo = ["Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
+            const videoUrl = RUTA_BASE + nombresVideo[Math.floor(Math.random() * nombresVideo.length)];
+            
+            console.log(`Reproduciendo: ${videoUrl}`);
             video.src = videoUrl;
             video.load();
             
+            // Timeout si no carga en 8 segundos
+            const timeoutId = setTimeout(() => {
+                console.log("Video timeout - pasando a resultados");
+                document.getElementById('modal-batalla').classList.add('oculto');
+                mostrarResultados();
+            }, 8000);
+            
             video.play().catch(err => {
-                console.warn("Video error:", err);
-                setTimeout(() => { document.getElementById('modal-batalla').classList.add('oculto'); mostrarResultados(); }, 2000);
+                console.warn("Play error:", err);
+                clearTimeout(timeoutId);
+                document.getElementById('modal-batalla').classList.add('oculto');
+                mostrarResultados();
             });
             
             video.onended = () => { 
+                clearTimeout(timeoutId);
                 document.getElementById('modal-batalla').classList.add('oculto'); 
                 mostrarResultados(); 
             };
@@ -247,6 +262,11 @@
             if(vueltaActual >= MAX_VUELTAS) {
                 document.getElementById('btn-repetir-accion').innerText = "👑 VER GRAN CAMPEÓN";
                 document.getElementById('btn-repetir-accion').onclick = mostrarGanadorFinal;
+                document.getElementById('btn-repetir-accion').style.display = 'inline-block';
+            } else {
+                document.getElementById('btn-repetir-accion').innerText = "⚔️ REPETIR (SIG. VUELTA)";
+                document.getElementById('btn-repetir-accion').onclick = () => window.continuarContienda();
+                document.getElementById('btn-repetir-accion').style.display = 'inline-block';
             }
         }
 
