@@ -112,12 +112,18 @@
         let jugadores = [];
         let cantJugadores = 0, turnoJugadorIdx = 0, slotActual = 0, cartaActualEnPantalla = null, jugadaPendiente = null;
         let indiceJugadorDados = 0;
+        let ojoActivo = false;
 
         window.forzarReescaneo = () => {
             resetUltimoId();
             cartaActualEnPantalla = null;
+            jugadaPendiente = null;
             resetBotones();
             document.getElementById('msg-visor').innerText = 'ESCANEA CARTA';
+            const scanner = document.getElementById('guia-scanner');
+            if (scanner) {
+                scanner.classList.remove('verde', 'dorado', 'violeta');
+            }
         };
 
         window.setModo = (modo) => {
@@ -253,7 +259,13 @@
         };
 
         window.confirmarCambioTurno = () => {
-            jugadaPendiente = null; resetBotones(); resetUltimoId();
+            jugadaPendiente = null; 
+            resetBotones(); 
+            resetUltimoId();
+            cartaActualEnPantalla = null;
+            document.getElementById('msg-visor').innerText = 'ESCANEA CARTA';
+            const scanner = document.getElementById('guia-scanner');
+            if (scanner) scanner.classList.remove('verde', 'dorado', 'violeta');
             document.getElementById('pantalla-cambio-turno').classList.add('oculto');
             document.getElementById('ui-juego').classList.remove('oculto');
             actualizarUI();

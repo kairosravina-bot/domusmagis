@@ -70,12 +70,14 @@ const CARTAS = {
     108: { id: 108, nombre: "IMPERATOR", elemento: "NEUTRO", tipo: "BUHO", imgEscudo: "108.png", botones: genB(10,6,4,6), codTarget: "108" }
 };
 
-// --- MOTOR DEL OJO ---
+// --- MOTOR DEL OJO - ULTRA OPTIMIZADO ---
 let scanning = false;
 let lastConfirmedId = null;
 let currentCandidateId = null;
 let confidenceCounter = 0;
 let guiaScanner = null;
+let lastCheckTime = 0;
+const MIN_FRAME_INTERVAL = 33; // ~30 FPS
 
 export async function iniciarOjo(containerId, onEncontrado) {
     const container = document.getElementById(containerId);
@@ -87,11 +89,16 @@ export async function iniciarOjo(containerId, onEncontrado) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d', { willReadFrequently: true });
     
-    // Referencia al guide-scanner para cambiar colores
     guiaScanner = document.getElementById('guia-scanner');
 
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: "environment",
+                width: { ideal: 640 },
+                height: { ideal: 480 }
+            } 
+        });
         video.srcObject = stream;
         video.play();
         scanning = true;
@@ -103,15 +110,22 @@ export async function iniciarOjo(containerId, onEncontrado) {
 
     function tick() {
         if (!scanning) return;
+        
+        const now = performance.now();
+        if (now - lastCheckTime < MIN_FRAME_INTERVAL) {
+            requestAnimationFrame(tick);
+            return;
+        }
+        lastCheckTime = now;
+        
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
             canvas.height = video.videoHeight;
             canvas.width = video.videoWidth;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
             
-            // CRUCIAL: jsQR debe estar disponible globalmente (se carga en batalla.html)
             if (typeof window.jsQR === 'undefined') {
-                console.error("jsQR no cargado - verifica script en batalla.html");
+                console.error("jsQR no cargado");
                 if (guiaScanner) guiaScanner.style.borderColor = '#ff0000';
                 requestAnimationFrame(tick);
                 return;
@@ -122,13 +136,12 @@ export async function iniciarOjo(containerId, onEncontrado) {
             if (code) {
                 const detectId = code.data.trim();
                 
-                // Cambiar marco a DORADO mientras hay detección
                 if (guiaScanner) {
                     guiaScanner.classList.remove('verde');
                     guiaScanner.classList.add('dorado');
                 }
                 
-                // Filtro de confianza: Debe ver el mismo ID 3 veces
+                // MÁXIMA SENSIBILIDAD: Confirma apenas ve el mismo ID
                 if (detectId === currentCandidateId) {
                     confidenceCounter++;
                 } else {
@@ -136,10 +149,10 @@ export async function iniciarOjo(containerId, onEncontrado) {
                     confidenceCounter = 1;
                 }
 
-                if (confidenceCounter > 2 && detectId !== lastConfirmedId) {
+                // Trigger inmediato con confianza = 1 (sin esperas)
+                if (confidenceCounter >= 1 && detectId !== lastConfirmedId) {
                     lastConfirmedId = detectId;
                     
-                    // Marco a VERDE cuando confirma
                     if (guiaScanner) {
                         guiaScanner.classList.remove('dorado');
                         guiaScanner.classList.add('verde');
@@ -147,22 +160,18 @@ export async function iniciarOjo(containerId, onEncontrado) {
                     
                     const original = CARTAS[parseInt(detectId)] || Object.values(CARTAS).find(c => c.codTarget == detectId);
                     if (original) {
-                        // Clonación profunda absoluta
                         onEncontrado(JSON.parse(JSON.stringify(original)));
                         
-                        // Resetear colores después de 500ms
                         setTimeout(() => {
                             if (guiaScanner) {
                                 guiaScanner.classList.remove('verde', 'dorado');
                             }
-                        }, 500);
+                        }, 200);
                     }
                 }
             } else {
-                // Sin detección: marco blanco (espera)
-                if (guiaScanner && !guiaScanner.classList.contains('verde') && !guiaScanner.classList.contains('dorado')) {
-                    guiaScanner.classList.remove('verde', 'dorado');
-                }
+                currentCandidateId = null;
+                confidenceCounter = 0;
             }
         }
         requestAnimationFrame(tick);
