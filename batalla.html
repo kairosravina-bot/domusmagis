@@ -137,33 +137,31 @@
 
         function onCartaDetectada(carta) {
             cartaActualEnPantalla = carta;
-            document.getElementById('msg-visor').innerHTML = `<span style="font-weight:900; font-size:30px;">${carta.nombre}</span>`;
+            document.getElementById('msg-visor').innerText = `✓ ${carta.nombre}`;
             actualizarEstiloBotones(carta);
+            console.log("Carta detectada:", carta.nombre);
         }
 
-        document.getElementById('btn-reescaneo').onclick = () => {
-            cartaActualEnPantalla = null; resetUltimoId();
-            document.getElementById('msg-visor').innerText = "ESCANEA CARTA";
-            resetBotones();
-        };
-
         function actualizarUI() {
-            const j = jugadores[turnoJugadorIdx];
-            document.getElementById('txt-turno').innerText = `TURNO: ${j.nombre}`;
-            document.getElementById('txt-turno').style.color = j.color;
+            document.getElementById('txt-turno').innerText = `TURNO: ${jugadores[turnoJugadorIdx].nombre}`;
             document.getElementById('txt-vuelta').innerText = `VUELTA: ${vueltaActual} / ${MAX_VUELTAS}`;
-            document.getElementById('slot-indicator').innerText = `${slotActual + 1}/${MAX_SLOTS}`;
+            document.getElementById('slot-indicator').innerText = `${slotActual + 1}/3`;
+            resetBotones();
         }
 
         window.iniciarFaseFinal = () => {
             document.getElementById('ui-juego').classList.add('oculto');
-            indiceJugadorDados = 0; prepararDadosParaJugador();
+            document.getElementById('modal-dados-fase').classList.remove('oculto');
+            indiceJugadorDados = 0;
+            prepararDadosParaJugador();
         };
 
         function prepararDadosParaJugador() {
-            if (indiceJugadorDados >= jugadores.length) return lanzarVideoBatalla();
+            if (indiceJugadorDados >= cantJugadores) {
+                lanzarVideoBatalla();
+                return;
+            }
             const j = jugadores[indiceJugadorDados];
-            document.getElementById('modal-dados-fase').classList.remove('oculto');
             document.getElementById('dados-player-name').innerText = j.nombre;
             document.getElementById('layer-valor-batalla').innerText = "0";
         }
