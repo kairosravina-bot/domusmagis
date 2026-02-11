@@ -1,6 +1,6 @@
 // --- BIBLIOTECA INTEGRADA EN EL OJO ---
 const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
-const VIDEOS_BATALLA = ["ExplosiÃ³n_Elemental.mp4", "Invocaciones_EtÃ©reas.mp4"];
+const VIDEOS_BATALLA = ["Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
 
 const genB = (i, a, t, m) => ({
     "btn-i": { texto: "I", label: "IMPETUS", valor: i, video: "ataque.mp4" },
@@ -158,8 +158,13 @@ export async function iniciarOjo(containerId, onEncontrado) {
                         guiaScanner.classList.add('verde');
                     }
                     
-                    const original = CARTAS[parseInt(detectId)] || Object.values(CARTAS).find(c => c.codTarget == detectId);
+                    const idNumerico = parseInt(detectId);
+                    const original = CARTAS[idNumerico] || Object.values(CARTAS).find(c => c.codTarget == detectId);
+                    
+                    console.log(`QR Detectado: "${detectId}" → ID: ${idNumerico} → Carta: ${original ? original.nombre : 'NO ENCONTRADA'}`);
+                    
                     if (original) {
+                        // Clonación profunda absoluta
                         onEncontrado(JSON.parse(JSON.stringify(original)));
                         
                         setTimeout(() => {
@@ -167,6 +172,9 @@ export async function iniciarOjo(containerId, onEncontrado) {
                                 guiaScanner.classList.remove('verde', 'dorado');
                             }
                         }, 100);
+                    } else {
+                        console.warn(`Carta no encontrada para ID: ${detectId}`);
+                        lastConfirmedId = null; // Resetear para reintentar
                     }
                 }
             } else {

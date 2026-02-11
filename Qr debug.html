@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR DEBUG - Verificar lectura</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <style>
+        body {
+            font-family: monospace;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            text-align: center;
+        }
+        #video {
+            width: 100%;
+            max-width: 500px;
+            border: 3px solid gold;
+            margin: 20px 0;
+        }
+        #resultado {
+            font-size: 24px;
+            font-weight: bold;
+            background: #001;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            min-height: 40px;
+        }
+        .info {
+            background: #003;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 QR DEBUG - Lector de Prueba</h1>
+    
+    <div class="info">
+        <p>Apunta la cámara a un QR para verificar exactamente qué se está leyendo</p>
+        <p>Compara el valor leído con el nombre de la carta esperado</p>
+    </div>
+    
+    <video id="video" playsinline muted></video>
+    
+    <div id="resultado">
+        <div>QR: <span id="qr-value">-</span></div>
+        <div>Carta: <span id="carta-name">-</span></div>
+    </div>
+    
+    <button onclick="location.href='batalla.html'" style="padding:15px 30px; font-size:18px; background:#050; color:#0f0; border:2px solid gold; cursor:pointer;">Volver a Batalla</button>
+
+    <script type="module">
+        import { CARTAS } from './ojo.js';
+        
+        const video = document.getElementById('video');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        
+        let lastDetected = null;
+        
+        async function init() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" }
+                });
+                video.srcObject = stream;
+                video.play();
+                scan();
+            } catch (err) {
+                document.getElementById('resultado').innerHTML = '❌ Error de cámara: ' + err.message;
+            }
+        }
+        
+        function scan() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                
+                if (typeof window.jsQR !== 'undefined') {
+                    const code = window.jsQR(imageData.data, imageData.width, imageData.height);
+                    if (code) {
+                        const detectId = code.data.trim();
+                        if (detectId !== lastDetected) {
+                            lastDetected = detectId;
+                            const idNum = parseInt(detectId);
+                            const carta = CARTAS[idNum] || Object.values(CARTAS).find(c => c.codTarget == detectId);
+                            
+                            document.getElementById('qr-value').textContent = detectId;
+                            document.getElementById('carta-name').textContent = carta ? 
+                                `✓ ${carta.nombre} (ID: ${carta.id})` : 
+                                `✗ NO ENCONTRADA`;
+                            
+                            console.log(`QR: ${detectId} → ${carta ? carta.nombre : 'NO ENCONTRADA'}`);
+                        }
+                    }
+                }
+            }
+            requestAnimationFrame(scan);
+        }
+        
+        init();
+    </script>
+</body>
+</html>

@@ -34,7 +34,7 @@
     <div id="modal-batalla" class="pantalla oculto" style="z-index:9999; background:rgba(0,0,0,0.95);">
         <h2 style="color:gold; font-weight:900;">BATALLA FINAL</h2>
         <div id="texto-vs" style="font-size:30px; font-weight:900; color:white;"></div>
-        <video id="video-clash" playsinline style="width:100%; border-top:4px solid gold; border-bottom:4px solid gold;"></video>
+        <video id="video-clash" playsinline webkit-playsinline muted style="width:100%; max-height:80vh; border-top:4px solid gold; border-bottom:4px solid gold; background:black;"></video>
     </div>
 
     <!-- CAMBIO TURNO -->
@@ -221,9 +221,37 @@
         function lanzarVideoBatalla() {
             document.getElementById('modal-batalla').classList.remove('oculto');
             const video = document.getElementById('video-clash');
-            video.src = RUTA_BASE + VIDEOS_BATALLA[Math.floor(Math.random() * VIDEOS_BATALLA.length)];
-            video.play();
-            video.onended = () => { document.getElementById('modal-batalla').classList.add('oculto'); mostrarResultados(); };
+            video.muted = true;
+            video.controls = false;
+            video.autoplay = false;
+            
+            const videoUrl = RUTA_BASE + VIDEOS_BATALLA[Math.floor(Math.random() * VIDEOS_BATALLA.length)];
+            console.log(`Cargando video de batalla: ${videoUrl}`);
+            
+            video.src = videoUrl;
+            
+            // Esperar a que el video esté listo
+            video.onloadedmetadata = () => {
+                console.log("Video metadata cargado, reproduciendo...");
+                video.play().catch(err => {
+                    console.error("Error reproduciendo video:", err);
+                    // Si falla, pasar a resultados de todas formas
+                    setTimeout(mostrarResultados, 2000);
+                });
+            };
+            
+            video.onerror = (err) => {
+                console.error("Error cargando video:", err);
+                // Si el video no carga, pasar a resultados
+                setTimeout(mostrarResultados, 2000);
+            };
+            
+            // Cuando termina el video
+            video.onended = () => { 
+                console.log("Video batalla terminado");
+                document.getElementById('modal-batalla').classList.add('oculto'); 
+                mostrarResultados(); 
+            };
         }
 
         function mostrarResultados() {
