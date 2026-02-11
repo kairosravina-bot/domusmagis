@@ -2,9 +2,8 @@ import { CARTAS } from './biblioteca.js';
 
 let scanning = false;
 let lastDetectedId = null;
-let lostTimeout = null;
 
-export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
+export async function iniciarOjo(containerId, onEncontrado) {
     const container = document.getElementById(containerId);
     
     const video = document.createElement('video');
@@ -39,30 +38,18 @@ export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            // jsQR se encarga de la lectura del número
             const code = jsQR(imageData.data, imageData.width, imageData.height);
 
             if (code) {
                 const detectId = code.data.trim();
                 
-                if (lostTimeout) { clearTimeout(lostTimeout); lostTimeout = null; }
-
-                // Cambio de carta detectado
+                // Solo actualiza si es una carta diferente
                 if (detectId !== lastDetectedId) {
                     lastDetectedId = detectId;
                     const cartaOriginal = buscarCarta(detectId);
                     if (cartaOriginal) {
-                        // Enviamos una COPIA para evitar que valores de una carta pisen a otra
                         onEncontrado(JSON.parse(JSON.stringify(cartaOriginal)));
                     }
-                }
-            } else {
-                // Si no hay código, esperamos un momento antes de dar por perdida la carta
-                if (!lostTimeout) {
-                    lostTimeout = setTimeout(() => {
-                        lastDetectedId = null;
-                        onPerdido();
-                    }, 800); 
                 }
             }
         }
@@ -71,9 +58,12 @@ export async function iniciarOjo(containerId, onEncontrado, onPerdido) {
 
     function buscarCarta(id) {
         const num = parseInt(id);
-        // Prioridad por ID numérico directo (1, 2, 3...)
         if (CARTAS[num]) return CARTAS[num];
-        // Búsqueda por codTarget si el QR tiene ceros a la izquierda (001, 005...)
         return Object.values(CARTAS).find(c => c.codTarget == id || parseInt(c.codTarget) == num);
     }
+}
+
+// Función para permitir volver a detectar el mismo ID tras un reset
+export function resetUltimoId() {
+    lastDetectedId = null;
 }
