@@ -5,22 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOMUS MAGI: BATALLA V83</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Librería externa para lectura de códigos -->
+    <!-- Escáner de identificación directa -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 </head>
 <body>
     <div id="container-ar"></div>
 
-    <!-- MODAL DADOS -->
     <div id="modal-dados-fase" class="pantalla oculto" style="z-index:9500; background:rgba(0,0,0,0.85);">
         <h2 style="color:#aaa; margin:0;">DESTINO</h2>
         <h1 id="dados-player-name" style="font-size:36px; margin:5px 0;">JUGADOR</h1>
-        
         <div class="dados-container">
             <video id="video-dados-batalla" class="video-dados" src="https://kairosravina-bot.github.io/domusmagis/Dados.mp4" playsinline webkit-playsinline muted></video>
             <div id="layer-valor-batalla" class="layer-valor">0</div>
         </div>
-
         <h3 style="margin: 0; margin-top:5px; color:#888; font-size:14px;">SELECCIONA TUS DADOS:</h3>
         <div class="grid-dados">
             <div class="btn-dado-sel" id="btn-batalla-2" onclick="window.ejecutarLanzamientoBatalla(2)"><strong>2</strong><span>(12)</span></div>
@@ -30,14 +27,12 @@
         </div>
     </div>
 
-    <!-- MODAL BATALLA FINAL -->
     <div id="modal-batalla" class="pantalla oculto" style="z-index:9999; background:rgba(0,0,0,0.9);">
         <h2 style="color:gold; margin-bottom:5px;">BATALLA FINAL</h2>
         <div id="texto-vs" style="font-size:26px; font-weight:900; margin-bottom:10px; font-family:var(--font-titulo); text-transform:uppercase;"></div>
         <video id="video-clash" playsinline webkit-playsinline style="width:100%; border-top:4px solid gold; border-bottom:4px solid gold;"></video>
     </div>
 
-    <!-- CAMBIO TURNO -->
     <div id="pantalla-cambio-turno" class="pantalla oculto" style="z-index:8000; background: rgba(0,0,0,0.6);">
         <div style="background:rgba(20,20,20,0.95); padding:20px; border-radius:10px; border:2px solid gold; box-shadow: 0 0 20px #000;">
             <h1 style="font-size:50px; color: #ff4444; margin:0;">🛑 ALTO 🛑</h1>
@@ -47,7 +42,6 @@
         </div>
     </div>
 
-    <!-- SETUP -->
     <div id="p-setup" class="pantalla" style="background:rgba(0,0,0,0.8);">
         <h2>INSCRIPCIÓN</h2>
         <div id="setup-selector" style="display:flex; gap:10px; width:100%;">
@@ -67,48 +61,28 @@
         <button class="btn-master" style="margin-top:20px; background:#333;" onclick="window.location.href='index.html'">CANCELAR</button>
     </div>
 
-    <!-- UI JUEGO -->
     <div id="ui-juego" class="oculto">
         <div id="zona-superior">
             <div id="txt-turno" style="position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(0,0,0,0.9); padding: 15px 20px; border: 3px solid gold; font-size: 26px; font-weight: 900; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-shadow: 0 0 5px rgba(0,0,0,0.8);">TURNO: ---</div>
-            
-            <!-- HUD DERECHO -->
             <div id="hud-derecho">
                 <img id="hud-img-escudo" src="" alt="Escudo">
                 <div id="hud-txt-arma">ARMA</div>
                 <div id="hud-txt-accion">ACCION</div>
                 <div id="hud-txt-valor">00</div>
             </div>
-
             <div id="guia-scanner"></div>
             <video id="video-action" playsinline webkit-playsinline></video>
         </div>
-
         <div id="zona-inferior">
             <div id="info-rival">RIVAL JUGÓ: <span id="rival-last-move">???</span></div>
             <div id="msg-visor" style="font-size:26px; color:var(--borde-dorado); font-weight:900;">ESCANEA CARTA</div>
             <p style="color:#aaa; font-size:20px; margin:0;">SLOT: <span id="slot-indicator" style="color:gold;">1/3</span></p>
-            
-            <!-- GEMAS -->
             <div class="contenedor-gemas">
-                <div class="wrapper-gema">
-                    <span id="val-i" class="valor-flotante"></span>
-                    <button id="btn-i" class="btn-gema"><span class="letra-grande">I</span></button>
-                </div>
-                <div class="wrapper-gema">
-                    <span id="val-a" class="valor-flotante"></span>
-                    <button id="btn-a" class="btn-gema"><span class="letra-grande">A</span></button>
-                </div>
-                <div class="wrapper-gema">
-                    <span id="val-t" class="valor-flotante"></span>
-                    <button id="btn-t" class="btn-gema"><span class="letra-grande">T</span></button>
-                </div>
-                <div class="wrapper-gema">
-                    <span id="val-m" class="valor-flotante"></span>
-                    <button id="btn-m" class="btn-gema"><span class="letra-grande">M</span></button>
-                </div>
+                <div class="wrapper-gema"><span id="val-i" class="valor-flotante"></span><button id="btn-i" class="btn-gema"><span class="letra-grande">I</span></button></div>
+                <div class="wrapper-gema"><span id="val-a" class="valor-flotante"></span><button id="btn-a" class="btn-gema"><span class="letra-grande">A</span></button></div>
+                <div class="wrapper-gema"><span id="val-t" class="valor-flotante"></span><button id="btn-t" class="btn-gema"><span class="letra-grande">T</span></button></div>
+                <div class="wrapper-gema"><span id="val-m" class="valor-flotante"></span><button id="btn-m" class="btn-gema"><span class="letra-grande">M</span></button></div>
             </div>
-            
             <div style="display:flex; gap:10px; width:100%;">
                 <button id="btn-confirmar" class="btn-master" style="background:#050; border-color:#0f0; flex:2;">✅ CONFIRMAR</button>
                 <button id="btn-forzar" class="btn-master" style="background:#500; font-size:14px;" onclick="window.iniciarFaseFinal()">⚔️ YA</button>
@@ -116,12 +90,9 @@
         </div>
     </div>
 
-    <!-- RESULTADOS -->
     <div id="p-resultado" class="pantalla oculto" style="background:rgba(0,0,0,0.8);">
         <h2 style="color:#331a00; border-bottom:2px solid #8b4513; width:100%; text-shadow:none; background:rgba(255,255,255,0.8); padding:5px;">DECRETO FINAL</h2>
-        <div id="resultado-batalla">
-            <div id="resultado-contenido"></div>
-        </div>
+        <div id="resultado-batalla"><div id="resultado-contenido"></div></div>
         <div style="width:100%; display:flex; gap:10px; margin:20px 0;">
             <button class="btn-master" onclick="window.continuarContienda()">⚔️ REPETIR</button>
             <button class="btn-master" style="background:#111; border-color:#f00;" onclick="window.location.href='index.html'">🚪 SALIR</button>
@@ -145,8 +116,6 @@
         let jugadaPendiente = null;
         let contadorPartidas = 0;
         let historialPartidas = [];
-        
-        let dadosSeleccionadosBatalla = 0;
         let indiceJugadorDados = 0; 
 
         window.setModo = (modo) => {
@@ -181,7 +150,7 @@
                !document.getElementById('pantalla-cambio-turno').classList.contains('oculto')) return;
 
             cartaActualEnPantalla = carta;
-            document.getElementById('msg-visor').innerHTML = `${carta.nombre}<br><span style="font-size:12px; color:#888;">${carta.codTarget}</span>`;
+            document.getElementById('msg-visor').innerHTML = `${carta.nombre}<br><span style="font-size:12px; color:#888;">ID: ${carta.id}</span>`;
             document.getElementById('guia-scanner').style.borderColor = '#00ff00';
             document.getElementById('guia-scanner').style.boxShadow = '0 0 30px #00ff00';
             resetBotones();
@@ -209,7 +178,6 @@
         window.confirmarCambioTurno = () => {
             jugadaPendiente = null;
             resetBotones();
-            document.getElementById('msg-visor').innerText = "ESCANEA CARTA";
             document.getElementById('pantalla-cambio-turno').classList.add('oculto');
             document.getElementById('ui-juego').classList.remove('oculto');
             actualizarUI();
@@ -228,12 +196,10 @@
             document.getElementById('dados-player-name').innerText = jugador.nombre;
             document.getElementById('layer-valor-batalla').innerText = "0"; 
             [2, 3, 4, 5].forEach(i => document.getElementById(`btn-batalla-${i}`).classList.remove('tageado'));
-            const video = document.getElementById('video-dados-batalla');
-            video.currentTime = 0; video.pause();
+            document.getElementById('video-dados-batalla').pause();
         }
 
         window.ejecutarLanzamientoBatalla = (n) => {
-            dadosSeleccionadosBatalla = n;
             const video = document.getElementById('video-dados-batalla');
             const layer = document.getElementById('layer-valor-batalla');
             [2, 3, 4, 5].forEach(i => document.getElementById(`btn-batalla-${i}`).classList.remove('tageado'));
@@ -254,10 +220,7 @@
         };
 
         function lanzarVideoBatalla() {
-            document.getElementById('modal-dados-fase').classList.add('oculto');
             document.getElementById('modal-batalla').classList.remove('oculto');
-            const p1 = jugadores[0], p2 = jugadores[1];
-            document.getElementById('texto-vs').innerText = `${p1.nombre} VS ${p2.nombre}`;
             const video = document.getElementById('video-clash');
             video.src = RUTA_BASE + VIDEOS_BATALLA[Math.floor(Math.random() * VIDEOS_BATALLA.length)];
             video.play();
@@ -272,61 +235,34 @@
             const cont = document.getElementById('resultado-contenido');
             cont.innerHTML = '';
             let resultados = jugadores.map(j => {
-                let total = 0;
+                let total = j.dado;
                 j.slots.forEach(s => { if (s) total += s.valor; });
-                return { ...j, total: total + j.dado };
+                return { ...j, total };
             });
             resultados.sort((a, b) => b.total - a.total);
-            contadorPartidas++;
-            const ganador = resultados[0];
-            historialPartidas.push({ id: contadorPartidas, nombre: ganador.nombre, pts: ganador.total });
-            actualizarListaHistorial();
             resultados.forEach((r, i) => {
                 let htmlSlots = "";
-                r.slots.forEach(s => {
-                    if (s) htmlSlots += `<div class="fila-res"><div style="display:flex; align-items:center;"><img src="${RUTA_BASE + s.carta.imgEscudo}" class="mini-escudo-res"><div><span class="res-nombre">${s.carta.nombre}</span></div></div><span>${s.lado}</span><span style="font-weight:900;">${s.valor}</span></div>`;
-                });
-                cont.innerHTML += `<div class="resultado-jugador ${i === 0 ? 'ganador' : ''}"><h3 style="color:${r.color}; margin:0;">${r.nombre}</h3>${htmlSlots}<div style="margin-top:10px; border-top:1px solid #8b4513; padding-top:5px;"><span>DADOS: +${r.dado}</span></div><div style="font-size:70px; color:#8b0000; font-weight:900; text-align:right;">${r.total}</div></div>`;
+                r.slots.forEach(s => { if(s) htmlSlots += `<div class="fila-res"><span>${s.carta.nombre}</span><span>${s.valor}</span></div>`; });
+                cont.innerHTML += `<div class="resultado-jugador ${i===0?'ganador':''}"><h3 style="color:${r.color}">${r.nombre}</h3>${htmlSlots}<div>DADOS: +${r.dado}</div><div class="total-score">${r.total}</div></div>`;
             });
         }
-
-        function actualizarListaHistorial() {
-            const lista = document.getElementById('lista-historial');
-            lista.innerHTML = "";
-            [...historialPartidas].reverse().forEach(h => {
-                lista.innerHTML += `<div style="padding:5px; border-bottom:1px solid #555; color:#aaa;"><span>BATALLA #${h.id}</span> - <strong style="color:gold;">${h.nombre}</strong> <span>(${h.pts})</span></div>`;
-            });
-        }
-
-        window.continuarContienda = () => {
-            jugadores.forEach(j => { j.slots = [null, null, null]; j.dado = 0; });
-            slotActual = 0; turnoJugadorIdx = 0;
-            document.getElementById('p-resultado').classList.add('oculto');
-            document.getElementById('ui-juego').classList.remove('oculto');
-            actualizarUI();
-        };
 
         function resetBotones() {
             ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
                 const btn = document.getElementById(id);
                 btn.className = 'btn-gema';
-                btn.innerHTML = `<span class="letra-grande">${id.split('-')[1].toUpperCase()}</span>`;
-                const valSpan = document.getElementById(id.replace('btn-', 'val-'));
-                valSpan.innerText = ""; valSpan.className = "valor-flotante";
+                document.getElementById(id.replace('btn-', 'val-')).innerText = "";
             });
         }
 
         function actualizarEstiloBotones(carta) {
             ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
                 const btn = document.getElementById(id);
-                const conf = carta.botones[id];
+                const val = carta.botones[id].valor;
                 if (carta.tipo === 'BUHO') btn.classList.add('style-buho');
-                else if (carta.tipo === 'ARTEFACTO') btn.classList.add('style-artefacto');
                 const valSpan = document.getElementById(id.replace('btn-', 'val-'));
-                valSpan.innerText = conf.valor;
-                if (carta.tipo === 'CASA') valSpan.classList.add('neon-blanco');
-                else if (carta.tipo === 'BUHO') valSpan.classList.add('neon-violeta');
-                else if (carta.tipo === 'ARTEFACTO') valSpan.classList.add('neon-amarillo');
+                valSpan.innerText = val;
+                valSpan.className = "valor-flotante " + (carta.tipo === 'CASA' ? 'neon-blanco' : 'neon-violeta');
             });
         }
 
@@ -334,7 +270,7 @@
             document.getElementById(id).onclick = () => {
                 if (!cartaActualEnPantalla) return;
                 const conf = cartaActualEnPantalla.botones[id];
-                jugadaPendiente = { carta: cartaActualEnPantalla, lado: conf.label, valor: conf.valor };
+                jugadaPendiente = { carta: cartaActualEnPantalla, valor: conf.valor };
                 const v = document.getElementById('video-action');
                 v.style.display = 'block'; v.src = RUTA_BASE + conf.video; v.play();
                 document.getElementById('hud-derecho').style.display = 'flex';
@@ -342,14 +278,12 @@
                 document.getElementById('hud-txt-arma').innerText = cartaActualEnPantalla.nombre;
                 document.getElementById('hud-txt-accion').innerText = conf.label;
                 document.getElementById('hud-txt-valor').innerText = conf.valor;
-                v.onended = () => {
-                    v.style.display = 'none'; document.getElementById('hud-derecho').style.display = 'none';
-                };
+                v.onended = () => { v.style.display = 'none'; document.getElementById('hud-derecho').style.display = 'none'; };
             };
         });
 
         document.getElementById('btn-confirmar').onclick = () => {
-            if (!jugadaPendiente) { alert("Escanea primero"); return; }
+            if (!jugadaPendiente) return;
             jugadores[turnoJugadorIdx].slots[slotActual] = jugadaPendiente;
             turnoJugadorIdx++;
             if (turnoJugadorIdx >= cantJugadores) { turnoJugadorIdx = 0; slotActual++; }
@@ -360,6 +294,13 @@
                 document.getElementById('ui-juego').classList.add('oculto');
             }
         };
+        window.confirmarCambioTurno = () => {
+            jugadaPendiente = null;
+            document.getElementById('pantalla-cambio-turno').classList.add('oculto');
+            document.getElementById('ui-juego').classList.remove('oculto');
+            actualizarUI();
+        };
+        window.continuarContienda = () => location.reload();
     </script>
 </body>
 </html>
