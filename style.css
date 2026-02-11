@@ -26,12 +26,20 @@ body {
     padding: 20px; z-index: 100;
 }
 
-.btn-master, .btn-jugar, .btn-info {
+.btn-master {
     font-family: var(--font-titulo); font-weight: 700; font-size: 18px; text-transform: uppercase;
     color: var(--color-oro); background: linear-gradient(to bottom, #3a3a3a, #1a1a1a);
     border: 2px solid var(--borde-dorado); border-radius: 4px;
     padding: 15px 20px; margin: 10px 0; width: 100%; max-width: 350px;
     cursor: pointer; box-shadow: 0 4px 0 #000; text-shadow: 1px 1px 0 #000;
+}
+
+/* BOTÓN REESCANEAR AMARILLO */
+.btn-reescanear {
+    background: linear-gradient(to bottom, #ffd700, #b8860b) !important;
+    color: #000 !important;
+    border-color: #fff !important;
+    text-shadow: none !important;
 }
 
 input[type="text"] {
@@ -51,6 +59,15 @@ input[type="text"] {
 
 #ui-juego { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; z-index: 500; pointer-events: none; }
 #zona-superior { height: 55%; width: 100%; position: relative; display: flex; justify-content: center; align-items: center; border-bottom: 4px solid var(--borde-dorado); }
+
+/* TURNO ACHICADO */
+#txt-turno { 
+    position: absolute; top: 15px; left: 15px; z-index: 10000; 
+    background: rgba(0,0,0,0.9); padding: 8px 12px; border: 2px solid gold; 
+    font-size: 18px; font-weight: 900; border-radius: 8px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+}
+
 #zona-inferior { height: 45%; width: 100%; background: linear-gradient(to bottom, rgba(26,5,5,0.95), rgba(0,0,0,1)); pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px 15px; }
 
 #hud-derecho { position: absolute; top: 10px; right: 10px; z-index: 9500; display: none; flex-direction: column; align-items: flex-end; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 10px; border: 1px solid gold; }
@@ -62,24 +79,4 @@ input[type="text"] {
 .total-score { font-size: 60px; font-weight: 900; text-align: right; color: #8b0000; }
 
 .dados-container { position: relative; width: 250px; height: 250px; border: 4px solid var(--borde-dorado); border-radius: 50%; overflow: hidden; background: #000; }
-.video-dados { width: 100%; height: 100%; object-fit: cover; }
-.layer-valor { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 100px; font-weight: 900; color: #fff; }
-
-.grid-dados { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-.btn-dado-sel { background: #222; border: 1px solid #444; border-radius: 8px; padding: 10px; text-align: center; color: #aaa; }
-
-#guia-scanner { width: 240px; height: 240px; border: 6px solid rgba(255,255,255,0.6); border-radius: 20px; }
-
-.contenedor-gemas { display: flex; gap: 15px; margin: 5px 0; }
-.wrapper-gema { display: flex; flex-direction: column; align-items: center; }
-.valor-flotante { font-size: 40px; font-weight: 900; margin-bottom: 2px; height: 45px; }
-.neon-blanco { color: #fff; text-shadow: 0 0 10px #fff; }
-
-.btn-gema { width: 80px; height: 80px; background-color: transparent; border: none; background-size: contain; background-repeat: no-repeat; }
-#btn-i { background-image: url('GEMA_ROJA.png'); } 
-#btn-a { background-image: url('GEMA_VERDE.png'); } 
-#btn-t { background-image: url('GEMA_GRIS.png'); } 
-#btn-m { background-image: url('GEMA_VIOLETA.png'); }
-
-.letra-grande { font-size: 32px; font-weight: 900; color: #fff; text-shadow: 0 2px 5px #000; }
-#video-action { position:absolute; width:100%; height:100%; display:none; background:black; object-fit:contain; }
+.video-dados { width: 100%; height

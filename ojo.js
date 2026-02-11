@@ -17,7 +17,6 @@ export async function iniciarOjo(containerId, onEncontrado) {
         video.play();
         container.appendChild(video);
 
-        // Cargar jsQR dinámicamente
         const script = document.createElement('script');
         script.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
         document.head.appendChild(script);
@@ -31,11 +30,16 @@ export async function iniciarOjo(containerId, onEncontrado) {
                 const code = jsQR(imageData.data, imageData.width, imageData.height);
 
                 if (code && code.data) {
-                    const id = parseInt(code.data.trim());
-                    if (!isNaN(id) && id !== ultimoId && CARTAS[id]) {
-                        ultimoId = id;
-                        console.log("✅ QR detectado:", id);
-                        onEncontrado(CARTAS[id]);
+                    const idString = code.data.trim();
+                    const idNum = parseInt(idString);
+                    // Solo actualiza si el ID es un número válido y cambió
+                    if (!isNaN(idNum) && idNum !== ultimoId) {
+                        if (CARTAS[idNum]) {
+                            ultimoId = idNum;
+                            console.log("✅ QR detectado:", idNum);
+                            // Enviamos la carta Y el número escaneado real
+                            onEncontrado(CARTAS[idNum], idString);
+                        }
                     }
                 }
             }
