@@ -36,7 +36,7 @@ export async function iniciarOjo(containerId, onEncontrado) {
                     lastDetectedId = detectId;
                     const original = CARTAS[parseInt(detectId)] || Object.values(CARTAS).find(c => c.codTarget == detectId);
                     if (original) {
-                        // Clonación profunda para evitar mezclar valores entre cartas
+                        // Clonación para evitar que los valores se mezclen entre cartas
                         onEncontrado(JSON.parse(JSON.stringify(original)));
                     }
                 }
