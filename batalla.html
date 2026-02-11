@@ -204,9 +204,16 @@
                 console.log(`Resultado: ${total} para jugador ${indiceJugadorDados}`);
                 
                 setTimeout(() => {
-                    document.getElementById('modal-dados-fase').classList.add('oculto');
                     indiceJugadorDados++;
-                    prepararDadosParaJugador();
+                    
+                    if (indiceJugadorDados >= cantJugadores) {
+                        // Todos tiraron dados - ir a batalla
+                        document.getElementById('modal-dados-fase').classList.add('oculto');
+                        lanzarVideoBatalla();
+                    } else {
+                        // Mostrar siguiente jugador SIN cerrar modal
+                        prepararDadosParaJugador();
+                    }
                 }, 1200);
             };
         };
