@@ -9,7 +9,7 @@ const genB = (i, a, t, m) => ({
 });
 
 export const CARTAS = {
-    // TIERRA (001-020)
+    // === TIERRA (001 - 020) ===
     1: { id: 1, nombre: "APER", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(6,1,5,0), codTarget: "1" },
     2: { id: 2, nombre: "SAXUM", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(3,1,12,1), codTarget: "2" },
     3: { id: 3, nombre: "BESTIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(9,1,5,5), codTarget: "3" },
@@ -31,7 +31,7 @@ export const CARTAS = {
     19: { id: 19, nombre: "BALISTA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "019.png", botones: genB(10,0,2,0), codTarget: "19" },
     20: { id: 20, nombre: "ONIAGER", elemento: "TERRA", tipo: "ARMA", imgEscudo: "020.png", botones: genB(9,1,3,1), codTarget: "20" },
 
-    // CIELO (021-040)
+    // === CIELO (021 - 040) ===
     21: { id: 21, nombre: "FENRIS", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(7,1,2,2), codTarget: "21" },
     22: { id: 22, nombre: "THALGRIM", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(4,3,8,3), codTarget: "22" },
     23: { id: 23, nombre: "AQUILON", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(2,5,3,9), codTarget: "23" },
@@ -53,7 +53,7 @@ export const CARTAS = {
     39: { id: 39, nombre: "BALISTA", elemento: "COELI", tipo: "ARMA", imgEscudo: "039.png", botones: genB(9,1,2,5), codTarget: "39" },
     40: { id: 40, nombre: "ONIAGER", elemento: "COELI", tipo: "ARMA", imgEscudo: "040.png", botones: genB(8,1,2,7), codTarget: "40" },
 
-    // AGUA (041-060)
+    // === AGUA (041 - 060) ===
     41: { id: 41, nombre: "SCORPIUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1041-AG-BE.png", botones: genB(5,1,1,5), codTarget: "41" },
     42: { id: 42, nombre: "TRITONIS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1041-AG-BE.png", botones: genB(3,6,4,6), codTarget: "42" },
     43: { id: 43, nombre: "HYDRUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1041-AG-BE.png", botones: genB(5,8,8,4), codTarget: "43" },
@@ -75,7 +75,7 @@ export const CARTAS = {
     59: { id: 59, nombre: "BALISTA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "059.png", botones: genB(9,9,3,4), codTarget: "59" },
     60: { id: 60, nombre: "ONIAGER", elemento: "AQUA", tipo: "ARMA", imgEscudo: "060.png", botones: genB(10,8,2,5), codTarget: "60" },
 
-    // MAGIA (061-080)
+    // === MAGIA / DIMENSIO (061 - 080) ===
     61: { id: 61, nombre: "FAMILIARES", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1061-MA-BE.png", botones: genB(1,3,2,3), codTarget: "61" },
     62: { id: 62, nombre: "ELEMENTUM", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1061-MA-BE.png", botones: genB(3,5,4,5), codTarget: "62" },
     63: { id: 63, nombre: "PHANTASMA", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1061-MA-BE.png", botones: genB(5,8,1,1), codTarget: "63" },
@@ -97,7 +97,7 @@ export const CARTAS = {
     79: { id: 79, nombre: "BALISTA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "079.png", botones: genB(7,2,2,10), codTarget: "79" },
     80: { id: 80, nombre: "ONIAGER", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "080.png", botones: genB(7,3,2,11), codTarget: "80" },
 
-    // ARTEFACTOS (081-089)
+    // === ARTEFACTOS (081 - 089) ===
     81: { id: 81, nombre: "IGNIS FIALA", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "081.png", botones: genB(6,0,-2,2), codTarget: "81" },
     82: { id: 82, nombre: "SPECULUM", elemento: "TERRA", tipo: "ARTEFACTO", imgEscudo: "082.png", botones: genB(1,2,7,4), codTarget: "82" },
     83: { id: 83, nombre: "MANICA", elemento: "TERRA", tipo: "ARTEFACTO", imgEscudo: "083.png", botones: genB(7,0,-2,2), codTarget: "83" },
@@ -108,7 +108,7 @@ export const CARTAS = {
     88: { id: 88, nombre: "OCULUS", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "088.png", botones: genB(2,9,2,10), codTarget: "88" },
     89: { id: 89, nombre: "MONOLITH", elemento: "AQUA", tipo: "ARTEFACTO", imgEscudo: "089.png", botones: genB(0,0,12,6), codTarget: "89" },
 
-    // POCIONES (090-098)
+    // === POCIONES (090 - 098) ===
     90: { id: 90, nombre: "VITA", elemento: "COELI", tipo: "POCION", imgEscudo: "090.png", botones: genB(1,8,3,4), codTarget: "90" },
     91: { id: 91, nombre: "AETHER", elemento: "COELI", tipo: "POCION", imgEscudo: "091.png", botones: genB(1,3,1,8), codTarget: "91" },
     92: { id: 92, nombre: "PETRA", elemento: "TERRA", tipo: "POCION", imgEscudo: "092.png", botones: genB(2,1,8,1), codTarget: "92" },
@@ -119,7 +119,7 @@ export const CARTAS = {
     97: { id: 97, nombre: "OBLIVIO", elemento: "AQUA", tipo: "POCION", imgEscudo: "097.png", botones: genB(16,1,3,5), codTarget: "97" },
     98: { id: 98, nombre: "FORTUNA", elemento: "MAGIA", tipo: "POCION", imgEscudo: "098.png", botones: genB(18,4,4,4), codTarget: "98" },
 
-    // BUHOS (099-108)
+    // === BÚHOS (099 - 108) ===
     99: { id: 99, nombre: "JUDEX", elemento: "TERRA", tipo: "BUHO", imgEscudo: "099.png", botones: genB(4,4,4,4), codTarget: "99" },
     100: { id: 100, nombre: "CARNIFEX", elemento: "COELI", tipo: "BUHO", imgEscudo: "100.png", botones: genB(7,1,2,2), codTarget: "100" },
     101: { id: 101, nombre: "SCRIPTOR", elemento: "TERRA", tipo: "BUHO", imgEscudo: "101.png", botones: genB(1,3,3,7), codTarget: "101" },
