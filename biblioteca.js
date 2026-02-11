@@ -1,42 +1,54 @@
-export const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
-export const VIDEOS_BATALLA = ["Explosión_Elemental.mp4", "Invocaciones_Etéreas.mp4"];
-
-const genB = (i, a, t, m) => ({
-    "btn-i": { texto: "I", label: "IMPETUS", valor: i, video: "ataque.mp4" },
-    "btn-a": { texto: "A", label: "AUXILIUM", valor: a, video: "cura.mp4" },
-    "btn-t": { texto: "T", label: "TUTELA", valor: t, video: "defensa.mp4" },
-    "btn-m": { texto: "M", label: "MYSTERIUM", valor: m, video: "magia.mp4" }
-});
-
-const genMp4s = (target) => ({
-    mp4I: `${target}-I.mp4`, mp4A: `${target}-A.mp4`, mp4T: `${target}-T.mp4`, mp4M: `${target}-M.mp4`
-});
-
-export const CARTAS = {
-    // TIERRA (001-020)
-    1: { id: 1, nombre: "APER", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(6,1,5,0), codTarget: "001", ...genMp4s("001") },
-    2: { id: 2, nombre: "SAXUM", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(3,1,12,1), codTarget: "002", ...genMp4s("002") },
-    3: { id: 3, nombre: "BESTIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(9,1,5,5), codTarget: "003", ...genMp4s("003") },
-    4: { id: 4, nombre: "LEO", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(8,5,7,4), codTarget: "004", ...genMp4s("004") },
-    5: { id: 5, nombre: "GAIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(10,5,8,3), codTarget: "005", ...genMp4s("005") },
-    6: { id: 6, nombre: "TIRONIS", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(5,2,4,1), codTarget: "006", ...genMp4s("006") },
-    7: { id: 7, nombre: "EQUES", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(8,2,6,1), codTarget: "007", ...genMp4s("007") },
-    8: { id: 8, nombre: "SAGITIS", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(10,2,5,3), codTarget: "008", ...genMp4s("008") },
-    9: { id: 9, nombre: "ALCHEMIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(4,9,5,6), codTarget: "009", ...genMp4s("009") },
-    10: { id: 10, nombre: "CAESAR", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(9,8,6,4), codTarget: "010", ...genMp4s("010") },
-    // ARMAS TIERRA (011-020)
-    11: { id: 11, nombre: "SICA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "011.png", botones: genB(7,1,2,0), codTarget: "011", ...genMp4s("011") },
-    12: { id: 12, nombre: "CLAVA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "012.png", botones: genB(8,1,2,0), codTarget: "012", ...genMp4s("012") },
-    13: { id: 13, nombre: "HASTA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "013.png", botones: genB(6,4,3,0), codTarget: "013", ...genMp4s("013") },
-    14: { id: 14, nombre: "SECURIS", elemento: "TERRA", tipo: "ARMA", imgEscudo: "014.png", botones: genB(8,5,3,1), codTarget: "014", ...genMp4s("014") },
-    15: { id: 15, nombre: "SCUTUM", elemento: "TERRA", tipo: "ARMA", imgEscudo: "015.png", botones: genB(1,2,8,0), codTarget: "015", ...genMp4s("015") },
-    16: { id: 16, nombre: "GLADIUS", elemento: "TERRA", tipo: "ARMA", imgEscudo: "016.png", botones: genB(6,2,4,1), codTarget: "016", ...genMp4s("016") },
-    17: { id: 17, nombre: "ARCUS", elemento: "TERRA", tipo: "ARMA", imgEscudo: "017.png", botones: genB(9,5,1,0), codTarget: "017", ...genMp4s("017") },
-    18: { id: 18, nombre: "MANUBALLISTA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "018.png", botones: genB(8,1,2,2), codTarget: "018", ...genMp4s("018") },
-    19: { id: 19, nombre: "BALISTA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "019.png", botones: genB(10,0,2,0), codTarget: "019", ...genMp4s("019") },
-    20: { id: 20, nombre: "ONIAGER", elemento: "TERRA", tipo: "ARMA", imgEscudo: "020.png", botones: genB(9,1,3,1), codTarget: "020", ...genMp4s("020") },
-    // CIELO (021-030)
-    21: { id: 21, nombre: "FENRIS", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(7,1,2,2), codTarget: "021", ...genMp4s("021") },
-    // ... completar el resto de la lista hasta 108 siguiendo los stats del PDF ...
-    108: { id: 108, nombre: "IMPERATOR", elemento: "NEUTRO", tipo: "BUHO", imgEscudo: "108.png", botones: genB(10,6,4,6), codTarget: "108", ...genMp4s("108") }
-};
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap');
+:root { --font-titulo: 'Cinzel', serif; --color-oro: #ffd700; --borde-dorado: #d4af37; --color-texto: #e0e0e0; }
+* { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; padding: 0; font-family: var(--font-titulo); background: url('BG_PIEDRA.jpg') no-repeat center center fixed; background-size: cover; color: var(--color-texto); overflow: hidden; height: 100vh; width: 100vw; }
+.oculto { display: none !important; }
+.pantalla { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
+.btn-master, .btn-jugar, .btn-info { font-family: var(--font-titulo); font-weight: 700; font-size: 18px; text-transform: uppercase; color: var(--color-oro); background: linear-gradient(to bottom, #3a3a3a, #1a1a1a); border: 2px solid var(--borde-dorado); border-radius: 4px; padding: 15px 20px; margin: 10px 0; width: 100%; max-width: 350px; cursor: pointer; box-shadow: 0 4px 0 #000; text-shadow: 1px 1px 0 #000; }
+.btn-master:active { transform: translateY(4px); box-shadow: 0 0 0 #000; }
+.fila-juego { display: flex; gap: 10px; width: 100%; max-width: 350px; justify-content: center; }
+.btn-jugar { font-size: 22px; border-color: #fff; background: linear-gradient(to bottom, #444, #222); }
+.btn-info { width: 50px; font-size: 24px; padding: 15px 0; background: #222; border-color: #555; color: #888; }
+input[type="text"] { background: rgba(0,0,0,0.6); border: none; border-bottom: 2px solid var(--borde-dorado); color: #fff; font-family: var(--font-titulo); font-size: 24px; text-align: center; padding: 10px; width: 100%; margin-bottom: 20px; outline: none; text-transform: uppercase; }
+.grid-casas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.btn-casa { font-family: var(--font-titulo); font-weight: 900; color: #fff; padding: 20px 10px; border: 2px solid #555; border-radius: 8px; font-size: 16px; cursor: pointer; }
+#p-setup { justify-content: flex-start !important; padding-top: 50px; }
+#container-ar { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; background: black; }
+#ui-juego { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; z-index: 500; pointer-events: none; }
+#zona-superior { height: 55%; width: 100%; position: relative; display: flex; justify-content: center; align-items: center; border-bottom: 4px solid var(--borde-dorado); }
+#zona-inferior { height: 45%; width: 100%; background: linear-gradient(to bottom, rgba(26,5,5,0.95), rgba(0,0,0,1)); pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px 15px; }
+#hud-derecho { position: absolute; top: 10px; right: 10px; z-index: 9999 !important; display: none; flex-direction: column; align-items: flex-end; text-align: right; pointer-events: none; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.4); backdrop-filter: blur(2px); }
+#hud-img-escudo { width: 95px; height: 95px; object-fit: contain; filter: drop-shadow(0 0 1px gold); }
+#hud-txt-arma { font-size: 20px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.5); width: 100%; }
+#hud-txt-accion { font-size: 26px; color: gold; font-weight: 900; margin-top: 5px; }
+#hud-txt-valor { font-size: 70px; color: white; line-height: 0.9; text-shadow: 0 0 10px #bf00ff; }
+#resultado-batalla { width:100%; background: url('BG_PERGAMINO.jpg') no-repeat center center; background-size: cover; color:#000; padding:20px; flex-grow:1; overflow-y:auto; border-radius:5px; border: 4px solid #5a3a22; }
+.resultado-jugador { background: rgba(0,0,0,0.05); margin: 15px 0; padding: 15px; border-bottom: 2px solid #5a3a22; }
+.ganador { border: 3px solid #d4af37; background: rgba(255, 215, 0, 0.1); }
+.fila-res { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #8b4513; }
+.mini-escudo-res { width: 35px; height: 35px; margin-right: 8px; }
+.res-nombre { font-weight: 900; }
+.dados-container { position: relative; width: 250px; height: 250px; margin: 20px auto; border: 4px solid var(--borde-dorado); border-radius: 50%; overflow: hidden; background: #000; }
+.video-dados { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+.layer-valor { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 100px; font-weight: 900; color: #fff; text-shadow: 0 0 20px #f00; }
+.grid-dados { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; width: 100%; max-width: 300px; }
+.btn-dado-sel { width: 100%; height: 90px; background: #222; border: 1px solid #444; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #666; }
+.btn-dado-sel.tageado { background: #400; border-color: #f00; color: #fff; }
+#guia-scanner { width: 240px; height: 240px; border: 6px solid rgba(255,255,255,0.6); border-radius: 20px; z-index: 10; pointer-events: none; }
+.contenedor-gemas { display: flex; gap: 15px; margin: 5px 0; justify-content: center; align-items: flex-end; }
+.wrapper-gema { display: flex; flex-direction: column; align-items: center; position: relative; }
+.valor-flotante { font-size: 40px; font-weight: 900; margin-bottom: 2px; height: 45px; font-family: var(--font-titulo); }
+.neon-blanco { color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #fff; }
+.neon-violeta { color: #bd00ff; text-shadow: 0 0 10px #bd00ff, 0 0 20px #bd00ff; }
+.neon-amarillo { color: #ffd700; text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700; }
+.btn-gema { width: 80px; height: 80px; background-color: transparent; border: none; background-size: contain; background-repeat: no-repeat; background-position: center; display: flex; align-items: center; justify-content: center; cursor: pointer; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8)); }
+.btn-gema:active { transform: scale(0.95); }
+#btn-i { background-image: url('GEMA_ROJA.png'); } 
+#btn-a { background-image: url('GEMA_VERDE.png'); } 
+#btn-t { background-image: url('GEMA_GRIS.png'); } 
+#btn-m { background-image: url('GEMA_VIOLETA.png'); }
+.btn-gema.style-buho { background-image: url('GEMA_DORADA.png') !important; }
+.btn-gema.style-artefacto { background-image: url('GEMA_VIOLETA.png') !important; }
+.letra-grande { font-size: 32px; font-weight: 900; color: #fff; text-shadow: 0 2px 5px #000; font-family: var(--font-titulo); }
+#video-action { position:absolute; width:100%; height:100%; display:none; background:black; z-index:50; object-fit:contain; }
+#info-rival { width: 100%; background: rgba(50,0,0,0.8); padding: 8px; border: 1px solid red; display: none; font-size: 16px; text-align: center; color: #ffaaaa; font-weight: 900; }
