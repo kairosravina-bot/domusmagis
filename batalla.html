@@ -86,7 +86,7 @@
             <div style="display:flex; gap:10px; width:100%;">
                 <button id="btn-confirmar" class="btn-master" style="background:#050; flex:2;">✅ CONFIRMAR</button>
                 <button id="btn-forzar" class="btn-master" style="background:#500; flex:1;" onclick="window.iniciarFaseFinal()">⚔️ YA</button>
-                <button id="btn-reescaneo" class="btn-master" style="background:#aa8800; flex:1;">🔄 RESCAN</button>
+                <button id="btn-reescaneo" class="btn-master" style="background:#aa8800; flex:1;" onclick="window.forzarReescaneo()">🔄 RESCAN</button>
             </div>
         </div>
     </div>
@@ -112,6 +112,13 @@
         let jugadores = [];
         let cantJugadores = 0, turnoJugadorIdx = 0, slotActual = 0, cartaActualEnPantalla = null, jugadaPendiente = null;
         let indiceJugadorDados = 0;
+
+        window.forzarReescaneo = () => {
+            resetUltimoId();
+            cartaActualEnPantalla = null;
+            resetBotones();
+            document.getElementById('msg-visor').innerText = 'ESCANEA CARTA';
+        };
 
         window.setModo = (modo) => {
             cantJugadores = modo;
