@@ -163,6 +163,10 @@
         }
 
         window.iniciarFaseFinal = () => {
+            jugadaPendiente = null;
+            cartaActualEnPantalla = null;
+            resetBotones();
+            resetUltimoId();
             document.getElementById('ui-juego').classList.add('oculto');
             document.getElementById('modal-dados-fase').classList.remove('oculto');
             indiceJugadorDados = 0;
@@ -177,16 +181,33 @@
             const j = jugadores[indiceJugadorDados];
             document.getElementById('dados-player-name').innerText = j.nombre;
             document.getElementById('layer-valor-batalla').innerText = "0";
+            document.getElementById('layer-valor-batalla').style.display = 'flex';
+            console.log(`Preparando dados para ${j.nombre} (${indiceJugadorDados + 1}/${cantJugadores})`);
         }
 
         window.ejecutarLanzamientoBatalla = (n) => {
+            console.log(`Tirando ${n}D para jugador ${indiceJugadorDados}`);
             const video = document.getElementById('video-dados-batalla');
-            video.currentTime = 0; video.play();
+            const layerValor = document.getElementById('layer-valor-batalla');
+            video.currentTime = 0;
+            layerValor.style.display = 'none';
+            video.play().catch(e => console.log("Error play:", e));
+            
             video.onended = () => {
-                let total = 0; for (let i = 0; i < n; i++) total += Math.floor(Math.random() * 6) + 1;
+                let total = 0;
+                for (let i = 0; i < n; i++) {
+                    total += Math.floor(Math.random() * 6) + 1;
+                }
                 jugadores[indiceJugadorDados].dado = total;
-                document.getElementById('layer-valor-batalla').innerText = total;
-                setTimeout(() => { document.getElementById('modal-dados-fase').classList.add('oculto'); indiceJugadorDados++; prepararDadosParaJugador(); }, 1200);
+                layerValor.innerText = total;
+                layerValor.style.display = 'flex';
+                console.log(`Resultado: ${total} para jugador ${indiceJugadorDados}`);
+                
+                setTimeout(() => {
+                    document.getElementById('modal-dados-fase').classList.add('oculto');
+                    indiceJugadorDados++;
+                    prepararDadosParaJugador();
+                }, 1200);
             };
         };
 
@@ -304,13 +325,22 @@
         document.getElementById('btn-confirmar').onclick = () => {
             if (!jugadaPendiente) return alert("Selecciona gema");
             jugadores[turnoJugadorIdx].slots[slotActual] = jugadaPendiente;
-            turnoJugadorIdx++; if (turnoJugadorIdx >= cantJugadores) { turnoJugadorIdx = 0; slotActual++; }
-            if (slotActual >= MAX_SLOTS) window.iniciarFaseFinal();
-            else { 
-                document.getElementById('pantalla-cambio-turno').classList.remove('oculto'); 
-                document.getElementById('next-player-name').innerText = jugadores[turnoJugadorIdx].nombre; 
-                document.getElementById('ui-juego').classList.add('oculto'); 
+            turnoJugadorIdx++;
+            
+            if (turnoJugadorIdx >= cantJugadores) {
+                turnoJugadorIdx = 0;
+                slotActual++;
+                
+                if (slotActual >= MAX_SLOTS) {
+                    window.iniciarFaseFinal();
+                    return;
+                }
             }
+            
+            document.getElementById('pantalla-cambio-turno').classList.remove('oculto'); 
+            document.getElementById('next-player-name').innerText = jugadores[turnoJugadorIdx].nombre; 
+            document.getElementById('ui-juego').classList.add('oculto');
+            actualizarUI();
         };
     </script>
 </body>

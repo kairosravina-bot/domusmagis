@@ -141,7 +141,7 @@ export async function iniciarOjo(containerId, onEncontrado) {
                     guiaScanner.classList.add('dorado');
                 }
                 
-                // MÁXIMA SENSIBILIDAD: Confirma apenas ve el mismo ID
+                // SENSIBILIDAD EXTREMA: Confirma casi instantáneamente
                 if (detectId === currentCandidateId) {
                     confidenceCounter++;
                 } else {
@@ -149,7 +149,7 @@ export async function iniciarOjo(containerId, onEncontrado) {
                     confidenceCounter = 1;
                 }
 
-                // Trigger inmediato con confianza = 1 (sin esperas)
+                // Trigger ultra-rápido (sin esperas adicionales)
                 if (confidenceCounter >= 1 && detectId !== lastConfirmedId) {
                     lastConfirmedId = detectId;
                     
@@ -166,7 +166,7 @@ export async function iniciarOjo(containerId, onEncontrado) {
                             if (guiaScanner) {
                                 guiaScanner.classList.remove('verde', 'dorado');
                             }
-                        }, 200);
+                        }, 100);
                     }
                 }
             } else {
