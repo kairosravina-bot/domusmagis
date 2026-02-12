@@ -126,15 +126,12 @@ let lastConfirmedId = null;
 export async function iniciarOjo(containerId, onEncontrado) {
     const container = document.getElementById(containerId);
     if (!container) return;
-
     const video = document.createElement('video');
     video.style.width='100%'; video.style.height='100%'; video.style.objectFit='cover';
     video.setAttribute('playsinline',true); video.muted=true;
     container.appendChild(video);
-
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d', {willReadFrequently:true});
-
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 480 } }
@@ -142,40 +139,24 @@ export async function iniciarOjo(containerId, onEncontrado) {
         video.srcObject = stream;
         await video.play();
         scanning = true;
-        
-        // Loop de escaneo cada 200ms para estabilidad
         setInterval(() => {
-            if(!scanning || video.readyState !== video.HAVE_ENOUGH_DATA) return;
-            
-            // Tamaño optimizado para procesamiento de QR
-            canvas.width = 400; 
-            canvas.height = 300;
+            if(!scanning || video.readyState !== 4) return;
+            canvas.width = 400; canvas.height = 300;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            // jsQR debe estar cargado globalmente desde el script del HTML
             const code = window.jsQR(imageData.data, imageData.width, imageData.height);
-            
             if(code && code.data.trim() !== lastConfirmedId) {
                 const detectId = code.data.trim();
-                // Búsqueda robusta por Key o por codTarget
                 const carta = CARTAS[detectId] || Object.values(CARTAS).find(c => c.codTarget == detectId);
-                
                 if(carta) {
                     lastConfirmedId = detectId;
                     const guia = document.getElementById('guia-scanner');
-                    if(guia) {
-                        guia.classList.add('verde');
-                        setTimeout(() => guia.classList.remove('verde'), 600);
-                    }
-                    // Enviamos una copia profunda para evitar mutaciones de datos
+                    if(guia) { guia.classList.add('verde'); setTimeout(() => guia.classList.remove('verde'), 600); }
                     onEncontrado(JSON.parse(JSON.stringify(carta)));
                 }
             }
-        }, 200);
-    } catch(e) { 
-        console.error("Cámara error:", e); 
-    }
+        }, 250);
+    } catch(e) { console.error("Error cámara:", e); }
 }
 
 export function resetUltimoId() { lastConfirmedId = null; }
