@@ -1,11 +1,15 @@
 <script type="module">
-    import { iniciarOjo, resetUltimoId, RUTA_BASE, VIDEOS_BATALLA } from './ojo.js';
+    import { iniciarOjo, resetUltimoId, RUTA_BASE } from './ojo.js';
 
-    const MAX_SLOTS = 3; 
     let jugadores = [];
-    let cantJugadores = 0, turnoJugadorIdx = 0, slotActual = 0, cartaActualEnPantalla = null, jugadaPendiente = null;
+    let cantJugadores = 0;
+    let turnoJugadorIdx = 0;
+    let slotActual = 0;
+    let cartaActualEnPantalla = null;
+    let jugadaPendiente = null;
+    const MAX_SLOTS = 3;
 
-    // Se asignan las funciones a window para que los onclick de los botones funcionen
+    // --- REPARACIÓN DE BOTONES (EXPORTAR A WINDOW) ---
     window.setModo = (modo) => {
         cantJugadores = modo;
         document.getElementById('setup-selector').style.display = 'none';
@@ -15,41 +19,38 @@
     window.registrarMago = (elemento, color) => {
         const nombreInput = document.getElementById('mago-nombre');
         const nombre = nombreInput.value.trim().toUpperCase();
-        if (!nombre) return alert("Escribe un nombre");
+        if(!nombre) return alert("Escribe nombre");
         
-        jugadores.push({ nombre, elemento, color, slots: [null, null, null], dado: 0 });
-        nombreInput.value = '';
+        jugadores.push({ nombre, elemento, color, slots: [null, null, null] });
+        nombreInput.value = "";
         
-        if (jugadores.length === cantJugadores) {
+        if(jugadores.length === cantJugadores) {
+            document.getElementById('p-setup').style.display = 'none';
+            document.getElementById('ui-juego').classList.remove('oculto');
+            document.getElementById('ui-superior-fijo').style.display = 'block';
             iniciarPartida();
         } else {
-            alert(`Mago ${jugadores.length}/${cantJugadores} registrado. Siguiente...`);
+            alert(`Mago ${jugadores.length}/${cantJugadores} listo`);
         }
     };
 
     function iniciarPartida() {
-        document.getElementById('p-setup').style.display = 'none';
-        document.getElementById('ui-juego').classList.remove('oculto');
-        document.getElementById('ui-superior-fijo').style.display = 'block';
         actualizarUI();
-        iniciarOjo('container-ar', onCartaDetectada);
-    }
-
-    function onCartaDetectada(carta) {
-        cartaActualEnPantalla = carta;
-        document.getElementById('msg-visor').innerHTML = `<span style="font-size:30px;">${carta.nombre}</span>`;
-        // Actualizar botones de gema con los valores de la carta
-        ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
-            const valSpan = document.getElementById(id.replace('btn-', 'val-'));
-            valSpan.innerText = carta.botones[id].valor;
+        iniciarOjo('container-ar', (carta) => {
+            cartaActualEnPantalla = carta;
+            document.getElementById('msg-visor').innerHTML = `<span style="font-size:30px;">${carta.nombre}</span>`;
+            // Cargar valores en gemas
+            ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
+                document.getElementById(id.replace('btn-', 'val-')).innerText = carta.botones[id].valor;
+            });
         });
     }
 
     function actualizarUI() {
         const j = jugadores[turnoJugadorIdx];
-        const t = document.getElementById('txt-turno');
-        t.innerText = `TURNO: ${j.nombre}`;
-        t.style.color = j.color;
+        const turnoTxt = document.getElementById('txt-turno');
+        turnoTxt.innerText = `TURNO: ${j.nombre}`;
+        turnoTxt.style.color = j.color;
         document.getElementById('slot-indicator').innerText = `${slotActual + 1}/${MAX_SLOTS}`;
     }
 
@@ -57,13 +58,13 @@
         cartaActualEnPantalla = null;
         resetUltimoId();
         document.getElementById('msg-visor').innerText = "ESCANEA CARTA";
-        ['val-i', 'val-a', 'val-t', 'val-m'].forEach(id => document.getElementById(id).innerText = "");
+        ['val-i', 'val-a', 'val-t', 'val-m'].forEach(v => document.getElementById(v).innerText = "");
     };
 
-    // Lógica de los botones de gemas
+    // Configurar gemas
     ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
         document.getElementById(id).onclick = () => {
-            if (!cartaActualEnPantalla) return;
+            if(!cartaActualEnPantalla) return;
             const conf = cartaActualEnPantalla.botones[id];
             jugadaPendiente = { carta: cartaActualEnPantalla, valor: conf.valor };
             
@@ -71,31 +72,33 @@
             v.style.display = 'block';
             v.src = RUTA_BASE + conf.video;
             v.play();
-            
+
             const hud = document.getElementById('hud-derecho');
             hud.style.display = 'flex';
             document.getElementById('hud-img-escudo').src = RUTA_BASE + cartaActualEnPantalla.imgEscudo;
             document.getElementById('hud-txt-arma').innerText = cartaActualEnPantalla.nombre;
             document.getElementById('hud-txt-valor').innerText = conf.valor;
-            
+
             v.onended = () => { v.style.display = 'none'; hud.style.display = 'none'; };
         };
     });
 
     document.getElementById('btn-confirmar').onclick = () => {
-        if (!jugadaPendiente) return alert("Selecciona una gema");
+        if(!jugadaPendiente) return alert("Selecciona gema");
         jugadores[turnoJugadorIdx].slots[slotActual] = jugadaPendiente;
         jugadaPendiente = null;
         
         turnoJugadorIdx++;
-        if (turnoJugadorIdx >= cantJugadores) {
+        if(turnoJugadorIdx >= cantJugadores) {
             turnoJugadorIdx = 0;
             slotActual++;
-            if (slotActual >= MAX_SLOTS) return window.iniciarFaseFinal();
+            if(slotActual >= MAX_SLOTS) {
+                alert("FIN DE SELECCIÓN - BATALLA FINAL");
+                location.reload();
+                return;
+            }
         }
         actualizarUI();
         window.forzarReescaneo();
     };
-
-    window.iniciarFaseFinal = () => { alert("BATALLA FINAL LISTA"); location.reload(); };
 </script>
