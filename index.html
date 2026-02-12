@@ -2,297 +2,219 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Scanner - HTML5 QRCode</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOMUS MAGI V123: MENU</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Courier New', monospace;
-            background: #0a0a0a;
-            color: #fff;
-            overflow: hidden;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            padding: 10px;
-        }
-        h1 {
-            text-align: center;
-            color: #ff00ff;
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-        .subtitle {
-            text-align: center;
-            color: #aaa;
-            font-size: 12px;
-            margin-bottom: 10px;
-        }
         #qr-reader {
-            flex: 1;
-            border: 5px solid #00ff00;
+            width: 100%;
+            border: 3px solid var(--borde-dorado);
+            border-radius: 10px;
             overflow: hidden;
+            margin-bottom: 20px;
             background: #000;
-            position: relative;
         }
-        #qr-reader::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 280px;
-            height: 280px;
-            border: 4px solid #00ff00;
-            box-shadow: 0 0 20px #00ff00, inset 0 0 20px rgba(0,255,0,0.1);
-            pointer-events: none;
-            z-index: 10;
+        .qr-info {
+            background: rgba(0,0,0,0.8);
+            border: 2px solid var(--borde-dorado);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #0f0;
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 2px;
         }
-        .corner {
-            position: absolute;
-            z-index: 11;
+        .carta-detectada {
+            background: linear-gradient(to bottom, #1a3a1a, #0a1a0a);
+            border: 3px solid #0f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
         }
-        .corner.tl { top: calc(50% - 140px - 8px); left: calc(50% - 140px - 8px); width: 35px; height: 35px; border: 3px solid #00ff00; border-right: none; border-bottom: none; }
-        .corner.tr { top: calc(50% - 140px - 8px); right: calc(50% - 140px - 8px); width: 35px; height: 35px; border: 3px solid #00ff00; border-left: none; border-bottom: none; }
-        .corner.bl { bottom: calc(50% - 140px - 8px); left: calc(50% - 140px - 8px); width: 35px; height: 35px; border: 3px solid #00ff00; border-right: none; border-top: none; }
-        .corner.br { bottom: calc(50% - 140px - 8px); right: calc(50% - 140px - 8px); width: 35px; height: 35px; border: 3px solid #00ff00; border-left: none; border-top: none; }
-
-        .info-panel {
-            background: #1a1a1a;
-            border: 3px solid #00ff00;
-            padding: 10px;
-            margin-top: 10px;
-            min-height: 140px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+        .carta-detectada h2 {
+            color: #0f0;
+            font-size: 32px;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 15px #0f0;
+        }
+        .carta-detectada p {
+            color: #fff;
+            margin: 5px 0;
             font-size: 14px;
         }
-        .numero-display {
-            font-size: 56px;
-            text-align: center;
-            color: #00ff00;
-            font-weight: bold;
-            letter-spacing: 3px;
-            padding: 15px;
-            background: #0a0a0a;
-            border: 3px solid #00ff00;
-            border-radius: 5px;
-            min-height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 10px;
-            background: #0a0a0a;
-            border-left: 4px solid #00ff00;
-            border-radius: 2px;
-        }
-        .label {
-            color: #aaa;
-            font-size: 11px;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
-        .value {
-            color: #ffff00;
-            font-size: 13px;
-            font-weight: bold;
-        }
-        .estado {
-            padding: 8px;
-            border-radius: 3px;
-            text-align: center;
-            font-weight: bold;
-            background: #000;
-            border: 2px solid #ff0000;
-            color: #ff0000;
-            font-size: 12px;
-        }
-        .estado.ok {
-            border-color: #00ff00;
-            color: #00ff00;
-        }
-        .buttons {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        button {
-            flex: 1;
-            padding: 10px;
-            font-size: 12px;
-            background: #00ff00;
-            color: #000;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-family: 'Courier New', monospace;
-        }
-        button:hover {
-            background: #00dd00;
-        }
-        button:active {
-            background: #00aa00;
+        #qr-reader video {
+            max-height: 400px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔍 QR SCANNER v3</h1>
-        <div class="subtitle">Enfoca el QR en el cuadrado</div>
-        
-        <div id="qr-reader">
-            <div class="corner tl"></div>
-            <div class="corner tr"></div>
-            <div class="corner bl"></div>
-            <div class="corner br"></div>
-        </div>
-
-        <div class="info-panel">
-            <div class="estado ok" id="estado">BUSCANDO QR...</div>
-            <div class="numero-display" id="numero">-</div>
-            
-            <div class="info-row">
-                <span class="label">Última detección:</span>
-                <span class="value" id="ultimo">--</span>
+    <!-- PANTALLA DE INICIO -->
+    <div id="p-inicio" class="pantalla">
+        <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
+            <div>
+                <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
+                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V6666666666666666666666666666666666</p>
             </div>
-            
-            <div class="info-row">
-                <span class="label">Confirmadas:</span>
-                <span class="value" id="confirmadas">0</span>
-            </div>
-
-            <div class="buttons">
-                <button onclick="resetear()">RESET</button>
-                <button onclick="detenerScanner()">DETENER</button>
-            </div>
+            <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTRAR AL GRIMORIO</button>
         </div>
     </div>
 
-    <script>
-        const numeroDisplay = document.getElementById('numero');
-        const estadoDisplay = document.getElementById('estado');
-        const ultimoDisplay = document.getElementById('ultimo');
-        const confirmadasDisplay = document.getElementById('confirmadas');
+    <!-- MENÚ PRINCIPAL -->
+    <div id="p-menu-principal" class="pantalla oculto">
+        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
+        
+        <div class="fila-juego">
+            <button class="btn-jugar" onclick="abrirEscanerCartas()">📸 ESCANEAR CARTAS</button>
+            <button class="btn-info" onclick="alert('Escanea QR de cartas para detectarlas')">?</button>
+        </div>
+        
+        <div class="fila-juego">
+            <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TÁCTICO</button>
+            <button class="btn-info" onclick="alert('Modo V100: Final Release. Neon Values & Stone Background.')">?</button>
+        </div>
+        
+        <div class="fila-juego">
+            <button class="btn-jugar" style="background:#222; border-color:#555;" onclick="window.location.href='misiones.html'">🦉 MISIONES (WIP)</button>
+        </div>
+        
+        <div class="fila-juego">
+            <button class="btn-jugar" style="background:#333; border-color:#555;" onclick="window.location.href='dados.html'">🎲 ORÁCULO (SOLO)</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE ESCÁNER -->
+    <div id="p-scanner" class="pantalla oculto">
+        <h2 style="text-align: center; color: var(--borde-dorado); margin-bottom: 15px;">📸 LECTOR DE CARTAS</h2>
+        
+        <div id="qr-reader"></div>
+        
+        <div class="qr-info" id="qr-estado">Enfoca el QR de la carta...</div>
+        
+        <div id="carta-info" class="carta-detectada oculto">
+            <h2 id="carta-nombre">---</h2>
+            <p>ID: <span id="carta-id" style="color: #0f0;">--</span></p>
+            <p>Elemento: <span id="carta-elemento" style="color: #0f0;">--</span></p>
+            <p>Tipo: <span id="carta-tipo" style="color: #0f0;">--</span></p>
+        </div>
+        
+        <div class="fila-juego">
+            <button class="btn-jugar" style="background:#500; border-color:#f00;" onclick="cerrarEscaner()">❌ CERRAR</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { inicializarOjo, CARTAS } from './ojo.js';
 
         let html5QrcodeScanner = null;
-        let lastCode = null;
-        let repeatCount = 0;
+        let lastDetectedCode = null;
+        let repeatCounter = 0;
         let blockedUntil = 0;
-        let confirmCount = 0;
 
-        function onScanSuccess(decodedText, decodedResult) {
-            const now = Date.now();
+        window.entrarGrimorio = function() {
+            document.getElementById('p-inicio').classList.add('oculto');
+            document.getElementById('p-menu-principal').classList.remove('oculto');
+            const v = document.getElementById('intro-video');
+            if(v) { 
+                v.muted = false; 
+                v.play().catch(e => console.log("Auto-play blocked by browser policy")); 
+            }
+        };
+
+        window.abrirEscanerCartas = function() {
+            document.getElementById('p-menu-principal').classList.add('oculto');
+            document.getElementById('p-scanner').classList.remove('oculto');
             
-            // Si está bloqueado, no procesar
-            if (now < blockedUntil) {
-                return;
+            if (!html5QrcodeScanner) {
+                iniciarEscaner();
             }
+        };
 
-            // Limpiar: solo números
-            const cleaned = decodedText.trim().replace(/[^\d]/g, '');
-            
-            if (!cleaned) return;
-
-            // Mostrar en grande lo que ve
-            numeroDisplay.textContent = cleaned;
-            numeroDisplay.style.color = '#00ffff';
-            ultimoDisplay.textContent = cleaned;
-
-            // Contar repeticiones del MISMO código
-            if (cleaned === lastCode) {
-                repeatCount++;
-            } else {
-                lastCode = cleaned;
-                repeatCount = 1;
+        window.cerrarEscaner = function() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    document.getElementById('p-scanner').classList.add('oculto');
+                    document.getElementById('p-menu-principal').classList.remove('oculto');
+                    document.getElementById('carta-info').classList.add('oculto');
+                    lastDetectedCode = null;
+                    repeatCounter = 0;
+                });
             }
+        };
 
-            // Cuando se repite 2 veces = confirmado
-            if (repeatCount >= 2) {
-                numeroDisplay.style.color = '#00ff00';
-                numeroDisplay.style.fontSize = '72px';
-                confirmCount++;
-                confirmadasDisplay.textContent = confirmCount;
-                
-                estadoDisplay.textContent = '✓ CONFIRMADO: ' + cleaned;
-                estadoDisplay.className = 'estado ok';
-                
-                // Bloquear por 2 segundos
-                blockedUntil = now + 2000;
-                
-                // Reset para siguiente
-                lastCode = null;
-                repeatCount = 0;
-            }
-        }
-
-        function onScanFailure(error) {
-            // Ignorar errores de "no QR encontrado"
-            // console.warn(`Error: ${error}`);
-        }
-
-        function startScanning() {
+        function iniciarEscaner() {
             html5QrcodeScanner = new Html5Qrcode("qr-reader");
             
             const config = { 
                 fps: 30,
-                qrbox: { width: 280, height: 280 },
-                aspectRatio: 1.0
+                qrbox: { width: 280, height: 280 }
             };
 
             html5QrcodeScanner.start(
                 { facingMode: "environment" },
                 config,
-                onScanSuccess,
-                onScanFailure
+                (decodedText) => procesarQR(decodedText),
+                (error) => {} // Ignorar errores
             ).catch(err => {
-                console.error('Error:', err);
-                estadoDisplay.textContent = '❌ ERROR DE CÁMARA';
-                estadoDisplay.className = 'estado';
+                document.getElementById('qr-estado').textContent = '❌ Error de cámara: ' + err;
             });
-
-            estadoDisplay.textContent = 'BUSCANDO QR...';
-            estadoDisplay.className = 'estado ok';
         }
 
-        window.resetear = function() {
-            lastCode = null;
-            repeatCount = 0;
-            blockedUntil = 0;
-            numeroDisplay.textContent = '-';
-            numeroDisplay.style.color = '#00ff00';
-            numeroDisplay.style.fontSize = '56px';
-            ultimoDisplay.textContent = '--';
-            estadoDisplay.textContent = 'BUSCANDO QR...';
-            estadoDisplay.className = 'estado ok';
-        };
-
-        window.detenerScanner = function() {
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.stop().then(() => {
-                    estadoDisplay.textContent = 'ESCÁNER DETENIDO';
-                    estadoDisplay.className = 'estado';
-                });
+        function procesarQR(rawCode) {
+            const now = Date.now();
+            
+            // Bloqueo temporal
+            if (now < blockedUntil) {
+                return;
             }
-        };
 
-        // Iniciar al cargar
-        window.addEventListener('load', () => {
-            setTimeout(startScanning, 500);
-        });
+            // Limpiar: solo números
+            const codigo = rawCode.trim().replace(/[^\d]/g, '');
+            
+            if (!codigo) return;
+
+            // Contar repeticiones
+            if (codigo === lastDetectedCode) {
+                repeatCounter++;
+            } else {
+                lastDetectedCode = codigo;
+                repeatCounter = 1;
+            }
+
+            const estado = document.getElementById('qr-estado');
+            estado.textContent = `Detectado: ${codigo} (${repeatCounter}x)`;
+
+            // Confirmar en 2 repeticiones
+            if (repeatCounter >= 2) {
+                const idNumerico = parseInt(codigo);
+                
+                if (CARTAS[idNumerico]) {
+                    const carta = CARTAS[idNumerico];
+                    
+                    // Mostrar carta
+                    document.getElementById('carta-nombre').textContent = carta.nombre;
+                    document.getElementById('carta-id').textContent = carta["id-ar"];
+                    document.getElementById('carta-elemento').textContent = carta.elemento;
+                    document.getElementById('carta-tipo').textContent = carta.tipo;
+                    document.getElementById('carta-info').classList.remove('oculto');
+                    
+                    estado.textContent = `✓ CONFIRMADO: ${carta.nombre} (#${codigo})`;
+                    estado.style.color = '#0f0';
+                    
+                    // Bloquear 2 segundos
+                    blockedUntil = now + 2000;
+                    lastDetectedCode = null;
+                    repeatCounter = 0;
+                } else {
+                    estado.textContent = `❌ Carta #${codigo} no encontrada`;
+                    estado.style.color = '#f00';
+                    blockedUntil = now + 1500;
+                }
+            }
+        }
     </script>
 </body>
 </html>
