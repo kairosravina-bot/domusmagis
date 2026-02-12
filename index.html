@@ -5,51 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOMUS MAGI V123: MENU</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
-    <style>
-        #qr-reader {
-            width: 100%;
-            border: 3px solid var(--borde-dorado);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            background: #000;
-        }
-        .qr-info {
-            background: rgba(0,0,0,0.8);
-            border: 2px solid var(--borde-dorado);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            color: #0f0;
-            font-weight: bold;
-            font-size: 18px;
-            letter-spacing: 2px;
-        }
-        .carta-detectada {
-            background: linear-gradient(to bottom, #1a3a1a, #0a1a0a);
-            border: 3px solid #0f0;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .carta-detectada h2 {
-            color: #0f0;
-            font-size: 32px;
-            margin: 0 0 10px 0;
-            text-shadow: 0 0 15px #0f0;
-        }
-        .carta-detectada p {
-            color: #fff;
-            margin: 5px 0;
-            font-size: 14px;
-        }
-        .oculto {
-            display: none !important;
-        }
-    </style>
 </head>
 <body>
     <!-- PANTALLA DE INICIO -->
@@ -57,7 +12,7 @@
         <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
             <div>
                 <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V8888888888888888888888888888888888888888888888888888888888888888</p>
+                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V522222222222222222222222222222222222222222222222222</p>
             </div>
             <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTRAR AL GRIMORIO</button>
         </div>
@@ -66,11 +21,6 @@
     <!-- MENÚ PRINCIPAL -->
     <div id="p-menu-principal" class="pantalla oculto">
         <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" onclick="abrirEscanerCartas()">📸 ESCANEAR CARTAS</button>
-            <button class="btn-info" onclick="alert('Escanea QR de cartas para detectarlas')">?</button>
-        </div>
         
         <div class="fila-juego">
             <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TÁCTICO</button>
@@ -86,33 +36,7 @@
         </div>
     </div>
 
-    <!-- PANTALLA DE ESCÁNER -->
-    <div id="p-scanner" class="pantalla oculto">
-        <h2 style="text-align: center; color: var(--borde-dorado); margin-bottom: 15px;">📸 LECTOR DE CARTAS</h2>
-        
-        <div id="qr-reader"></div>
-        
-        <div class="qr-info" id="qr-estado">Enfoca el QR de la carta...</div>
-        
-        <div id="carta-info" class="carta-detectada oculto">
-            <h2 id="carta-nombre">---</h2>
-            <p>ID: <span id="carta-id" style="color: #0f0;">--</span></p>
-            <p>Elemento: <span id="carta-elemento" style="color: #0f0;">--</span></p>
-            <p>Tipo: <span id="carta-tipo" style="color: #0f0;">--</span></p>
-        </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#500; border-color:#f00;" onclick="cerrarEscaner()">❌ CERRAR</button>
-        </div>
-    </div>
-
-    <script src="ojo.js"></script>
     <script>
-        let html5QrcodeScanner = null;
-        let lastDetectedCode = null;
-        let repeatCounter = 0;
-        let blockedUntil = 0;
-
         function entrarGrimorio() {
             document.getElementById('p-inicio').classList.add('oculto');
             document.getElementById('p-menu-principal').classList.remove('oculto');
@@ -120,98 +44,6 @@
             if(v) { 
                 v.muted = false; 
                 v.play().catch(e => console.log("Auto-play blocked by browser policy")); 
-            }
-        }
-
-        function abrirEscanerCartas() {
-            document.getElementById('p-menu-principal').classList.add('oculto');
-            document.getElementById('p-scanner').classList.remove('oculto');
-            
-            if (!html5QrcodeScanner) {
-                iniciarEscaner();
-            }
-        }
-
-        function cerrarEscaner() {
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.stop().then(() => {
-                    document.getElementById('p-scanner').classList.add('oculto');
-                    document.getElementById('p-menu-principal').classList.remove('oculto');
-                    document.getElementById('carta-info').classList.add('oculto');
-                    lastDetectedCode = null;
-                    repeatCounter = 0;
-                });
-            }
-        }
-
-        function iniciarEscaner() {
-            html5QrcodeScanner = new Html5Qrcode("qr-reader");
-            
-            const config = { 
-                fps: 30,
-                qrbox: { width: 280, height: 280 }
-            };
-
-            html5QrcodeScanner.start(
-                { facingMode: "environment" },
-                config,
-                (decodedText) => procesarQR(decodedText),
-                (error) => {} // Ignorar errores
-            ).catch(err => {
-                document.getElementById('qr-estado').textContent = '❌ Error de cámara: ' + err;
-            });
-        }
-
-        function procesarQR(rawCode) {
-            const now = Date.now();
-            
-            // Bloqueo temporal
-            if (now < blockedUntil) {
-                return;
-            }
-
-            // Limpiar: solo números
-            const codigo = rawCode.trim().replace(/[^\d]/g, '');
-            
-            if (!codigo) return;
-
-            // Contar repeticiones
-            if (codigo === lastDetectedCode) {
-                repeatCounter++;
-            } else {
-                lastDetectedCode = codigo;
-                repeatCounter = 1;
-            }
-
-            const estado = document.getElementById('qr-estado');
-            estado.textContent = `Detectado: ${codigo} (${repeatCounter}x)`;
-
-            // Confirmar en 2 repeticiones
-            if (repeatCounter >= 2) {
-                const idNumerico = parseInt(codigo);
-                
-                if (CARTAS[idNumerico]) {
-                    const carta = CARTAS[idNumerico];
-                    
-                    // Mostrar carta
-                    document.getElementById('carta-nombre').textContent = carta.nombre;
-                    document.getElementById('carta-id').textContent = carta["id-ar"];
-                    document.getElementById('carta-elemento').textContent = carta.elemento;
-                    document.getElementById('carta-tipo').textContent = carta.tipo;
-                    document.getElementById('carta-info').classList.remove('oculto');
-                    
-                    estado.textContent = `✓ CONFIRMADO: ${carta.nombre} (#${codigo})`;
-                    estado.style.color = '#0f0';
-                    
-                    // Bloquear 2 segundos
-                    blockedUntil = now + 2000;
-                    lastDetectedCode = null;
-                    repeatCounter = 0;
-                } else {
-                    estado.textContent = `❌ Carta #${codigo} no encontrada`;
-                    estado.style.color = '#f00';
-                    blockedUntil = now + 1500;
-                }
             }
         }
     </script>
