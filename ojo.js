@@ -192,16 +192,21 @@ export async function iniciarOjo(containerId, onEncontrado) {
                     guiaScanner.classList.add('dorado');
                 }
                 
-                // SENSIBILIDAD EXTREMA: Confirma casi instantáneamente
-                if (detectId === currentCandidateId) {
+                // Validar que detectId sea numérico limpio (sin basura)
+                const detectedNum = parseInt(detectId);
+                if (isNaN(detectedNum) || detectedNum < 1 || detectedNum > 108) {
+                    // Rechazar IDs inválidos
+                    currentCandidateId = null;
+                    confidenceCounter = 0;
+                } else if (detectId === currentCandidateId) {
                     confidenceCounter++;
                 } else {
                     currentCandidateId = detectId;
                     confidenceCounter = 1;
                 }
 
-                // Trigger ultra-rápido (sin esperas adicionales)
-                if (confidenceCounter >= 1 && detectId !== lastConfirmedId) {
+                // Exigir 5 confirmaciones consecutivas (no 1)
+                if (confidenceCounter >= 5 && detectId !== lastConfirmedId) {
                     lastConfirmedId = detectId;
                     
                     if (guiaScanner) {
@@ -210,22 +215,7 @@ export async function iniciarOjo(containerId, onEncontrado) {
                     }
                     
                     const idNumerico = parseInt(detectId);
-                    let original = null;
-                    
-                    // Buscar por id-ar exacto (como número, no como string)
-                    if (CARTAS[idNumerico]) {
-                        original = CARTAS[idNumerico];
-                    } else {
-                        // Fallback: búsqueda lineal por id-ar exacto
-                        for (let key in CARTAS) {
-                            if (CARTAS[key]["id-ar"] === idNumerico) {
-                                original = CARTAS[key];
-                                break;
-                            }
-                        }
-                    }
-                    
-                    console.log(`QR Detectado: "${detectId}" → ID-AR: ${idNumerico} → Carta: ${original ? original.nombre : 'NO ENCONTRADA'}`);
+                    let original = CARTAS[idNumerico] || null;
                     
                     if (original) {
                         // Clonación profunda absoluta
