@@ -9,7 +9,7 @@ const genB = (i, a, t, m) => ({
 });
 
 const CARTAS = {
-   1: { "id-ar": 1, id: 1, nombre: "APER", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(6,1,5,0), codTarget: "1" },
+    1: { "id-ar": 1, id: 1, nombre: "APER", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(6,1,5,0), codTarget: "1" },
     2: { "id-ar": 2, id: 2, nombre: "SAXUM", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(3,1,12,1), codTarget: "2" },
     3: { "id-ar": 3, id: 3, nombre: "BESTIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(9,1,5,5), codTarget: "3" },
     4: { "id-ar": 4, id: 4, nombre: "LEO", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(8,5,7,4), codTarget: "4" },
@@ -21,7 +21,7 @@ const CARTAS = {
     10: { "id-ar": 10, id: 10, nombre: "CAESAR", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(9,8,6,4), codTarget: "10" },
     11: { "id-ar": 11, id: 1, nombre: "SICA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "011.png", botones: genB(7,1,2,0), codTarget: "11" },
     12: { "id-ar": 12, id: 2, nombre: "HASTA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "012.png", botones: genB(6,4,3,0), codTarget: "12" },
-    13: { "id-ar": 13, id: 3, nombre: "CLAVA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "013.png", botones: genB(8,1,2,0), codTarget: "13" },    
+    13: { "id-ar": 13, id: 3, nombre: "CLAVA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "013.png", botones: genB(8,1,2,0), codTarget: "13" },
     14: { "id-ar": 14, id: 4, nombre: "SECURIS", elemento: "TERRA", tipo: "ARMA", imgEscudo: "014.png", botones: genB(8,5,3,1), codTarget: "14" },
     15: { "id-ar": 15, id: 5, nombre: "SCUTUM", elemento: "TERRA", tipo: "ARMA", imgEscudo: "015.png", botones: genB(1,2,8,0), codTarget: "15" },
     16: { "id-ar": 16, id: 6, nombre: "GLADIUS", elemento: "TERRA", tipo: "ARMA", imgEscudo: "016.png", botones: genB(6,2,4,1), codTarget: "16" },
@@ -41,7 +41,7 @@ const CARTAS = {
     30: { "id-ar": 30, id: 10, nombre: "TYRION", elemento: "COELI", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(6,6,6,5), codTarget: "30" },
     31: { "id-ar": 31, id: 1, nombre: "SICA", elemento: "COELI", tipo: "ARMA", imgEscudo: "1033-CI-AR1.png", botones: genB(5,4,2,4), codTarget: "31" },
     32: { "id-ar": 32, id: 2, nombre: "HASTA", elemento: "COELI", tipo: "ARMA", imgEscudo: "1034-CI-AR2.png", botones: genB(6,3,3,3), codTarget: "32" },
-    33: { "id-ar": 33, id: 3, nombre: "CLAVA", elemento: "COELI", tipo: "ARMA", imgEscudo: "1033-CI-AR1.png", botones: genB(7,1,2,5), codTarget: "33" },    
+    33: { "id-ar": 33, id: 3, nombre: "CLAVA", elemento: "COELI", tipo: "ARMA", imgEscudo: "1033-CI-AR1.png", botones: genB(7,1,2,5), codTarget: "33" },
     34: { "id-ar": 34, id: 4, nombre: "SECURIS", elemento: "COELI", tipo: "ARMA", imgEscudo: "1034-CI-AR2.png", botones: genB(7,2,2,4), codTarget: "34" },
     35: { "id-ar": 35, id: 5, nombre: "SCUTUM", elemento: "COELI", tipo: "ARMA", imgEscudo: "1033-CI-AR1.png", botones: genB(1,4,2,6), codTarget: "35" },
     36: { "id-ar": 36, id: 6, nombre: "GLADIUS", elemento: "COELI", tipo: "ARMA", imgEscudo: "1034-CI-AR2.png", botones: genB(6,3,3,4), codTarget: "36" },
@@ -61,7 +61,7 @@ const CARTAS = {
     50: { "id-ar": 50, id: 10, nombre: "NEPTUNUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1042-AG-HU.png", botones: genB(7,8,7,6), codTarget: "50" },
     51: { "id-ar": 51, id: 1, nombre: "SICA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1053-AG-AR1.png", botones: genB(5,4,3,2), codTarget: "51" },
     52: { "id-ar": 52, id: 2, nombre: "HASTA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1054-AG-AR2.png", botones: genB(6,5,5,3), codTarget: "52" },
-    53: { "id-ar": 53, id: 3, nombre: "CLAVA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1053-AG-AR1.png", botones: genB(6,2,3,1), codTarget: "53" },    
+    53: { "id-ar": 53, id: 3, nombre: "CLAVA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1053-AG-AR1.png", botones: genB(6,2,3,1), codTarget: "53" },
     54: { "id-ar": 54, id: 4, nombre: "SECURIS", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1054-AG-AR2.png", botones: genB(6,2,4,2), codTarget: "54" },
     55: { "id-ar": 55, id: 5, nombre: "SCUTUM", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1053-AG-AR1.png", botones: genB(1,5,9,3), codTarget: "55" },
     56: { "id-ar": 56, id: 6, nombre: "GLADIUS", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1054-AG-AR2.png", botones: genB(6,4,4,2), codTarget: "56" },
@@ -78,10 +78,10 @@ const CARTAS = {
     67: { "id-ar": 67, id: 7, nombre: "QUAESITOR", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(5,1,4,7), codTarget: "67" },
     68: { "id-ar": 68, id: 8, nombre: "MIMUS", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(1,4,6,10), codTarget: "68" },
     69: { "id-ar": 69, id: 9, nombre: "ARCHIMAGUS", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(3,5,2,12), codTarget: "69" },
-    70: { "id-ar": 70, id: 10, nombre: "MAGITER", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(5,7,4,10), codTarget: "70" }, 
+    70: { "id-ar": 70, id: 10, nombre: "MAGITER", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(5,7,4,10), codTarget: "70" },
     71: { "id-ar": 71, id: 1, nombre: "SICA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1073-MA-AR1.png", botones: genB(4,3,1,7), codTarget: "71" },
     72: { "id-ar": 72, id: 2, nombre: "HASTA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1074-MA-AR2.png", botones: genB(4,4,2,7), codTarget: "72" },
-    73: { "id-ar": 73, id: 3, nombre: "CLAVA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1073-MA-AR1.png", botones: genB(5,2,2,8), codTarget: "73" },    
+    73: { "id-ar": 73, id: 3, nombre: "CLAVA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1073-MA-AR1.png", botones: genB(5,2,2,8), codTarget: "73" },
     74: { "id-ar": 74, id: 4, nombre: "SECURIS", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1074-MA-AR2.png", botones: genB(6,1,1,8), codTarget: "74" },
     75: { "id-ar": 75, id: 5, nombre: "SCUTUM", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1073-MA-AR1.png", botones: genB(1,5,5,9), codTarget: "75" },
     76: { "id-ar": 76, id: 6, nombre: "GLADIUS", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1074-MA-AR2.png", botones: genB(6,2,1,7), codTarget: "76" },
@@ -116,7 +116,7 @@ const CARTAS = {
     105: { "id-ar": 105, id: 7, nombre: "MACHINA", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(5,1,9,1), codTarget: "105" },
     106: { "id-ar": 106, id: 8, nombre: "AUGUR", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(1,5,2,8), codTarget: "106" },
     107: { "id-ar": 107, id: 9, nombre: "JUSTITIA", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(5,5,5,1), codTarget: "107" },
-    108: { "id-ar": 108, id: 10, nombre: "IMPERATOR", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(6,4,6,4), codTarget: "108" },
+    108: { "id-ar": 108, id: 10, nombre: "IMPERATOR", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(6,4,6,4), codTarget: "108" }
 };
 
 let scanning = false;
@@ -142,33 +142,26 @@ export async function iniciarOjo(containerId, onEncontrado) {
         
         setInterval(() => {
             if(!scanning || video.readyState !== video.HAVE_ENOUGH_DATA) return;
-            
             canvas.width = 400; 
             canvas.height = 300;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
             const code = window.jsQR(imageData.data, imageData.width, imageData.height);
             
             if(code && code.data.trim() !== lastConfirmedId) {
                 const detectId = code.data.trim();
                 const carta = CARTAS[detectId] || Object.values(CARTAS).find(c => c.codTarget == detectId);
-                
                 if(carta) {
                     lastConfirmedId = detectId;
-                    
-                    // --- EFECTO VISUAL: CAMBIAR RECUADRO A VERDE BRILLANTE ---
                     const guia = document.getElementById('guia-scanner');
                     if(guia) {
                         guia.classList.add('verde');
-                        setTimeout(() => guia.classList.remove('verde'), 300);
+                        setTimeout(() => guia.classList.remove('verde'), 600);
                     }
-
                     onEncontrado(JSON.parse(JSON.stringify(carta)));
                 }
             }
         }, 200);
-
     } catch(e) { console.error("Cámara error", e); }
 }
 
