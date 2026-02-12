@@ -107,7 +107,7 @@ const CARTAS = {
     95: { id: 15, nombre: "OCULUS", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "1083-ART-PO.png", botones: genB(2,9,2,10), codTarget: "95" },
     96: { id: 16, nombre: "OBLIVIO", elemento: "MAGIA", tipo: "POCION", imgEscudo: "1083-ART-PO.png", botones: genB(1,3,5,6), codTarget: "96" },
     97: { id: 17, nombre: "MONOLITH", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "1083-ART-PO.png", botones: genB(0,0,12,6), codTarget: "97" },
-    98: { id: 18, nombre: "FORTUNA", elemento: "MAGIA", tipo: "POCION", imgEscudo: "1083-ART-PO.png", botones: genB(4,4,4,4), codTarget: "98" },
+    98: { id: 16, nombre: "FORTUNA", elemento: "MAGIA", tipo: "POCION", imgEscudo: "1083-ART-PO.png", botones: genB(4,4,4,4), codTarget: "98" },
     99: { id: 1, nombre: "JUDEX", elemento: "TERRA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(4,4,4,4), codTarget: "99" },
     100: { id: 2, nombre: "CARNIFEX", elemento: "COELI", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(7,1,2,2), codTarget: "100" },
     101: { id: 3, nombre: "SCRIPTOR", elemento: "TERRA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(1,3,3,7), codTarget: "101" },
@@ -117,44 +117,47 @@ const CARTAS = {
     105: { id: 7, nombre: "MACHINA", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(5,1,9,1), codTarget: "105" },
     106: { id: 8, nombre: "AUGUR", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(1,5,2,8), codTarget: "106" },
     107: { id: 9, nombre: "JUSTITIA", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(5,5,5,1), codTarget: "107" },
-    108: { id: 10, nombre: "IMPERATOR", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(6,4,6,4), codTarget: "108" }
+    108: { id: 10, nombre: "IMPERATOR", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(6,4,6,4), codTarget: "108" },
+
 };
 
-// ============ SCANNER QR ============
+// --- MOTOR DEL OJO - ULTRA OPTIMIZADO ---
 let scanning = false;
-let lastCheckTime = 0;
-const MIN_FRAME_INTERVAL = 50;
 let lastConfirmedId = null;
 let currentCandidateId = null;
 let confidenceCounter = 0;
 let guiaScanner = null;
+let lastCheckTime = 0;
+const MIN_FRAME_INTERVAL = 33; // ~30 FPS
 
-export function iniciarScanner(onEncontrado) {
-    const video = document.getElementById('video-qr');
-    const canvas = document.getElementById('canvas-qr');
+export async function iniciarOjo(containerId, onEncontrado) {
+    const container = document.getElementById(containerId);
+    const video = document.createElement('video');
+    video.style.width = '100%'; video.style.height = '100%'; video.style.objectFit = 'cover';
+    video.setAttribute('playsinline', true); video.setAttribute('muted', true);
+    container.appendChild(video);
+
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    
     guiaScanner = document.getElementById('guia-scanner');
 
-    if (!video || !canvas) {
-        console.error("❌ Elementos video/canvas no encontrados en DOM");
-        return;
-    }
-
-    const constraints = { video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } };
-
-    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
-        const context = canvas.getContext('2d', { willReadFrequently: true });
-        if (!context) {
-            console.error("❌ No se pudo obtener contexto 2D del canvas");
-            return;
-        }
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: "environment",
+                width: { ideal: 640 },
+                height: { ideal: 480 }
+            } 
+        });
         video.srcObject = stream;
         video.play();
         scanning = true;
         requestAnimationFrame(tick);
-    }).catch(err => { 
+    } catch (err) { 
         console.error("Error cámara:", err);
         if (guiaScanner) guiaScanner.style.borderColor = '#ff0000';
-    });
+    }
 
     function tick() {
         if (!scanning) return;
@@ -169,7 +172,6 @@ export function iniciarScanner(onEncontrado) {
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
             canvas.height = video.videoHeight;
             canvas.width = video.videoWidth;
-            const context = canvas.getContext('2d', { willReadFrequently: true });
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
             
@@ -184,23 +186,13 @@ export function iniciarScanner(onEncontrado) {
 
             if (code) {
                 const detectId = code.data.trim();
-                const idNumerico = parseInt(detectId);
-                
-                // Validar que sea un número entre 1-108
-                if (isNaN(idNumerico) || idNumerico < 1 || idNumerico > 108) {
-                    console.warn(`⚠️ QR inválido: "${detectId}" (fuera de rango 1-108)`);
-                    currentCandidateId = null;
-                    confidenceCounter = 0;
-                    requestAnimationFrame(tick);
-                    return;
-                }
                 
                 if (guiaScanner) {
                     guiaScanner.classList.remove('verde');
                     guiaScanner.classList.add('dorado');
                 }
                 
-                // Requiere 2 detecciones idénticas
+                // SENSIBILIDAD EXTREMA: Confirma casi instantáneamente
                 if (detectId === currentCandidateId) {
                     confidenceCounter++;
                 } else {
@@ -208,8 +200,8 @@ export function iniciarScanner(onEncontrado) {
                     confidenceCounter = 1;
                 }
 
-                // Confirma tras 2 frames idénticos
-                if (confidenceCounter >= 2 && detectId !== lastConfirmedId) {
+                // Trigger ultra-rápido (sin esperas adicionales)
+                if (confidenceCounter >= 1 && detectId !== lastConfirmedId) {
                     lastConfirmedId = detectId;
                     
                     if (guiaScanner) {
@@ -217,20 +209,30 @@ export function iniciarScanner(onEncontrado) {
                         guiaScanner.classList.add('verde');
                     }
                     
-                    const original = CARTAS[idNumerico];
-                    console.log(`✅ QR: "${detectId}" → Carta: ${original ? original.nombre : 'NO ENCONTRADA'}`);
+                    const idNumerico = parseInt(detectId);
+                    // Buscar SIEMPRE por codTarget para evitar confusiones
+                    let original = null;
+                    for (let key in CARTAS) {
+                        if (CARTAS[key].codTarget == detectId) {
+                            original = CARTAS[key];
+                            break;
+                        }
+                    }
+                    
+                    console.log(`QR Detectado: "${detectId}" → ID: ${idNumerico} → Carta: ${original ? original.nombre : 'NO ENCONTRADA'}`);
                     
                     if (original) {
+                        // Clonación profunda absoluta
                         onEncontrado(JSON.parse(JSON.stringify(original)));
                         
                         setTimeout(() => {
                             if (guiaScanner) {
                                 guiaScanner.classList.remove('verde', 'dorado');
                             }
-                        }, 200);
+                        }, 100);
                     } else {
-                        console.error(`❌ Carta no existe para ID: ${idNumerico}`);
-                        lastConfirmedId = null;
+                        console.warn(`Carta no encontrada para ID: ${detectId}`);
+                        lastConfirmedId = null; // Resetear para reintentar
                     }
                 }
             } else {
