@@ -131,112 +131,85 @@ let lastCheckTime = 0;
 const MIN_FRAME_INTERVAL = 33; // ~30 FPS
 
 export async function iniciarOjo(containerId, onEncontrado) {
-    const container = document.getElementById(containerId);
-    const video = document.createElement('video');
-    video.style.width = '100%'; video.style.height = '100%'; video.style.objectFit = 'cover';
-    video.setAttribute('playsinline', true); video.setAttribute('muted', true);
-    container.appendChild(video);
-
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d', { willReadFrequently: true });
-    
     guiaScanner = document.getElementById('guia-scanner');
 
+    if (typeof Html5Qrcode === 'undefined') {
+        console.error("Html5Qrcode no cargado");
+        if (guiaScanner) guiaScanner.style.borderColor = '#ff0000';
+        return;
+    }
+
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                facingMode: "environment",
-                width: { ideal: 640 },
-                height: { ideal: 480 }
-            } 
-        });
-        video.srcObject = stream;
-        video.play();
+        const qrScanner = new Html5Qrcode(containerId);
+        const config = { 
+            fps: 30,
+            qrbox: { width: 250, height: 250 }
+        };
+
         scanning = true;
-        requestAnimationFrame(tick);
+        
+        await qrScanner.start(
+            { facingMode: "environment" },
+            config,
+            (decodedText) => procesarQRCode(decodedText, onEncontrado),
+            (error) => {} // Ignorar errores
+        );
+
+        if (guiaScanner) guiaScanner.style.borderColor = '#00ff00';
     } catch (err) { 
         console.error("Error cámara:", err);
         if (guiaScanner) guiaScanner.style.borderColor = '#ff0000';
     }
 
-    function tick() {
-        if (!scanning) return;
+    function procesarQRCode(decodedText, onEncontrado) {
+        if (!decodedText) return;
         
-        const now = performance.now();
-        if (now - lastCheckTime < MIN_FRAME_INTERVAL) {
-            requestAnimationFrame(tick);
-            return;
+        const detectId = decodedText.trim();
+        
+        if (guiaScanner) {
+            guiaScanner.classList.remove('verde');
+            guiaScanner.classList.add('dorado');
         }
-        lastCheckTime = now;
         
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            canvas.height = video.videoHeight;
-            canvas.width = video.videoWidth;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        // Validar que detectId sea numérico limpio (sin basura)
+        const detectedNum = parseInt(detectId);
+        if (isNaN(detectedNum) || detectedNum < 1 || detectedNum > 108) {
+            // Rechazar IDs inválidos
+            currentCandidateId = null;
+            confidenceCounter = 0;
+        } else if (detectId === currentCandidateId) {
+            confidenceCounter++;
+        } else {
+            currentCandidateId = detectId;
+            confidenceCounter = 1;
+        }
+
+        // Exigir 5 confirmaciones consecutivas (no 1)
+        if (confidenceCounter >= 5 && detectId !== lastConfirmedId) {
+            lastConfirmedId = detectId;
             
-            if (typeof window.jsQR === 'undefined') {
-                console.error("jsQR no cargado");
-                if (guiaScanner) guiaScanner.style.borderColor = '#ff0000';
-                requestAnimationFrame(tick);
-                return;
+            if (guiaScanner) {
+                guiaScanner.classList.remove('dorado');
+                guiaScanner.classList.add('verde');
             }
-
-            const code = window.jsQR(imageData.data, imageData.width, imageData.height);
-
-            if (code) {
-                const detectId = code.data.trim();
+            
+            const idNumerico = parseInt(detectId);
+            let original = CARTAS[idNumerico] || null;
+            
+            if (original) {
+                // Clonación profunda absoluta
+                onEncontrado(JSON.parse(JSON.stringify(original)));
                 
-                if (guiaScanner) {
-                    guiaScanner.classList.remove('verde');
-                    guiaScanner.classList.add('dorado');
-                }
-                
-                // Validar que detectId sea numérico limpio (sin basura)
-                const detectedNum = parseInt(detectId);
-                if (isNaN(detectedNum) || detectedNum < 1 || detectedNum > 108) {
-                    // Rechazar IDs inválidos
-                    currentCandidateId = null;
-                    confidenceCounter = 0;
-                } else if (detectId === currentCandidateId) {
-                    confidenceCounter++;
-                } else {
-                    currentCandidateId = detectId;
-                    confidenceCounter = 1;
-                }
-
-                // Exigir 5 confirmaciones consecutivas (no 1)
-                if (confidenceCounter >= 5 && detectId !== lastConfirmedId) {
-                    lastConfirmedId = detectId;
-                    
+                setTimeout(() => {
                     if (guiaScanner) {
-                        guiaScanner.classList.remove('dorado');
-                        guiaScanner.classList.add('verde');
+                        guiaScanner.classList.remove('verde', 'dorado');
                     }
-                    
-                    const idNumerico = parseInt(detectId);
-                    let original = CARTAS[idNumerico] || null;
-                    
-                    if (original) {
-                        // Clonación profunda absoluta
-                        onEncontrado(JSON.parse(JSON.stringify(original)));
-                        
-                        setTimeout(() => {
-                            if (guiaScanner) {
-                                guiaScanner.classList.remove('verde', 'dorado');
-                            }
-                        }, 100);
-                    } else {
-                        console.warn(`Carta no encontrada para ID-AR: ${detectId}`);
-                        lastConfirmedId = null; // Resetear para reintentar
-                    }
-                }
+                }, 100);
             } else {
-                currentCandidateId = null;
-                confidenceCounter = 0;
+                console.warn(`Carta no encontrada para ID-AR: ${detectId}`);
+                lastConfirmedId = null; // Resetear para reintentar
             }
         }
-        requestAnimationFrame(tick);
     }
 }
 
