@@ -211,10 +211,17 @@ export async function iniciarOjo(containerId, onEncontrado) {
                     
                     const idNumerico = parseInt(detectId);
                     let original = null;
-                    for (let key in CARTAS) {
-                        if (String(CARTAS[key]["id-ar"]) === String(detectId)) {
-                            original = CARTAS[key];
-                            break;
+                    
+                    // Buscar por id-ar exacto (como número, no como string)
+                    if (CARTAS[idNumerico]) {
+                        original = CARTAS[idNumerico];
+                    } else {
+                        // Fallback: búsqueda lineal por id-ar exacto
+                        for (let key in CARTAS) {
+                            if (CARTAS[key]["id-ar"] === idNumerico) {
+                                original = CARTAS[key];
+                                break;
+                            }
                         }
                     }
                     
