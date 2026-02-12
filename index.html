@@ -3,154 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test QR Reader - Solo Números</title>
+    <title>Test QR Reader - Con Marco</title>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <style>
-        body {
+        * {
             margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background: #1a1a1a;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #0a0a0a;
             color: #fff;
         }
         .container {
-            max-width: 500px;
-            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 10px;
         }
         h1 {
             text-align: center;
-            color: #00ff00;
+            color: #ff00ff;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .video-container {
+            position: relative;
+            flex: 1;
+            max-height: 70vh;
+            border: 5px solid #00ff00;
+            overflow: hidden;
+            background: #000;
         }
         video {
             width: 100%;
-            height: auto;
-            border: 3px solid #00ff00;
+            height: 100%;
+            object-fit: cover;
             display: block;
-            margin: 20px 0;
-            background: #000;
         }
         canvas {
             display: none;
         }
-        .info-box {
-            background: #222;
-            border: 2px solid #00ff00;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-            font-size: 18px;
-            min-height: 60px;
+        .scan-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border: 4px solid #00ff00;
+            box-shadow: inset 0 0 20px #00ff00;
+            background: transparent;
         }
-        .numero-detectado {
-            font-size: 48px;
-            font-weight: bold;
-            color: #00ff00;
-            text-align: center;
-            margin: 20px 0;
-            font-family: 'Courier New', monospace;
+        .scan-frame::before,
+        .scan-frame::after,
+        .scan-frame > div:nth-child(1)::before,
+        .scan-frame > div:nth-child(1)::after {
+            content: '';
+            position: absolute;
+            background: #00ff00;
         }
-        .log-container {
-            background: #000;
-            border: 1px solid #00ff00;
+        .corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #00ff00;
+        }
+        .corner.tl { top: -5px; left: -5px; border-right: none; border-bottom: none; }
+        .corner.tr { top: -5px; right: -5px; border-left: none; border-bottom: none; }
+        .corner.bl { bottom: -5px; left: -5px; border-right: none; border-top: none; }
+        .corner.br { bottom: -5px; right: -5px; border-left: none; border-top: none; }
+
+        .info-panel {
+            background: #1a1a1a;
+            border: 3px solid #00ff00;
             padding: 15px;
-            height: 200px;
-            overflow-y: auto;
-            margin: 20px 0;
+            margin-top: 10px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: #0a0a0a;
+            border-radius: 3px;
+            border-left: 4px solid #00ff00;
+        }
+        .info-label {
+            color: #aaa;
             font-size: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .info-value {
+            color: #00ff00;
+            font-size: 20px;
+            font-weight: bold;
             font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
         }
-        .log-entry {
+        .numero-grande {
+            font-size: 48px;
+            text-align: center;
+            color: #ffff00;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            padding: 15px;
+            background: #1a1a1a;
+            border: 3px solid #ffff00;
+            border-radius: 5px;
+        }
+        .estado {
+            padding: 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            text-align: center;
+            background: #000;
+            border: 2px solid #ff0000;
+        }
+        .estado.activo {
+            border-color: #00ff00;
             color: #00ff00;
-            margin: 5px 0;
-            padding: 5px;
-            border-bottom: 1px solid #333;
         }
-        .log-error {
-            color: #ff0000;
+        .estado.bloqueado {
+            border-color: #ffff00;
+            color: #ffff00;
         }
-        .log-success {
-            color: #00ff00;
+        .botones {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
         }
         button {
-            width: 100%;
-            padding: 15px;
-            font-size: 16px;
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
             background: #00ff00;
             color: #000;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            margin: 10px 0;
+            text-transform: uppercase;
         }
         button:hover {
             background: #00dd00;
+        }
+        button:active {
+            background: #00bb00;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎯 TEST QR READER</h1>
-        <p style="text-align: center; color: #aaa;">Lee únicamente el número del QR - sin lógica de cartas</p>
+        <h1>🎯 QR SCANNER TEST</h1>
         
-        <video id="video" autoplay playsinline></video>
-        <canvas id="canvas"></canvas>
-        
-        <div class="info-box">
-            <strong>Estado:</strong> <span id="estado">Esperando...</span>
+        <div class="video-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+            <div class="scan-frame">
+                <div class="corner tl"></div>
+                <div class="corner tr"></div>
+                <div class="corner bl"></div>
+                <div class="corner br"></div>
+            </div>
         </div>
-        
-        <div class="numero-detectado" id="numero">-</div>
-        
-        <div class="info-box">
-            <strong>Último detectado:</strong> <span id="ultimo" style="color: #ffff00;">Ninguno</span>
+
+        <div class="info-panel">
+            <div class="estado activo" id="estado">ESPERANDO QR...</div>
+            <div class="numero-grande" id="numero">-</div>
+            
+            <div class="info-row">
+                <span class="info-label">Último confirmado:</span>
+                <span class="info-value" id="confirmado">NINGUNO</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">Detecciones:</span>
+                <span class="info-value" id="contador">0</span>
+            </div>
+
+            <div class="botones">
+                <button onclick="resetearScanner()">RESETEAR</button>
+                <button onclick="cerrarCamara()">CERRAR</button>
+            </div>
         </div>
-        
-        <div class="log-container" id="log"></div>
-        
-        <button onclick="limpiarLog()">Limpiar Log</button>
-        <button onclick="resetear()">Resetear</button>
     </div>
 
-    <script type="module">
+    <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const context = canvas.getContext('2d');
-        const estado = document.getElementById('estado');
-        const numero = document.getElementById('numero');
-        const ultimo = document.getElementById('ultimo');
-        const logDiv = document.getElementById('log');
+        const numeroDisplay = document.getElementById('numero');
+        const estadoDisplay = document.getElementById('estado');
+        const confirmadoDisplay = document.getElementById('confirmado');
+        const contadorDisplay = document.getElementById('contador');
 
-        let lastDetected = null;
-        let detectionCount = 0;
-
-        function log(msg, type = 'info') {
-            const entry = document.createElement('div');
-            entry.className = `log-entry log-${type}`;
-            const now = new Date().toLocaleTimeString();
-            entry.textContent = `[${now}] ${msg}`;
-            logDiv.appendChild(entry);
-            logDiv.scrollTop = logDiv.scrollHeight;
-            console.log(msg);
-        }
+        let lastStableCode = null;
+        let stableCounter = 0;
+        let blockedUntil = 0;
+        let totalDetections = 0;
 
         async function startCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' }
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
                 });
                 video.srcObject = stream;
-                log('Cámara iniciada', 'success');
-                estado.textContent = 'Escaneando...';
-                estado.style.color = '#00ff00';
+                estadoDisplay.textContent = 'ESCANEANDO...';
+                estadoDisplay.className = 'estado activo';
                 
                 setTimeout(() => {
                     scan();
-                }, 100);
+                }, 500);
             } catch (err) {
-                log(`Error de cámara: ${err.message}`, 'error');
-                estado.textContent = 'Error de cámara';
-                estado.style.color = '#ff0000';
+                estadoDisplay.textContent = '❌ ERROR DE CÁMARA';
+                estadoDisplay.className = 'estado';
+                console.error(err);
             }
         }
 
@@ -170,46 +248,80 @@
 
             if (code) {
                 const raw = code.data.trim();
-                const cleaned = raw.replace(/[^\d]/g, ''); // Solo dígitos
-                const num = parseInt(cleaned);
-
-                log(`RAW: "${raw}" | LIMPIO: "${cleaned}" | NÚMERO: ${num}`, 'info');
-
-                if (lastDetected === cleaned) {
-                    detectionCount++;
-                    numero.textContent = cleaned + ` (${detectionCount}x)`;
-                } else {
-                    lastDetected = cleaned;
-                    detectionCount = 1;
-                    numero.textContent = cleaned;
-                    numero.style.color = '#ffff00';
-                    
-                    setTimeout(() => {
-                        numero.style.color = '#00ff00';
-                    }, 500);
-
-                    log(`✓ NUEVA DETECCIÓN: ${cleaned}`, 'success');
-                    ultimo.textContent = cleaned;
-                    ultimo.style.color = '#ffff00';
+                totalDetections++;
+                
+                // Mostrar número detectado (sin filtro)
+                numeroDisplay.textContent = raw;
+                numeroDisplay.style.color = '#00ffff';
+                
+                // Sistema de bloqueo temporal
+                const now = Date.now();
+                if (now < blockedUntil) {
+                    estadoDisplay.textContent = '⏳ BLOQUEADO - ESPERA 1 SEG';
+                    estadoDisplay.className = 'estado bloqueado';
+                    contadorDisplay.textContent = totalDetections;
+                    return;
                 }
+
+                // Confirmar si es el mismo código 3 veces
+                if (raw === lastStableCode) {
+                    stableCounter++;
+                } else {
+                    lastStableCode = raw;
+                    stableCounter = 1;
+                }
+
+                // Cuando se confirma 3 veces = es estable
+                if (stableCounter >= 3) {
+                    numeroDisplay.style.color = '#ffff00';
+                    numeroDisplay.style.fontSize = '64px';
+                    confirmadoDisplay.textContent = raw;
+                    
+                    estadoDisplay.textContent = '✓ CONFIRMADO: ' + raw;
+                    estadoDisplay.className = 'estado activo';
+                    
+                    // Bloquear por 1 segundo para evitar duplicados
+                    blockedUntil = now + 1000;
+                    
+                    // Reset para siguiente lectura
+                    lastStableCode = null;
+                    stableCounter = 0;
+                }
+
+                contadorDisplay.textContent = totalDetections;
             } else {
-                numero.textContent = '-';
+                // Sin QR visible
+                if (stableCounter < 3) {
+                    numeroDisplay.textContent = '-';
+                    numeroDisplay.style.fontSize = '48px';
+                    numeroDisplay.style.color = '#ffff00';
+                    estadoDisplay.textContent = 'ESPERANDO QR...';
+                    estadoDisplay.className = 'estado activo';
+                    lastStableCode = null;
+                    stableCounter = 0;
+                }
             }
         }
 
-        window.limpiarLog = function() {
-            logDiv.innerHTML = '';
-            log('Log limpiado', 'success');
+        window.resetearScanner = function() {
+            lastStableCode = null;
+            stableCounter = 0;
+            blockedUntil = 0;
+            totalDetections = 0;
+            numeroDisplay.textContent = '-';
+            numeroDisplay.style.color = '#ffff00';
+            confirmadoDisplay.textContent = 'NINGUNO';
+            contadorDisplay.textContent = '0';
+            estadoDisplay.textContent = 'ESCANEANDO...';
+            estadoDisplay.className = 'estado activo';
         };
 
-        window.resetear = function() {
-            lastDetected = null;
-            detectionCount = 0;
-            numero.textContent = '-';
-            log('Reseteado', 'success');
+        window.cerrarCamara = function() {
+            video.srcObject.getTracks().forEach(track => track.stop());
+            estadoDisplay.textContent = 'CÁMARA CERRADA';
+            estadoDisplay.className = 'estado';
         };
 
-        log('Iniciando...', 'info');
         startCamera();
     </script>
 </body>
