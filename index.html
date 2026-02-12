@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test QR Reader - Con Marco</title>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <title>QR Scanner - HTML5 QRCode</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -12,9 +12,10 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Courier New', monospace;
             background: #0a0a0a;
             color: #fff;
+            overflow: hidden;
         }
         .container {
             display: flex;
@@ -25,304 +26,273 @@
         h1 {
             text-align: center;
             color: #ff00ff;
-            font-size: 24px;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            font-size: 12px;
             margin-bottom: 10px;
         }
-        .video-container {
-            position: relative;
+        #qr-reader {
             flex: 1;
-            max-height: 70vh;
             border: 5px solid #00ff00;
             overflow: hidden;
             background: #000;
+            position: relative;
         }
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        canvas {
-            display: none;
-        }
-        .scan-frame {
+        #qr-reader::after {
+            content: '';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 250px;
-            height: 250px;
+            width: 280px;
+            height: 280px;
             border: 4px solid #00ff00;
-            box-shadow: inset 0 0 20px #00ff00;
-            background: transparent;
-        }
-        .scan-frame::before,
-        .scan-frame::after,
-        .scan-frame > div:nth-child(1)::before,
-        .scan-frame > div:nth-child(1)::after {
-            content: '';
-            position: absolute;
-            background: #00ff00;
+            box-shadow: 0 0 20px #00ff00, inset 0 0 20px rgba(0,255,0,0.1);
+            pointer-events: none;
+            z-index: 10;
         }
         .corner {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            border: 3px solid #00ff00;
+            z-index: 11;
         }
-        .corner.tl { top: -5px; left: -5px; border-right: none; border-bottom: none; }
-        .corner.tr { top: -5px; right: -5px; border-left: none; border-bottom: none; }
-        .corner.bl { bottom: -5px; left: -5px; border-right: none; border-top: none; }
-        .corner.br { bottom: -5px; right: -5px; border-left: none; border-top: none; }
+        .corner.tl { top: calc(50% - 140px - 8px); left: calc(50% - 140px - 8px); width: 35px; height: 35px; border: 3px solid #00ff00; border-right: none; border-bottom: none; }
+        .corner.tr { top: calc(50% - 140px - 8px); right: calc(50% - 140px - 8px); width: 35px; height: 35px; border: 3px solid #00ff00; border-left: none; border-bottom: none; }
+        .corner.bl { bottom: calc(50% - 140px - 8px); left: calc(50% - 140px - 8px); width: 35px; height: 35px; border: 3px solid #00ff00; border-right: none; border-top: none; }
+        .corner.br { bottom: calc(50% - 140px - 8px); right: calc(50% - 140px - 8px); width: 35px; height: 35px; border: 3px solid #00ff00; border-left: none; border-top: none; }
 
         .info-panel {
             background: #1a1a1a;
             border: 3px solid #00ff00;
-            padding: 15px;
+            padding: 10px;
             margin-top: 10px;
-            min-height: 120px;
+            min-height: 140px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .numero-display {
+            font-size: 56px;
+            text-align: center;
+            color: #00ff00;
+            font-weight: bold;
+            letter-spacing: 3px;
+            padding: 15px;
+            background: #0a0a0a;
+            border: 3px solid #00ff00;
+            border-radius: 5px;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .info-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 8px;
+            padding: 5px 10px;
             background: #0a0a0a;
-            border-radius: 3px;
             border-left: 4px solid #00ff00;
+            border-radius: 2px;
         }
-        .info-label {
+        .label {
             color: #aaa;
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             font-weight: bold;
         }
-        .info-value {
-            color: #00ff00;
-            font-size: 20px;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 2px;
-        }
-        .numero-grande {
-            font-size: 48px;
-            text-align: center;
+        .value {
             color: #ffff00;
-            font-family: 'Courier New', monospace;
-            margin: 10px 0;
-            padding: 15px;
-            background: #1a1a1a;
-            border: 3px solid #ffff00;
-            border-radius: 5px;
+            font-size: 13px;
+            font-weight: bold;
         }
         .estado {
-            padding: 10px;
+            padding: 8px;
             border-radius: 3px;
-            font-weight: bold;
             text-align: center;
+            font-weight: bold;
             background: #000;
             border: 2px solid #ff0000;
+            color: #ff0000;
+            font-size: 12px;
         }
-        .estado.activo {
+        .estado.ok {
             border-color: #00ff00;
             color: #00ff00;
         }
-        .estado.bloqueado {
-            border-color: #ffff00;
-            color: #ffff00;
-        }
-        .botones {
+        .buttons {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 8px;
+            margin-top: 8px;
         }
         button {
             flex: 1;
-            padding: 12px;
-            font-size: 14px;
+            padding: 10px;
+            font-size: 12px;
             background: #00ff00;
             color: #000;
             border: none;
-            border-radius: 5px;
+            border-radius: 3px;
             cursor: pointer;
             font-weight: bold;
             text-transform: uppercase;
+            font-family: 'Courier New', monospace;
         }
         button:hover {
             background: #00dd00;
         }
         button:active {
-            background: #00bb00;
+            background: #00aa00;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎯 QR SCANNER TEST</h1>
+        <h1>🔍 QR SCANNER v3</h1>
+        <div class="subtitle">Enfoca el QR en el cuadrado</div>
         
-        <div class="video-container">
-            <video id="video" autoplay playsinline></video>
-            <canvas id="canvas"></canvas>
-            <div class="scan-frame">
-                <div class="corner tl"></div>
-                <div class="corner tr"></div>
-                <div class="corner bl"></div>
-                <div class="corner br"></div>
-            </div>
+        <div id="qr-reader">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
         </div>
 
         <div class="info-panel">
-            <div class="estado activo" id="estado">ESPERANDO QR...</div>
-            <div class="numero-grande" id="numero">-</div>
+            <div class="estado ok" id="estado">BUSCANDO QR...</div>
+            <div class="numero-display" id="numero">-</div>
             
             <div class="info-row">
-                <span class="info-label">Último confirmado:</span>
-                <span class="info-value" id="confirmado">NINGUNO</span>
+                <span class="label">Última detección:</span>
+                <span class="value" id="ultimo">--</span>
             </div>
             
             <div class="info-row">
-                <span class="info-label">Detecciones:</span>
-                <span class="info-value" id="contador">0</span>
+                <span class="label">Confirmadas:</span>
+                <span class="value" id="confirmadas">0</span>
             </div>
 
-            <div class="botones">
-                <button onclick="resetearScanner()">RESETEAR</button>
-                <button onclick="cerrarCamara()">CERRAR</button>
+            <div class="buttons">
+                <button onclick="resetear()">RESET</button>
+                <button onclick="detenerScanner()">DETENER</button>
             </div>
         </div>
     </div>
 
     <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
         const numeroDisplay = document.getElementById('numero');
         const estadoDisplay = document.getElementById('estado');
-        const confirmadoDisplay = document.getElementById('confirmado');
-        const contadorDisplay = document.getElementById('contador');
+        const ultimoDisplay = document.getElementById('ultimo');
+        const confirmadasDisplay = document.getElementById('confirmadas');
 
-        let lastStableCode = null;
-        let stableCounter = 0;
+        let html5QrcodeScanner = null;
+        let lastCode = null;
+        let repeatCount = 0;
         let blockedUntil = 0;
-        let totalDetections = 0;
+        let confirmCount = 0;
 
-        async function startCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { 
-                        facingMode: 'environment',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    }
-                });
-                video.srcObject = stream;
-                estadoDisplay.textContent = 'ESCANEANDO...';
-                estadoDisplay.className = 'estado activo';
-                
-                setTimeout(() => {
-                    scan();
-                }, 500);
-            } catch (err) {
-                estadoDisplay.textContent = '❌ ERROR DE CÁMARA';
-                estadoDisplay.className = 'estado';
-                console.error(err);
-            }
-        }
-
-        function scan() {
-            requestAnimationFrame(scan);
-
-            if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+        function onScanSuccess(decodedText, decodedResult) {
+            const now = Date.now();
+            
+            // Si está bloqueado, no procesar
+            if (now < blockedUntil) {
                 return;
             }
 
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // Limpiar: solo números
+            const cleaned = decodedText.trim().replace(/[^\d]/g, '');
+            
+            if (!cleaned) return;
 
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            const code = window.jsQR(imageData.data, imageData.width, imageData.height);
+            // Mostrar en grande lo que ve
+            numeroDisplay.textContent = cleaned;
+            numeroDisplay.style.color = '#00ffff';
+            ultimoDisplay.textContent = cleaned;
 
-            if (code) {
-                const raw = code.data.trim();
-                totalDetections++;
-                
-                // Mostrar número detectado (sin filtro)
-                numeroDisplay.textContent = raw;
-                numeroDisplay.style.color = '#00ffff';
-                
-                // Sistema de bloqueo temporal
-                const now = Date.now();
-                if (now < blockedUntil) {
-                    estadoDisplay.textContent = '⏳ BLOQUEADO - ESPERA 1 SEG';
-                    estadoDisplay.className = 'estado bloqueado';
-                    contadorDisplay.textContent = totalDetections;
-                    return;
-                }
-
-                // Confirmar si es el mismo código 3 veces
-                if (raw === lastStableCode) {
-                    stableCounter++;
-                } else {
-                    lastStableCode = raw;
-                    stableCounter = 1;
-                }
-
-                // Cuando se confirma 3 veces = es estable
-                if (stableCounter >= 3) {
-                    numeroDisplay.style.color = '#ffff00';
-                    numeroDisplay.style.fontSize = '64px';
-                    confirmadoDisplay.textContent = raw;
-                    
-                    estadoDisplay.textContent = '✓ CONFIRMADO: ' + raw;
-                    estadoDisplay.className = 'estado activo';
-                    
-                    // Bloquear por 1 segundo para evitar duplicados
-                    blockedUntil = now + 1000;
-                    
-                    // Reset para siguiente lectura
-                    lastStableCode = null;
-                    stableCounter = 0;
-                }
-
-                contadorDisplay.textContent = totalDetections;
+            // Contar repeticiones del MISMO código
+            if (cleaned === lastCode) {
+                repeatCount++;
             } else {
-                // Sin QR visible
-                if (stableCounter < 3) {
-                    numeroDisplay.textContent = '-';
-                    numeroDisplay.style.fontSize = '48px';
-                    numeroDisplay.style.color = '#ffff00';
-                    estadoDisplay.textContent = 'ESPERANDO QR...';
-                    estadoDisplay.className = 'estado activo';
-                    lastStableCode = null;
-                    stableCounter = 0;
-                }
+                lastCode = cleaned;
+                repeatCount = 1;
+            }
+
+            // Cuando se repite 2 veces = confirmado
+            if (repeatCount >= 2) {
+                numeroDisplay.style.color = '#00ff00';
+                numeroDisplay.style.fontSize = '72px';
+                confirmCount++;
+                confirmadasDisplay.textContent = confirmCount;
+                
+                estadoDisplay.textContent = '✓ CONFIRMADO: ' + cleaned;
+                estadoDisplay.className = 'estado ok';
+                
+                // Bloquear por 2 segundos
+                blockedUntil = now + 2000;
+                
+                // Reset para siguiente
+                lastCode = null;
+                repeatCount = 0;
             }
         }
 
-        window.resetearScanner = function() {
-            lastStableCode = null;
-            stableCounter = 0;
+        function onScanFailure(error) {
+            // Ignorar errores de "no QR encontrado"
+            // console.warn(`Error: ${error}`);
+        }
+
+        function startScanning() {
+            html5QrcodeScanner = new Html5Qrcode("qr-reader");
+            
+            const config = { 
+                fps: 30,
+                qrbox: { width: 280, height: 280 },
+                aspectRatio: 1.0
+            };
+
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                config,
+                onScanSuccess,
+                onScanFailure
+            ).catch(err => {
+                console.error('Error:', err);
+                estadoDisplay.textContent = '❌ ERROR DE CÁMARA';
+                estadoDisplay.className = 'estado';
+            });
+
+            estadoDisplay.textContent = 'BUSCANDO QR...';
+            estadoDisplay.className = 'estado ok';
+        }
+
+        window.resetear = function() {
+            lastCode = null;
+            repeatCount = 0;
             blockedUntil = 0;
-            totalDetections = 0;
             numeroDisplay.textContent = '-';
-            numeroDisplay.style.color = '#ffff00';
-            confirmadoDisplay.textContent = 'NINGUNO';
-            contadorDisplay.textContent = '0';
-            estadoDisplay.textContent = 'ESCANEANDO...';
-            estadoDisplay.className = 'estado activo';
+            numeroDisplay.style.color = '#00ff00';
+            numeroDisplay.style.fontSize = '56px';
+            ultimoDisplay.textContent = '--';
+            estadoDisplay.textContent = 'BUSCANDO QR...';
+            estadoDisplay.className = 'estado ok';
         };
 
-        window.cerrarCamara = function() {
-            video.srcObject.getTracks().forEach(track => track.stop());
-            estadoDisplay.textContent = 'CÁMARA CERRADA';
-            estadoDisplay.className = 'estado';
+        window.detenerScanner = function() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    estadoDisplay.textContent = 'ESCÁNER DETENIDO';
+                    estadoDisplay.className = 'estado';
+                });
+            }
         };
 
-        startCamera();
+        // Iniciar al cargar
+        window.addEventListener('load', () => {
+            setTimeout(startScanning, 500);
+        });
     </script>
 </body>
 </html>
