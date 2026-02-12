@@ -2,50 +2,215 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V123: MENU</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test QR Reader - Solo Números</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #00ff00;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            border: 3px solid #00ff00;
+            display: block;
+            margin: 20px 0;
+            background: #000;
+        }
+        canvas {
+            display: none;
+        }
+        .info-box {
+            background: #222;
+            border: 2px solid #00ff00;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-size: 18px;
+            min-height: 60px;
+        }
+        .numero-detectado {
+            font-size: 48px;
+            font-weight: bold;
+            color: #00ff00;
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .log-container {
+            background: #000;
+            border: 1px solid #00ff00;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            margin: 20px 0;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+        }
+        .log-entry {
+            color: #00ff00;
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid #333;
+        }
+        .log-error {
+            color: #ff0000;
+        }
+        .log-success {
+            color: #00ff00;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            background: #00ff00;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #00dd00;
+        }
+    </style>
 </head>
 <body>
-    <!-- PANTALLA DE INICIO -->
-    <div id="p-inicio" class="pantalla">
-        <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
-            <div>
-                <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V6666666666666666666666666666666666</p>
-            </div>
-            <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTRAR AL GRIMORIO</button>
+    <div class="container">
+        <h1>🎯 TEST QR READER</h1>
+        <p style="text-align: center; color: #aaa;">Lee únicamente el número del QR - sin lógica de cartas</p>
+        
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas"></canvas>
+        
+        <div class="info-box">
+            <strong>Estado:</strong> <span id="estado">Esperando...</span>
         </div>
+        
+        <div class="numero-detectado" id="numero">-</div>
+        
+        <div class="info-box">
+            <strong>Último detectado:</strong> <span id="ultimo" style="color: #ffff00;">Ninguno</span>
+        </div>
+        
+        <div class="log-container" id="log"></div>
+        
+        <button onclick="limpiarLog()">Limpiar Log</button>
+        <button onclick="resetear()">Resetear</button>
     </div>
 
-    <!-- MENÚ PRINCIPAL -->
-    <div id="p-menu-principal" class="pantalla oculto">
-        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ DUELO TÁCTICO</button>
-            <button class="btn-info" onclick="alert('Modo V100: Final Release. Neon Values & Stone Background.')">?</button>
-        </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#222; border-color:#555;" onclick="window.location.href='misiones.html'">🦉 MISIONES (WIP)</button>
-        </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#333; border-color:#555;" onclick="window.location.href='dados.html'">🎲 ORÁCULO (SOLO)</button>
-        </div>
-    </div>
+    <script type="module">
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const estado = document.getElementById('estado');
+        const numero = document.getElementById('numero');
+        const ultimo = document.getElementById('ultimo');
+        const logDiv = document.getElementById('log');
 
-    <script>
-        function entrarGrimorio() {
-            document.getElementById('p-inicio').classList.add('oculto');
-            document.getElementById('p-menu-principal').classList.remove('oculto');
-            const v = document.getElementById('intro-video');
-            if(v) { 
-                v.muted = false; 
-                v.play().catch(e => console.log("Auto-play blocked by browser policy")); 
+        let lastDetected = null;
+        let detectionCount = 0;
+
+        function log(msg, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const now = new Date().toLocaleTimeString();
+            entry.textContent = `[${now}] ${msg}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(msg);
+        }
+
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+                video.srcObject = stream;
+                log('Cámara iniciada', 'success');
+                estado.textContent = 'Escaneando...';
+                estado.style.color = '#00ff00';
+                
+                setTimeout(() => {
+                    scan();
+                }, 100);
+            } catch (err) {
+                log(`Error de cámara: ${err.message}`, 'error');
+                estado.textContent = 'Error de cámara';
+                estado.style.color = '#ff0000';
             }
         }
+
+        function scan() {
+            requestAnimationFrame(scan);
+
+            if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+                return;
+            }
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const code = window.jsQR(imageData.data, imageData.width, imageData.height);
+
+            if (code) {
+                const raw = code.data.trim();
+                const cleaned = raw.replace(/[^\d]/g, ''); // Solo dígitos
+                const num = parseInt(cleaned);
+
+                log(`RAW: "${raw}" | LIMPIO: "${cleaned}" | NÚMERO: ${num}`, 'info');
+
+                if (lastDetected === cleaned) {
+                    detectionCount++;
+                    numero.textContent = cleaned + ` (${detectionCount}x)`;
+                } else {
+                    lastDetected = cleaned;
+                    detectionCount = 1;
+                    numero.textContent = cleaned;
+                    numero.style.color = '#ffff00';
+                    
+                    setTimeout(() => {
+                        numero.style.color = '#00ff00';
+                    }, 500);
+
+                    log(`✓ NUEVA DETECCIÓN: ${cleaned}`, 'success');
+                    ultimo.textContent = cleaned;
+                    ultimo.style.color = '#ffff00';
+                }
+            } else {
+                numero.textContent = '-';
+            }
+        }
+
+        window.limpiarLog = function() {
+            logDiv.innerHTML = '';
+            log('Log limpiado', 'success');
+        };
+
+        window.resetear = function() {
+            lastDetected = null;
+            detectionCount = 0;
+            numero.textContent = '-';
+            log('Reseteado', 'success');
+        };
+
+        log('Iniciando...', 'info');
+        startCamera();
     </script>
 </body>
 </html>
