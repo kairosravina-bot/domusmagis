@@ -9,8 +9,9 @@ const genB = (i, a, t, m) => ({
     "btn-m": { texto: "M", label: "MYSTERIUM", valor: m, video: "magia.mp4" }
 });
 
+/* ===================== CARTAS (SIN CAMBIOS) ===================== */
 const CARTAS = {
-    1: { id-ar: 1, id: 1, nombre: "APER", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(6,1,5,0), codTarget: "1" },
+   1: { id-ar: 1, id: 1, nombre: "APER", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(6,1,5,0), codTarget: "1" },
     2: { id-ar: 2, id: 2, nombre: "SAXUM", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(3,1,12,1), codTarget: "2" },
     3: { id-ar: 3, id: 3, nombre: "BESTIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(9,1,5,5), codTarget: "3" },
     4: { id-ar: 4, id: 4, nombre: "LEO", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(8,5,7,4), codTarget: "4" },
@@ -120,122 +121,107 @@ const CARTAS = {
     108: { id-ar: 108, id: 10, nombre: "IMPERATOR", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(6,4,6,4), codTarget: "108" },
 
 };
+/* =============================================================== */
 
-// --- MOTOR DEL OJO - ULTRA OPTIMIZADO ---
+// --- MOTOR DEL OJO ---
 let scanning = false;
 let lastConfirmedId = null;
 let currentCandidateId = null;
 let confidenceCounter = 0;
 let guiaScanner = null;
-let lastCheckTime = 0;
-const MIN_FRAME_INTERVAL = 33; // ~30 FPS
 
 export async function iniciarOjo(containerId, onEncontrado) {
-    const container = document.getElementById(containerId);
-    const video = document.createElement('video');
-    video.style.width = '100%'; video.style.height = '100%'; video.style.objectFit = 'cover';
-    video.setAttribute('playsinline', true); video.setAttribute('muted', true);
-    container.appendChild(video);
 
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d', { willReadFrequently: true });
-    
-    guiaScanner = document.getElementById('guia-scanner');
+const container = document.getElementById(containerId);
+const video = document.createElement('video');
+video.style.width='100%';
+video.style.height='100%';
+video.style.objectFit='cover';
+video.setAttribute('playsinline',true);
+video.muted=true;
+container.appendChild(video);
 
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                facingMode: "environment",
-                width: { ideal: 640 },
-                height: { ideal: 480 }
-            } 
-        });
-        video.srcObject = stream;
-        video.play();
-        scanning = true;
-        requestAnimationFrame(tick);
-    } catch (err) { 
-        console.error("Error cámara:", err);
-        if (guiaScanner) guiaScanner.style.borderColor = '#ff0000';
-    }
+const canvas=document.createElement('canvas');
+const context=canvas.getContext('2d',{willReadFrequently:true});
 
-    function tick() {
-        if (!scanning) return;
-        
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            canvas.height = video.videoHeight;
-            canvas.width = video.videoWidth;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            
-            if (typeof window.Html5Qrcode === 'undefined') {
-                console.error("Html5Qrcode no cargado");
-                if (guiaScanner) guiaScanner.style.borderColor = '#ff0000';
-                requestAnimationFrame(tick);
-                return;
-            }
+guiaScanner=document.getElementById('guia-scanner');
 
-            // Html5Qrcode analiza desde canvas automáticamente
-            const code = window.Html5Qrcode.scanImage(imageData, imageData.width, imageData.height).catch(err => null);
-
-            if (code) {
-                const detectId = code.data.trim();
-                
-                if (guiaScanner) {
-                    guiaScanner.classList.remove('verde');
-                    guiaScanner.classList.add('dorado');
-                }
-                
-                // SENSIBILIDAD EXTREMA: Confirma casi instantáneamente
-                if (detectId === currentCandidateId) {
-                    confidenceCounter++;
-                } else {
-                    currentCandidateId = detectId;
-                    confidenceCounter = 1;
-                }
-
-                // Trigger ultra-rápido (sin esperas adicionales)
-                if (confidenceCounter >= 1 && detectId !== lastConfirmedId) {
-                    lastConfirmedId = detectId;
-                    
-                    if (guiaScanner) {
-                        guiaScanner.classList.remove('dorado');
-                        guiaScanner.classList.add('verde');
-                    }
-                    
-                    const idNumerico = parseInt(detectId);
-                    const original = CARTAS[idNumerico] || Object.values(CARTAS).find(c => c.codTarget == detectId);
-                    
-                    console.log(`QR Detectado: "${detectId}" → ID: ${idNumerico} → Carta: ${original ? original.nombre : 'NO ENCONTRADA'}`);
-                    
-                    if (original) {
-                        // Clonación profunda absoluta
-                        onEncontrado(JSON.parse(JSON.stringify(original)));
-                        
-                        setTimeout(() => {
-                            if (guiaScanner) {
-                                guiaScanner.classList.remove('verde', 'dorado');
-                            }
-                        }, 100);
-                    } else {
-                        console.warn(`Carta no encontrada para ID: ${detectId}`);
-                        lastConfirmedId = null; // Resetear para reintentar
-                    }
-                }
-            } else {
-                currentCandidateId = null;
-                confidenceCounter = 0;
-            }
-        }
-        requestAnimationFrame(tick);
-    }
+try{
+const stream=await navigator.mediaDevices.getUserMedia({
+video:{facingMode:"environment",width:{ideal:640},height:{ideal:480}}
+});
+video.srcObject=stream;
+await video.play();
+scanning=true;
+requestAnimationFrame(tick);
+}catch(e){
+console.error("Error cámara:",e);
+return;
 }
 
-export function resetUltimoId() {
-    lastConfirmedId = null;
-    currentCandidateId = null;
-    confidenceCounter = 0;
-    if (guiaScanner) guiaScanner.classList.remove('verde', 'dorado');
+function tick(){
+
+if(!scanning){requestAnimationFrame(tick);return;}
+
+if(video.readyState===video.HAVE_ENOUGH_DATA){
+
+canvas.width=video.videoWidth;
+canvas.height=video.videoHeight;
+context.drawImage(video,0,0,canvas.width,canvas.height);
+
+const imageData=context.getImageData(0,0,canvas.width,canvas.height);
+
+window.Html5Qrcode.scanImage(imageData,imageData.width,imageData.height)
+
+.then(code=>{
+
+if(!code)return;
+
+const detectId=code.data.trim();
+
+if(detectId===currentCandidateId)confidenceCounter++;
+else{currentCandidateId=detectId;confidenceCounter=1;}
+
+if(confidenceCounter>=3 && detectId!==lastConfirmedId){
+
+lastConfirmedId=detectId;
+
+if(guiaScanner){
+guiaScanner.classList.remove("dorado");
+guiaScanner.classList.add("verde");
+}
+
+const idNumerico=parseInt(detectId);
+const original=CARTAS[idNumerico]||Object.values(CARTAS).find(c=>c.codTarget==detectId);
+
+if(original){
+onEncontrado(JSON.parse(JSON.stringify(original)));
+setTimeout(()=>{
+if(guiaScanner) guiaScanner.classList.remove("verde","dorado");
+},150);
+}
+
+}
+
+})
+
+.catch(()=>{
+currentCandidateId=null;
+confidenceCounter=0;
+});
+
+}
+
+requestAnimationFrame(tick);
+}
+
+}
+
+export function resetUltimoId(){
+lastConfirmedId=null;
+currentCandidateId=null;
+confidenceCounter=0;
+if(guiaScanner) guiaScanner.classList.remove("verde","dorado");
 }
 
 export { RUTA_BASE, VIDEOS_BATALLA };
