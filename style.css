@@ -1,157 +1,48 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap');
-
-:root {
-    --font-titulo: 'Cinzel', serif;
-    --color-oro: #ffd700;
-    --borde-dorado: #d4af37;
-    --color-texto: #e0e0e0;
-}
-
+:root { --font-titulo: 'Cinzel', serif; --color-oro: #ffd700; --borde-dorado: #d4af37; --color-texto: #e0e0e0; }
 * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
-
-body {
-    margin: 0; padding: 0;
-    font-family: var(--font-titulo);
-    background: url('BG_PIEDRA.jpg') no-repeat center center fixed;
-    background-size: cover; /* FONDO PIEDRA GLOBAL */
-    color: var(--color-texto);
-    overflow: hidden; height: 100vh; width: 100vw;
-}
-
+body { margin: 0; padding: 0; font-family: var(--font-titulo); background: url('BG_PIEDRA.jpg') no-repeat center center fixed; background-size: cover; color: var(--color-texto); overflow: hidden; height: 100vh; width: 100vw; }
 .oculto { display: none !important; }
-
-/* PANTALLAS */
-.pantalla {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 20px; z-index: 100;
-    /* Quitamos fondos sólidos opacos para que se vea la piedra, usamos RGBA en HTML si es necesario */
-}
-
-/* BOTONES MASTER */
-.btn-master, .btn-jugar, .btn-info {
-    font-family: var(--font-titulo); font-weight: 700; font-size: 18px; text-transform: uppercase;
-    color: var(--color-oro); background: linear-gradient(to bottom, #3a3a3a, #1a1a1a);
-    border: 2px solid var(--borde-dorado); border-radius: 4px;
-    padding: 15px 20px; margin: 10px 0; width: 100%; max-width: 350px;
-    cursor: pointer; box-shadow: 0 4px 0 #000; text-shadow: 1px 1px 0 #000;
-}
-.btn-master:active { transform: translateY(4px); box-shadow: 0 0 0 #000; }
-
+.pantalla { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
+.btn-master, .btn-jugar { font-family: var(--font-titulo); font-weight: 700; font-size: 18px; color: var(--color-oro); background: linear-gradient(to bottom, #3a3a3a, #1a1a1a); border: 2px solid var(--borde-dorado); border-radius: 4px; padding: 15px 20px; margin: 10px 0; width: 100%; max-width: 350px; cursor: pointer; }
+.btn-master:active { transform: translateY(4px); }
 .fila-juego { display: flex; gap: 10px; width: 100%; max-width: 350px; justify-content: center; }
-.btn-jugar { font-size: 22px; border-color: #fff; background: linear-gradient(to bottom, #444, #222); }
-.btn-info { width: 50px; font-size: 24px; padding: 15px 0; background: #222; border-color: #555; color: #888; }
-
-/* INPUTS Y SETUP */
-input[type="text"] {
-    background: rgba(0,0,0,0.6); border: none; border-bottom: 2px solid var(--borde-dorado);
-    color: #fff; font-family: var(--font-titulo); font-size: 24px; text-align: center;
-    padding: 10px; width: 100%; margin-bottom: 20px; outline: none; text-transform: uppercase;
-}
+input[type="text"] { background: rgba(0,0,0,0.6); border: none; border-bottom: 2px solid var(--borde-dorado); color: #fff; font-family: var(--font-titulo); font-size: 24px; text-align: center; padding: 10px; width: 100%; margin-bottom: 20px; outline: none; }
 .grid-casas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-.btn-casa {
-    font-family: var(--font-titulo); font-weight: 900; color: #fff; padding: 20px 10px;
-    border: 2px solid #555; border-radius: 8px; font-size: 16px; cursor: pointer;
-}
-
-/* SETUP ALINEADO ARRIBA */
-#p-setup { justify-content: flex-start !important; padding-top: 50px; }
-
-/* INTERFAZ AR */
+.btn-casa { font-family: var(--font-titulo); font-weight: 900; color: #fff; padding: 20px 10px; border: 2px solid #555; border-radius: 8px; cursor: pointer; }
 #container-ar { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
-#ui-juego { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; z-index: 500; pointer-events: none; }
+#ui-juego { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; z-index: 500; pointer-events: none; }
 #zona-superior { height: 55%; width: 100%; position: relative; display: flex; justify-content: center; align-items: center; border-bottom: 4px solid var(--borde-dorado); }
-#zona-inferior { 
-    height: 45%; width: 100%; 
-    background: linear-gradient(to bottom, rgba(26,5,5,0.95), rgba(0,0,0,1)); 
-    pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px 15px; 
+#zona-inferior { height: 45%; width: 100%; background: linear-gradient(to bottom, rgba(26,5,5,0.95), rgba(0,0,0,1)); pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px 15px; }
+#hud-derecho { position: absolute; top: 10px; right: 10px; z-index: 9999; display: none; flex-direction: column; align-items: flex-end; padding: 10px; border-radius: 12px; border: 1px solid gold; background: rgba(0,0,0,0.5); }
+#hud-img-escudo { width: 95px; height: 95px; object-fit: contain; }
+#hud-txt-valor { font-size: 70px; color: white; text-shadow: 0 0 10px #bf00ff; }
+.dados-container { position: relative; width: 250px; height: 250px; margin: 20px auto; border: 4px solid gold; border-radius: 50%; overflow: hidden; background: #000; }
+.video-dados { width: 100%; height: 100%; object-fit: cover; }
+.layer-valor { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 100px; color: #fff; }
+.grid-dados { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 300px; }
+.btn-dado-sel { width: 100%; height: 90px; background: #222; border: 1px solid #444; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; }
+
+/* --- RECUADRO DE ESCANEO --- */
+#guia-scanner { width: 240px; height: 240px; border: 6px solid rgba(255,255,255,0.6); border-radius: 20px; transition: all 0.2s ease; }
+
+/* --- BRILLO VERDE FOSFORESCENTE (BRILLANTE) --- */
+#guia-scanner.verde { 
+    border-color: #00ff00 !important; 
+    box-shadow: 0 0 50px #00ff00, inset 0 0 30px #00ff00 !important; 
+    filter: brightness(1.5);
 }
 
-/* HUD DERECHO */
-#hud-derecho { 
-    position: absolute; top: 10px; right: 10px; z-index: 9999 !important; display: none; 
-    flex-direction: column; align-items: flex-end; text-align: right; pointer-events: none; 
-    background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; 
-    border: 1px solid rgba(255, 215, 0, 0.4); backdrop-filter: blur(2px);
-}
-#hud-img-escudo { width: 95px; height: 95px; object-fit: contain; filter: drop-shadow(0 0 1px gold); }
-#hud-txt-arma { font-size: 20px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.5); width: 100%; }
-#hud-txt-accion { font-size: 26px; color: gold; font-weight: 900; margin-top: 5px; }
-#hud-txt-valor { font-size: 70px; color: white; line-height: 0.9; text-shadow: 0 0 10px #bf00ff; }
-
-/* RESULTADOS PERGAMINO */
-#resultado-batalla { 
-    width:100%; background: url('BG_PERGAMINO.jpg') no-repeat center center; background-size: cover;
-    color:#000; padding:20px; flex-grow:1; overflow-y:auto; border-radius:5px; border: 4px solid #5a3a22; 
-}
-.resultado-jugador { background: rgba(0,0,0,0.05); margin: 15px 0; padding: 15px; border-bottom: 2px solid #5a3a22; }
-.ganador { border: 3px solid #d4af37; background: rgba(255, 215, 0, 0.1); }
-.fila-res { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #8b4513; }
-.mini-escudo-res { width: 35px; height: 35px; margin-right: 8px; }
-.res-nombre { font-weight: 900; }
-
-/* RESULTADOS GIGANTES (V81) */
-.dado-gigante-res { font-size: 60px; color: #000; text-shadow: none; font-weight: 900; }
-.total-score { font-size: 90px; color: #8b0000; font-family: var(--font-titulo); text-align: right; line-height: 1; margin-top: 10px; text-shadow: none; font-weight: 900; }
-
-/* DADOS Y GRID (V81) */
-.dados-container {
-    position: relative; width: 250px; height: 250px; margin: 20px auto;
-    border: 4px solid var(--borde-dorado); border-radius: 50%; overflow: hidden; background: #000;
-}
-.video-dados { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-.layer-valor {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 100px; font-weight: 900; color: #fff; text-shadow: 0 0 20px #f00;
-}
-/* GRID DADOS 2x2 */
-.grid-dados { 
-    display: grid; grid-template-columns: 1fr 1fr; gap: 15px; 
-    margin-top: 15px; width: 100%; max-width: 300px; 
-}
-.btn-dado-sel {
-    width: 100%; height: 90px; /* Más grandes */
-    background: #222; border: 1px solid #444; border-radius: 8px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #666;
-}
-.btn-dado-sel.tageado { background: #400; border-color: #f00; color: #fff; }
-
-/* GEMAS Y SCANNER */
-#guia-scanner { width: 240px; height: 240px; border: 6px solid rgba(255,255,255,0.6); border-radius: 20px; z-index: 10; }
-#guia-scanner.verde { border-color: #00ff00; box-shadow: 0 0 30px #00ff00; }
-#guia-scanner.dorado { border-color: #ffd700; box-shadow: 0 0 30px #ffd700; }
-#guia-scanner.violeta { border-color: #bd00ff; box-shadow: 0 0 30px #bd00ff; }
-
-.contenedor-gemas { display: flex; gap: 15px; margin: 5px 0; justify-content: center; align-items: flex-end; }
-
-/* WRAPPER PARA VALOR FLOTANTE (V81) */
-.wrapper-gema { display: flex; flex-direction: column; align-items: center; position: relative; }
-.valor-flotante { 
-    font-size: 40px; font-weight: 900; margin-bottom: 2px; height: 45px; 
-    font-family: var(--font-titulo);
-}
-/* COLORES NEON */
-.neon-blanco { color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff; }
-.neon-violeta { color: #bd00ff; text-shadow: 0 0 10px #bd00ff, 0 0 20px #bd00ff, 0 0 30px #bd00ff; }
-.neon-amarillo { color: #ffd700; text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700; }
-
-.btn-gema { 
-    width: 80px; height: 80px; background-color: transparent; border: none;
-    background-size: contain; background-repeat: no-repeat; background-position: center;
-    display: flex; align-items: center; justify-content: center; cursor: pointer;
-    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8));
-}
-.btn-gema:active { transform: scale(0.95); }
-
-/* IMAGENES DE GEMAS */
+.contenedor-gemas { display: flex; gap: 15px; justify-content: center; }
+.wrapper-gema { display: flex; flex-direction: column; align-items: center; }
+.valor-flotante { font-size: 40px; font-weight: 900; height: 45px; }
+.neon-blanco { color: #fff; text-shadow: 0 0 10px #fff; }
+.neon-violeta { color: #bd00ff; text-shadow: 0 0 10px #bd00ff; }
+.btn-gema { width: 80px; height: 80px; background-color: transparent; border: none; background-size: contain; background-repeat: no-repeat; background-position: center; display: flex; align-items: center; justify-content: center; }
 #btn-i { background-image: url('GEMA_ROJA.png'); } 
 #btn-a { background-image: url('GEMA_VERDE.png'); } 
 #btn-t { background-image: url('GEMA_GRIS.png'); } 
 #btn-m { background-image: url('GEMA_VIOLETA.png'); }
 .btn-gema.style-buho { background-image: url('GEMA_DORADA.png') !important; }
-.btn-gema.style-artefacto { background-image: url('GEMA_VIOLETA.png') !important; }
-
-.letra-grande { font-size: 32px; font-weight: 900; color: #fff; text-shadow: 0 2px 5px #000; font-family: var(--font-titulo); }
+.letra-grande { font-size: 32px; font-weight: 900; color: #fff; }
 #video-action { position:absolute; width:100%; height:100%; display:none; background:black; z-index:50; object-fit:contain; }
-#info-rival { width: 100%; background: rgba(50,0,0,0.8); padding: 8px; border: 1px solid red; display: none; font-size: 16px; text-align: center; color: #ffaaaa; font-weight: 900; }

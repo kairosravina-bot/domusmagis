@@ -140,11 +140,10 @@ export async function iniciarOjo(containerId, onEncontrado) {
         await video.play();
         scanning = true;
         
-        // MOTOR DE ESCANEO OPTIMIZADO: Escanea cada 200ms para no saturar el móvil
         setInterval(() => {
             if(!scanning || video.readyState !== video.HAVE_ENOUGH_DATA) return;
             
-            canvas.width = 400; // Bajamos resolución para que sea instantáneo
+            canvas.width = 400; 
             canvas.height = 300;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
@@ -154,8 +153,17 @@ export async function iniciarOjo(containerId, onEncontrado) {
             if(code && code.data.trim() !== lastConfirmedId) {
                 const detectId = code.data.trim();
                 const carta = CARTAS[detectId] || Object.values(CARTAS).find(c => c.codTarget == detectId);
+                
                 if(carta) {
                     lastConfirmedId = detectId;
+                    
+                    // --- EFECTO VISUAL: CAMBIAR RECUADRO A VERDE BRILLANTE ---
+                    const guia = document.getElementById('guia-scanner');
+                    if(guia) {
+                        guia.classList.add('verde');
+                        setTimeout(() => guia.classList.remove('verde'), 300);
+                    }
+
                     onEncontrado(JSON.parse(JSON.stringify(carta)));
                 }
             }
