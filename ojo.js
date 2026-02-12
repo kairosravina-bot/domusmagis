@@ -1,6 +1,6 @@
-// --- BIBLIOTECA INTEGRADA EN EL OJO ---
-const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
-const VIDEOS_BATALLA = ["Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
+// --- BIBLIOTECA DE 108 CARTAS INTEGRADA ---
+export const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
+export const VIDEOS_BATALLA = ["Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
 
 const genB = (i, a, t, m) => ({
     "btn-i": { texto: "I", label: "IMPETUS", valor: i, video: "ataque.mp4" },
@@ -9,219 +9,158 @@ const genB = (i, a, t, m) => ({
     "btn-m": { texto: "M", label: "MYSTERIUM", valor: m, video: "magia.mp4" }
 });
 
-/* ===================== CARTAS (SIN CAMBIOS) ===================== */
 const CARTAS = {
-   1: { id-ar: 1, id: 1, nombre: "APER", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(6,1,5,0), codTarget: "1" },
-    2: { id-ar: 2, id: 2, nombre: "SAXUM", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(3,1,12,1), codTarget: "2" },
-    3: { id-ar: 3, id: 3, nombre: "BESTIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(9,1,5,5), codTarget: "3" },
-    4: { id-ar: 4, id: 4, nombre: "LEO", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(8,5,7,4), codTarget: "4" },
-    5: { id-ar: 5, id: 5, nombre: "GAIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(10,5,8,3), codTarget: "5" },
-    6: { id-ar: 6, id: 6, nombre: "TIRONIS", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(5,2,4,1), codTarget: "6" },
-    7: { id-ar: 7, id: 7, nombre: "EQUES", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(8,2,6,1), codTarget: "7" },
-    8: { id-ar: 8, id: 8, nombre: "SAGITIS", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(10,2,5,3), codTarget: "8" },
-    9: { id-ar: 9, id: 9, nombre: "ALCHEMIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(4,9,5,6), codTarget: "9" },
-    10: { id-ar: 10, id: 10, nombre: "CAESAR", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(9,8,6,4), codTarget: "10" },
-    11: { id-ar: 11, id: 1, nombre: "SICA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "011.png", botones: genB(7,1,2,0), codTarget: "11" },
-    12: { id-ar: 12, id: 2, nombre: "HASTA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "012.png", botones: genB(6,4,3,0), codTarget: "12" },
-    13: { id-ar: 13, id: 3, nombre: "CLAVA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "013.png", botones: genB(8,1,2,0), codTarget: "13" },    
-    14: { id-ar: 14, id: 4, nombre: "SECURIS", elemento: "TERRA", tipo: "ARMA", imgEscudo: "014.png", botones: genB(8,5,3,1), codTarget: "14" },
-    15: { id-ar: 15, id: 5, nombre: "SCUTUM", elemento: "TERRA", tipo: "ARMA", imgEscudo: "015.png", botones: genB(1,2,8,0), codTarget: "15" },
-    16: { id-ar: 16, id: 6, nombre: "GLADIUS", elemento: "TERRA", tipo: "ARMA", imgEscudo: "016.png", botones: genB(6,2,4,1), codTarget: "16" },
-    17: { id-ar: 17, id: 7, nombre: "ARCUS", elemento: "TERRA", tipo: "ARMA", imgEscudo: "017.png", botones: genB(9,5,1,0), codTarget: "17" },
-    18: { id-ar: 18, id: 8, nombre: "MANUBALLISTA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "018.png", botones: genB(8,1,2,2), codTarget: "18" },
-    19: { id-ar: 19, id: 9, nombre: "BALISTA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "019.png", botones: genB(10,0,2,0), codTarget: "19" },
-    20: { id-ar: 20, id: 10, nombre: "ONIAGER", elemento: "TERRA", tipo: "ARMA", imgEscudo: "020.png", botones: genB(9,1,3,1), codTarget: "20" },
-    21: { id-ar: 21, id: 1, nombre: "FENRIS", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(7,1,2,2), codTarget: "21" },
-    22: { id-ar: 22, id: 2, nombre: "THALGRIM", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(4,3,8,3), codTarget: "22" },
-    23: { id-ar: 23, id: 3, nombre: "AQUILON", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(2,5,3,9), codTarget: "23" },
-    24: { id-ar: 24, id: 4, nombre: "NIVIS", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(6,2,5,9), codTarget: "24" },
-    25: { id-ar: 25, id: 5, nombre: "AURORA", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(8,7,7,6), codTarget: "25" },
-    26: { id-ar: 26, id: 6, nombre: "BOREAS", elemento: "COELI", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(5,2,3,1), codTarget: "26" },
-    27: { id-ar: 27, id: 7, nombre: "VALKYR", elemento: "COELI", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(9,1,2,1), codTarget: "27" },
-    28: { id-ar: 28, id: 8, nombre: "EIDOLON", elemento: "COELI", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(3,4,9,2), codTarget: "28" },
-    29: { id-ar: 29, id: 9, nombre: "KORIN", elemento: "COELI", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(2,7,2,7), codTarget: "29" },
-    30: { id-ar: 30, id: 10, nombre: "TYRION", elemento: "COELI", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(6,6,6,5), codTarget: "30" },
-    31: { id-ar: 31, id: 1, nombre: "SICA", elemento: "COELI", tipo: "ARMA", imgEscudo: "1033-CI-AR1.png", botones: genB(5,4,2,4), codTarget: "31" },
-    32: { id-ar: 32, id: 2, nombre: "HASTA", elemento: "COELI", tipo: "ARMA", imgEscudo: "1034-CI-AR2.png", botones: genB(6,3,3,3), codTarget: "32" },
-    33: { id-ar: 33, id: 3, nombre: "CLAVA", elemento: "COELI", tipo: "ARMA", imgEscudo: "1033-CI-AR1.png", botones: genB(7,1,2,5), codTarget: "33" },    
-    34: { id-ar: 34, id: 4, nombre: "SECURIS", elemento: "COELI", tipo: "ARMA", imgEscudo: "1034-CI-AR2.png", botones: genB(7,2,2,4), codTarget: "34" },
-    35: { id-ar: 35, id: 5, nombre: "SCUTUM", elemento: "COELI", tipo: "ARMA", imgEscudo: "1033-CI-AR1.png", botones: genB(1,4,2,6), codTarget: "35" },
-    36: { id-ar: 36, id: 6, nombre: "GLADIUS", elemento: "COELI", tipo: "ARMA", imgEscudo: "1034-CI-AR2.png", botones: genB(6,3,3,4), codTarget: "36" },
-    37: { id-ar: 37, id: 7, nombre: "ARCUS", elemento: "COELI", tipo: "ARMA", imgEscudo: "1033-CI-AR1.png", botones: genB(6,6,1,5), codTarget: "37" },
-    38: { id-ar: 38, id: 8, nombre: "MANUBALLISTA", elemento: "COELI", tipo: "ARMA", imgEscudo: "1034-CI-AR2.png", botones: genB(7,2,2,4), codTarget: "38" },
-    39: { id-ar: 39, id: 9, nombre: "BALISTA", elemento: "COELI", tipo: "ARMA", imgEscudo: "1033-CI-AR1.png", botones: genB(9,1,2,5), codTarget: "39" },
-    40: { id-ar: 40, id: 10, nombre: "ONIAGER", elemento: "COELI", tipo: "ARMA", imgEscudo: "1034-CI-AR2.png", botones: genB(8,1,2,7), codTarget: "40" },
-    41: { id-ar: 41, id: 1, nombre: "SCORPIUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1041-AG-BE.png", botones: genB(5,1,5,5), codTarget: "41" },
-    42: { id-ar: 42, id: 2, nombre: "TRITONIS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1041-AG-BE.png", botones: genB(6,4,6,4), codTarget: "42" },
-    43: { id-ar: 43, id: 3, nombre: "HYDRUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1041-AG-BE.png", botones: genB(8,8,4,2), codTarget: "43" },
-    44: { id-ar: 44, id: 4, nombre: "LEVIATHAN", elemento: "AQUA", tipo: "CASA", imgEscudo: "1041-AG-BE.png", botones: genB(9,2,7,5), codTarget: "44" },
-    45: { id-ar: 45, id: 5, nombre: "TIAMAT", elemento: "AQUA", tipo: "CASA", imgEscudo: "1041-AG-BE.png", botones: genB(6,7,12,5), codTarget: "45" },
-    46: { id-ar: 46, id: 6, nombre: "HASTATUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1042-AG-HU.png", botones: genB(7,2,3,1), codTarget: "46" },
-    47: { id-ar: 47, id: 7, nombre: "CORSARIUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1042-AG-HU.png", botones: genB(5,3,4,2), codTarget: "47" },
-    48: { id-ar: 48, id: 8, nombre: "ORACULUM", elemento: "AQUA", tipo: "CASA", imgEscudo: "1042-AG-HU.png", botones: genB(1,5,6,9), codTarget: "48" },
-    49: { id-ar: 49, id: 9, nombre: "ADMIRALIS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1042-AG-HU.png", botones: genB(5,6,6,5), codTarget: "49" },
-    50: { id-ar: 50, id: 10, nombre: "NEPTUNUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1042-AG-HU.png", botones: genB(7,8,7,6), codTarget: "50" },
-    51: { id-ar: 51, id: 1, nombre: "SICA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1053-AG-AR1.png", botones: genB(5,4,3,2), codTarget: "51" },
-    52: { id-ar: 52, id: 2, nombre: "HASTA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1054-AG-AR2.png", botones: genB(6,5,5,3), codTarget: "52" },
-    53: { id-ar: 53, id: 3, nombre: "CLAVA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1053-AG-AR1.png", botones: genB(6,2,3,1), codTarget: "53" },    
-    54: { id-ar: 54, id: 4, nombre: "SECURIS", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1054-AG-AR2.png", botones: genB(6,2,4,2), codTarget: "54" },
-    55: { id-ar: 55, id: 5, nombre: "SCUTUM", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1053-AG-AR1.png", botones: genB(1,5,9,3), codTarget: "55" },
-    56: { id-ar: 56, id: 6, nombre: "GLADIUS", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1054-AG-AR2.png", botones: genB(6,4,4,2), codTarget: "56" },
-    57: { id-ar: 57, id: 7, nombre: "ARCUS", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1053-TI-AG-AR1.png", botones: genB(5,4,2,3), codTarget: "57" },
-    58: { id-ar: 58, id: 8, nombre: "MANUBALLISTA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1054-AG-AR2.png", botones: genB(7,2,3,2), codTarget: "58" },
-    59: { id-ar: 59, id: 9, nombre: "BALISTA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1053-AG-AR1.png", botones: genB(9,3,4,3), codTarget: "59" },
-    60: { id-ar: 60, id: 10, nombre: "ONIAGER", elemento: "AQUA", tipo: "ARMA", imgEscudo: "1054-AG-AR2.png", botones: genB(8,2,5,3), codTarget: "60" },
-    61: { id-ar: 61, id: 1, nombre: "FAMILIARES", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1061-MA-BE.png", botones: genB(3,2,3,8), codTarget: "61" },
-    62: { id-ar: 62, id: 2, nombre: "ELEMENTUM", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1061-MA-BE.png", botones: genB(5,4,5,9), codTarget: "62" },
-    63: { id-ar: 63, id: 3, nombre: "PHANTASMA", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1061-MA-BE.png", botones: genB(8,1,1,11), codTarget: "63" },
-    64: { id-ar: 64, id: 4, nombre: "AVATARUS", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1061-MA-BE.png", botones: genB(2,9,5,10), codTarget: "64" },
-    65: { id-ar: 65, id: 5, nombre: "AETHERUS", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1061-MA-BE.png", botones: genB(5,7,5,13), codTarget: "65" },
-    66: { id-ar: 66, id: 6, nombre: "TYRO", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(2,2,1,9), codTarget: "66" },
-    67: { id-ar: 67, id: 7, nombre: "QUAESITOR", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(5,1,4,7), codTarget: "67" },
-    68: { id-ar: 68, id: 8, nombre: "MIMUS", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(1,4,6,10), codTarget: "68" },
-    69: { id-ar: 69, id: 9, nombre: "ARCHIMAGUS", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(3,5,2,12), codTarget: "69" },
-    70: { id-ar: 70, id: 10, nombre: "MAGITER", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(5,7,4,10), codTarget: "70" }, 
-    71: { id-ar: 71, id: 1, nombre: "SICA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1073-MA-AR1.png", botones: genB(4,3,1,7), codTarget: "71" },
-    72: { id-ar: 72, id: 2, nombre: "HASTA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1074-MA-AR2.png", botones: genB(4,4,2,7), codTarget: "72" },
-    73: { id-ar: 73, id: 3, nombre: "CLAVA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1073-MA-AR1.png", botones: genB(5,2,2,8), codTarget: "73" },    
-    74: { id-ar: 74, id: 4, nombre: "SECURIS", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1074-MA-AR2.png", botones: genB(6,1,1,8), codTarget: "74" },
-    75: { id-ar: 75, id: 5, nombre: "SCUTUM", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1073-MA-AR1.png", botones: genB(1,5,5,9), codTarget: "75" },
-    76: { id-ar: 76, id: 6, nombre: "GLADIUS", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1074-MA-AR2.png", botones: genB(6,2,1,7), codTarget: "76" },
-    77: { id-ar: 77, id: 7, nombre: "ARCUS", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1073-MA-AR1.png", botones: genB(4,4,1,8), codTarget: "77" },
-    78: { id-ar: 78, id: 8, nombre: "MANUBALLISTA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1074-MA-AR2.png", botones: genB(2,4,2,10), codTarget: "78" },
-    79: { id-ar: 79, id: 9, nombre: "BALISTA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1073-MA-AR1.png", botones: genB(7,2,2,10), codTarget: "79" },
-    80: { id-ar: 80, id: 10, nombre: "ONIAGER", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "1074-MA-AR2.png", botones: genB(7,3,2,11), codTarget: "80" },
-    81: { id-ar: 81, id: 1, nombre: "IGNIS PHIALA", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "1083-ART-PO.png", botones: genB(6,0,-2,2), codTarget: "81" },
-    82: { id-ar: 82, id: 2, nombre: "VITA", elemento: "MAGIA", tipo: "POCION", imgEscudo: "1083-ART-PO.png", botones: genB(1,8,3,4), codTarget: "82" },
-    83: { id-ar: 83, id: 3, nombre: "SPECULUM", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "1083-ART-PO.png", botones: genB(1,2,7,4), codTarget: "83" },
-    84: { id-ar: 84, id: 4, nombre: "AETHER", elemento: "MAGIA", tipo: "POCION", imgEscudo: "1083-ART-PO.png", botones: genB(1,3,1,8), codTarget: "84" },
-    85: { id-ar: 85, id: 5, nombre: "MANICA", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "1083-ART-PO.png", botones: genB(7,0,-2,2), codTarget: "85" },
-    86: { id-ar: 86, id: 6, nombre: "PETRA", elemento: "MAGIA", tipo: "POCION", imgEscudo: "1083-ART-PO.png", botones: genB(2,1,8,1), codTarget: "86" },
-    87: { id-ar: 87, id: 7, nombre: "LUCERNA", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "1083-ART-PO.png", botones: genB(1,7,2,3), codTarget: "87" },
-    88: { id-ar: 88, id: 8, nombre: "VENENUN", elemento: "MAGIA", tipo: "POCION", imgEscudo: "1083-ART-PO.png", botones: genB(6,0,2,4), codTarget: "88" },
-    89: { id-ar: 89, id: 9, nombre: "APERTUM", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "1083-ART-PO.png", botones: genB(4,5,3,5), codTarget: "89" },
-    90: { id-ar: 90, id: 10, nombre: "AMBROSIA", elemento: "MAGIA", tipo: "POCION", imgEscudo: "1083-ART-PO.png", botones: genB(5,5,5,5), codTarget: "90" },
-    91: { id-ar: 91, id: 11, nombre: "AEGIS", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "1083-ART-PO.png", botones: genB(1,5,10,4), codTarget: "91" },
-    92: { id-ar: 92, id: 12, nombre: "VELOCITAS", elemento: "MAGIA", tipo: "POCION", imgEscudo: "1083-ART-PO.png", botones: genB(6,2,1,4), codTarget: "92" },
-    93: { id-ar: 93, id: 13, nombre: "VEXILLUM", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "1083-ART-PO.png", botones: genB(3,9,2,3), codTarget: "93" },
-    94: { id-ar: 94, id: 14, nombre: "FUROR", elemento: "MAGIA", tipo: "POCION", imgEscudo: "1083-ART-PO.png", botones: genB(10,0,0,0), codTarget: "94" },
-    95: { id-ar: 95, id: 15, nombre: "OCULUS", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "1083-ART-PO.png", botones: genB(2,9,2,10), codTarget: "95" },
-    96: { id-ar: 96, id: 16, nombre: "OBLIVIO", elemento: "MAGIA", tipo: "POCION", imgEscudo: "1083-ART-PO.png", botones: genB(1,3,5,6), codTarget: "96" },
-    97: { id-ar: 97, id: 17, nombre: "MONOLITH", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "1083-ART-PO.png", botones: genB(0,0,12,6), codTarget: "97" },
-    98: { id-ar: 98, id: 18, nombre: "FORTUNA", elemento: "MAGIA", tipo: "POCION", imgEscudo: "1083-ART-PO.png", botones: genB(4,4,4,4), codTarget: "98" },
-    99: { id-ar: 99, id: 1, nombre: "JUDEX", elemento: "TERRA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(4,4,4,4), codTarget: "99" },
-    100: { id-ar: 100, id: 2, nombre: "CARNIFEX", elemento: "COELI", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(7,1,2,2), codTarget: "100" },
-    101: { id-ar: 101, id: 3, nombre: "SCRIPTOR", elemento: "TERRA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(1,3,3,7), codTarget: "101" },
-    102: { id-ar: 102, id: 4, nombre: "CUSTOS", elemento: "COELI", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(2,2,8,2), codTarget: "102" },
-    103: { id-ar: 103, id: 5, nombre: "TEMPUS", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(3,6,4,3), codTarget: "103" },
-    104: { id-ar: 104, id: 6, nombre: "UMBRA", elemento: "AQUA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(6,4,4,3), codTarget: "104" },
-    105: { id-ar: 105, id: 7, nombre: "MACHINA", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(5,1,9,1), codTarget: "105" },
-    106: { id-ar: 106, id: 8, nombre: "AUGUR", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(1,5,2,8), codTarget: "106" },
-    107: { id-ar: 107, id: 9, nombre: "JUSTITIA", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(5,5,5,1), codTarget: "107" },
-    108: { id-ar: 108, id: 10, nombre: "IMPERATOR", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(6,4,6,4), codTarget: "108" },
-
+    // TIERRA
+    1: { idar: 1, id: 1, nombre: "APER", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(6,1,5,0), codTarget: "1" },
+    2: { idar: 2, id: 2, nombre: "SAXUM", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(3,1,12,1), codTarget: "2" },
+    3: { idar: 3, id: 3, nombre: "BESTIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(9,1,5,5), codTarget: "3" },
+    4: { idar: 4, id: 4, nombre: "LEO", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(8,5,7,4), codTarget: "4" },
+    5: { idar: 5, id: 5, nombre: "GAIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(10,5,8,3), codTarget: "5" },
+    6: { idar: 6, id: 6, nombre: "TIRONIS", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(5,2,4,1), codTarget: "6" },
+    7: { idar: 7, id: 7, nombre: "EQUES", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(8,2,6,1), codTarget: "7" },
+    8: { idar: 8, id: 8, nombre: "SAGITIS", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(10,2,5,3), codTarget: "8" },
+    9: { idar: 9, id: 9, nombre: "ALCHEMIA", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(4,9,5,6), codTarget: "9" },
+    10: { idar: 10, id: 10, nombre: "CAESAR", elemento: "TERRA", tipo: "CASA", imgEscudo: "1002-TI-HU.png", botones: genB(9,8,6,4), codTarget: "10" },
+    11: { idar: 11, id: 11, nombre: "SICA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "011.png", botones: genB(7,1,2,0), codTarget: "11" },
+    12: { idar: 12, id: 12, nombre: "HASTA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "012.png", botones: genB(6,4,3,0), codTarget: "12" },
+    13: { idar: 13, id: 13, nombre: "CLAVA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "013.png", botones: genB(8,1,2,0), codTarget: "13" },
+    14: { idar: 14, id: 14, nombre: "SECURIS", elemento: "TERRA", tipo: "ARMA", imgEscudo: "014.png", botones: genB(8,5,3,1), codTarget: "14" },
+    15: { idar: 15, id: 15, nombre: "SCUTUM", elemento: "TERRA", tipo: "ARMA", imgEscudo: "015.png", botones: genB(1,2,8,0), codTarget: "15" },
+    16: { idar: 16, id: 16, nombre: "GLADIUS", elemento: "TERRA", tipo: "ARMA", imgEscudo: "016.png", botones: genB(6,2,4,1), codTarget: "16" },
+    17: { idar: 17, id: 17, nombre: "ARCUS", elemento: "TERRA", tipo: "ARMA", imgEscudo: "017.png", botones: genB(9,5,1,0), codTarget: "17" },
+    18: { idar: 18, id: 18, nombre: "MANUBALLISTA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "018.png", botones: genB(8,1,2,2), codTarget: "18" },
+    19: { idar: 19, id: 19, nombre: "BALISTA", elemento: "TERRA", tipo: "ARMA", imgEscudo: "019.png", botones: genB(10,0,2,0), codTarget: "19" },
+    20: { idar: 20, id: 20, nombre: "ONIAGER", elemento: "TERRA", tipo: "ARMA", imgEscudo: "020.png", botones: genB(9,1,3,1), codTarget: "20" },
+    // COELI
+    21: { idar: 21, id: 21, nombre: "FENRIS", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(7,1,2,2), codTarget: "21" },
+    22: { idar: 22, id: 22, nombre: "THALGRIM", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(4,3,8,3), codTarget: "22" },
+    23: { idar: 23, id: 23, nombre: "AQUILON", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(2,5,3,9), codTarget: "23" },
+    24: { idar: 24, id: 24, nombre: "NIVIS", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(6,2,5,9), codTarget: "24" },
+    25: { idar: 25, id: 25, nombre: "AURORA", elemento: "COELI", tipo: "CASA", imgEscudo: "1021-CI-BE.png", botones: genB(8,7,7,6), codTarget: "25" },
+    26: { idar: 26, id: 26, nombre: "BOREAS", elemento: "COELI", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(5,2,3,1), codTarget: "26" },
+    27: { idar: 27, id: 27, nombre: "VALKYR", elemento: "COELI", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(9,1,2,1), codTarget: "27" },
+    28: { idar: 28, id: 28, nombre: "EIDOLON", elemento: "COELI", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(3,4,9,2), codTarget: "28" },
+    29: { idar: 29, id: 29, nombre: "KORIN", elemento: "COELI", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(2,7,2,7), codTarget: "29" },
+    30: { idar: 30, id: 30, nombre: "TYRION", elemento: "COELI", tipo: "CASA", imgEscudo: "1022-CI-HU.png", botones: genB(6,6,6,5), codTarget: "30" },
+    31: { idar: 31, id: 31, nombre: "SICA", elemento: "COELI", tipo: "ARMA", imgEscudo: "031.png", botones: genB(5,4,2,4), codTarget: "31" },
+    32: { idar: 32, id: 32, nombre: "HASTA", elemento: "COELI", tipo: "ARMA", imgEscudo: "032.png", botones: genB(6,3,3,3), codTarget: "32" },
+    33: { idar: 33, id: 33, nombre: "CLAVA", elemento: "COELI", tipo: "ARMA", imgEscudo: "033.png", botones: genB(7,1,2,5), codTarget: "33" },
+    34: { idar: 34, id: 34, nombre: "SECURIS", elemento: "COELI", tipo: "ARMA", imgEscudo: "034.png", botones: genB(7,2,2,4), codTarget: "34" },
+    35: { idar: 35, id: 35, nombre: "SCUTUM", elemento: "COELI", tipo: "ARMA", imgEscudo: "035.png", botones: genB(1,4,7,6), codTarget: "35" },
+    36: { idar: 36, id: 36, nombre: "GLADIUS", elemento: "COELI", tipo: "ARMA", imgEscudo: "036.png", botones: genB(6,3,3,4), codTarget: "36" },
+    37: { idar: 37, id: 37, nombre: "ARCUS", elemento: "COELI", tipo: "ARMA", imgEscudo: "037.png", botones: genB(6,6,1,5), codTarget: "37" },
+    38: { idar: 38, id: 38, nombre: "MANUBALLISTA", elemento: "COELI", tipo: "ARMA", imgEscudo: "038.png", botones: genB(7,2,2,4), codTarget: "38" },
+    39: { idar: 39, id: 39, nombre: "BALISTA", elemento: "COELI", tipo: "ARMA", imgEscudo: "039.png", botones: genB(9,1,2,5), codTarget: "39" },
+    40: { idar: 40, id: 40, nombre: "ONIAGER", elemento: "COELI", tipo: "ARMA", imgEscudo: "040.png", botones: genB(8,1,2,7), codTarget: "40" },
+    // AQUA
+    41: { idar: 41, id: 41, nombre: "SCORPIUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1041-AG-BE.png", botones: genB(5,1,1,5), codTarget: "41" },
+    42: { idar: 42, id: 42, nombre: "TRITONIS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1041-AG-BE.png", botones: genB(3,6,4,6), codTarget: "42" },
+    43: { idar: 43, id: 43, nombre: "HYDRUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1041-AG-BE.png", botones: genB(5,8,8,4), codTarget: "43" },
+    44: { idar: 44, id: 44, nombre: "LEVIATHAN", elemento: "AQUA", tipo: "CASA", imgEscudo: "1041-AG-BE.png", botones: genB(7,9,2,7), codTarget: "44" },
+    45: { idar: 45, id: 45, nombre: "TIAMAT", elemento: "AQUA", tipo: "CASA", imgEscudo: "1041-AG-BE.png", botones: genB(9,6,7,12), codTarget: "45" },
+    46: { idar: 46, id: 46, nombre: "HASTATUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1042-AG-HU.png", botones: genB(2,7,2,3), codTarget: "46" },
+    47: { idar: 47, id: 47, nombre: "CORSARIUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1042-AG-HU.png", botones: genB(4,5,3,4), codTarget: "47" },
+    48: { idar: 48, id: 48, nombre: "ORACULUM", elemento: "AQUA", tipo: "CASA", imgEscudo: "1042-AG-HU.png", botones: genB(6,1,5,6), codTarget: "48" },
+    49: { idar: 49, id: 49, nombre: "ADMIRALIS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1042-AG-HU.png", botones: genB(8,5,6,6), codTarget: "49" },
+    50: { idar: 50, id: 50, nombre: "NEPTUNUS", elemento: "AQUA", tipo: "CASA", imgEscudo: "1042-AG-HU.png", botones: genB(10,7,8,7), codTarget: "50" },
+    51: { idar: 51, id: 51, nombre: "SICA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "051.png", botones: genB(1,5,4,3), codTarget: "51" },
+    52: { idar: 52, id: 52, nombre: "HASTA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "052.png", botones: genB(2,6,5,5), codTarget: "52" },
+    53: { idar: 53, id: 53, nombre: "CLAVA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "053.png", botones: genB(3,6,2,3), codTarget: "53" },
+    54: { idar: 54, id: 54, nombre: "SECURIS", elemento: "AQUA", tipo: "ARMA", imgEscudo: "054.png", botones: genB(4,6,2,4), codTarget: "54" },
+    55: { idar: 55, id: 55, nombre: "SCUTUM", elemento: "AQUA", tipo: "ARMA", imgEscudo: "055.png", botones: genB(5,1,5,9), codTarget: "55" },
+    56: { idar: 56, id: 56, nombre: "GLADIUS", elemento: "AQUA", tipo: "ARMA", imgEscudo: "056.png", botones: genB(6,6,4,4), codTarget: "56" },
+    57: { idar: 57, id: 57, nombre: "ARCUS", elemento: "AQUA", tipo: "ARMA", imgEscudo: "057.png", botones: genB(7,5,4,2), codTarget: "57" },
+    58: { idar: 58, id: 58, nombre: "MANUBALLISTA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "058.png", botones: genB(8,7,2,3), codTarget: "58" },
+    59: { idar: 59, id: 59, nombre: "BALISTA", elemento: "AQUA", tipo: "ARMA", imgEscudo: "059.png", botones: genB(9,9,3,4), codTarget: "59" },
+    60: { idar: 60, id: 60, nombre: "ONIAGER", elemento: "AQUA", tipo: "ARMA", imgEscudo: "060.png", botones: genB(10,8,2,5), codTarget: "60" },
+    // MAGIA
+    61: { idar: 61, id: 61, nombre: "FAMILIARES", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1061-MA-BE.png", botones: genB(1,3,2,3), codTarget: "61" },
+    62: { idar: 62, id: 62, nombre: "ELEMENTUM", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1061-MA-BE.png", botones: genB(3,5,4,5), codTarget: "62" },
+    63: { idar: 63, id: 63, nombre: "PHANTASMA", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1061-MA-BE.png", botones: genB(5,8,1,1), codTarget: "63" },
+    64: { idar: 64, id: 64, nombre: "AVATARUS", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1061-MA-BE.png", botones: genB(7,2,9,5), codTarget: "64" },
+    65: { idar: 65, id: 65, nombre: "AETHERUS", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1061-MA-BE.png", botones: genB(9,5,7,5), codTarget: "65" },
+    66: { idar: 66, id: 66, nombre: "TYRO", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(2,2,2,1), codTarget: "66" },
+    67: { idar: 67, id: 67, nombre: "QUAESITOR", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(4,5,1,4), codTarget: "67" },
+    68: { idar: 68, id: 68, nombre: "MIMUS", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(6,1,4,6), codTarget: "68" },
+    69: { idar: 69, id: 69, nombre: "ARCHIMAGUS", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(8,3,5,2), codTarget: "69" },
+    70: { idar: 70, id: 70, nombre: "MAGITER", elemento: "MAGIA", tipo: "CASA", imgEscudo: "1062-MA-HU.png", botones: genB(10,5,7,4), codTarget: "70" },
+    71: { idar: 71, id: 71, nombre: "SICA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "071.png", botones: genB(4,3,1,7), codTarget: "71" },
+    72: { idar: 72, id: 72, nombre: "HASTA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "072.png", botones: genB(4,4,2,7), codTarget: "72" },
+    73: { idar: 73, id: 73, nombre: "CLAVA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "073.png", botones: genB(5,2,2,8), codTarget: "73" },
+    74: { idar: 74, id: 74, nombre: "SECURIS", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "074.png", botones: genB(6,1,1,8), codTarget: "74" },
+    75: { idar: 75, id: 75, nombre: "SCUTUM", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "075.png", botones: genB(1,5,5,9), codTarget: "75" },
+    76: { idar: 76, id: 76, nombre: "GLADIUS", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "076.png", botones: genB(6,2,1,7), codTarget: "76" },
+    77: { idar: 77, id: 77, nombre: "ARCUS", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "077.png", botones: genB(4,4,1,8), codTarget: "77" },
+    78: { idar: 78, id: 78, nombre: "MANUBALLISTA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "078.png", botones: genB(2,4,2,10), codTarget: "78" },
+    79: { idar: 79, id: 79, nombre: "BALISTA", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "079.png", botones: genB(7,2,2,10), codTarget: "79" },
+    80: { idar: 80, id: 80, nombre: "ONIAGER", elemento: "MAGIA", tipo: "ARMA", imgEscudo: "080.png", botones: genB(7,3,2,11), codTarget: "80" },
+    // ARTEFACTOS Y POCIONES
+    81: { idar: 81, id: 81, nombre: "IGNIS FIALA", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "081.png", botones: genB(6,0,-2,2), codTarget: "81" },
+    82: { idar: 82, id: 82, nombre: "SPECULUM", elemento: "TERRA", tipo: "ARTEFACTO", imgEscudo: "082.png", botones: genB(1,2,7,4), codTarget: "82" },
+    83: { idar: 83, id: 83, nombre: "MANICA", elemento: "TERRA", tipo: "ARTEFACTO", imgEscudo: "083.png", botones: genB(7,0,-2,2), codTarget: "83" },
+    84: { idar: 84, id: 84, nombre: "LUCERNA", elemento: "COELI", tipo: "ARTEFACTO", imgEscudo: "084.png", botones: genB(1,7,2,3), codTarget: "84" },
+    85: { idar: 85, id: 85, nombre: "APERTUM", elemento: "COELI", tipo: "ARTEFACTO", imgEscudo: "085.png", botones: genB(4,5,3,5), codTarget: "85" },
+    86: { idar: 86, id: 86, nombre: "AEGIS", elemento: "AQUA", tipo: "ARTEFACTO", imgEscudo: "086.png", botones: genB(1,5,10,4), codTarget: "86" },
+    87: { idar: 87, id: 87, nombre: "VEXILLUM", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "087.png", botones: genB(3,9,2,3), codTarget: "87" },
+    88: { idar: 88, id: 88, nombre: "OCULUS", elemento: "MAGIA", tipo: "ARTEFACTO", imgEscudo: "088.png", botones: genB(2,9,2,10), codTarget: "88" },
+    89: { idar: 89, id: 89, nombre: "MONOLITH", elemento: "AQUA", tipo: "ARTEFACTO", imgEscudo: "089.png", botones: genB(0,0,12,6), codTarget: "89" },
+    90: { idar: 90, id: 90, nombre: "VITA", elemento: "COELI", tipo: "POCION", imgEscudo: "090.png", botones: genB(1,8,3,4), codTarget: "90" },
+    91: { idar: 91, id: 91, nombre: "AETHER", elemento: "COELI", tipo: "POCION", imgEscudo: "091.png", botones: genB(1,3,1,8), codTarget: "91" },
+    92: { idar: 92, id: 92, nombre: "PETRA", elemento: "TERRA", tipo: "POCION", imgEscudo: "092.png", botones: genB(2,1,8,1), codTarget: "92" },
+    93: { idar: 93, id: 93, nombre: "VENENUM", elemento: "TERRA", tipo: "POCION", imgEscudo: "093.png", botones: genB(6,0,2,4), codTarget: "93" },
+    94: { idar: 94, id: 94, nombre: "AMBROSIA", elemento: "MAGIA", tipo: "POCION", imgEscudo: "094.png", botones: genB(10,5,5,5), codTarget: "94" },
+    95: { idar: 95, id: 95, nombre: "VELOCITAS", elemento: "AQUA", tipo: "POCION", imgEscudo: "095.png", botones: genB(12,6,2,1), codTarget: "95" },
+    96: { idar: 96, id: 96, nombre: "FUROR", elemento: "TERRA", tipo: "POCION", imgEscudo: "096.png", botones: genB(14,10,0,0), codTarget: "96" },
+    97: { idar: 97, id: 97, nombre: "OBLIVIO", elemento: "AQUA", tipo: "POCION", imgEscudo: "097.png", botones: genB(16,1,3,5), codTarget: "97" },
+    98: { idar: 98, id: 98, nombre: "FORTUNA", elemento: "MAGIA", tipo: "POCION", imgEscudo: "098.png", botones: genB(18,4,4,4), codTarget: "98" },
+    // BUHOS
+    99: { idar: 99, id: 99, nombre: "JUDEX", elemento: "TERRA", tipo: "BUHO", imgEscudo: "099.png", botones: genB(4,4,4,4), codTarget: "99" },
+    100: { idar: 100, id: 100, nombre: "CARNIFEX", elemento: "COELI", tipo: "BUHO", imgEscudo: "100.png", botones: genB(7,1,2,2), codTarget: "100" },
+    101: { idar: 101, id: 101, nombre: "SCRIPTOR", elemento: "TERRA", tipo: "BUHO", imgEscudo: "101.png", botones: genB(1,3,3,7), codTarget: "101" },
+    102: { idar: 102, id: 102, nombre: "CUSTOS", elemento: "COELI", tipo: "BUHO", imgEscudo: "102.png", botones: genB(2,2,8,2), codTarget: "102" },
+    103: { idar: 103, id: 103, nombre: "TEMPUS", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "103.png", botones: genB(5,3,6,4), codTarget: "103" },
+    104: { idar: 104, id: 104, nombre: "UMBRA", elemento: "AQUA", tipo: "BUHO", imgEscudo: "104.png", botones: genB(6,6,4,4), codTarget: "104" },
+    105: { idar: 105, id: 105, nombre: "MACHINA", elemento: "AQUA", tipo: "BUHO", imgEscudo: "105.png", botones: genB(7,5,1,9), codTarget: "105" },
+    106: { idar: 106, id: 106, nombre: "AUGUR", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "106.png", botones: genB(8,1,5,2), codTarget: "106" },
+    107: { idar: 107, id: 107, nombre: "JUSTITIA", elemento: "NEUTRO", tipo: "BUHO", imgEscudo: "107.png", botones: genB(9,5,5,5), codTarget: "107" },
+    108: { idar: 108, id: 108, nombre: "IMPERATOR", elemento: "NEUTRO", tipo: "BUHO", imgEscudo: "108.png", botones: genB(10,6,4,6), codTarget: "108" }
 };
-/* =============================================================== */
 
-// --- MOTOR DEL OJO ---
 let scanning = false;
 let lastConfirmedId = null;
-let currentCandidateId = null;
-let confidenceCounter = 0;
-let guiaScanner = null;
 
 export async function iniciarOjo(containerId, onEncontrado) {
-
-const container = document.getElementById(containerId);
-const video = document.createElement('video');
-video.style.width='100%';
-video.style.height='100%';
-video.style.objectFit='cover';
-video.setAttribute('playsinline',true);
-video.muted=true;
-container.appendChild(video);
-
-const canvas=document.createElement('canvas');
-const context=canvas.getContext('2d',{willReadFrequently:true});
-
-guiaScanner=document.getElementById('guia-scanner');
-
-try{
-const stream=await navigator.mediaDevices.getUserMedia({
-video:{facingMode:"environment",width:{ideal:640},height:{ideal:480}}
-});
-video.srcObject=stream;
-await video.play();
-scanning=true;
-requestAnimationFrame(tick);
-}catch(e){
-console.error("Error cámara:",e);
-return;
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const video = document.createElement('video');
+    video.style.width='100%'; video.style.height='100%'; video.style.objectFit='cover';
+    video.setAttribute('playsinline',true); video.muted=true;
+    container.appendChild(video);
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d', {willReadFrequently:true});
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 480 } }
+        });
+        video.srcObject = stream;
+        await video.play();
+        scanning = true;
+        setInterval(() => {
+            if(!scanning || video.readyState !== 4) return;
+            canvas.width = 400; canvas.height = 300;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const code = window.jsQR(imageData.data, imageData.width, imageData.height);
+            if(code && code.data.trim() !== lastConfirmedId) {
+                const detectId = code.data.trim();
+                const carta = CARTAS[detectId] || Object.values(CARTAS).find(c => c.codTarget == detectId);
+                if(carta) {
+                    lastConfirmedId = detectId;
+                    onEncontrado(JSON.parse(JSON.stringify(carta)));
+                }
+            }
+        }, 250);
+    } catch(e) { console.error("Error cámara:", e); }
 }
 
-function tick(){
-
-if(!scanning){requestAnimationFrame(tick);return;}
-
-if(video.readyState===video.HAVE_ENOUGH_DATA){
-
-canvas.width=video.videoWidth;
-canvas.height=video.videoHeight;
-context.drawImage(video,0,0,canvas.width,canvas.height);
-
-const imageData=context.getImageData(0,0,canvas.width,canvas.height);
-
-window.Html5Qrcode.scanImage(imageData,imageData.width,imageData.height)
-
-.then(code=>{
-
-if(!code)return;
-
-const detectId=code.data.trim();
-
-if(detectId===currentCandidateId)confidenceCounter++;
-else{currentCandidateId=detectId;confidenceCounter=1;}
-
-if(confidenceCounter>=3 && detectId!==lastConfirmedId){
-
-lastConfirmedId=detectId;
-
-if(guiaScanner){
-guiaScanner.classList.remove("dorado");
-guiaScanner.classList.add("verde");
-}
-
-const idNumerico=parseInt(detectId);
-const original=CARTAS[idNumerico]||Object.values(CARTAS).find(c=>c.codTarget==detectId);
-
-if(original){
-onEncontrado(JSON.parse(JSON.stringify(original)));
-setTimeout(()=>{
-if(guiaScanner) guiaScanner.classList.remove("verde","dorado");
-},150);
-}
-
-}
-
-})
-
-.catch(()=>{
-currentCandidateId=null;
-confidenceCounter=0;
-});
-
-}
-
-requestAnimationFrame(tick);
-}
-
-}
-
-export function resetUltimoId(){
-lastConfirmedId=null;
-currentCandidateId=null;
-confidenceCounter=0;
-if(guiaScanner) guiaScanner.classList.remove("verde","dorado");
-}
-
-export { RUTA_BASE, VIDEOS_BATALLA };
+export function resetUltimoId() { lastConfirmedId = null; }
