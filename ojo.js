@@ -1,4 +1,4 @@
-// --- BIBLIOTECA INTEGRADA EN EL OJO ---
+// --- MOTOR DE DETECCIÓN BLINDADO ---
 export const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
 export const VIDEOS_BATALLA = ["Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
 
@@ -150,13 +150,10 @@ export async function iniciarOjo(containerId, onEncontrado) {
                 const carta = CARTAS[detectId] || Object.values(CARTAS).find(c => c.codTarget == detectId);
                 if(carta) {
                     lastConfirmedId = detectId;
-                    const guia = document.getElementById('guia-scanner');
-                    if(guia) { guia.classList.add('verde'); setTimeout(() => guia.classList.remove('verde'), 600); }
                     onEncontrado(JSON.parse(JSON.stringify(carta)));
                 }
             }
         }, 250);
     } catch(e) { console.error("Error cámara:", e); }
 }
-
 export function resetUltimoId() { lastConfirmedId = null; }
