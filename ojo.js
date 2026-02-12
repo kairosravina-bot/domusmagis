@@ -162,27 +162,21 @@ export async function iniciarOjo(containerId, onEncontrado) {
     function tick() {
         if (!scanning) return;
         
-        const now = performance.now();
-        if (now - lastCheckTime < MIN_FRAME_INTERVAL) {
-            requestAnimationFrame(tick);
-            return;
-        }
-        lastCheckTime = now;
-        
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
             canvas.height = video.videoHeight;
             canvas.width = video.videoWidth;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
             
-            if (typeof window.jsQR === 'undefined') {
-                console.error("jsQR no cargado");
+            if (typeof window.Html5Qrcode === 'undefined') {
+                console.error("Html5Qrcode no cargado");
                 if (guiaScanner) guiaScanner.style.borderColor = '#ff0000';
                 requestAnimationFrame(tick);
                 return;
             }
 
-            const code = window.jsQR(imageData.data, imageData.width, imageData.height);
+            // Html5Qrcode analiza desde canvas automáticamente
+            const code = window.Html5Qrcode.scanImage(imageData, imageData.width, imageData.height).catch(err => null);
 
             if (code) {
                 const detectId = code.data.trim();
