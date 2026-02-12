@@ -1,15 +1,13 @@
-// --- BIBLIOTECA INTEGRADA EN EL OJO ---
 const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
 const VIDEOS_BATALLA = ["Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
 
 const genB = (i, a, t, m) => ({
-    "btn-i": { texto: "I", label: "IMPETUS", valor: i, video: "ataque.mp4" },
-    "btn-a": { texto: "A", label: "AUXILIUM", valor: a, video: "cura.mp4" },
-    "btn-t": { texto: "T", label: "TUTELA", valor: t, video: "defensa.mp4" },
-    "btn-m": { texto: "M", label: "MYSTERIUM", valor: m, video: "magia.mp4" }
+    "btn-i": { valor: i, video: "ataque.mp4" },
+    "btn-a": { valor: a, video: "cura.mp4" },
+    "btn-t": { valor: t, video: "defensa.mp4" },
+    "btn-m": { valor: m, video: "magia.mp4" }
 });
 
-/* ===================== CARTAS (CORRECCIÓN id-ar) ===================== */
 const CARTAS = {
    1: { "id-ar": 1, id: 1, nombre: "APER", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(6,1,5,0), codTarget: "1" },
     2: { "id-ar": 2, id: 2, nombre: "SAXUM", elemento: "TERRA", tipo: "CASA", imgEscudo: "1001-TI-BE.png", botones: genB(3,1,12,1), codTarget: "2" },
@@ -119,82 +117,52 @@ const CARTAS = {
     106: { "id-ar": 106, id: 8, nombre: "AUGUR", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(1,5,2,8), codTarget: "106" },
     107: { "id-ar": 107, id: 9, nombre: "JUSTITIA", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(5,5,5,1), codTarget: "107" },
     108: { "id-ar": 108, id: 10, nombre: "IMPERATOR", elemento: "MAGIA", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: genB(6,4,6,4), codTarget: "108" },
-
 };
-/* =============================================================== */
 
-// --- MOTOR DEL OJO ---
 let scanning = false;
 let lastConfirmedId = null;
-let currentCandidateId = null;
-let confidenceCounter = 0;
-let guiaScanner = null;
 
 export async function iniciarOjo(containerId, onEncontrado) {
     const container = document.getElementById(containerId);
     const video = document.createElement('video');
-    video.style.width='100%';
-    video.style.height='100%';
-    video.style.objectFit='cover';
-    video.setAttribute('playsinline',true);
-    video.muted=true;
+    video.style.width='100%'; video.style.height='100%'; video.style.objectFit='cover';
+    video.setAttribute('playsinline',true); video.muted=true;
     container.appendChild(video);
 
-    const canvas=document.createElement('canvas');
-    const context=canvas.getContext('2d',{willReadFrequently:true});
-    guiaScanner=document.getElementById('guia-scanner');
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d', {willReadFrequently:true});
 
-    try{
+    try {
         const stream = await navigator.mediaDevices.getUserMedia({
-            video:{facingMode:"environment",width:{ideal:640},height:{ideal:480}}
+            video: { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 480 } }
         });
-        video.srcObject=stream;
+        video.srcObject = stream;
         await video.play();
-        scanning=true;
-        requestAnimationFrame(tick);
-    }catch(e){
-        console.error("Error cámara:",e);
-        return;
-    }
-
-    function tick(){
-        if(!scanning){requestAnimationFrame(tick);return;}
-        if(video.readyState===video.HAVE_ENOUGH_DATA){
-            canvas.width=video.videoWidth;
-            canvas.height=video.videoHeight;
-            context.drawImage(video,0,0,canvas.width,canvas.height);
-            const imageData=context.getImageData(0,0,canvas.width,canvas.height);
-
-            // Escaneo optimizado
-            window.Html5Qrcode.scanImage(imageData,imageData.width,imageData.height)
-            .then(code=>{
-                if(!code)return;
-                const detectId=code.data.trim();
-                if(detectId===currentCandidateId)confidenceCounter++;
-                else{currentCandidateId=detectId;confidenceCounter=1;}
-
-                if(confidenceCounter>=3 && detectId!==lastConfirmedId){
-                    lastConfirmedId=detectId;
-                    const idNumerico=parseInt(detectId);
-                    const original=CARTAS[idNumerico]||Object.values(CARTAS).find(c=>c.codTarget==detectId);
-                    if(original){
-                        onEncontrado(JSON.parse(JSON.stringify(original)));
-                    }
+        scanning = true;
+        
+        // MOTOR DE ESCANEO OPTIMIZADO: Escanea cada 200ms para no saturar el móvil
+        setInterval(() => {
+            if(!scanning || video.readyState !== video.HAVE_ENOUGH_DATA) return;
+            
+            canvas.width = 400; // Bajamos resolución para que sea instantáneo
+            canvas.height = 300;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const code = window.jsQR(imageData.data, imageData.width, imageData.height);
+            
+            if(code && code.data.trim() !== lastConfirmedId) {
+                const detectId = code.data.trim();
+                const carta = CARTAS[detectId] || Object.values(CARTAS).find(c => c.codTarget == detectId);
+                if(carta) {
+                    lastConfirmedId = detectId;
+                    onEncontrado(JSON.parse(JSON.stringify(carta)));
                 }
-            })
-            .catch(()=>{
-                currentCandidateId=null;
-                confidenceCounter=0;
-            });
-        }
-        requestAnimationFrame(tick);
-    }
+            }
+        }, 200);
+
+    } catch(e) { console.error("Cámara error", e); }
 }
 
-export function resetUltimoId(){
-    lastConfirmedId=null;
-    currentCandidateId=null;
-    confidenceCounter=0;
-}
-
+export function resetUltimoId() { lastConfirmedId = null; }
 export { RUTA_BASE, VIDEOS_BATALLA };
