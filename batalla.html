@@ -283,14 +283,27 @@
             document.getElementById('nombre-j2').innerText = j2.nombre;
             document.getElementById('nombre-j2').style.color = j2.color;
             
-            // VIDEO
+            // VIDEO - LIMPIAR PRIMERO
+            vid.pause();
+            vid.currentTime = 0;
+            vid.src = '';
+            
+            // CARGAR VIDEO
             const videoAleatorio = MIS_VIDEOS[Math.floor(Math.random() * MIS_VIDEOS.length)];
-            vid.src = RUTA_BASE + videoAleatorio;
-            vid.load();
-            vid.play();
+            const rutaVideo = RUTA_BASE + videoAleatorio;
+            
+            vid.src = rutaVideo;
+            vid.muted = true;
+            vid.autoplay = true;
+            
+            // Intentar reproducir
+            const playPromise = vid.play();
+            if(playPromise !== undefined) {
+                playPromise.catch(err => console.log("Video play error:", err));
+            }
             
             // TIMEOUT 6 SEGUNDOS - PUNTO
-            setTimeout(() => {
+            const timerBatalla = setTimeout(() => {
                 vid.pause();
                 modal.style.display = 'none';
                 mostrarResultados();
