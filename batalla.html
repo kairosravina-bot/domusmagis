@@ -8,25 +8,26 @@
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
         .papiro-ronda {
-            display: inline-block;
+            display: flex;
             width: 45px;
             height: 50px;
             background: linear-gradient(135deg, #f5deb3 0%, #ffe8b6 100%);
             border: 2px solid #8b7355;
             border-radius: 5px;
-            margin: 5px;
-            display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 900;
             font-size: 18px;
             color: #000;
             box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
         }
-        .resultado-jugador b, .resultado-jugador span {
-            color: #000 !important;
-            font-weight: 900 !important;
+        /* Estilos mejorados para botones de dados */
+        .btn-dado-sel {
+            width: 100%; height: 90px;
+            border: 3px solid #fff; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 50px !important; cursor: pointer;
+            text-shadow: 2px 2px 4px #000;
         }
     </style>
 </head>
@@ -35,7 +36,7 @@
     
     <div id="ui-superior-fijo" style="position:fixed; top:10px; left:10px; z-index:9000; display:none;">
         <div id="txt-turno" style="background:rgba(0,0,0,0.9); padding:10px 15px; border:3px solid gold; font-size:24px; font-weight:900; border-radius:8px;">TURNO: ---</div>
-        <div id="txt-vuelta" style="background:gold; color:black; padding:5px 10px; font-weight:900; border-radius:5px; margin-top:5px; display:inline-block;">VUELTA: 1 / 7</div>
+        <div id="txt-vuelta" style="background:gold; color:black; padding:5px 10px; font-weight:900; border-radius:5px; margin-top:5px; display:inline-block;">ROUND: 1 / 7</div>
     </div>
 
     <!-- MODAL DADOS -->
@@ -43,30 +44,19 @@
         <h1 id="dados-player-name" style="font-size:36px; font-weight:900; color:white;">JUGADOR</h1>
         <div class="dados-container">
             <video id="video-dados-batalla" class="video-dados" src="https://kairosravina-bot.github.io/domusmagis/Dados.mp4" playsinline muted></video>
-            <div id="layer-valor-batalla" class="layer-valor" style="font-weight:900;">0</div>
+            <div id="layer-valor-batalla" class="layer-valor" style="font-weight:900;"></div>
         </div>
         <div class="grid-dados">
-            <div class="btn-dado-sel" onclick="window.ejecutarLanzamientoBatalla(2)"><strong>2</strong></div>
-            <div class="btn-dado-sel" onclick="window.ejecutarLanzamientoBatalla(3)"><strong>3</strong></div>
-            <div class="btn-dado-sel" onclick="window.ejecutarLanzamientoBatalla(4)"><strong>4</strong></div>
-            <div class="btn-dado-sel" onclick="window.ejecutarLanzamientoBatalla(5)"><strong>5</strong></div>
-        </div>
-    </div>
-
-    <!-- MODAL BATALLA FINAL -->
-    <div id="modal-batalla" style="z-index:9999; background:black; display:none; align-items:center; justify-content:center; width:100%; height:100vh; position:fixed; top:0; left:0;">
-        <video id="video-clash" playsinline muted autoplay style="width:100%; height:100%; object-fit:contain; background:black;"></video>
-        <div id="overlay-batalla" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:9998; pointer-events:none; text-align:center; width:100%;">
-            <div style="display:flex; align-items:center; justify-content:center; gap:60px; font-size:45px; font-weight:900; text-shadow:4px 4px 15px rgba(0,0,0,1);">
-                <div id="nombre-j1" style="text-transform:uppercase;"></div>
-                <div id="nombre-j2" style="text-transform:uppercase;"></div>
-            </div>
+            <div class="btn-dado-sel" style="background: #a00;" onclick="window.ejecutarLanzamientoBatalla(2)"><strong>2</strong></div>
+            <div class="btn-dado-sel" style="background: #00a;" onclick="window.ejecutarLanzamientoBatalla(3)"><strong>3</strong></div>
+            <div class="btn-dado-sel" style="background: #0a0;" onclick="window.ejecutarLanzamientoBatalla(4)"><strong>4</strong></div>
+            <div class="btn-dado-sel" style="background: #a0a;" onclick="window.ejecutarLanzamientoBatalla(5)"><strong>5</strong></div>
         </div>
     </div>
 
     <!-- PLAYERS SETUP -->
     <div id="p-setup" class="pantalla" style="background:rgba(0,0,0,0.8); z-index:10000;">
-        <h2 style="color:gold;">PLAYERS</h2>
+        <h2>PLAYERS</h2>
         <div id="setup-selector" style="display:flex; gap:10px;">
             <button class="btn-master" onclick="window.setModo(2)">2 PLAYERS</button>
             <button class="btn-master" onclick="window.setModo(4)">4 PLAYERS</button>
@@ -103,9 +93,9 @@
                 <div class="wrapper-gema"><span id="val-m" class="valor-flotante"></span><button id="btn-m" class="btn-gema"><span class="letra-grande">M</span></button></div>
             </div>
             <div style="display:flex; gap:10px; width:100%;">
-                <button id="btn-confirmar" class="btn-master" style="background:#050; flex:1; font-size: 20px;">OK</button>
-                <button id="btn-forzar" class="btn-master" style="background:#500; flex:1; font-size: 24px;" onclick="window.iniciarFaseDados()">🎲</button>
-                <button id="btn-reescaneo" class="btn-master" style="background:#aa8800; flex:1; font-size: 24px;" onclick="window.forzarReescaneo()">👁️</button>
+                <button id="btn-confirmar" class="btn-master" style="background:#050; flex:1;">OK</button>
+                <button id="btn-forzar" class="btn-master" style="background:#500; flex:1; font-size:24px;" onclick="window.iniciarFaseDados()">🎲</button>
+                <button id="btn-reescaneo" class="btn-master" style="background:#aa8800; flex:1; font-size:24px;" onclick="window.forzarReescaneo()">👁️</button>
             </div>
         </div>
     </div>
@@ -113,11 +103,11 @@
     <!-- PANTALLA RESULTADOS -->
     <div id="p-resultado" class="pantalla oculto" style="z-index:11000; background:rgba(0,0,0,0.9);">
         <div id="resultado-batalla" style="max-height:85vh; overflow-y:auto; padding:20px;">
-            <h2 style="text-align:center; color:#000; font-size:32px; margin-bottom:30px; font-weight:900;">⚔️ CRÓNICAS DE GUERRA ⚔️</h2>
+            <h2 style="text-align:center; color:#000; font-size:32px; margin-bottom:30px; font-weight:900;">⚔️ RESULTADOS ⚔️</h2>
             <div id="resultado-contenido"></div>
             <div id="resultado-ganador" style="display:none; text-align:center; margin-top:40px; padding:30px; background:rgba(0,0,0,0.1); border:3px solid #000; border-radius:10px;">
-                <div style="font-size:48px; font-weight:900; color:#000; margin-bottom:20px;">👑 CAMPEÓN 👑</div>
-                <div id="txt-ganador-final" style="font-size:42px; font-weight:900; text-shadow:1px 1px 2px #fff;"></div>
+                <div style="font-size:48px; font-weight:900; color:#000; margin-bottom:20px;">👑 GANADOR 👑</div>
+                <div id="txt-ganador-final" style="font-size:42px; font-weight:900;"></div>
             </div>
         </div>
         <button id="btn-repetir-accion" class="btn-master" onclick="window.continuarContienda()">⚔️ SIGUIENTE RONDA</button>
@@ -172,7 +162,7 @@
             document.getElementById('txt-turno').innerText = `TURNO: ${j.nombre}`;
             document.getElementById('txt-turno').style.color = j.color;
             document.getElementById('slot-indicator').innerText = `${slotActual + 1}/${MAX_SLOTS}`;
-            document.getElementById('txt-vuelta').innerText = `VUELTA: ${vueltaActual} / ${MAX_VUELTAS}`;
+            document.getElementById('txt-vuelta').innerText = `ROUND: ${vueltaActual} / ${MAX_VUELTAS}`;
         }
 
         window.forzarReescaneo = () => { 
@@ -210,39 +200,31 @@
             document.getElementById('ui-juego').classList.add('oculto');
             document.getElementById('ui-superior-fijo').style.display = 'none';
             document.getElementById('modal-dados-fase').classList.remove('oculto');
+            document.getElementById('layer-valor-batalla').innerText = ""; // Limpiar valor previo
             document.getElementById('dados-player-name').innerText = jugadores[diceIdx].nombre;
             document.getElementById('dados-player-name').style.color = jugadores[diceIdx].color;
         };
 
         window.ejecutarLanzamientoBatalla = (n) => {
             const vid = document.getElementById('video-dados-batalla');
+            const res = document.getElementById('layer-valor-batalla');
+            res.innerText = ""; 
             vid.play();
             vid.onended = () => {
                 let suma = 0; for(let i=0; i<n; i++) suma += Math.floor(Math.random()*6)+1;
-                document.getElementById('layer-valor-batalla').innerText = suma;
+                res.innerText = suma;
                 jugadores[diceIdx].dadoRonda = suma;
+                // Esperar 3 segundos para pasar al siguiente o a resultados
                 setTimeout(() => {
                     diceIdx++;
-                    if(diceIdx < cantJugadores) { window.iniciarFaseDados(); }
-                    else { document.getElementById('modal-dados-fase').classList.add('oculto'); window.iniciarFaseFinal(); }
-                }, 1200);
+                    if(diceIdx < cantJugadores) { 
+                        window.iniciarFaseDados(); 
+                    } else { 
+                        document.getElementById('modal-dados-fase').classList.add('oculto'); 
+                        mostrarResultados(); // Directo a resultados
+                    }
+                }, 3000);
             };
-        };
-
-        window.iniciarFaseFinal = () => {
-            const modalBatalla = document.getElementById('modal-batalla');
-            const videoClash = document.getElementById('video-clash');
-            modalBatalla.style.display = 'flex';
-            document.getElementById('nombre-j1').innerText = jugadores[0].nombre;
-            document.getElementById('nombre-j1').style.color = jugadores[0].color;
-            if(jugadores[1]) {
-                document.getElementById('nombre-j2').innerText = jugadores[1].nombre;
-                document.getElementById('nombre-j2').style.color = jugadores[1].color;
-            }
-            const misVideosBatalla = ["Escudos_vs_Espadas.mp4", "Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
-            videoClash.src = RUTA_BASE + misVideosBatalla[Math.floor(Math.random() * 3)];
-            videoClash.play();
-            videoClash.onended = () => { modalBatalla.style.display = 'none'; mostrarResultados(); };
         };
 
         function mostrarResultados() {
@@ -252,14 +234,14 @@
                 const totalRonda = j.slotsPuntos + j.dadoRonda;
                 j.puntosTotales += totalRonda;
                 j.historico.push(totalRonda);
-                let papiros = j.historico.map(h => `<div class="papiro-ronda">${h}</div>`).join('');
+                let papiros = j.historico.map(h => `<div class="papiro-ronda" style="margin-right:5px;">${h}</div>`).join('');
                 cont.innerHTML += `
-                    <div class="resultado-jugador" style="margin-bottom:20px; padding:15px; border-bottom:3px solid #5a3a22;">
+                    <div class="resultado-jugador" style="margin-bottom:20px; padding:15px; border-bottom:3px solid ${j.color};">
                         <div style="color:${j.color}; font-size:30px; font-weight:900; margin-bottom:10px;">${j.nombre}</div>
-                        <div class="fila-res"><b>CARTAS:</b> <span>${j.slotsPuntos}</span></div>
-                        <div class="fila-res"><b>DADOS:</b> <span>${j.dadoRonda}</span></div>
-                        <div style="font-size:26px; color:#000; font-weight:900; margin:10px 0;">PUNTOS TOTALES: ${j.puntosTotales}</div>
-                        <div style="display:flex; flex-direction:row; overflow-x:auto; margin-top:5px;">${papiros}</div>
+                        <div style="color:#000; font-weight:900; display:flex; justify-content:space-between; margin-bottom:5px;"><span>CARTAS:</span> <span>${j.slotsPuntos}</span></div>
+                        <div style="color:#000; font-weight:900; display:flex; justify-content:space-between; margin-bottom:5px;"><span>DADOS:</span> <span>${j.dadoRonda}</span></div>
+                        <div style="font-size:28px; color:#000; font-weight:900; margin:10px 0;">TOTAL: ${j.puntosTotales}</div>
+                        <div style="display:flex; flex-direction:row; overflow-x:auto; padding:10px 0;">${papiros}</div>
                     </div>`;
             });
             if(vueltaActual >= MAX_VUELTAS) {
