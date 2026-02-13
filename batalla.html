@@ -31,8 +31,16 @@
     </div>
 
     <!-- MODAL BATALLA FINAL (VIDEO) -->
-    <div id="modal-batalla" class="pantalla oculto" style="z-index:9999; background:black; display:flex; align-items:center; justify-content:center; width:100%; height:100vh;">
+    <div id="modal-batalla" class="pantalla oculto" style="z-index:9999; background:black; display:flex; align-items:center; justify-content:center; width:100%; height:100vh; position:relative;">
         <video id="video-clash" playsinline webkit-playsinline muted autoplay style="width:100%; height:100%; object-fit:contain; background:black;"></video>
+        <div id="overlay-batalla" style="position:absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:40px; z-index:9998; pointer-events:none;">
+            <div style="font-size:48px; font-weight:900; color:#FFD700; text-shadow:3px 3px 10px rgba(0,0,0,0.9), 0 0 20px rgba(255,215,0,0.5); letter-spacing:3px; margin-bottom:20px;">⚔️ BATALLA FINAL ⚔️</div>
+            <div style="display:flex; align-items:center; justify-content:center; gap:30px; font-size:36px; font-weight:900; text-shadow:3px 3px 10px rgba(0,0,0,0.9);">
+                <div id="nombre-j1" style="color:#ff0000;">JUGADOR 1</div>
+                <div style="color:#FFD700; font-size:48px;">VS</div>
+                <div id="nombre-j2" style="color:#00aaff;">JUGADOR 2</div>
+            </div>
+        </div>
     </div>
 
     <!-- INSCRIPCION -->
@@ -205,21 +213,76 @@
         window.iniciarFaseFinal = () => {
             const modal = document.getElementById('modal-batalla');
             const vid = document.getElementById('video-clash');
+            
+            // Determinar los 2 jugadores principales (por puntos actuales)
+            const jugadoresOrdenados = [...jugadores].sort((a, b) => b.slotsPuntos + b.dadoRonda - (a.slotsPuntos + a.dadoRonda));
+            const j1 = jugadoresOrdenados[0];
+            const j2 = jugadoresOrdenados[1] || jugadoresOrdenados[0];
+            
+            // Actualizar nombres y colores en el overlay
+            document.getElementById('nombre-j1').innerText = j1.nombre;
+            document.getElementById('nombre-j1').style.color = j1.color;
+            document.getElementById('nombre-j2').innerText = j2.nombre;
+            document.getElementById('nombre-j2').style.color = j2.color;
+            
             modal.classList.remove('oculto');
             modal.style.display = 'flex';
+            modal.style.visibility = 'visible';
+            
             const videoAleatorio = MIS_VIDEOS[Math.floor(Math.random() * MIS_VIDEOS.length)];
             const rutaVideo = RUTA_BASE + videoAleatorio;
+            
             vid.src = rutaVideo;
             vid.style.display = 'block';
-            vid.load();
-            setTimeout(() => {
-                vid.play().catch(e => console.error("Error reproduciendo video:", e));
-            }, 100);
+            vid.style.visibility = 'visible';
+            
+            // Limpiar handlers previos
+            vid.onended = null;
+            vid.oncanplay = null;
+            vid.ontimeupdate = null;
+            
+            // Esperar a que el video pueda reproducirse
+            vid.oncanplay = () => {
+                vid.oncanplay = null;
+                vid.play().catch(e => {
+                    console.error("Error reproduciendo:", e);
+                    setTimeout(() => finalizarBatalla(), 3000);
+                });
+            };
+            
+            // Manejador para cuando termina
             vid.onended = () => {
+                console.log("Video terminado");
+                finalizarBatalla();
+            };
+            
+            // Límite de 6 segundos máximo
+            let tiempoInicio = Date.now();
+            vid.ontimeupdate = () => {
+                const tiempoTranscurrido = (Date.now() - tiempoInicio) / 1000;
+                if(tiempoTranscurrido > 6) {
+                    finalizarBatalla();
+                }
+            };
+            
+            // Fallback: si no termina en 8 segundos, avanzar
+            const fallbackTimer = setTimeout(() => {
+                console.warn("Video timeout, avanzando");
+                finalizarBatalla();
+            }, 8000);
+            
+            function finalizarBatalla() {
+                clearTimeout(fallbackTimer);
+                vid.onended = null;
+                vid.oncanplay = null;
+                vid.ontimeupdate = null;
                 modal.classList.add('oculto');
                 modal.style.display = 'none';
+                modal.style.visibility = 'hidden';
+                vid.pause();
+                vid.src = '';
                 mostrarResultados();
-            };
+            }
         };
 
         function mostrarResultados() {
