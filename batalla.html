@@ -127,7 +127,7 @@
         let jugadores = [], cantJugadores = 0, turnoIdx = 0, slotActual = 0, vueltaActual = 1;
         let cartaActual = null, jugadaPendiente = null, diceIdx = 0;
         const MAX_SLOTS = 3, MAX_VUELTAS = 7;
-        const MIS_VIDEOS = ["Escudos_vs_Espadas.mp4", "Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
+        const MIS_VIDEOS = ["Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
 
         window.setModo = (m) => { 
             cantJugadores = m; 
@@ -160,6 +160,7 @@
             actualizarUI();
             iniciarOjo('container-ar', (carta) => {
                 cartaActual = carta;
+                console.log("CARTA ESCANEADA:", carta);
                 document.getElementById('guia-scanner').className = "verde";
                 setTimeout(() => document.getElementById('guia-scanner').className = "", 600);
                 document.getElementById('msg-visor').innerHTML = `<span>${carta.nombre}</span>`;
@@ -200,7 +201,16 @@
                 v.src=RUTA_BASE+conf.video; 
                 v.play();
                 document.getElementById('hud-derecho').style.display='flex';
-                document.getElementById('hud-img-escudo').src = RUTA_BASE + cartaActual.imgEscudo;
+                
+                // Intentar cargar escudo de múltiples propiedades posibles
+                const escudoUrl = cartaActual.imgEscudo || cartaActual.escudo || cartaActual.img || '';
+                if(escudoUrl) {
+                    document.getElementById('hud-img-escudo').src = RUTA_BASE + escudoUrl;
+                    console.log("ESCUDO CARGADO:", RUTA_BASE + escudoUrl);
+                } else {
+                    console.warn("NO HAY ESCUDO EN CARTA:", cartaActual);
+                }
+                
                 document.getElementById('hud-txt-arma').innerText = cartaActual.nombre;
                 document.getElementById('hud-txt-valor').innerText = conf.valor;
                 v.onended = () => { 
@@ -277,15 +287,24 @@
             
             modal.style.display = 'flex';
             
+            // Cargar video aleatorio
             const videoAleatorio = MIS_VIDEOS[Math.floor(Math.random() * MIS_VIDEOS.length)];
             const rutaVideo = RUTA_BASE + videoAleatorio;
+            
+            console.log("CARGANDO VIDEO:", rutaVideo);
             
             vid.src = rutaVideo;
             vid.load();
             
-            setTimeout(() => {
-                vid.play().catch(e => console.error("Error:", e));
-            }, 100);
+            // Esperar a que pueda reproducirse
+            vid.oncanplay = () => {
+                console.log("VIDEO LISTO PARA REPRODUCIR");
+                vid.play().catch(e => {
+                    console.error("ERROR AL REPRODUCIR VIDEO:", e);
+                    // Si falla, esperar 6 segundos igual
+                    setTimeout(() => finalizarBatalla(), 6000);
+                });
+            };
             
             // Timeout a 6 segundos
             let inicioVideo = Date.now();
@@ -295,12 +314,18 @@
                 }
             };
             
-            vid.onended = () => finalizarBatalla();
+            vid.onended = () => {
+                console.log("VIDEO TERMINÓ");
+                finalizarBatalla();
+            };
             
             function finalizarBatalla() {
+                console.log("FINALIZANDO BATALLA");
                 vid.ontimeupdate = null;
                 vid.onended = null;
+                vid.oncanplay = null;
                 vid.pause();
+                vid.src = '';
                 modal.style.display = 'none';
                 mostrarResultados();
             }
