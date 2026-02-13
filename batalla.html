@@ -276,14 +276,10 @@
             const vid = document.getElementById('video-clash');
             
             // Mostrar modal
-            modal.classList.add('oculto');
-            modal.classList.remove('oculto');
             modal.style.display = 'flex';
             modal.style.visibility = 'visible';
             modal.style.opacity = '1';
             modal.style.zIndex = '9999';
-            
-            console.log("MODAL VISIBLE:", modal.style.display);
             
             // Determinar jugadores
             const jugadoresOrdenados = [...jugadores].sort((a, b) => b.slotsPuntos + b.dadoRonda - (a.slotsPuntos + a.dadoRonda));
@@ -295,32 +291,67 @@
             document.getElementById('nombre-j2').innerText = j2.nombre;
             document.getElementById('nombre-j2').style.color = j2.color;
             
+            // Limpiar handlers previos
+            vid.onended = null;
+            vid.onplay = null;
+            vid.ontimeupdate = null;
+            
             // Cargar video
             const videoAleatorio = MIS_VIDEOS[Math.floor(Math.random() * MIS_VIDEOS.length)];
             const rutaVideo = RUTA_BASE + videoAleatorio;
             
-            console.log("REPRODUCIÉNDOSE VIDEO:", rutaVideo);
+            console.log("CARGANDO VIDEO:", rutaVideo);
             
             vid.src = rutaVideo;
             vid.muted = true;
-            vid.load();
-            vid.play().catch(err => console.log("Play error:", err));
             
-            // TIMEOUT FIJO: 6 segundos
-            console.log("INICIANDO TIMEOUT 6 SEGUNDOS");
-            const timeout = setTimeout(() => {
-                console.log("TIMEOUT COMPLETADO - AVANZANDO A RESULTADOS");
+            // Reproducir cuando esté listo
+            vid.onplay = () => {
+                console.log("VIDEO INICIADO - Durando 6 segundos");
+            };
+            
+            // Timer para detener a los 6 segundos
+            let tiempoInicio = null;
+            vid.ontimeupdate = () => {
+                if(!tiempoInicio) tiempoInicio = Date.now();
+                
+                const tiempoTranscurrido = (Date.now() - tiempoInicio) / 1000;
+                if(tiempoTranscurrido >= 6) {
+                    console.log("6 SEGUNDOS COMPLETADOS");
+                    finalizarBatalla();
+                }
+            };
+            
+            // Si el video termina antes de 6 segundos
+            vid.onended = () => {
+                console.log("VIDEO FINALIZÓ");
                 finalizarBatalla();
-            }, 6000);
+            };
+            
+            // Fallback: si no inicia en 1 segundo, forzar
+            const fallback = setTimeout(() => {
+                if(vid.paused) {
+                    console.log("FORZANDO REPRODUCCIÓN");
+                    vid.play().catch(e => console.warn("No se puede reproducir:", e));
+                }
+            }, 1000);
             
             function finalizarBatalla() {
-                console.log("=== FINALIZANDO BATALLA ===");
-                clearTimeout(timeout);
+                clearTimeout(fallback);
+                console.log("FINALIZANDO BATALLA");
+                vid.ontimeupdate = null;
+                vid.onended = null;
+                vid.onplay = null;
                 vid.pause();
                 modal.style.display = 'none';
                 modal.style.opacity = '0';
                 mostrarResultados();
             }
+            
+            // Intentar reproducir inmediatamente
+            vid.play().catch(e => {
+                console.log("Error inicial de play, será reinicio en fallback:", e);
+            });
         };
 
         function mostrarResultados() {
@@ -342,9 +373,9 @@
                 cont.innerHTML += `
                     <div class="resultado-jugador" style="margin-bottom:30px; padding:20px; background:rgba(255,255,255,0.05); border-left:5px solid ${j.color}; border-radius:5px;">
                         <div class="res-nombre" style="color:${j.color}; font-size:24px; font-weight:900; margin-bottom:10px;">${j.nombre}</div>
-                        <div class="fila-res" style="margin:10px 0;"><span style="color:#aaa;">CARTAS:</span> <span style="color:${j.color}; font-weight:900;">${j.slotsPuntos}</span></div>
-                        <div class="fila-res" style="margin:10px 0;"><span style="color:#aaa;">DADOS:</span> <span style="color:${j.color}; font-weight:900;">${j.dadoRonda}</span></div>
-                        <div class="total-score" style="font-size:28px; color:gold; font-weight:900; margin:15px 0;">${j.puntosTotales} PUNTOS</div>
+                        <div class="fila-res" style="margin:10px 0;"><span style="color:#aaa;">CARTAS:</span> <span style="color:${j.color}; font-weight:900; font-size:20px;">${j.slotsPuntos}</span></div>
+                        <div class="fila-res" style="margin:10px 0;"><span style="color:#aaa;">DADOS:</span> <span style="color:${j.color}; font-weight:900; font-size:20px;">${j.dadoRonda}</span></div>
+                        <div class="total-score" style="font-size:32px; color:gold; font-weight:900; margin:15px 0; text-shadow:2px 2px 5px rgba(0,0,0,0.5);">${j.puntosTotales} PUNTOS</div>
                         <div style="font-size:12px; color:#aaa; margin-bottom:10px;">HISTÓRICO (7 RONDAS):</div>
                         <div style="text-align:center;">${papiros}</div>
                     </div>
