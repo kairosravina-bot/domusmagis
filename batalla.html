@@ -49,9 +49,16 @@
         </div>
     </div>
 
-    <!-- MODAL BATALLA FINAL (VIDEO) -->
+    <!-- MODAL BATALLA FINAL (VIDEO) - AQUÍ LOS CAMBIOS IMPORTANTES -->
     <div id="modal-batalla" style="z-index:9999; background:black; display:none; align-items:center; justify-content:center; width:100%; height:100vh; position:fixed; top:0; left:0;">
-        <video id="video-clash" playsinline webkit-playsinline muted autoplay style="width:100%; height:100%; object-fit:contain; background:black;"></video>
+        <video 
+            id="video-clash" 
+            playsinline 
+            loop 
+            muted 
+            autoplay 
+            style="width:100%; height:100%; object-fit:contain; background:black;"
+        ></video>
         <div id="overlay-batalla" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:9998; pointer-events:none; text-align:center; width:100%;">
             <div style="font-size:52px; font-weight:900; color:#FFD700; text-shadow:4px 4px 15px rgba(0,0,0,0.95), 0 0 30px rgba(255,215,0,0.7); letter-spacing:4px; margin-bottom:30px; text-transform:uppercase;">⚔️ BATALLA FINAL ⚔️</div>
             <div style="display:flex; align-items:center; justify-content:center; gap:40px; font-size:40px; font-weight:900; text-shadow:4px 4px 15px rgba(0,0,0,0.95);">
@@ -283,10 +290,10 @@
             document.getElementById('nombre-j2').innerText = j2.nombre;
             document.getElementById('nombre-j2').style.color = j2.color;
             
-            // VIDEO - LIMPIAR PRIMERO
+            // VIDEO - LIMPIAR Y CONFIGURAR
             vid.pause();
             vid.currentTime = 0;
-            vid.src = '';
+            vid.src = '';  // limpiar fuente anterior
             
             // CARGAR VIDEO
             const videoAleatorio = MIS_VIDEOS[Math.floor(Math.random() * MIS_VIDEOS.length)];
@@ -294,12 +301,22 @@
             
             vid.src = rutaVideo;
             vid.muted = true;
-            vid.autoplay = true;
-            
-            // Intentar reproducir
+            vid.loop = true;
+            vid.playsInline = true;  // redundante pero a veces ayuda
+
+            vid.load();  // fuerza recarga del nuevo source
+
+            // Intentar reproducir con manejo de errores
             const playPromise = vid.play();
-            if(playPromise !== undefined) {
-                playPromise.catch(err => console.log("Video play error:", err));
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        console.log("Batalla video → Reproducción OK");
+                    })
+                    .catch(err => {
+                        console.error("Error reproduciendo video batalla:", err);
+                        // Opcional: aquí podrías mostrar un botón temporal "Toca para ver batalla"
+                    });
             }
             
             // TIMEOUT 6 SEGUNDOS - PUNTO
