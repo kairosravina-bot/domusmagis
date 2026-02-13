@@ -124,71 +124,55 @@ const CARTAS = {
     108: { idar: 108, id: 10, nombre: "IMPERATOR", elemento: "NEUTRO", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: { "btn-i": { texto: "I", valor: 10, video: "108I.mp4" }, "btn-a": { texto: "A", valor: 6, video: "108A.mp4" }, "btn-t": { texto: "T", valor: 4, video: "108T.mp4" }, "btn-m": { texto: "M", valor: 6, video: "108M.mp4" } }, codTarget: "108" }
 };
 
-// --- LOGICA DE PODER Y VIDEOS REPARADA ---
-
-export const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
-export const VIDEOS_BATALLA = ["Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
-
 let scanning = false;
 let lastConfirmedId = null;
 
-/**
- * REPARACIÓN CRÍTICA: Calcula el poder total sumando (Valor Carta + Valor Dado)
- * @param {Object} carta - El objeto de la carta detectada
- * @param {string} btnKey - La clave del botón presionado ('btn-i', 'btn-a', 'btn-t', 'btn-m')
- * @param {number} valorDado - El resultado aleatorio del dado (1-6 o el que uses)
- */
-export function obtenerResultadoTotal(carta, btnKey, valorDado) {
-    if (!carta || !carta.botones || !carta.botones[btnKey]) {
-        console.error("Error: Carta o botón no válido");
-        return valorDado; // Retorna solo dado si hay error
-    }
-
-    // Extrae el valor numérico de la carta (el que antes daba 0)
-    const valorCarta = parseInt(carta.botones[btnKey].valor) || 0;
-    const resultadoF = valorCarta + valorDado;
-
-    console.log(`Suma Real: Carta ${valorCarta} + Dado ${valorDado} = ${resultadoF}`);
-    return resultadoF;
-}
-
-/**
- * REPARACIÓN VIDEO: Sin default y con aviso "NO VIDEO"
- */
+// --- REPARACIÓN DE VIDEO (SIN DEFAULT + MENSAJE NO VIDEO) ---
 export function reproducirVideoAccion(videoElement, rutaVideo) {
     if (!videoElement) return;
 
-    // Manejo de error si el video no existe
+    // Si el video falla, mostramos "NO VIDEO" en el contenedor
     videoElement.onerror = () => {
-        console.error("Video inexistente:", rutaVideo);
-        videoElement.style.display = "none"; // Oculta video fallido
-        
-        // Crear o mostrar aviso en pantalla
-        let aviso = document.getElementById("error-video-display");
-        if (!aviso) {
-            aviso = document.createElement("div");
-            aviso.id = "error-video-display";
-            aviso.style = "color:red; font-size:20px; font-weight:bold; text-align:center; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:black; padding:10px; border:2px solid red;";
-            videoElement.parentElement.appendChild(aviso);
+        const contenedor = videoElement.parentElement;
+        if (contenedor) {
+            videoElement.style.display = "none";
+            // Si ya existe un mensaje, lo quitamos para no duplicar
+            const viejo = contenedor.querySelector(".no-video-msg");
+            if (viejo) viejo.remove();
+            
+            const msg = document.createElement("div");
+            msg.className = "no-video-msg";
+            msg.style = "color:white; font-weight:bold; text-align:center; padding:20px;";
+            msg.innerText = "NO VIDEO";
+            contenedor.appendChild(msg);
         }
-        aviso.innerText = "NO VIDEO";
-        aviso.style.display = "block";
     };
 
-    // Reset de estado visual
-    const aviso = document.getElementById("error-video-display");
-    if (aviso) aviso.style.display = "none";
+    // Quitar mensaje de error anterior si existe
+    const msgAnterior = videoElement.parentElement?.querySelector(".no-video-msg");
+    if (msgAnterior) msgAnterior.remove();
     videoElement.style.display = "block";
 
-    // Carga directa del video de la carta
+    // Llamada directa al video de la carta (sin fallback/default)
     videoElement.src = RUTA_BASE + "videos/" + rutaVideo;
-    videoElement.load();
-    videoElement.play().catch(e => console.warn("Esperando interacción para video"));
+    videoElement.play().catch(() => {
+        // Fallo silencioso si no hay interacción, el onerror se encargará del resto
+    });
 }
 
-/**
- * ESCÁNER QR INTEGRADO
- */
+// --- REPARACIÓN DE RESULTADOS (SUMA CARTA + DADO) ---
+// Esta función garantiza que el valor de la carta no sea ignorado (0)
+export function obtenerPuntajeFinal(carta, idBoton, valorDado) {
+    if (!carta || !carta.botones[idBoton]) return valorDado;
+    
+    const valorBaseCarta = carta.botones[idBoton].valor; // El valor de tu lista (1-18)
+    const sumaTotal = valorBaseCarta + valorDado;
+    
+    console.log("Suma realizada:", valorBaseCarta, "+", valorDado, "=", sumaTotal);
+    return sumaTotal;
+}
+
+// --- LÓGICA DE ESCANEO (COMPATIBLE CON 2 PLAYERS) ---
 export async function iniciarOjo(containerId, onEncontrado) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -215,16 +199,18 @@ export async function iniciarOjo(containerId, onEncontrado) {
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
             
-            // Asume que jsQR está cargado globalmente
-            const code = window.jsQR ? window.jsQR(imageData.data, imageData.width, imageData.height) : null;
-
-            if(code && code.data.trim() !== lastConfirmedId) {
-                const detectId = code.data.trim();
-                const carta = CARTAS[detectId] || Object.values(CARTAS).find(c => c.codTarget == detectId);
-                
-                if(carta) {
-                    lastConfirmedId = detectId;
-                    onEncontrado(JSON.parse(JSON.stringify(carta)));
+            if (window.jsQR) {
+                const code = window.jsQR(imageData.data, imageData.width, imageData.height);
+                if(code && code.data.trim() !== lastConfirmedId) {
+                    const detectId = code.data.trim();
+                    // Acceso a la constante CARTAS que tienes arriba
+                    const carta = CARTAS[detectId] || Object.values(CARTAS).find(c => c.codTarget == detectId);
+                    
+                    if(carta) {
+                        lastConfirmedId = detectId;
+                        // onEncontrado envía la carta al player correspondiente (1 o 2)
+                        onEncontrado(JSON.parse(JSON.stringify(carta)));
+                    }
                 }
             }
         }, 250);
