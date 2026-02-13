@@ -59,21 +59,20 @@
             style="width:100%; height:100%; object-fit:contain; background:black;"
         ></video>
         <div id="overlay-batalla" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:9998; pointer-events:none; text-align:center; width:100%;">
-            <div style="font-size:52px; font-weight:900; color:#FFD700; text-shadow:4px 4px 15px rgba(0,0,0,0.95), 0 0 30px rgba(255,215,0,0.7); letter-spacing:4px; margin-bottom:30px; text-transform:uppercase;">⚔️ BATALLA FINAL ⚔️</div>
             <div style="display:flex; align-items:center; justify-content:center; gap:40px; font-size:40px; font-weight:900; text-shadow:4px 4px 15px rgba(0,0,0,0.95);">
-                <div id="nombre-j1" style="color:#ff0000; text-transform:uppercase;">JUGADOR 1</div>
+                <div id="nombre-j1" style="color:#ff0000; text-transform:uppercase;"></div>
                 <div style="color:#FFD700; font-size:52px;">⚔️</div>
-                <div id="nombre-j2" style="color:#00aaff; text-transform:uppercase;">JUGADOR 2</div>
+                <div id="nombre-j2" style="color:#00aaff; text-transform:uppercase;"></div>
             </div>
         </div>
     </div>
 
     <!-- INSCRIPCIÓN -->
     <div id="p-setup" class="pantalla" style="background:rgba(0,0,0,0.8); z-index:10000;">
-        <h2>INSCRIPCIÓN</h2>
+        <h2>PLAYERS</h2>
         <div id="setup-selector" style="display:flex; gap:10px;">
-            <button class="btn-master" onclick="window.setModo(2)">2 MAGOS</button>
-            <button class="btn-master" onclick="window.setModo(4)">4 MAGOS</button>
+            <button class="btn-master" onclick="window.setModo(2)">2 PLAYERS</button>
+            <button class="btn-master" onclick="window.setModo(4)">4 PLAYERS</button>
         </div>
         <div id="registro" class="oculto">
             <input type="text" id="mago-nombre" placeholder="NOMBRE DEL MAGO">
@@ -107,9 +106,9 @@
                 <div class="wrapper-gema"><span id="val-m" class="valor-flotante"></span><button id="btn-m" class="btn-gema"><span class="letra-grande">M</span></button></div>
             </div>
             <div style="display:flex; gap:10px; width:100%;">
-                <button id="btn-confirmar" class="btn-master" style="background:#050; flex:2;">✅ CONFIRMAR</button>
-                <button id="btn-forzar" class="btn-master" style="background:#500; flex:1;" onclick="window.iniciarFaseDados()">⚔️ YA</button>
-                <button id="btn-reescaneo" class="btn-master" style="background:#aa8800; flex:1;" onclick="window.forzarReescaneo()">🔄 RESCAN</button>
+                <button id="btn-confirmar" class="btn-master" style="background:#050; flex:1;">OK</button>
+                <button id="btn-forzar" class="btn-master" style="background:#500; flex:1;" onclick="window.iniciarFaseDados()">🎲</button>
+                <button id="btn-reescaneo" class="btn-master" style="background:#aa8800; flex:1;" onclick="window.forzarReescaneo()">👁️</button>
             </div>
         </div>
     </div>
@@ -133,7 +132,6 @@
         let jugadores = [], cantJugadores = 0, turnoIdx = 0, slotActual = 0, vueltaActual = 1;
         let cartaActual = null, jugadaPendiente = null, diceIdx = 0;
         const MAX_SLOTS = 3, MAX_VUELTAS = 7;
-        const MIS_VIDEOS = ["Escudos_vs_Espadas.mp4", "Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
 
         window.setModo = (m) => { 
             cantJugadores = m; 
@@ -166,7 +164,6 @@
             actualizarUI();
             iniciarOjo('container-ar', (carta) => {
                 cartaActual = carta;
-                console.log("CARTA ESCANEADA:", carta);
                 document.getElementById('guia-scanner').className = "verde";
                 setTimeout(() => document.getElementById('guia-scanner').className = "", 600);
                 document.getElementById('msg-visor').innerHTML = `<span>${carta.nombre}</span>`;
@@ -207,7 +204,6 @@
                 v.src = RUTA_BASE + conf.video; 
                 v.play();
                 document.getElementById('hud-derecho').style.display = 'flex';
-                
                 const escudoUrl = RUTA_BASE + cartaActual.imgEscudo;
                 document.getElementById('hud-img-escudo').src = escudoUrl;
                 document.getElementById('hud-txt-arma').innerText = cartaActual.nombre;
@@ -269,69 +265,24 @@
             };
         };
 
-        // ── BLOQUE DE BATALLA FINAL (CORREGIDO Y MEJORADO) ──
         window.iniciarFaseFinal = () => {
-            // 1. Ocultar modal de dados por si acaso
-            document.getElementById('modal-dados-fase').classList.add('oculto');
-
-            // 2. Preparar modal y vídeo
             const modalBatalla = document.getElementById('modal-batalla');
             const videoClash = document.getElementById('video-clash');
-
             modalBatalla.style.display = 'flex';
+            
+            // Asignar nombres a los contenedores
+            if(jugadores[0]) document.getElementById('nombre-j1').innerText = jugadores[0].nombre;
+            if(jugadores[1]) document.getElementById('nombre-j2').innerText = jugadores[1].nombre;
 
-            // 3. Reiniciar vídeo
-            videoClash.pause();
-            videoClash.currentTime = 0;
-            videoClash.src = '';
-
-            // 4. Elegir vídeo aleatorio
-            const misVideosBatalla = [
-                "Escudos_vs_Espadas.mp4",
-                "Explosion_Elemental.mp4",
-                "Invocaciones_Etereas.mp4"
-            ];
+            const misVideosBatalla = ["Escudos_vs_Espadas.mp4", "Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
             const videoElegido = misVideosBatalla[Math.floor(Math.random() * misVideosBatalla.length)];
-            const rutaVideo = RUTA_BASE + videoElegido;
+            videoClash.src = RUTA_BASE + videoElegido;
+            videoClash.play();
 
-            // 5. Configuración reforzada
-            videoClash.src = rutaVideo;
-            videoClash.muted = true;
-            videoClash.playsInline = true;
-            videoClash.autoplay = true;
-            // videoClash.loop = true;   // descomenta si quieres que repita
-
-            videoClash.load();
-
-            // 6. Intentar reproducir
-            const playPromise = videoClash.play();
-            if (playPromise !== undefined) {
-                playPromise
-                    .then(() => {
-                        console.log("Reproduciendo batalla: " + videoElegido);
-                    })
-                    .catch(error => {
-                        console.log("Error al auto-reproducir, pasando a resultados...", error);
-                        setTimeout(() => {
-                            modalBatalla.style.display = 'none';
-                            mostrarResultados();
-                        }, 2000);
-                    });
-            }
-
-            // 7. Al terminar el vídeo → resultados
             videoClash.onended = () => {
                 modalBatalla.style.display = 'none';
                 mostrarResultados();
             };
-
-            // Seguridad: timeout máximo por si el vídeo no dispara onended
-            setTimeout(() => {
-                if (modalBatalla.style.display !== 'none') {
-                    modalBatalla.style.display = 'none';
-                    mostrarResultados();
-                }
-            }, 12000);
         };
 
         function mostrarResultados() {
@@ -351,12 +302,12 @@
                 
                 cont.innerHTML += `
                     <div class="resultado-jugador" style="margin-bottom:30px; padding:20px; background:rgba(255,255,255,0.05); border-left:5px solid ${j.color}; border-radius:5px;">
-                        <div class="res-nombre" style="color:${j.color}; font-size:24px; font-weight:900; margin-bottom:10px;">${j.nombre}</div>
-                        <div class="fila-res" style="margin:10px 0;"><span style="color:#aaa;">CARTAS:</span> <span style="color:${j.color}; font-weight:900; font-size:20px;">${j.slotsPuntos}</span></div>
-                        <div class="fila-res" style="margin:10px 0;"><span style="color:#aaa;">DADOS:</span> <span style="color:${j.color}; font-weight:900; font-size:20px;">${j.dadoRonda}</span></div>
-                        <div class="total-score" style="font-size:32px; color:gold; font-weight:900; margin:15px 0; text-shadow:2px 2px 5px rgba(0,0,0,0.5);">${j.puntosTotales} PUNTOS</div>
-                        <div style="font-size:12px; color:#aaa; margin-bottom:10px;">HISTÓRICO (7 RONDAS):</div>
-                        <div style="text-align:center;">${papiros}</div>
+                        <div class="res-nombre" style="color:${j.color}; font-size:28px; font-weight:900; margin-bottom:10px;">${j.nombre}</div>
+                        <div class="fila-res" style="margin:10px 0; color:#000; font-weight:900;"><span>CARTAS:</span> <span>${j.slotsPuntos}</span></div>
+                        <div class="fila-res" style="margin:10px 0; color:#000; font-weight:900;"><span>DADOS:</span> <span>${j.dadoRonda}</span></div>
+                        <div class="total-score" style="font-size:32px; color:#000; font-weight:900; margin:15px 0; text-align:left;">PUNTOS TOTALES: ${j.puntosTotales}</div>
+                        <div style="font-size:14px; color:#000; font-weight:900; margin-bottom:10px;">HISTÓRICO DE RONDAS:</div>
+                        <div style="display:flex; flex-direction:row; flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto;">${papiros}</div>
                     </div>
                 `;
             });
@@ -366,29 +317,16 @@
                 document.getElementById('resultado-ganador').style.display = 'block';
                 document.getElementById('txt-ganador-final').innerText = ganador.nombre;
                 document.getElementById('txt-ganador-final').style.color = ganador.color;
-            } else {
-                document.getElementById('resultado-ganador').style.display = 'none';
             }
             
             document.getElementById('p-resultado').classList.remove('oculto');
-            
-            if(vueltaActual >= MAX_VUELTAS) {
-                document.getElementById('btn-repetir-accion').innerText = "🏆 FINALIZAR GRAN CONTIENDA";
-            } else {
-                document.getElementById('btn-repetir-accion').innerText = "⚔️ SIGUIENTE RONDA";
-            }
         }
 
         window.continuarContienda = () => {
             if(vueltaActual >= MAX_VUELTAS) return location.reload();
             vueltaActual++;
-            slotActual = 0; 
-            turnoIdx = 0; 
-            diceIdx = 0;
-            jugadores.forEach(j => { 
-                j.slotsPuntos = 0; 
-                j.dadoRonda = 0; 
-            });
+            slotActual = 0; turnoIdx = 0; diceIdx = 0;
+            jugadores.forEach(j => { j.slotsPuntos = 0; j.dadoRonda = 0; });
             document.getElementById('p-resultado').classList.add('oculto');
             document.getElementById('ui-juego').classList.remove('oculto');
             document.getElementById('ui-superior-fijo').style.display = 'block';
