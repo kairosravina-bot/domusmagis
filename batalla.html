@@ -271,62 +271,54 @@
         };
 
         window.iniciarFaseFinal = () => {
+            console.log("=== INICIANDO FASE FINAL ===");
             const modal = document.getElementById('modal-batalla');
             const vid = document.getElementById('video-clash');
             
-            // Determinar los 2 jugadores principales
+            // Mostrar modal
+            modal.classList.add('oculto');
+            modal.classList.remove('oculto');
+            modal.style.display = 'flex';
+            modal.style.visibility = 'visible';
+            modal.style.opacity = '1';
+            modal.style.zIndex = '9999';
+            
+            console.log("MODAL VISIBLE:", modal.style.display);
+            
+            // Determinar jugadores
             const jugadoresOrdenados = [...jugadores].sort((a, b) => b.slotsPuntos + b.dadoRonda - (a.slotsPuntos + a.dadoRonda));
             const j1 = jugadoresOrdenados[0];
             const j2 = jugadoresOrdenados[1] || jugadoresOrdenados[0];
             
-            // Actualizar nombres en overlay
             document.getElementById('nombre-j1').innerText = j1.nombre;
             document.getElementById('nombre-j1').style.color = j1.color;
             document.getElementById('nombre-j2').innerText = j2.nombre;
             document.getElementById('nombre-j2').style.color = j2.color;
             
-            modal.style.display = 'flex';
-            
-            // Cargar video aleatorio
+            // Cargar video
             const videoAleatorio = MIS_VIDEOS[Math.floor(Math.random() * MIS_VIDEOS.length)];
             const rutaVideo = RUTA_BASE + videoAleatorio;
             
-            console.log("CARGANDO VIDEO:", rutaVideo);
+            console.log("REPRODUCIÉNDOSE VIDEO:", rutaVideo);
             
             vid.src = rutaVideo;
+            vid.muted = true;
             vid.load();
+            vid.play().catch(err => console.log("Play error:", err));
             
-            // Esperar a que pueda reproducirse
-            vid.oncanplay = () => {
-                console.log("VIDEO LISTO PARA REPRODUCIR");
-                vid.play().catch(e => {
-                    console.error("ERROR AL REPRODUCIR VIDEO:", e);
-                    // Si falla, esperar 6 segundos igual
-                    setTimeout(() => finalizarBatalla(), 6000);
-                });
-            };
-            
-            // Timeout a 6 segundos
-            let inicioVideo = Date.now();
-            vid.ontimeupdate = () => {
-                if((Date.now() - inicioVideo) > 6000) {
-                    finalizarBatalla();
-                }
-            };
-            
-            vid.onended = () => {
-                console.log("VIDEO TERMINÓ");
+            // TIMEOUT FIJO: 6 segundos
+            console.log("INICIANDO TIMEOUT 6 SEGUNDOS");
+            const timeout = setTimeout(() => {
+                console.log("TIMEOUT COMPLETADO - AVANZANDO A RESULTADOS");
                 finalizarBatalla();
-            };
+            }, 6000);
             
             function finalizarBatalla() {
-                console.log("FINALIZANDO BATALLA");
-                vid.ontimeupdate = null;
-                vid.onended = null;
-                vid.oncanplay = null;
+                console.log("=== FINALIZANDO BATALLA ===");
+                clearTimeout(timeout);
                 vid.pause();
-                vid.src = '';
                 modal.style.display = 'none';
+                modal.style.opacity = '0';
                 mostrarResultados();
             }
         };
