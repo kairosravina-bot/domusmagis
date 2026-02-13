@@ -49,12 +49,11 @@
         </div>
     </div>
 
-    <!-- MODAL BATALLA FINAL (VIDEO) - AQUÍ LOS CAMBIOS IMPORTANTES -->
+    <!-- MODAL BATALLA FINAL -->
     <div id="modal-batalla" style="z-index:9999; background:black; display:none; align-items:center; justify-content:center; width:100%; height:100vh; position:fixed; top:0; left:0;">
         <video 
             id="video-clash" 
             playsinline 
-            loop 
             muted 
             autoplay 
             style="width:100%; height:100%; object-fit:contain; background:black;"
@@ -69,7 +68,7 @@
         </div>
     </div>
 
-    <!-- INSCRIPCION -->
+    <!-- INSCRIPCIÓN -->
     <div id="p-setup" class="pantalla" style="background:rgba(0,0,0,0.8); z-index:10000;">
         <h2>INSCRIPCIÓN</h2>
         <div id="setup-selector" style="display:flex; gap:10px;">
@@ -115,7 +114,7 @@
         </div>
     </div>
 
-    <!-- PANTALLA RESULTADOS (PERGAMINO) -->
+    <!-- PANTALLA RESULTADOS -->
     <div id="p-resultado" class="pantalla oculto" style="z-index:11000; background:rgba(0,0,0,0.9);">
         <div id="resultado-batalla" style="max-height:85vh; overflow-y:auto; padding:20px;">
             <h2 style="text-align:center; color:#FFD700; font-size:32px; margin-bottom:30px;">⚔️ CRÓNICAS DE GUERRA ⚔️</h2>
@@ -134,7 +133,7 @@
         let jugadores = [], cantJugadores = 0, turnoIdx = 0, slotActual = 0, vueltaActual = 1;
         let cartaActual = null, jugadaPendiente = null, diceIdx = 0;
         const MAX_SLOTS = 3, MAX_VUELTAS = 7;
-        const MIS_VIDEOS = ["Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
+        const MIS_VIDEOS = ["Escudos_vs_Espadas.mp4", "Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
 
         window.setModo = (m) => { 
             cantJugadores = m; 
@@ -152,7 +151,7 @@
                 slotsPuntos: 0, 
                 dadoRonda: 0, 
                 puntosTotales: 0,
-                historico: [] // Guardar puntos de cada ronda
+                historico: [] 
             });
             document.getElementById('mago-nombre').value = "";
             if(jugadores.length === cantJugadores) { 
@@ -192,9 +191,9 @@
             resetUltimoId(); 
             document.getElementById('msg-visor').innerText = "ESCANEA CARTA"; 
             ['val-i', 'val-a', 'val-t', 'val-m'].forEach(v => { 
-                const e=document.getElementById(v); 
-                e.innerText=""; 
-                e.className="valor-flotante";
+                const e = document.getElementById(v); 
+                e.innerText = ""; 
+                e.className = "valor-flotante";
             }); 
         };
 
@@ -204,21 +203,18 @@
                 const conf = cartaActual.botones[id];
                 jugadaPendiente = { val: conf.valor };
                 const v = document.getElementById('video-action'); 
-                v.style.display='block'; 
-                v.src=RUTA_BASE+conf.video; 
+                v.style.display = 'block'; 
+                v.src = RUTA_BASE + conf.video; 
                 v.play();
-                document.getElementById('hud-derecho').style.display='flex';
+                document.getElementById('hud-derecho').style.display = 'flex';
                 
-                // ESCUDO SIMPLE
                 const escudoUrl = RUTA_BASE + cartaActual.imgEscudo;
                 document.getElementById('hud-img-escudo').src = escudoUrl;
-                console.log("ESCUDO:", escudoUrl);
-                
                 document.getElementById('hud-txt-arma').innerText = cartaActual.nombre;
                 document.getElementById('hud-txt-valor').innerText = conf.valor;
                 v.onended = () => { 
-                    v.style.display='none'; 
-                    document.getElementById('hud-derecho').style.display='none'; 
+                    v.style.display = 'none'; 
+                    document.getElementById('hud-derecho').style.display = 'none'; 
                 };
             };
         });
@@ -273,58 +269,69 @@
             };
         };
 
+        // ── BLOQUE DE BATALLA FINAL (CORREGIDO Y MEJORADO) ──
         window.iniciarFaseFinal = () => {
-            const modal = document.getElementById('modal-batalla');
-            const vid = document.getElementById('video-clash');
-            
-            // MOSTRAR MODAL
-            modal.style.display = 'flex';
-            
-            // NOMBRES
-            const jugadoresOrdenados = [...jugadores].sort((a, b) => b.slotsPuntos + b.dadoRonda - (a.slotsPuntos + a.dadoRonda));
-            const j1 = jugadoresOrdenados[0];
-            const j2 = jugadoresOrdenados[1] || jugadoresOrdenados[0];
-            
-            document.getElementById('nombre-j1').innerText = j1.nombre;
-            document.getElementById('nombre-j1').style.color = j1.color;
-            document.getElementById('nombre-j2').innerText = j2.nombre;
-            document.getElementById('nombre-j2').style.color = j2.color;
-            
-            // VIDEO - LIMPIAR Y CONFIGURAR
-            vid.pause();
-            vid.currentTime = 0;
-            vid.src = '';  // limpiar fuente anterior
-            
-            // CARGAR VIDEO
-            const videoAleatorio = MIS_VIDEOS[Math.floor(Math.random() * MIS_VIDEOS.length)];
-            const rutaVideo = RUTA_BASE + videoAleatorio;
-            
-            vid.src = rutaVideo;
-            vid.muted = true;
-            vid.loop = true;
-            vid.playsInline = true;  // redundante pero a veces ayuda
+            // 1. Ocultar modal de dados por si acaso
+            document.getElementById('modal-dados-fase').classList.add('oculto');
 
-            vid.load();  // fuerza recarga del nuevo source
+            // 2. Preparar modal y vídeo
+            const modalBatalla = document.getElementById('modal-batalla');
+            const videoClash = document.getElementById('video-clash');
 
-            // Intentar reproducir con manejo de errores
-            const playPromise = vid.play();
+            modalBatalla.style.display = 'flex';
+
+            // 3. Reiniciar vídeo
+            videoClash.pause();
+            videoClash.currentTime = 0;
+            videoClash.src = '';
+
+            // 4. Elegir vídeo aleatorio
+            const misVideosBatalla = [
+                "Escudos_vs_Espadas.mp4",
+                "Explosion_Elemental.mp4",
+                "Invocaciones_Etereas.mp4"
+            ];
+            const videoElegido = misVideosBatalla[Math.floor(Math.random() * misVideosBatalla.length)];
+            const rutaVideo = RUTA_BASE + videoElegido;
+
+            // 5. Configuración reforzada
+            videoClash.src = rutaVideo;
+            videoClash.muted = true;
+            videoClash.playsInline = true;
+            videoClash.autoplay = true;
+            // videoClash.loop = true;   // descomenta si quieres que repita
+
+            videoClash.load();
+
+            // 6. Intentar reproducir
+            const playPromise = videoClash.play();
             if (playPromise !== undefined) {
                 playPromise
                     .then(() => {
-                        console.log("Batalla video → Reproducción OK");
+                        console.log("Reproduciendo batalla: " + videoElegido);
                     })
-                    .catch(err => {
-                        console.error("Error reproduciendo video batalla:", err);
-                        // Opcional: aquí podrías mostrar un botón temporal "Toca para ver batalla"
+                    .catch(error => {
+                        console.log("Error al auto-reproducir, pasando a resultados...", error);
+                        setTimeout(() => {
+                            modalBatalla.style.display = 'none';
+                            mostrarResultados();
+                        }, 2000);
                     });
             }
-            
-            // TIMEOUT 6 SEGUNDOS - PUNTO
-            const timerBatalla = setTimeout(() => {
-                vid.pause();
-                modal.style.display = 'none';
+
+            // 7. Al terminar el vídeo → resultados
+            videoClash.onended = () => {
+                modalBatalla.style.display = 'none';
                 mostrarResultados();
-            }, 6000);
+            };
+
+            // Seguridad: timeout máximo por si el vídeo no dispara onended
+            setTimeout(() => {
+                if (modalBatalla.style.display !== 'none') {
+                    modalBatalla.style.display = 'none';
+                    mostrarResultados();
+                }
+            }, 12000);
         };
 
         function mostrarResultados() {
@@ -334,9 +341,8 @@
             jugadores.forEach(j => {
                 const totalRonda = j.slotsPuntos + j.dadoRonda;
                 j.puntosTotales += totalRonda;
-                j.historico.push(totalRonda); // Guardar en histórico
+                j.historico.push(totalRonda);
                 
-                // Generar papiros con puntos históricos
                 let papiros = '';
                 for(let i = 0; i < MAX_VUELTAS; i++) {
                     const ptaño = j.historico[i] || '-';
@@ -355,7 +361,6 @@
                 `;
             });
             
-            // Si es la última vuelta, mostrar ganador
             if(vueltaActual >= MAX_VUELTAS) {
                 const ganador = jugadores.reduce((a, b) => a.puntosTotales > b.puntosTotales ? a : b);
                 document.getElementById('resultado-ganador').style.display = 'block';
