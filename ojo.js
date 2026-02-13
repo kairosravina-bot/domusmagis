@@ -124,56 +124,71 @@ const CARTAS = {
     108: { idar: 108, id: 10, nombre: "IMPERATOR", elemento: "NEUTRO", tipo: "BUHO", imgEscudo: "1100-BU.png", botones: { "btn-i": { texto: "I", valor: 10, video: "108I.mp4" }, "btn-a": { texto: "A", valor: 6, video: "108A.mp4" }, "btn-t": { texto: "T", valor: 4, video: "108T.mp4" }, "btn-m": { texto: "M", valor: 6, video: "108M.mp4" } }, codTarget: "108" }
 };
 
+// --- LOGICA DE PODER Y VIDEOS REPARADA ---
+
+export const RUTA_BASE = "https://kairosravina-bot.github.io/domusmagis/";
+export const VIDEOS_BATALLA = ["Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
+
 let scanning = false;
 let lastConfirmedId = null;
 
 /**
- * REPARACIÓN: Función para sumar Valor de Carta + Dado
- * Úsala en tu lógica de batalla para que el valor de la carta no sea 0.
+ * REPARACIÓN CRÍTICA: Calcula el poder total sumando (Valor Carta + Valor Dado)
+ * @param {Object} carta - El objeto de la carta detectada
+ * @param {string} btnKey - La clave del botón presionado ('btn-i', 'btn-a', 'btn-t', 'btn-m')
+ * @param {number} valorDado - El resultado aleatorio del dado (1-6 o el que uses)
  */
-export function calcularResultadoAccion(carta, idBoton, valorDado) {
-    const valorCarta = carta.botones[idBoton].valor;
-    console.log(`Calculando: Carta(${valorCarta}) + Dado(${valorDado})`);
-    return valorCarta + valorDado;
+export function obtenerResultadoTotal(carta, btnKey, valorDado) {
+    if (!carta || !carta.botones || !carta.botones[btnKey]) {
+        console.error("Error: Carta o botón no válido");
+        return valorDado; // Retorna solo dado si hay error
+    }
+
+    // Extrae el valor numérico de la carta (el que antes daba 0)
+    const valorCarta = parseInt(carta.botones[btnKey].valor) || 0;
+    const resultadoF = valorCarta + valorDado;
+
+    console.log(`Suma Real: Carta ${valorCarta} + Dado ${valorDado} = ${resultadoF}`);
+    return resultadoF;
 }
 
-// Lógica de reproducción reparada: Sin default y con mensaje "NO VIDEO"
+/**
+ * REPARACIÓN VIDEO: Sin default y con aviso "NO VIDEO"
+ */
 export function reproducirVideoAccion(videoElement, rutaVideo) {
     if (!videoElement) return;
 
-    // Si el archivo no existe o falla, se ejecuta esto:
+    // Manejo de error si el video no existe
     videoElement.onerror = () => {
-        console.error("Video no encontrado:", rutaVideo);
-        // Intentamos mostrar "NO VIDEO" sobre el elemento si es posible
-        if (videoElement.parentElement) {
-            videoElement.style.display = "none";
-            let aviso = document.getElementById("aviso-no-video");
-            if (!aviso) {
-                aviso = document.createElement("div");
-                aviso.id = "aviso-no-video";
-                aviso.style.color = "white";
-                aviso.style.fontWeight = "bold";
-                aviso.style.textAlign = "center";
-                aviso.innerText = "NO VIDEO";
-                videoElement.parentElement.appendChild(aviso);
-            }
+        console.error("Video inexistente:", rutaVideo);
+        videoElement.style.display = "none"; // Oculta video fallido
+        
+        // Crear o mostrar aviso en pantalla
+        let aviso = document.getElementById("error-video-display");
+        if (!aviso) {
+            aviso = document.createElement("div");
+            aviso.id = "error-video-display";
+            aviso.style = "color:red; font-size:20px; font-weight:bold; text-align:center; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:black; padding:10px; border:2px solid red;";
+            videoElement.parentElement.appendChild(aviso);
         }
-        alert("NO VIDEO"); 
+        aviso.innerText = "NO VIDEO";
+        aviso.style.display = "block";
     };
 
-    // Limpiamos avisos previos si existen
-    const avisoPrevio = document.getElementById("aviso-no-video");
-    if (avisoPrevio) avisoPrevio.remove();
+    // Reset de estado visual
+    const aviso = document.getElementById("error-video-display");
+    if (aviso) aviso.style.display = "none";
     videoElement.style.display = "block";
 
-    // Llamada directa al video de la carta
+    // Carga directa del video de la carta
     videoElement.src = RUTA_BASE + "videos/" + rutaVideo;
-    
-    videoElement.play().catch(e => {
-        console.warn("Error al reproducir o archivo faltante:", rutaVideo);
-    });
+    videoElement.load();
+    videoElement.play().catch(e => console.warn("Esperando interacción para video"));
 }
 
+/**
+ * ESCÁNER QR INTEGRADO
+ */
 export async function iniciarOjo(containerId, onEncontrado) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -199,16 +214,16 @@ export async function iniciarOjo(containerId, onEncontrado) {
             canvas.width = 400; canvas.height = 300;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            const code = window.jsQR(imageData.data, imageData.width, imageData.height);
+            
+            // Asume que jsQR está cargado globalmente
+            const code = window.jsQR ? window.jsQR(imageData.data, imageData.width, imageData.height) : null;
 
             if(code && code.data.trim() !== lastConfirmedId) {
                 const detectId = code.data.trim();
-                // Buscamos en la base de 108 cartas
                 const carta = CARTAS[detectId] || Object.values(CARTAS).find(c => c.codTarget == detectId);
                 
                 if(carta) {
                     lastConfirmedId = detectId;
-                    // Retornamos copia para no afectar la base original
                     onEncontrado(JSON.parse(JSON.stringify(carta)));
                 }
             }
