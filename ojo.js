@@ -127,19 +127,50 @@ const CARTAS = {
 let scanning = false;
 let lastConfirmedId = null;
 
-// Lógica de reproducción con detección de error "NO VIDEO"
+/**
+ * REPARACIÓN: Función para sumar Valor de Carta + Dado
+ * Úsala en tu lógica de batalla para que el valor de la carta no sea 0.
+ */
+export function calcularResultadoAccion(carta, idBoton, valorDado) {
+    const valorCarta = carta.botones[idBoton].valor;
+    console.log(`Calculando: Carta(${valorCarta}) + Dado(${valorDado})`);
+    return valorCarta + valorDado;
+}
+
+// Lógica de reproducción reparada: Sin default y con mensaje "NO VIDEO"
 export function reproducirVideoAccion(videoElement, rutaVideo) {
     if (!videoElement) return;
-    
-    // Si el video falla al cargar, mostramos mensaje en consola o pantalla
+
+    // Si el archivo no existe o falla, se ejecuta esto:
     videoElement.onerror = () => {
-        console.error("Archivo no encontrado:", rutaVideo);
-        alert("NO VIDEO"); // Mensaje solicitado
+        console.error("Video no encontrado:", rutaVideo);
+        // Intentamos mostrar "NO VIDEO" sobre el elemento si es posible
+        if (videoElement.parentElement) {
+            videoElement.style.display = "none";
+            let aviso = document.getElementById("aviso-no-video");
+            if (!aviso) {
+                aviso = document.createElement("div");
+                aviso.id = "aviso-no-video";
+                aviso.style.color = "white";
+                aviso.style.fontWeight = "bold";
+                aviso.style.textAlign = "center";
+                aviso.innerText = "NO VIDEO";
+                videoElement.parentElement.appendChild(aviso);
+            }
+        }
+        alert("NO VIDEO"); 
     };
 
+    // Limpiamos avisos previos si existen
+    const avisoPrevio = document.getElementById("aviso-no-video");
+    if (avisoPrevio) avisoPrevio.remove();
+    videoElement.style.display = "block";
+
+    // Llamada directa al video de la carta
     videoElement.src = RUTA_BASE + "videos/" + rutaVideo;
-    videoElement.play().catch(() => {
-        console.warn("Reproducción bloqueada o archivo faltante");
+    
+    videoElement.play().catch(e => {
+        console.warn("Error al reproducir o archivo faltante:", rutaVideo);
     });
 }
 
@@ -172,11 +203,12 @@ export async function iniciarOjo(containerId, onEncontrado) {
 
             if(code && code.data.trim() !== lastConfirmedId) {
                 const detectId = code.data.trim();
+                // Buscamos en la base de 108 cartas
                 const carta = CARTAS[detectId] || Object.values(CARTAS).find(c => c.codTarget == detectId);
                 
                 if(carta) {
                     lastConfirmedId = detectId;
-                    // Retornamos una copia limpia de la carta
+                    // Retornamos copia para no afectar la base original
                     onEncontrado(JSON.parse(JSON.stringify(carta)));
                 }
             }
