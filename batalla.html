@@ -3,9 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI: BATALLA V83</title>
+    <title>DOMUS MAGI: BATALLA V84</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <style>
+        .papiro-ronda {
+            display: inline-block;
+            width: 45px;
+            height: 50px;
+            background: linear-gradient(135deg, #f5deb3 0%, #ffe8b6 100%);
+            border: 2px solid #8b7355;
+            border-radius: 5px;
+            margin: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 18px;
+            color: #000;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+        }
+    </style>
 </head>
 <body>
     <div id="container-ar"></div>
@@ -31,14 +50,14 @@
     </div>
 
     <!-- MODAL BATALLA FINAL (VIDEO) -->
-    <div id="modal-batalla" class="pantalla oculto" style="z-index:9999; background:black; display:flex; align-items:center; justify-content:center; width:100%; height:100vh; position:relative;">
+    <div id="modal-batalla" class="pantalla oculto" style="z-index:9999; background:black; display:none; align-items:center; justify-content:center; width:100%; height:100vh; position:fixed; top:0; left:0;">
         <video id="video-clash" playsinline webkit-playsinline muted autoplay style="width:100%; height:100%; object-fit:contain; background:black;"></video>
-        <div id="overlay-batalla" style="position:absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:40px; z-index:9998; pointer-events:none;">
-            <div style="font-size:48px; font-weight:900; color:#FFD700; text-shadow:3px 3px 10px rgba(0,0,0,0.9), 0 0 20px rgba(255,215,0,0.5); letter-spacing:3px; margin-bottom:20px;">⚔️ BATALLA FINAL ⚔️</div>
-            <div style="display:flex; align-items:center; justify-content:center; gap:30px; font-size:36px; font-weight:900; text-shadow:3px 3px 10px rgba(0,0,0,0.9);">
-                <div id="nombre-j1" style="color:#ff0000;">JUGADOR 1</div>
-                <div style="color:#FFD700; font-size:48px;">VS</div>
-                <div id="nombre-j2" style="color:#00aaff;">JUGADOR 2</div>
+        <div id="overlay-batalla" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:9998; pointer-events:none; text-align:center; width:100%;">
+            <div style="font-size:52px; font-weight:900; color:#FFD700; text-shadow:4px 4px 15px rgba(0,0,0,0.95), 0 0 30px rgba(255,215,0,0.7); letter-spacing:4px; margin-bottom:30px; text-transform:uppercase;">⚔️ BATALLA FINAL ⚔️</div>
+            <div style="display:flex; align-items:center; justify-content:center; gap:40px; font-size:40px; font-weight:900; text-shadow:4px 4px 15px rgba(0,0,0,0.95);">
+                <div id="nombre-j1" style="color:#ff0000; text-transform:uppercase;">JUGADOR 1</div>
+                <div style="color:#FFD700; font-size:52px;">⚔️</div>
+                <div id="nombre-j2" style="color:#00aaff; text-transform:uppercase;">JUGADOR 2</div>
             </div>
         </div>
     </div>
@@ -91,9 +110,13 @@
 
     <!-- PANTALLA RESULTADOS (PERGAMINO) -->
     <div id="p-resultado" class="pantalla oculto" style="z-index:11000; background:rgba(0,0,0,0.9);">
-        <div id="resultado-batalla">
-            <h2 style="text-align:center; color:#5a3a22;">CRÓNICAS DE GUERRA</h2>
+        <div id="resultado-batalla" style="max-height:85vh; overflow-y:auto; padding:20px;">
+            <h2 style="text-align:center; color:#FFD700; font-size:32px; margin-bottom:30px;">⚔️ CRÓNICAS DE GUERRA ⚔️</h2>
             <div id="resultado-contenido"></div>
+            <div id="resultado-ganador" style="display:none; text-align:center; margin-top:40px; padding:30px; background:rgba(255,215,0,0.15); border:3px solid gold; border-radius:10px;">
+                <div style="font-size:48px; font-weight:900; color:#FFD700; text-shadow:3px 3px 10px rgba(0,0,0,0.9); margin-bottom:20px;">👑 CAMPEÓN 👑</div>
+                <div id="txt-ganador-final" style="font-size:42px; font-weight:900; text-shadow:3px 3px 10px rgba(0,0,0,0.9);"></div>
+            </div>
         </div>
         <button id="btn-repetir-accion" class="btn-master" onclick="window.continuarContienda()">⚔️ SIGUIENTE RONDA</button>
     </div>
@@ -106,12 +129,24 @@
         const MAX_SLOTS = 3, MAX_VUELTAS = 7;
         const MIS_VIDEOS = ["Escudos_vs_Espadas.mp4", "Explosion_Elemental.mp4", "Invocaciones_Etereas.mp4"];
 
-        window.setModo = (m) => { cantJugadores = m; document.getElementById('setup-selector').style.display='none'; document.getElementById('registro').classList.remove('oculto'); };
+        window.setModo = (m) => { 
+            cantJugadores = m; 
+            document.getElementById('setup-selector').style.display='none'; 
+            document.getElementById('registro').classList.remove('oculto'); 
+        };
 
         window.registrarMago = (elem, col) => {
             const nom = document.getElementById('mago-nombre').value.trim().toUpperCase();
             if(!nom) return alert("Nombre vacío");
-            jugadores.push({ nombre: nom, elemento: elem, color: col, slotsPuntos: 0, dadoRonda: 0, puntosTotales: 0 });
+            jugadores.push({ 
+                nombre: nom, 
+                elemento: elem, 
+                color: col, 
+                slotsPuntos: 0, 
+                dadoRonda: 0, 
+                puntosTotales: 0,
+                historico: [] // Guardar puntos de cada ronda
+            });
             document.getElementById('mago-nombre').value = "";
             if(jugadores.length === cantJugadores) { 
                 document.getElementById('p-setup').classList.add('oculto'); 
@@ -145,10 +180,13 @@
         }
 
         window.forzarReescaneo = () => { 
-            cartaActual = null; resetUltimoId(); 
+            cartaActual = null; 
+            resetUltimoId(); 
             document.getElementById('msg-visor').innerText = "ESCANEA CARTA"; 
             ['val-i', 'val-a', 'val-t', 'val-m'].forEach(v => { 
-                const e=document.getElementById(v); e.innerText=""; e.className="valor-flotante";
+                const e=document.getElementById(v); 
+                e.innerText=""; 
+                e.className="valor-flotante";
             }); 
         };
 
@@ -157,27 +195,36 @@
                 if(!cartaActual) return;
                 const conf = cartaActual.botones[id];
                 jugadaPendiente = { val: conf.valor };
-                const v = document.getElementById('video-action'); v.style.display='block'; v.src=RUTA_BASE+conf.video; v.play();
+                const v = document.getElementById('video-action'); 
+                v.style.display='block'; 
+                v.src=RUTA_BASE+conf.video; 
+                v.play();
                 document.getElementById('hud-derecho').style.display='flex';
                 document.getElementById('hud-img-escudo').src = RUTA_BASE + cartaActual.imgEscudo;
                 document.getElementById('hud-txt-arma').innerText = cartaActual.nombre;
                 document.getElementById('hud-txt-valor').innerText = conf.valor;
-                v.onended = () => { v.style.display='none'; document.getElementById('hud-derecho').style.display='none'; };
+                v.onended = () => { 
+                    v.style.display='none'; 
+                    document.getElementById('hud-derecho').style.display='none'; 
+                };
             };
         });
 
         document.getElementById('btn-confirmar').onclick = () => {
             if(!jugadaPendiente) return alert("Selecciona gema");
             jugadores[turnoIdx].slotsPuntos += jugadaPendiente.val;
-            jugadaPendiente = null; turnoIdx++;
+            jugadaPendiente = null; 
+            turnoIdx++;
             if(turnoIdx >= cantJugadores) { 
-                turnoIdx = 0; slotActual++; 
+                turnoIdx = 0; 
+                slotActual++; 
                 if(slotActual >= MAX_SLOTS) {
                     window.iniciarFaseDados();
                     return;
                 }
             }
-            actualizarUI(); window.forzarReescaneo();
+            actualizarUI(); 
+            window.forzarReescaneo();
         };
 
         window.iniciarFaseDados = () => {
@@ -193,9 +240,12 @@
         window.ejecutarLanzamientoBatalla = (n) => {
             const vid = document.getElementById('video-dados-batalla');
             const res = document.getElementById('layer-valor-batalla');
-            res.innerText = "..."; vid.currentTime = 0; vid.play();
+            res.innerText = "..."; 
+            vid.currentTime = 0; 
+            vid.play();
             vid.onended = () => {
-                let suma = 0; for(let i=0; i<n; i++) suma += Math.floor(Math.random()*6)+1;
+                let suma = 0; 
+                for(let i=0; i<n; i++) suma += Math.floor(Math.random()*6)+1;
                 res.innerText = suma;
                 jugadores[diceIdx].dadoRonda = suma;
                 setTimeout(() => {
@@ -214,73 +264,44 @@
             const modal = document.getElementById('modal-batalla');
             const vid = document.getElementById('video-clash');
             
-            // Determinar los 2 jugadores principales (por puntos actuales)
+            // Determinar los 2 jugadores principales
             const jugadoresOrdenados = [...jugadores].sort((a, b) => b.slotsPuntos + b.dadoRonda - (a.slotsPuntos + a.dadoRonda));
             const j1 = jugadoresOrdenados[0];
             const j2 = jugadoresOrdenados[1] || jugadoresOrdenados[0];
             
-            // Actualizar nombres y colores en el overlay
+            // Actualizar nombres en overlay
             document.getElementById('nombre-j1').innerText = j1.nombre;
             document.getElementById('nombre-j1').style.color = j1.color;
             document.getElementById('nombre-j2').innerText = j2.nombre;
             document.getElementById('nombre-j2').style.color = j2.color;
             
-            modal.classList.remove('oculto');
             modal.style.display = 'flex';
-            modal.style.visibility = 'visible';
             
             const videoAleatorio = MIS_VIDEOS[Math.floor(Math.random() * MIS_VIDEOS.length)];
             const rutaVideo = RUTA_BASE + videoAleatorio;
             
             vid.src = rutaVideo;
-            vid.style.display = 'block';
-            vid.style.visibility = 'visible';
+            vid.load();
             
-            // Limpiar handlers previos
-            vid.onended = null;
-            vid.oncanplay = null;
-            vid.ontimeupdate = null;
+            setTimeout(() => {
+                vid.play().catch(e => console.error("Error:", e));
+            }, 100);
             
-            // Esperar a que el video pueda reproducirse
-            vid.oncanplay = () => {
-                vid.oncanplay = null;
-                vid.play().catch(e => {
-                    console.error("Error reproduciendo:", e);
-                    setTimeout(() => finalizarBatalla(), 3000);
-                });
-            };
-            
-            // Manejador para cuando termina
-            vid.onended = () => {
-                console.log("Video terminado");
-                finalizarBatalla();
-            };
-            
-            // Límite de 6 segundos máximo
-            let tiempoInicio = Date.now();
+            // Timeout a 6 segundos
+            let inicioVideo = Date.now();
             vid.ontimeupdate = () => {
-                const tiempoTranscurrido = (Date.now() - tiempoInicio) / 1000;
-                if(tiempoTranscurrido > 6) {
+                if((Date.now() - inicioVideo) > 6000) {
                     finalizarBatalla();
                 }
             };
             
-            // Fallback: si no termina en 8 segundos, avanzar
-            const fallbackTimer = setTimeout(() => {
-                console.warn("Video timeout, avanzando");
-                finalizarBatalla();
-            }, 8000);
+            vid.onended = () => finalizarBatalla();
             
             function finalizarBatalla() {
-                clearTimeout(fallbackTimer);
-                vid.onended = null;
-                vid.oncanplay = null;
                 vid.ontimeupdate = null;
-                modal.classList.add('oculto');
-                modal.style.display = 'none';
-                modal.style.visibility = 'hidden';
+                vid.onended = null;
                 vid.pause();
-                vid.src = '';
+                modal.style.display = 'none';
                 mostrarResultados();
             }
         };
@@ -288,30 +309,60 @@
         function mostrarResultados() {
             const cont = document.getElementById('resultado-contenido');
             cont.innerHTML = "";
+            
             jugadores.forEach(j => {
                 const totalRonda = j.slotsPuntos + j.dadoRonda;
                 j.puntosTotales += totalRonda;
+                j.historico.push(totalRonda); // Guardar en histórico
+                
+                // Generar papiros con puntos históricos
+                let papiros = '';
+                for(let i = 0; i < MAX_VUELTAS; i++) {
+                    const ptaño = j.historico[i] || '-';
+                    papiros += `<div class="papiro-ronda">${ptaño}</div>`;
+                }
+                
                 cont.innerHTML += `
-                    <div class="resultado-jugador">
-                        <div class="res-nombre" style="color:${j.color}">${j.nombre}</div>
-                        <div class="fila-res"><span>CARTAS DE ESTA RONDA:</span> <span>${j.slotsPuntos}</span></div>
-                        <div class="fila-res"><span>DADOS DE ESTA RONDA:</span> <span>${j.dadoRonda}</span></div>
-                        <div class="total-score">${j.puntosTotales}</div>
-                        <div style="font-size:10px; text-align:right;">PUNTOS TOTALES ACUMULADOS</div>
+                    <div class="resultado-jugador" style="margin-bottom:30px; padding:20px; background:rgba(255,255,255,0.05); border-left:5px solid ${j.color}; border-radius:5px;">
+                        <div class="res-nombre" style="color:${j.color}; font-size:24px; font-weight:900; margin-bottom:10px;">${j.nombre}</div>
+                        <div class="fila-res" style="margin:10px 0;"><span style="color:#aaa;">CARTAS:</span> <span style="color:${j.color}; font-weight:900;">${j.slotsPuntos}</span></div>
+                        <div class="fila-res" style="margin:10px 0;"><span style="color:#aaa;">DADOS:</span> <span style="color:${j.color}; font-weight:900;">${j.dadoRonda}</span></div>
+                        <div class="total-score" style="font-size:28px; color:gold; font-weight:900; margin:15px 0;">${j.puntosTotales} PUNTOS</div>
+                        <div style="font-size:12px; color:#aaa; margin-bottom:10px;">HISTÓRICO (7 RONDAS):</div>
+                        <div style="text-align:center;">${papiros}</div>
                     </div>
                 `;
             });
+            
+            // Si es la última vuelta, mostrar ganador
+            if(vueltaActual >= MAX_VUELTAS) {
+                const ganador = jugadores.reduce((a, b) => a.puntosTotales > b.puntosTotales ? a : b);
+                document.getElementById('resultado-ganador').style.display = 'block';
+                document.getElementById('txt-ganador-final').innerText = ganador.nombre;
+                document.getElementById('txt-ganador-final').style.color = ganador.color;
+            } else {
+                document.getElementById('resultado-ganador').style.display = 'none';
+            }
+            
             document.getElementById('p-resultado').classList.remove('oculto');
+            
             if(vueltaActual >= MAX_VUELTAS) {
                 document.getElementById('btn-repetir-accion').innerText = "🏆 FINALIZAR GRAN CONTIENDA";
+            } else {
+                document.getElementById('btn-repetir-accion').innerText = "⚔️ SIGUIENTE RONDA";
             }
         }
 
         window.continuarContienda = () => {
             if(vueltaActual >= MAX_VUELTAS) return location.reload();
             vueltaActual++;
-            slotActual = 0; turnoIdx = 0; diceIdx = 0;
-            jugadores.forEach(j => { j.slotsPuntos = 0; j.dadoRonda = 0; });
+            slotActual = 0; 
+            turnoIdx = 0; 
+            diceIdx = 0;
+            jugadores.forEach(j => { 
+                j.slotsPuntos = 0; 
+                j.dadoRonda = 0; 
+            });
             document.getElementById('p-resultado').classList.add('oculto');
             document.getElementById('ui-juego').classList.remove('oculto');
             document.getElementById('ui-superior-fijo').style.display = 'block';
