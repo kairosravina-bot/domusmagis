@@ -63,9 +63,10 @@
 <body>
     <div id="container-ar"></div>
     
-    <div id="ui-superior-fijo" style="position:fixed; top:10px; left:10px; z-index:9000; display:none;">
-        <div id="txt-turno" style="background:rgba(0,0,0,0.9); padding:10px 15px; border:3px solid gold; font-size:24px; font-weight:900; border-radius:8px;">TURNO: ---</div>
-        <div id="txt-vuelta" style="background:gold; color:black; padding:5px 10px; font-weight:900; border-radius:5px; margin-top:5px; display:inline-block;">ROUND: 1 / 7</div>
+    <!-- UI SUPERIOR FIJA: Turno y Round Unificados -->
+    <div id="ui-superior-fijo" style="position:fixed; top:10px; left:10px; z-index:9000; display:none; font-family: 'Cinzel', serif;">
+        <div id="txt-turno" style="background:rgba(0,0,0,0.9); padding:8px 12px; border:2px solid gold; font-size:18px; font-weight:900; border-radius:5px; width: 230px; text-align: left; white-space: nowrap; overflow: hidden;">TURNO: ---</div>
+        <div id="txt-vuelta" style="background:gold; color:black; padding:8px 12px; font-size:18px; font-weight:900; border-radius:5px; margin-top:5px; width: 230px; text-align: left; border: 2px solid gold;">ROUND: 1 / 7</div>
     </div>
 
     <!-- MODAL DADOS -->
@@ -98,7 +99,7 @@
             <button class="btn-setup-elegant" onclick="window.setModo(4)">4 PLAYERS</button>
         </div>
         <div id="registro" class="oculto">
-            <input type="text" id="mago-nombre" placeholder="NOMBRE DEL MAGO">
+            <input type="text" id="mago-nombre" placeholder="NOMBRE DEL MAGO" maxlength="10">
             <div class="grid-casas">
                 <button onclick="window.registrarMago('TERRA','#ff0000')" class="btn-casa" style="background:#500;">🛡️ TERRA</button>
                 <button onclick="window.registrarMago('CAELUM','#00aaff')" class="btn-casa" style="background:#003;">⚔️ CAELUM</button>
@@ -136,6 +137,7 @@
         </div>
     </div>
 
+    <!-- PANTALLA RESULTADOS -->
     <div id="p-resultado" class="pantalla oculto" style="z-index:11000; background:rgba(0,0,0,0.9);">
         <div id="resultado-batalla" style="max-height:85vh; overflow-y:auto; padding:20px;">
             <h2 style="text-align:center; color:#000; font-size:32px; margin-bottom:30px; font-weight:900;">⚔️ RESULTADOS ⚔️</h2>
@@ -238,14 +240,13 @@
             document.getElementById('layer-valor-batalla').innerText = ""; 
             document.getElementById('dados-player-name').innerText = jugadores[diceIdx].nombre;
             document.getElementById('dados-player-name').style.color = jugadores[diceIdx].color;
-            // Limpiar resaltado de botones al iniciar fase
             [1,2,3,4,5].forEach(i => document.getElementById('btn-batalla-'+i).classList.remove('tageado'));
         };
 
         window.ejecutarLanzamientoBatalla = (n) => {
-            // Visual de selección
             [1,2,3,4,5].forEach(i => document.getElementById('btn-batalla-'+i).classList.remove('tageado'));
-            document.getElementById('btn-batalla-'+n).classList.add('tageado');
+            const btn = document.getElementById('btn-batalla-'+n);
+            if(btn) btn.classList.add('tageado');
 
             const vid = document.getElementById('video-dados-batalla');
             const res = document.getElementById('layer-valor-batalla');
