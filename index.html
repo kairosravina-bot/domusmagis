@@ -8,16 +8,23 @@
     <script type="module" src="ojo.js"></script>
 </head>
 <body>
+    <!-- PANTALLA INICIAL -->
     <div id="p-inicio" class="pantalla">
-        <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap: 20px;">
+            <!-- ESCUDO LOGO -->
+            <img src="logoescudo.png" alt="Escudo Domus Magi" style="width: 180px; height: auto; filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.6)); margin-bottom: -10px;">
+            
             <div>
-                <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V22</p>
+                <!-- TEXTO UNIFICADO EN DORADO -->
+                <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px; margin-top: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">DOMUS<br>MAGI</h1>
+                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS Ver: 1.00</p>
             </div>
+            
             <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTER</button>
         </div>
     </div>
 
+    <!-- MENÚ PRINCIPAL -->
     <div id="p-menu-principal" class="pantalla oculto">
         <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
         
@@ -30,7 +37,6 @@
         </div>
 
         <div class="fila-juego">
-            <!-- CORRECCIÓN: Función de salida mejorada -->
             <button class="btn-jugar" style="background:#500; border-color:#fff;" onclick="salirApp()">❌ EXIT</button>
         </div>
     </div>
@@ -40,13 +46,16 @@
             document.getElementById('p-inicio').classList.add('oculto');
             document.getElementById('p-menu-principal').classList.remove('oculto');
             const v = document.getElementById('intro-video');
-            if(v) { v.muted = false; v.play().catch(e => console.log("Video block")); }
+            if(v) { 
+                v.muted = false; 
+                v.play().catch(e => console.log("Video interactivo requerido")); 
+            }
         }
 
         function salirApp() {
             if (confirm("¿Deseas salir del juego?")) {
                 window.close();
-                // Si window.close() no funciona por seguridad del navegador:
+                // Respaldo si el navegador bloquea el cierre directo
                 setTimeout(() => {
                     window.location.href = "about:blank";
                 }, 300);
