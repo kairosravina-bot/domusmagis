@@ -18,9 +18,8 @@
                 <div id="layer-valor-solo" class="layer-valor" style="display:none;">0</div>
             </div>
 
-            <!-- GRID DE DADOS ACTUALIZADO CON 1D -->
+            <!-- GRID DE DADOS -->
             <div class="grid-dados" style="margin: 20px auto; animation: slideUp 0.6s ease-out 0.3s both;">
-                <div class="btn-dado-sel" id="btn-solo-1" onclick="tirarDados(1)"><strong>1D</strong></div>
                 <div class="btn-dado-sel" id="btn-solo-2" onclick="tirarDados(2)"><strong>2D</strong></div>
                 <div class="btn-dado-sel" id="btn-solo-3" onclick="tirarDados(3)"><strong>3D</strong></div>
                 <div class="btn-dado-sel" id="btn-solo-4" onclick="tirarDados(4)"><strong>4D</strong></div>
@@ -35,8 +34,8 @@
         function tirarDados(n) {
             console.log(`🎲 Tirando ${n}D...`);
             
-            // Reset visual incluyendo el nuevo botón 1
-            [1,2,3,4,5].forEach(i => {
+            // Reset visual
+            [2,3,4,5].forEach(i => {
                 const btn = document.getElementById('btn-solo-'+i);
                 if (btn) btn.classList.remove('tageado');
             });
