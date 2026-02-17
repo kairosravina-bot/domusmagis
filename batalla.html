@@ -28,6 +28,27 @@
             color: #fff; font-size: 50px !important; cursor: pointer;
             text-shadow: 2px 2px 4px #000;
         }
+        /* Estilo elegante para botones de setup vertical */
+        .btn-setup-elegant {
+            width: 280px;
+            padding: 20px;
+            margin: 10px 0;
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            font-weight: 900;
+            color: gold;
+            background: linear-gradient(145deg, #2a2a2a, #000);
+            border: 2px solid gold;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+        .btn-setup-elegant:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 5px gold;
+        }
     </style>
 </head>
 <body>
@@ -38,6 +59,7 @@
         <div id="txt-vuelta" style="background:gold; color:black; padding:5px 10px; font-weight:900; border-radius:5px; margin-top:5px; display:inline-block;">ROUND: 1 / 7</div>
     </div>
 
+    <!-- MODAL DADOS -->
     <div id="modal-dados-fase" class="pantalla oculto" style="z-index:9500; background:rgba(0,0,0,0.95);">
         <h1 id="dados-player-name" style="font-size:36px; font-weight:900; color:white;">JUGADOR</h1>
         <div class="dados-container">
@@ -52,11 +74,12 @@
         </div>
     </div>
 
-    <div id="p-setup" class="pantalla" style="background:rgba(0,0,0,0.8); z-index:10000;">
-        <h2>PLAYERS</h2>
-        <div id="setup-selector" style="display:flex; gap:10px;">
-            <button class="btn-master" onclick="window.setModo(2)">2 PLAYERS</button>
-            <button class="btn-master" onclick="window.setModo(4)">4 PLAYERS</button>
+    <!-- PLAYERS SETUP -->
+    <div id="p-setup" class="pantalla" style="background:rgba(0,0,0,0.85); z-index:10000;">
+        <h2 style="color:white; letter-spacing: 5px; margin-bottom: 30px;">PLAYERS</h2>
+        <div id="setup-selector" style="display:flex; flex-direction: column; gap:15px; align-items:center;">
+            <button class="btn-setup-elegant" onclick="window.setModo(2)">2 PLAYERS</button>
+            <button class="btn-setup-elegant" onclick="window.setModo(4)">4 PLAYERS</button>
         </div>
         <div id="registro" class="oculto">
             <input type="text" id="mago-nombre" placeholder="NOMBRE DEL MAGO">
@@ -69,6 +92,7 @@
         </div>
     </div>
 
+    <!-- UI JUEGO -->
     <div id="ui-juego" class="oculto">
         <div id="zona-superior">
             <div id="hud-derecho">
@@ -80,7 +104,7 @@
             <video id="video-action" playsinline style="display:none;"></video>
         </div>
         <div id="zona-inferior">
-            <div id="msg-visor" style="font-size:26px; color:gold; font-weight:900;">ESCANEA CARTA</div>
+            <div id="msg-visor" style="font-size:32px; color:gold; font-weight:900; letter-spacing:8px;">SCAN</div>
             <p style="color:#aaa; font-weight:900;">SLOT: <span id="slot-indicator">1/3</span></p>
             <div class="contenedor-gemas">
                 <div class="wrapper-gema"><span id="val-i" class="valor-flotante"></span><button id="btn-i" class="btn-gema"><span class="letra-grande">I</span></button></div>
@@ -96,6 +120,7 @@
         </div>
     </div>
 
+    <!-- PANTALLA RESULTADOS -->
     <div id="p-resultado" class="pantalla oculto" style="z-index:11000; background:rgba(0,0,0,0.9);">
         <div id="resultado-batalla" style="max-height:85vh; overflow-y:auto; padding:20px;">
             <h2 style="text-align:center; color:#000; font-size:32px; margin-bottom:30px; font-weight:900;">⚔️ RESULTADOS ⚔️</h2>
@@ -143,7 +168,7 @@
                 cartaActual = carta;
                 document.getElementById('guia-scanner').className = "verde";
                 setTimeout(() => document.getElementById('guia-scanner').className = "", 600);
-                document.getElementById('msg-visor').innerHTML = `<span>${carta.nombre}</span>`;
+                document.getElementById('msg-visor').innerHTML = `<span style="letter-spacing:1px;">${carta.nombre}</span>`;
                 ['btn-i', 'btn-a', 'btn-t', 'btn-m'].forEach(id => {
                     const v = document.getElementById(id.replace('btn-', 'val-'));
                     v.innerText = carta.botones[id].valor;
@@ -162,7 +187,7 @@
 
         window.forzarReescaneo = () => { 
             cartaActual = null; resetUltimoId(); 
-            document.getElementById('msg-visor').innerText = "ESCANEA CARTA"; 
+            document.getElementById('msg-visor').innerText = "SCAN"; 
             ['val-i', 'val-a', 'val-t', 'val-m'].forEach(v => { 
                 document.getElementById(v).innerText = ""; 
             }); 
