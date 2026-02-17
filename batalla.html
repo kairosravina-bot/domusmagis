@@ -21,6 +21,7 @@
             color: #000;
             box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
         }
+        /* Resaltado de botones de dados */
         .btn-dado-sel {
             width: 100%; height: 90px;
             background: #222; border: 1px solid #444; border-radius: 12px;
@@ -31,8 +32,8 @@
             font-family: 'Cinzel', serif;
         }
         .btn-dado-sel.tageado { 
-            background: #400; border: 3px solid #f00; color: #fff; 
-            box-shadow: 0 0 20px rgba(255,0,0,0.5);
+            background: #400 !important; border: 3px solid #f00 !important; color: #fff !important; 
+            box-shadow: 0 0 20px rgba(255,0,0,0.5) !important;
         }
         .btn-setup-elegant {
             width: 280px; padding: 20px; margin: 10px 0;
@@ -54,9 +55,8 @@
         }
     </style>
 </head>
-<body onclick="desbloquearAudio()"> <!-- Se añade clic inicial para móviles -->
-    
-    <!-- REPARACIÓN: Nombre exacto del archivo -->
+<body>
+    <!-- Audio de Fanfarrea -->
     <audio id="audio-fanfarria" src="fanfarrea.mp3" preload="auto"></audio>
 
     <div id="container-ar"></div>
@@ -157,13 +157,19 @@
         let cartaActual = null, jugadaPendiente = null, diceIdx = 0;
         const MAX_SLOTS = 3, MAX_VUELTAS = 7;
 
-        // Función para desbloquear audio en móviles
-        window.desbloquearAudio = () => {
+        // Función para preparar audio silenciosamente
+        function prepararAudio() {
             const fmf = document.getElementById('audio-fanfarria');
-            fmf.play().then(() => { fmf.pause(); fmf.currentTime = 0; }).catch(e => {});
-        };
+            fmf.muted = true;
+            fmf.play().then(() => {
+                fmf.pause();
+                fmf.muted = false;
+                fmf.currentTime = 0;
+            }).catch(e => console.log("Audio prep waiting..."));
+        }
 
         window.setModo = (m) => { 
+            prepararAudio(); // Desbloquea audio al elegir modo
             cantJugadores = m; 
             document.getElementById('setup-selector').style.display='none'; 
             document.getElementById('registro').classList.remove('oculto'); 
@@ -241,9 +247,21 @@
             document.getElementById('layer-valor-batalla').innerText = ""; 
             document.getElementById('dados-player-name').innerText = jugadores[diceIdx].nombre;
             document.getElementById('dados-player-name').style.color = jugadores[diceIdx].color;
+            // Limpiar resaltado al entrar
+            for(let i=1; i<=5; i++) {
+                const b = document.getElementById('btn-batalla-'+i);
+                if(b) b.classList.remove('tageado');
+            }
         };
 
         window.ejecutarLanzamientoBatalla = (n) => {
+            // CORRECCIÓN: Resaltado visual rojizo
+            for(let i=1; i<=5; i++) {
+                const b = document.getElementById('btn-batalla-'+i);
+                if(b) b.classList.remove('tageado');
+            }
+            document.getElementById('btn-batalla-'+n).classList.add('tageado');
+
             const vid = document.getElementById('video-dados-batalla');
             const res = document.getElementById('layer-valor-batalla');
             res.innerText = ""; 
@@ -287,11 +305,7 @@
                     const fmf = document.getElementById('audio-fanfarria');
 
                     pVic.classList.remove('oculto');
-                    // EJECUCIÓN DEL AUDIO
-                    if(fmf) {
-                        fmf.currentTime = 0;
-                        fmf.play().catch(e => console.log("Permiso de audio denegado"));
-                    }
+                    if(fmf) fmf.play(); // Suena fanfarrea completa
 
                     let copia = [...jugadores].sort((a,b) => b.puntosTotales - a.puntosTotales);
                     if(copia.length > 1 && copia[0].puntosTotales === copia[1].puntosTotales) {
