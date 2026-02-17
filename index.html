@@ -10,23 +10,28 @@
 <body>
     <!-- PANTALLA INICIAL -->
     <div id="p-inicio" class="pantalla">
-        <div style="display:flex; flex-direction:column; align-items:center; gap: 20px;">
-            <!-- ESCUDO LOGO -->
-            <img src="logoescudo.png" alt="Escudo Domus Magi" style="width: 180px; height: auto; filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.6)); margin-bottom: -10px;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap: 10px;">
             
-            <div>
-                <!-- TEXTO UNIFICADO EN DORADO -->
-                <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px; margin-top: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">DOMUS<br>MAGI</h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS Ver: 1.00</p>
+            <!-- LOGO ESCUDO -->
+            <div style="width: 220px; height: auto; margin-bottom: -15px;">
+                <img src="logoescudo.png" style="width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.6));">
             </div>
             
-            <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTER</button>
+            <div>
+                <!-- TITULO UNIFICADO EN DORADO -->
+                <h1 style="font-size: 65px; line-height:0.85; text-align:center; color: #d4af37; margin: 0; text-shadow: 2px 2px 5px rgba(0,0,0,0.7); font-family: 'Cinzel', serif; font-weight: 900;">
+                    DOMUS<br>MAGI
+                </h1>
+                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin: 10px 0 0 0; font-size: 16px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V1.4</p>
+            </div>
+            
+            <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200); margin-top: 30px;" onclick="entrarGrimorio()">ENTER</button>
         </div>
     </div>
 
-    <!-- MENÚ PRINCIPAL -->
+    <!-- MENU PRINCIPAL -->
     <div id="p-menu-principal" class="pantalla oculto">
-        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid var(--borde-dorado); border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
+        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid #d4af37; border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
         
         <div class="fila-juego">
             <button class="btn-jugar" onclick="window.location.href='batalla.html'">⚔️ FIRST BLOOD 1</button>
@@ -48,14 +53,13 @@
             const v = document.getElementById('intro-video');
             if(v) { 
                 v.muted = false; 
-                v.play().catch(e => console.log("Video interactivo requerido")); 
+                v.play().catch(e => console.log("Interacción requerida")); 
             }
         }
 
         function salirApp() {
             if (confirm("¿Deseas salir del juego?")) {
                 window.close();
-                // Respaldo si el navegador bloquea el cierre directo
                 setTimeout(() => {
                     window.location.href = "about:blank";
                 }, 300);
