@@ -54,9 +54,10 @@
         }
     </style>
 </head>
-<body>
-    <!-- Audio de Fanfarria -->
-    <audio id="audio-fanfarria" src="fanfarria.mp3" preload="auto"></audio>
+<body onclick="desbloquearAudio()"> <!-- Se añade clic inicial para móviles -->
+    
+    <!-- REPARACIÓN: Nombre exacto del archivo -->
+    <audio id="audio-fanfarria" src="fanfarrea.mp3" preload="auto"></audio>
 
     <div id="container-ar"></div>
 
@@ -155,6 +156,12 @@
         let jugadores = [], cantJugadores = 0, turnoIdx = 0, slotActual = 0, vueltaActual = 1;
         let cartaActual = null, jugadaPendiente = null, diceIdx = 0;
         const MAX_SLOTS = 3, MAX_VUELTAS = 7;
+
+        // Función para desbloquear audio en móviles
+        window.desbloquearAudio = () => {
+            const fmf = document.getElementById('audio-fanfarria');
+            fmf.play().then(() => { fmf.pause(); fmf.currentTime = 0; }).catch(e => {});
+        };
 
         window.setModo = (m) => { 
             cantJugadores = m; 
@@ -280,7 +287,11 @@
                     const fmf = document.getElementById('audio-fanfarria');
 
                     pVic.classList.remove('oculto');
-                    if(fmf) fmf.play().catch(e => console.log("Error Audio"));
+                    // EJECUCIÓN DEL AUDIO
+                    if(fmf) {
+                        fmf.currentTime = 0;
+                        fmf.play().catch(e => console.log("Permiso de audio denegado"));
+                    }
 
                     let copia = [...jugadores].sort((a,b) => b.puntosTotales - a.puntosTotales);
                     if(copia.length > 1 && copia[0].puntosTotales === copia[1].puntosTotales) {
