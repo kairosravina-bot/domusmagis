@@ -12,7 +12,7 @@
         <div style="display:flex; flex-direction:column; align-items:center; gap: 30px;">
             <div>
                 <h1 style="font-size: 60px; line-height:1; text-align:center; color: var(--borde-dorado); margin-bottom: 5px;">DOMUS<br><span style="color:#fff;">MAGI</span></h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V1616161616161Y</p>
+                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin:0; font-size: 18px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V20</p>
             </div>
             <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200);" onclick="entrarGrimorio()">ENTER</button>
         </div>
@@ -30,7 +30,8 @@
         </div>
 
         <div class="fila-juego">
-            <button class="btn-jugar" style="background:#500; border-color:#fff;" onclick="window.close()">❌ EXIT</button>
+            <!-- CORRECCIÓN: Función de salida mejorada -->
+            <button class="btn-jugar" style="background:#500; border-color:#fff;" onclick="salirApp()">❌ EXIT</button>
         </div>
     </div>
 
@@ -40,6 +41,16 @@
             document.getElementById('p-menu-principal').classList.remove('oculto');
             const v = document.getElementById('intro-video');
             if(v) { v.muted = false; v.play().catch(e => console.log("Video block")); }
+        }
+
+        function salirApp() {
+            if (confirm("¿Deseas salir del juego?")) {
+                window.close();
+                // Si window.close() no funciona por seguridad del navegador:
+                setTimeout(() => {
+                    window.location.href = "about:blank";
+                }, 300);
+            }
         }
     </script>
 </body>
