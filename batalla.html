@@ -21,13 +21,17 @@
             color: #000;
             box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
         }
+        /* Botones de dados estilo Oráculo */
         .btn-dado-sel {
             width: 100%; height: 90px;
             border: 3px solid #fff; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
             color: #fff; font-size: 50px !important; cursor: pointer;
             text-shadow: 2px 2px 4px #000;
+            transition: transform 0.1s;
         }
+        .btn-dado-sel:active { transform: scale(0.95); }
+
         /* Estilo elegante para botones de setup vertical */
         .btn-setup-elegant {
             width: 280px;
@@ -66,6 +70,13 @@
             <video id="video-dados-batalla" class="video-dados" src="https://kairosravina-bot.github.io/domusmagis/Dados.mp4" playsinline muted></video>
             <div id="layer-valor-batalla" class="layer-valor" style="font-weight:900;"></div>
         </div>
+
+        <!-- BOTÓN 1 DADO (ENCIMA DEL GRID) -->
+        <div style="width: 100%; max-width: 300px; margin-bottom: 15px;">
+            <div class="btn-dado-sel" style="background: #444;" onclick="window.ejecutarLanzamientoBatalla(1)"><strong>1</strong></div>
+        </div>
+
+        <!-- GRID DE DADOS 2, 3, 4, 5 -->
         <div class="grid-dados">
             <div class="btn-dado-sel" style="background: #a00;" onclick="window.ejecutarLanzamientoBatalla(2)"><strong>2</strong></div>
             <div class="btn-dado-sel" style="background: #00a;" onclick="window.ejecutarLanzamientoBatalla(3)"><strong>3</strong></div>
@@ -120,7 +131,6 @@
         </div>
     </div>
 
-    <!-- PANTALLA RESULTADOS -->
     <div id="p-resultado" class="pantalla oculto" style="z-index:11000; background:rgba(0,0,0,0.9);">
         <div id="resultado-batalla" style="max-height:85vh; overflow-y:auto; padding:20px;">
             <h2 style="text-align:center; color:#000; font-size:32px; margin-bottom:30px; font-weight:900;">⚔️ RESULTADOS ⚔️</h2>
