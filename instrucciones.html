@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>DOMUS MAGI - INSTRUCCIONES</title>
     <style>
         * {
@@ -10,170 +10,185 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            background: #000;
+            background: #1a1a1a;
+            font-family: 'Cinzel', serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #flipbook-container {
+            width: 100%;
+            height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            min-height: 100vh;
-            padding: 10px;
+            justify-content: flex-start;
+            position: relative;
+            padding: 60px 10px 10px 10px;
         }
-        
-        .flipbook {
+
+        #flipbook-image {
             width: 100%;
-            max-width: 100%;
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .page {
-            display: none;
-            width: 100%;
+            max-width: 95vw;
             height: auto;
+            max-height: calc(100vh - 140px);
+            object-fit: contain;
+            border: 3px solid #d4af37;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+            margin-bottom: 10px;
         }
-        
-        .page.active {
-            display: block;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .page img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        
+
         .controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
             display: flex;
             justify-content: center;
-            gap: 15px;
-            z-index: 1000;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+            width: 100%;
+            flex-wrap: nowrap;
         }
-        
+
         button {
-            background: linear-gradient(to bottom, #8b6f47, #3a2a0a);
-            color: #d4af37;
+            background: linear-gradient(to bottom, #3a3a3a, #1a1a1a);
             border: 2px solid #d4af37;
-            padding: 12px 25px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 8px;
+            color: #ffd700;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Cinzel', serif;
-            letter-spacing: 1px;
+            border-radius: 5px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 0 #000;
+            white-space: nowrap;
+            flex: 1;
+            max-width: 140px;
         }
-        
-        button:hover {
-            background: linear-gradient(to bottom, #a0845a, #4a3a1a);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
-            transform: scale(1.05);
-        }
-        
+
         button:active {
-            transform: scale(0.98);
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #000;
         }
-        
-        .page-counter {
-            color: #d4af37;
-            font-size: 16px;
-            font-weight: bold;
-            background: rgba(0,0,0,0.8);
-            border: 2px solid #d4af37;
-            padding: 10px 20px;
-            border-radius: 8px;
-            letter-spacing: 1px;
-            font-family: 'Cinzel', serif;
-        }
-        
+
         button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        .page-info {
+            color: #ffd700;
+            font-size: 12px;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px #000;
+            text-align: center;
+            flex: 0 0 auto;
+            min-width: 80px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #500;
+            border-color: #fff;
+            color: #fff;
+            padding: 8px 12px;
+            font-size: 12px;
+            max-width: 90px;
+        }
+
+        @media (max-width: 480px) {
+            #flipbook-container {
+                padding: 50px 8px 8px 8px;
+            }
+
+            button {
+                padding: 8px 12px;
+                font-size: 12px;
+                max-width: 110px;
+            }
+
+            .page-info {
+                font-size: 11px;
+                min-width: 70px;
+            }
+
+            .controls {
+                gap: 8px;
+                margin-top: 8px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="flipbook">
-        <div class="page active" id="page-1">
-            <img src="hoja 1.jpg" alt="Página 1">
-        </div>
-        <div class="page" id="page-2">
-            <img src="hoja 2.jpg" alt="Página 2">
-        </div>
-        <div class="page" id="page-3">
-            <img src="hoja 3.jpg" alt="Página 3">
-        </div>
-        <div class="page" id="page-4">
-            <img src="hoja 4.jpg" alt="Página 4">
-        </div>
-        <div class="page" id="page-5">
-            <img src="hoja 5.jpg" alt="Página 5">
-        </div>
-        <div class="page" id="page-6">
-            <img src="hoja 6.jpg" alt="Página 6">
+    <div id="flipbook-container">
+        <button class="back-btn" onclick="volverMenu()">← VOLVER</button>
+        
+        <img id="flipbook-image" src="hoja 1.jpg" alt="Instrucciones Domus Magi">
+        
+        <div class="controls">
+            <button id="prev-btn" onclick="paginaAnterior()">◀ ANTERIOR</button>
+            <div class="page-info">
+                <span id="page-number">Página 1</span>
+            </div>
+            <button id="next-btn" onclick="paginaSiguiente()">SIGUIENTE ▶</button>
         </div>
     </div>
-    
-    <div class="controls">
-        <button onclick="prevPage()">⬅️ ANTERIOR</button>
-        <div class="page-counter">
-            <span id="current-page">1</span> / 6
-        </div>
-        <button onclick="nextPage()">SIGUIENTE ➡️</button>
-        <button onclick="exitInstructions()">SALIR</button>
-    </div>
-    
+
     <script>
-        let currentPage = 1;
-        const totalPages = 6;
-        
-        function showPage(n) {
-            const pages = document.querySelectorAll('.page');
-            
-            if (n > totalPages) {
-                currentPage = totalPages;
-            } else if (n < 1) {
-                currentPage = 1;
-            } else {
-                currentPage = n;
+        const pages = [
+            { num: 1, name: 'hoja 1.jpg', title: 'Página 1' },
+            { num: 2, name: 'hoja 2.jpg', title: 'Página 2' },
+            { num: 3, name: 'hoja 3.jpg', title: 'Página 3' },
+            { num: 4, name: 'hoja 4.jpg', title: 'Página 4' },
+            { num: 5, name: 'hoja 5.jpg', title: 'Página 5' },
+            { num: 6, name: 'hoja 6.jpg', title: 'Página 6' },
+        ];
+
+        let currentPage = 0;
+
+        const flipImg = document.getElementById('flipbook-image');
+        const pageNum = document.getElementById('page-number');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        function actualizarPagina() {
+            flipImg.src = pages[currentPage].name;
+            pageNum.textContent = `${pages[currentPage].title} (${currentPage + 1}/${pages.length})`;
+            prevBtn.disabled = currentPage === 0;
+            nextBtn.disabled = currentPage === pages.length - 1;
+        }
+
+        function paginaSiguiente() {
+            if (currentPage < pages.length - 1) {
+                currentPage++;
+                actualizarPagina();
             }
-            
-            pages.forEach(page => page.classList.remove('active'));
-            document.getElementById(`page-${currentPage}`).classList.add('active');
-            document.getElementById('current-page').textContent = currentPage;
         }
-        
-        function nextPage() {
-            showPage(currentPage + 1);
+
+        function paginaAnterior() {
+            if (currentPage > 0) {
+                currentPage--;
+                actualizarPagina();
+            }
         }
-        
-        function prevPage() {
-            showPage(currentPage - 1);
+
+        function volverMenu() {
+            window.location.href = 'index.html';
         }
-        
-        function exitInstructions() {
-            window.history.back();
-        }
-        
+
+        // Teclado: Flechas para navegar
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight') nextPage();
-            if (e.key === 'ArrowLeft') prevPage();
-            if (e.key === 'Escape') exitInstructions();
+            if (e.key === 'ArrowRight') paginaSiguiente();
+            if (e.key === 'ArrowLeft') paginaAnterior();
         });
-        
-        showPage(1);
+
+        // Inicializar
+        actualizarPagina();
     </script>
 </body>
 </html>
