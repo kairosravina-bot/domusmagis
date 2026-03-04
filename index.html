@@ -3,62 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOMUS MAGI V2: MENU</title>
+    <title>DOMUS MAGI V1: MENU</title>
     <link rel="stylesheet" href="style.css">
     <script type="module" src="ojo.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Cinzel', serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1410 50%, #0a0a0a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .pantalla {
+            width: 100%;
+            max-width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            gap: 15px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .oculto {
+            display: none !important;
+        }
+
+        /* PANTALLA INICIO */
+        #p-inicio {
+            justify-content: center;
+        }
+
+        .contenedor-inicio {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .logo-container {
+            width: 100%;
+            max-width: 220px;
+            height: auto;
+            margin-bottom: -15px;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.6));
+        }
+
+        .titulo-container h1 {
+            font-size: clamp(40px, 15vw, 65px);
+            line-height: 0.85;
+            text-align: center;
+            color: #d4af37;
+            margin: 0;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+            font-weight: 900;
+        }
+
+        .titulo-container p {
+            letter-spacing: 5px;
+            color: #0f0;
+            text-align: center;
+            margin: 10px 0 0 0;
+            font-size: clamp(12px, 4vw, 16px);
+            font-weight: 900;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        /* BOTONES */
+        .btn-master {
+            width: 100%;
+            max-width: 280px;
+            padding: 15px 20px;
+            border: 3px solid #fff;
+            background: linear-gradient(to bottom, #500, #200);
+            color: #d4af37;
+            font-size: clamp(14px, 4vw, 18px);
+            font-weight: 900;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn-master:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+        }
+
+        /* MENU PRINCIPAL */
+        #p-menu-principal {
+            justify-content: flex-start;
+            padding-top: 30px;
+            padding-bottom: 30px;
+        }
+
+        #intro-video {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            border: 2px solid #d4af37;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .contenedor-botones {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .fila-juego {
+            width: 100%;
+        }
+
+        .btn-jugar {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #d4af37;
+            background: linear-gradient(to bottom, #8b6f47, #6b5436);
+            color: #d4af37;
+            font-size: clamp(14px, 4vw, 18px);
+            font-weight: 900;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Cinzel', serif;
+        }
+
+        .btn-jugar:active {
+            transform: scale(0.98);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+        }
+
+        .btn-jugar:hover {
+            background: linear-gradient(to bottom, #a08557, #8b7546);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .pantalla {
+                padding: 15px;
+                gap: 12px;
+            }
+
+            .contenedor-inicio {
+                gap: 12px;
+            }
+
+            .btn-master, .btn-jugar {
+                padding: 12px 15px;
+            }
+
+            .logo-container {
+                max-width: 180px;
+            }
+
+            #intro-video {
+                margin-bottom: 15px;
+            }
+
+            .contenedor-botones {
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .pantalla {
+                padding: 10px;
+                gap: 10px;
+            }
+
+            .btn-master, .btn-jugar {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+
+            .logo-container {
+                max-width: 150px;
+            }
+        }
+
+        /* Asegurar que no hay overflow */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(0px, env(safe-area-inset-left));
+                padding-right: max(0px, env(safe-area-inset-right));
+                padding-top: max(0px, env(safe-area-inset-top));
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- PANTALLA INICIAL -->
     <div id="p-inicio" class="pantalla">
-        <div style="display:flex; flex-direction:column; align-items:center; gap: 10px;">
-            
+        <div class="contenedor-inicio">
             <!-- LOGO ESCUDO -->
-            <div style="width: 220px; height: auto; margin-bottom: -15px;">
-                <img src="logoescudo.png" style="width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.6));">
+            <div class="logo-container">
+                <img src="logoescudo.png" alt="Logo Domus Magi">
             </div>
-            
-            <div>
-                <!-- TITULO UNIFICADO EN DORADO -->
-                <h1 style="font-size: 65px; line-height:0.85; text-align:center; color: #d4af37; margin: 0; text-shadow: 2px 2px 5px rgba(0,0,0,0.7); font-family: 'Cinzel', serif; font-weight: 900;">
-                    DOMUS<br>MAGI
-                </h1>
-                <p style="letter-spacing:5px; color:#0f0; text-align:center; margin: 10px 0 0 0; font-size: 16px; font-weight:900; text-shadow:0 0 10px #0f0;">REVELATIONS V1</p>
+
+            <!-- TITULO -->
+            <div class="titulo-container">
+                <h1>DOMUS<br>MAGI</h1>
+                <p>REVELATIONS V1</p>
             </div>
-            
-            <button class="btn-master" style="width: 280px; border-color: #fff; background: linear-gradient(to bottom, #500, #200); margin-top: 30px;" onclick="entrarGrimorio()">ENTER</button>
+
+            <!-- BOTON ENTER -->
+            <button class="btn-master" onclick="entrarGrimorio()">ENTER</button>
         </div>
     </div>
+
     <!-- MENU PRINCIPAL -->
     <div id="p-menu-principal" class="pantalla oculto">
-        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted style="width:100%; border:2px solid #d4af37; border-radius:10px; margin-bottom:20px; opacity:0.8;"></video>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#8b6f47; border-color:#d4af37; color:#d4af37;" onclick="window.location.href='batalla.html'">⚔️ FIRST BLOOD 1</button>
-        </div>
-        
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#6b5436; border-color:#d4af37; color:#d4af37;" onclick="window.location.href='dados.html'">🎲 DADOS</button>
-        </div>
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#5a4a2a; border-color:#d4af37; color:#d4af37;" onclick="window.location.href='flipbook.html'">📚 CATÁLOGO</button>
-        </div>
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#4a3a1a; border-color:#d4af37; color:#d4af37;" onclick="window.location.href='instrucciones.html'">📖 INSTRUCCIONES</button>
-        </div>
-        <div class="fila-juego">
-            <button class="btn-jugar" style="background:#3a2a0a; border-color:#d4af37; color:#d4af37;" onclick="salirApp()">❌ EXIT</button>
+        <video id="intro-video" src="https://kairosravina-bot.github.io/domusmagis/presentacion.mp4" playsinline webkit-playsinline muted></video>
+
+        <div class="contenedor-botones">
+            <div class="fila-juego">
+                <button class="btn-jugar" style="background: linear-gradient(to bottom, #8b6f47, #6b5436);" onclick="window.location.href='batalla.html'">⚔️ FIRST BLOOD 1</button>
+            </div>
+
+            <div class="fila-juego">
+                <button class="btn-jugar" style="background: linear-gradient(to bottom, #6b5436, #5a4a2a);" onclick="window.location.href='dados.html'">🎲 DADOS</button>
+            </div>
+
+            <div class="fila-juego">
+                <button class="btn-jugar" style="background: linear-gradient(to bottom, #5a4a2a, #4a3a1a);" onclick="window.location.href='flipbook.html'">📚 CATÁLOGO</button>
+            </div>
+
+            <div class="fila-juego">
+                <button class="btn-jugar" style="background: linear-gradient(to bottom, #4a3a1a, #3a2a0a);" onclick="window.location.href='instrucciones.html'">📖 INSTRUCCIONES</button>
+            </div>
+
+            <div class="fila-juego">
+                <button class="btn-jugar" style="background: linear-gradient(to bottom, #3a2a0a, #2a1a00);" onclick="salirApp()">❌ EXIT</button>
+            </div>
         </div>
     </div>
+
     <script>
         function entrarGrimorio() {
             document.getElementById('p-inicio').classList.add('oculto');
             document.getElementById('p-menu-principal').classList.remove('oculto');
             const v = document.getElementById('intro-video');
-            if(v) { 
-                v.muted = false; 
-                v.play().catch(e => console.log("Interacción requerida")); 
+            if (v) {
+                v.muted = false;
+                v.play().catch(e => console.log("Interacción requerida"));
             }
         }
+
         function salirApp() {
             if (confirm("¿Deseas salir del juego?")) {
                 window.close();
@@ -67,6 +293,13 @@
                 }, 300);
             }
         }
+
+        // Prevenir zoom accidental en móvil
+        document.addEventListener('touchmove', function (event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
     </script>
 </body>
 </html>
