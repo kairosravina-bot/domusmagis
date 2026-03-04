@@ -24,6 +24,8 @@ body {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 20px; z-index: 100;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .btn-master, .btn-jugar, .btn-info {
@@ -66,7 +68,8 @@ input[type="text"] {
 #zona-inferior { 
     height: 45%; width: 100%; 
     background: linear-gradient(to bottom, rgba(26,5,5,0.95), rgba(0,0,0,1)); 
-    pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px 15px; 
+    pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px 15px;
+    overflow-y: auto;
 }
 
 #hud-derecho { 
@@ -122,3 +125,163 @@ input[type="text"] {
 
 .letra-grande { font-size: 32px; font-weight: 900; color: #fff; text-shadow: 0 2px 5px #000; font-family: var(--font-titulo); }
 #video-action { position:absolute; width:100%; height:100%; display:none; background:black; z-index:50; object-fit:contain; }
+
+/* ===== RESPONSIVE MOBILE ONLY - SIN CAMBIAR ESTÉTICA ===== */
+
+@media (max-width: 768px) {
+    .btn-master, .btn-jugar, .btn-info {
+        max-width: 90%;
+    }
+
+    .fila-juego {
+        max-width: 90%;
+    }
+
+    .datos-container {
+        width: 90%;
+    }
+}
+
+@media (max-width: 480px) {
+    .pantalla {
+        padding: 15px;
+    }
+
+    #zona-superior {
+        height: 50%;
+    }
+
+    #zona-inferior {
+        height: 50%;
+        padding: 8px;
+        gap: 8px;
+    }
+
+    #guia-scanner {
+        width: 180px;
+        height: 180px;
+    }
+
+    .datos-container {
+        width: 80vw;
+        max-width: 280px;
+        height: auto;
+        aspect-ratio: 1;
+    }
+
+    .grid-dados {
+        max-width: 280px;
+        gap: 10px;
+    }
+
+    .contenedor-gemas {
+        gap: 12px;
+        margin: 3px 0;
+    }
+
+    .btn-gema {
+        width: 70px;
+        height: 70px;
+    }
+
+    .valor-flotante {
+        font-size: 32px;
+        height: 35px;
+    }
+
+    .letra-grande {
+        font-size: 28px;
+    }
+
+    #hud-derecho {
+        top: 5px;
+        right: 5px;
+    }
+
+    #hud-img-escudo {
+        width: 70px;
+        height: 70px;
+    }
+
+    #hud-txt-valor {
+        font-size: 50px;
+    }
+
+    input[type="text"] {
+        font-size: 18px;
+    }
+
+    .btn-master, .btn-jugar, .btn-info {
+        padding: 12px 15px;
+        font-size: 16px;
+        max-width: 100%;
+    }
+
+    .grid-casas {
+        gap: 8px;
+    }
+
+    .btn-casa {
+        padding: 15px 8px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 360px) {
+    .pantalla {
+        padding: 10px;
+    }
+
+    #zona-superior {
+        height: 48%;
+    }
+
+    #zona-inferior {
+        height: 52%;
+        padding: 6px;
+        gap: 6px;
+    }
+
+    #guia-scanner {
+        width: 150px;
+        height: 150px;
+    }
+
+    .datos-container {
+        width: 75vw;
+        max-width: 240px;
+    }
+
+    .grid-dados {
+        max-width: 240px;
+        gap: 8px;
+    }
+
+    .contenedor-gemas {
+        gap: 10px;
+    }
+
+    .btn-gema {
+        width: 60px;
+        height: 60px;
+    }
+
+    .valor-flotante {
+        font-size: 28px;
+        height: 30px;
+    }
+
+    .letra-grande {
+        font-size: 24px;
+    }
+
+    .btn-master, .btn-jugar, .btn-info {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    #btn-i, #btn-a, #btn-t, #btn-m {
+        width: 60px;
+        height: 60px;
+    }
+}
